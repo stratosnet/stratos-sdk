@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "tsc --module commonjs && webpack --mode production",
-    "test": "jest",
+    "test": "jest --watch",
     "prettier": "prettier --write ./src/**/*.ts",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "doc": "typedoc",
