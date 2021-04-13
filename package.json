@@ -78,6 +78,7 @@
     "webpack-cli": "^4.3.0"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "axios": "^0.21.1",
+    "bip39": "3.0.2"
   }
 }
