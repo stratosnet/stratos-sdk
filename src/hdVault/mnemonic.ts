@@ -9,7 +9,7 @@ interface MnemonicItem {
   readonly index: number;
 }
 
-type MnemonicPhrase = MnemonicItem[];
+export type MnemonicPhrase = MnemonicItem[];
 
 type MnemonicLength = typeof mnemonic12 | typeof mnemonic24;
 

@@ -1,27 +1,29 @@
 import * as keyUtils from './keyUtils';
+import { MnemonicPhrase } from './mnemonic';
 
 export interface MasterKeyInfo {
-  readonly encryptedMasterKeySeed: string;
+  readonly encryptedMasterKeySeed: sjcl.SjclCipherEncrypted;
   readonly masterKeySeedAddress: string;
+  readonly masterKeySeedPublicKey: string;
 }
 
-export class KeyManager {
-  protected encryptedMasterKeySeed: string;
-  protected masterKeySeedAddress: string;
+export const createMasterKeySeed = (phrase: MnemonicPhrase, password: string): MasterKeyInfo => {
+  const derivedMasterKeySeed = keyUtils.generateMasterKeySeed(phrase);
+  const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
 
-  public constructor(mnemonicArray: string[], password: string) {
-    const derivedMasterKeySeed = keyUtils.generateMasterKeySeed(mnemonicArray);
-    this.encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
-    this.masterKeySeedAddress = keyUtils.getMasterKeySeedAddress(
-      keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed),
-    );
-  }
+  const masterKeySeedPublicKey = keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
+  const masterKeySeedAddress = keyUtils.getMasterKeySeedAddress(masterKeySeedPublicKey);
 
-  public get keyInfo(): MasterKeyInfo {
-    return { encryptedMasterKeySeed: '', masterKeySeedAddress: '' };
-  }
+  return {
+    encryptedMasterKeySeed,
+    masterKeySeedAddress,
+    masterKeySeedPublicKey,
+  };
+};
 
-  public unlock(password: string): boolean {
-    return true;
-  }
-}
+export const unlockMasterKeySeed = async (
+  password: string,
+  encryptedMasterKeySeed: string,
+): Promise<boolean> => {
+  return await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed);
+};
