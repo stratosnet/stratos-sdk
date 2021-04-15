@@ -43,4 +43,8 @@ describe('createMasterKeySeed', () => {
     const parsedPasterkeySeed = JSON.parse(masterKeySeed.encryptedMasterKeySeed.toString());
     expect(parsedPasterkeySeed.ct.length).toEqual(128);
   });
+  it('creates a master key seed using gcm method', () => {
+    const parsedPasterkeySeed = JSON.parse(masterKeySeed.encryptedMasterKeySeed.toString());
+    expect(parsedPasterkeySeed.mode).toEqual('gcm');
+  });
 });

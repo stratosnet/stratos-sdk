@@ -38,7 +38,7 @@ export const encryptMasterKeySeed = (password: string, masterKeySeed: Buffer): s
     v: 1,
     iter: 1000,
     ks: 128,
-    mode: 'ccm',
+    mode: 'gcm',
     adata: '',
     cipher: 'aes',
     salt: saltBits,
