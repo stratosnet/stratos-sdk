@@ -37,10 +37,10 @@ export const deriveKeyPairFromPrivateKeySeed = async (privateKeySeed: Buffer): P
     const result = nacl.sign.keyPair.fromSeed(privateKeySeed);
     const { publicKey, secretKey } = result;
 
-    return Promise.resolve({
+    return {
       publicKey: naclUtil.encodeBase64(publicKey),
       privateKey: naclUtil.encodeBase64(secretKey),
-    });
+    };
   } catch (e) {
     return Promise.reject(false);
   }

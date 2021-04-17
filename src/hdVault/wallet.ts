@@ -18,10 +18,22 @@ export const deriveKeyPair = async (
   keyIndex: number,
   password: string,
   encryptedMasterKeySeed: string,
-): Promise<KeyPairInfo> => {
-  const decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed);
+): Promise<KeyPairInfo | false> => {
+  let decryptedMasterKeySeed;
 
-  const masterKey = deriveMasterKey(bufferToHexStr(decryptedMasterKeySeed));
+  try {
+    decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed);
+  } catch (e) {
+    return Promise.reject(false);
+  }
+
+  if (!decryptedMasterKeySeed) {
+    return Promise.reject(false);
+  }
+
+  const masterKeySeed = bufferToHexStr(decryptedMasterKeySeed);
+
+  const masterKey = deriveMasterKey(masterKeySeed);
 
   const privateKeySeed = derivePrivateKeySeed(masterKey, `${keyPath}${keyIndex}${keyPathSuffix}`);
 

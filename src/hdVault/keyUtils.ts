@@ -51,7 +51,7 @@ export const decryptMasterKeySeed = async (
   }
 
   if (decryptedMasterKeySeed) {
-    return Promise.resolve(decryptedMasterKeySeed);
+    return decryptedMasterKeySeed;
   }
 
   return Promise.reject(false);
@@ -63,8 +63,8 @@ export const unlockMasterKeySeed = async (
 ): Promise<boolean> => {
   try {
     await decryptMasterKeySeed(password, encryptedMasterKeySeed);
-    return Promise.resolve(true);
+    return true;
   } catch (e) {
-    return Promise.resolve(false);
+    return false;
   }
 };

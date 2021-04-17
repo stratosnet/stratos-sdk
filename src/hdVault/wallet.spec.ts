@@ -41,13 +41,15 @@ describe('deriveKeyPair', () => {
 
   it('should derive a keypair', async () => {
     const keyPair = await deriveKeyPair(sourceKeyIndex, password, encryptedMasterKeySeedString);
-    const { address, keyIndex, publicKey } = keyPair;
-    expect(address).toEqual(sourceAddress);
-    expect(keyIndex).toEqual(sourceKeyIndex);
-    expect(publicKey).toEqual(sourcePublicKey);
+    if (keyPair !== false) {
+      const { address, keyIndex, publicKey } = keyPair;
+      expect(address).toEqual(sourceAddress);
+      expect(keyIndex).toEqual(sourceKeyIndex);
+      expect(publicKey).toEqual(sourcePublicKey);
+    }
   });
 
-  it('should reject with an empty buffer when using a wrong password', async () => {
+  it('should reject with false when using a wrong password', async () => {
     await expect(deriveKeyPair(sourceKeyIndex, wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(
       false,
     );
