@@ -1,15 +1,48 @@
-/**
- * derive the masterKey from masterKeySeed for Ed25519
- */
-export const deriveMasterKey = (num: number): Uint8Array => {
-  return Uint8Array.from([num]);
+import { keyPath, keyPathSuffix } from '../config/hdVault';
+import {
+  deriveAddress,
+  deriveKeyPairFromPrivateKeySeed,
+  deriveMasterKey,
+  derivePrivateKeySeed,
+} from './deriveManager';
+import { decryptMasterKeySeed } from './keyUtils';
+import { bufferToHexStr } from './utils';
+
+export interface KeyPairInfo {
+  keyIndex: number;
+  address: string;
+  publicKey: string;
+}
+
+export const deriveKeyPair = async (
+  keyIndex: number,
+  password: string,
+  encryptedMasterKeySeed: string,
+): Promise<KeyPairInfo | false> => {
+  let decryptedMasterKeySeed;
+
+  try {
+    decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed);
+  } catch (e) {
+    return Promise.reject(false);
+  }
+
+  if (!decryptedMasterKeySeed) {
+    return Promise.reject(false);
+  }
+
+  const masterKeySeed = bufferToHexStr(decryptedMasterKeySeed);
+
+  const masterKey = deriveMasterKey(masterKeySeed);
+
+  const privateKeySeed = derivePrivateKeySeed(masterKey, `${keyPath}${keyIndex}${keyPathSuffix}`);
+
+  const { publicKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+
+  const address = deriveAddress(publicKey);
+
+  return { keyIndex, address, publicKey };
 };
-
-// export const derivePrivateKeySeed = (masterKey: string, keyPath: string): void => {};
-
-// export const deriveKeyPair = (privateKeySeed: string): void => {};
-
-// export const deriveAddress = (publicKey: string): void => {};
 
 // export const verifyAddress = (address: string): void => {};
 

@@ -1,4 +1,4 @@
-import { createMasterKeySeed } from './keyManager';
+import { createMasterKeySeed, unlockMasterKeySeed } from './keyManager';
 
 const phrase = [
   { index: 1, word: 'rate' },
@@ -27,10 +27,11 @@ const phrase = [
   { index: 24, word: 'pole' },
 ];
 
-describe('createMasterKeySeed', () => {
-  const password = '123456';
-  const masterKeySeed = createMasterKeySeed(phrase, password);
+const password = '123456';
+const wrongPassword = '123456ABC';
+const masterKeySeed = createMasterKeySeed(phrase, password);
 
+describe('createMasterKeySeed', () => {
   it('creates a master key seed with the same address and public key', () => {
     expect(masterKeySeed.masterKeySeedAddress).toEqual('st1yx3kkx9jnqeck59j744nc5qgtv4lt4dc45jcwz');
     expect(masterKeySeed.masterKeySeedPublicKey).toEqual('fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=');
@@ -46,5 +47,16 @@ describe('createMasterKeySeed', () => {
   it('creates a master key seed using gcm method', () => {
     const parsedPasterkeySeed = JSON.parse(masterKeySeed.encryptedMasterKeySeed.toString());
     expect(parsedPasterkeySeed.mode).toEqual('gcm');
+  });
+});
+
+describe('unlockMasterKeySeed', () => {
+  it('unlocks master key seed', async () => {
+    const result = await unlockMasterKeySeed(password, masterKeySeed.encryptedMasterKeySeed.toString());
+    expect(result).toEqual(true);
+  });
+  it('returns false when unlocks with wrong password', async () => {
+    const result = await unlockMasterKeySeed(wrongPassword, masterKeySeed.encryptedMasterKeySeed.toString());
+    expect(result).toEqual(false);
   });
 });

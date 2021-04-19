@@ -1,3 +1,4 @@
+import { deriveAddress } from './deriveManager';
 import * as keyUtils from './keyUtils';
 import { MnemonicPhrase } from './mnemonic';
 
@@ -12,7 +13,7 @@ export const createMasterKeySeed = (phrase: MnemonicPhrase, password: string): M
   const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
 
   const masterKeySeedPublicKey = keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
-  const masterKeySeedAddress = keyUtils.getMasterKeySeedAddress(masterKeySeedPublicKey);
+  const masterKeySeedAddress = deriveAddress(masterKeySeedPublicKey);
 
   return {
     encryptedMasterKeySeed,

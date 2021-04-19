@@ -3,8 +3,6 @@ import {
   decryptMasterKeySeed,
   encryptMasterKeySeed,
   generateMasterKeySeed,
-  getMasterKeySeedAddress,
-  getMasterKeySeedAddressFromPhrase,
   getMasterKeySeedPublicKey,
   unlockMasterKeySeed,
 } from './keyUtils';
@@ -46,17 +44,16 @@ const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toStri
 const masterKeySeedHex =
   'd7564333264ec1b72683b0f24e342fb35c67dd1812c173375101ed1b095e16b57c45cb2eecd216736950ceae58881894b5e7ec9a6a8c9da626b9b2928191d320';
 const masterKeySeedPublicKey = 'fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=';
-const masterKeySeedAddress = 'st1yx3kkx9jnqeck59j744nc5qgtv4lt4dc45jcwz';
 
 describe('decryptMasterKeySeed', () => {
   it('decrypts master key seed', async () => {
     const decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeedString);
-    expect(bufferToHexStr(decryptedMasterKeySeed)).toEqual(masterKeySeedHex);
+    if (decryptedMasterKeySeed !== false) {
+      expect(bufferToHexStr(decryptedMasterKeySeed)).toEqual(masterKeySeedHex);
+    }
   });
   it('should fail while wrongPassword is used', async () => {
-    await expect(decryptMasterKeySeed(wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(
-      Buffer.from(''),
-    );
+    await expect(decryptMasterKeySeed(wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(false);
   });
 });
 
@@ -79,13 +76,6 @@ describe('encryptMasterKeySeed', () => {
   });
 });
 
-describe('getMasterKeySeedAddress', () => {
-  it('should return an address from the public key', () => {
-    const address = getMasterKeySeedAddress(masterKeySeedPublicKey);
-    expect(address).toEqual(masterKeySeedAddress);
-  });
-});
-
 describe('getMasterKeySeedPublicKey', () => {
   it('should return a public key from the master key seed', () => {
     const testMasterKeySeed = hexStrToBuffer(masterKeySeedHex);
@@ -98,12 +88,5 @@ describe('generateMasterKeySeed', () => {
   it('should generate master key seed from a mnemonic phrase', () => {
     const testMasterKeySeed = generateMasterKeySeed(phrase);
     expect(testMasterKeySeed).toEqual(hexStrToBuffer(masterKeySeedHex));
-  });
-});
-
-describe('getMasterKeySeedAddressFromPhrase', () => {
-  it('generates master seed keey address from a given phrase', () => {
-    const retrivedAddress = getMasterKeySeedAddressFromPhrase(phrase);
-    expect(retrivedAddress).toEqual(masterKeySeedAddress);
   });
 });
