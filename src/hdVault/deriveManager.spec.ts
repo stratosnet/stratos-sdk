@@ -1,13 +1,14 @@
+import { Slip10Curve } from '@cosmjs/crypto';
+
 import { keyPath, keyPathSuffix } from '../config/hdVault';
 import {
   deriveAddress,
   deriveAddressFromPhrase,
   deriveKeyPairFromPrivateKeySeed,
-  deriveMasterKey,
   derivePrivateKeySeed,
 } from './deriveManager';
 import { generateMasterKeySeed } from './keyUtils';
-import { bufferToHexStr } from './utils';
+import { bufferToHexStr, bufferToUint8Array } from './utils';
 
 const phrase = [
   { index: 1, word: 'rate' },
@@ -40,8 +41,10 @@ const masterKeySeedPublicKey = 'fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=';
 const masterKeySeedAddress = 'st1yx3kkx9jnqeck59j744nc5qgtv4lt4dc45jcwz';
 const derivedMasterKeySeed = generateMasterKeySeed(phrase);
 
-const masterKeySeed = bufferToHexStr(derivedMasterKeySeed);
-const masterKey = deriveMasterKey(masterKeySeed);
+const masterKeySeed = bufferToUint8Array(derivedMasterKeySeed);
+
+const seedEd25519 = 'bc5888d19db1613b1bacae2c9882b8ef27b7d2fa5b57e42b2c2077f6289865c3';
+const seedSecp256k1 = '9481736343ff4a00086271b96157ef7b01d903bbe2650f837ab30d328ce26e95';
 
 describe('deriveAddress', () => {
   it('should return an address from the public key', () => {
@@ -59,7 +62,7 @@ describe('deriveAddressFromPhrase', () => {
 
 describe('deriveKeyPairFromPrivateKeySeed', () => {
   it('derives keypair from private key seed', async () => {
-    const privateKeySeed = derivePrivateKeySeed(masterKey, `${keyPath}${0}${keyPathSuffix}`);
+    const privateKeySeed = derivePrivateKeySeed(masterKeySeed, `${keyPath}${0}${keyPathSuffix}`);
 
     const { publicKey, privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
 
@@ -72,17 +75,34 @@ describe('deriveKeyPairFromPrivateKeySeed', () => {
   });
 });
 
-describe('deriveMasterKey', () => {
-  it('derives master key', () => {
-    const testMasterKey = deriveMasterKey(masterKeySeed);
-    expect(testMasterKey.length).toEqual(32);
-  });
-});
-
 describe('derivePrivateKeySeed', () => {
-  it('derives private key seed', () => {
-    const testPrivateKeySeed = derivePrivateKeySeed(masterKey, `${keyPath}${0}${keyPathSuffix}`);
-
+  it('derives private key seed using default curve', () => {
+    const testPrivateKeySeed = derivePrivateKeySeed(masterKeySeed, `${keyPath}${0}${keyPathSuffix}`);
     expect(testPrivateKeySeed.length).toEqual(32);
+
+    const str = bufferToHexStr(testPrivateKeySeed);
+    expect(str).toEqual(seedSecp256k1);
+  });
+  it('derives private key seed using Ed25519 curve', () => {
+    const testPrivateKeySeed = derivePrivateKeySeed(
+      masterKeySeed,
+      `${keyPath}${0}${keyPathSuffix}`,
+      Slip10Curve.Ed25519,
+    );
+    expect(testPrivateKeySeed.length).toEqual(32);
+
+    const str = bufferToHexStr(testPrivateKeySeed);
+    expect(str).toEqual(seedEd25519);
+  });
+  it('derives private key seed using Secp256k1 curve', () => {
+    const testPrivateKeySeed = derivePrivateKeySeed(
+      masterKeySeed,
+      `${keyPath}${0}${keyPathSuffix}`,
+      Slip10Curve.Secp256k1,
+    );
+    expect(testPrivateKeySeed.length).toEqual(32);
+
+    const str = bufferToHexStr(testPrivateKeySeed);
+    expect(str).toEqual(seedSecp256k1);
   });
 });

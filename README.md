@@ -2,7 +2,7 @@
 
 ## Technology Stack
 
-TypeScript, axios, jest, webpack5, ed25519-hd-key, bip39, crypto
+TypeScript, axios, jest, webpack5, @cosmjs/crypto, bip39, crypto
 
 ## Prerequisites
 
