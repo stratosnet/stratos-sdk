@@ -41,7 +41,7 @@ const masterKeySeedPublicKey = 'fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=';
 const masterKeySeedAddress = 'st1yx3kkx9jnqeck59j744nc5qgtv4lt4dc45jcwz';
 const derivedMasterKeySeed = generateMasterKeySeed(phrase);
 
-const masterKeySeedNew = bufferToUint8Array(derivedMasterKeySeed);
+const masterKeySeed = bufferToUint8Array(derivedMasterKeySeed);
 
 const seedEd25519 = 'bc5888d19db1613b1bacae2c9882b8ef27b7d2fa5b57e42b2c2077f6289865c3';
 const seedSecp256k1 = '9481736343ff4a00086271b96157ef7b01d903bbe2650f837ab30d328ce26e95';
@@ -62,7 +62,7 @@ describe('deriveAddressFromPhrase', () => {
 
 describe('deriveKeyPairFromPrivateKeySeed', () => {
   it('derives keypair from private key seed', async () => {
-    const privateKeySeed = derivePrivateKeySeed(masterKeySeedNew, `${keyPath}${0}${keyPathSuffix}`);
+    const privateKeySeed = derivePrivateKeySeed(masterKeySeed, `${keyPath}${0}${keyPathSuffix}`);
 
     const { publicKey, privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
 
@@ -77,7 +77,7 @@ describe('deriveKeyPairFromPrivateKeySeed', () => {
 
 describe('derivePrivateKeySeed', () => {
   it('derives private key seed using default curve', () => {
-    const testPrivateKeySeed = derivePrivateKeySeed(masterKeySeedNew, `${keyPath}${0}${keyPathSuffix}`);
+    const testPrivateKeySeed = derivePrivateKeySeed(masterKeySeed, `${keyPath}${0}${keyPathSuffix}`);
     expect(testPrivateKeySeed.length).toEqual(32);
 
     const str = bufferToHexStr(testPrivateKeySeed);
@@ -85,7 +85,7 @@ describe('derivePrivateKeySeed', () => {
   });
   it('derives private key seed using Ed25519 curve', () => {
     const testPrivateKeySeed = derivePrivateKeySeed(
-      masterKeySeedNew,
+      masterKeySeed,
       `${keyPath}${0}${keyPathSuffix}`,
       Slip10Curve.Ed25519,
     );
@@ -96,7 +96,7 @@ describe('derivePrivateKeySeed', () => {
   });
   it('derives private key seed using Secp256k1 curve', () => {
     const testPrivateKeySeed = derivePrivateKeySeed(
-      masterKeySeedNew,
+      masterKeySeed,
       `${keyPath}${0}${keyPathSuffix}`,
       Slip10Curve.Secp256k1,
     );
