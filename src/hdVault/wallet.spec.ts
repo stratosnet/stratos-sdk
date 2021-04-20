@@ -1,5 +1,5 @@
 import { createMasterKeySeed } from './keyManager';
-import { deriveKeyPair } from './wallet';
+import { deriveKeyPair, sign, verifySignature } from './wallet';
 
 const phrase = [
   { index: 1, word: 'rate' },
@@ -34,11 +34,17 @@ const wrongPassword = '123456ABC';
 const masterKeySeed = createMasterKeySeed(phrase, password);
 const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
 
-describe('deriveKeyPair', () => {
-  const sourceKeyIndex = 0;
-  const sourceAddress = 'st14e2wee4zhfg0q29y5ehk2dt8nmc9ta4rj6s598';
-  const sourcePublicKey = 'bB3/zDDHrfo964xIlogLEwv73MdL81z9Mgx7eydZbBQ=';
+const path = "m/44'/606'/0'/0'/0'";
 
+const sourceKeyIndex = 0;
+const sourceAddress = 'st14e2wee4zhfg0q29y5ehk2dt8nmc9ta4rj6s598';
+const sourcePublicKey = 'bB3/zDDHrfo964xIlogLEwv73MdL81z9Mgx7eydZbBQ=';
+const encodedSignData = 'eyBmb286ICdiYXInLCBmb29iYXI6ICdiYXJmb28nIH0=';
+
+const sourceSignature =
+  'JqfsQ5ABWPrOcLhgORkv2j80hdypUprEhzTMGKze0N2Q5H1uBhq8zsj8lFFQQB0jc1OKJqjJ/nrIGHxXRXIGCA==';
+
+describe('deriveKeyPair', () => {
   it('should derive a keypair', async () => {
     const keyPair = await deriveKeyPair(sourceKeyIndex, password, encryptedMasterKeySeedString);
     if (keyPair !== false) {
@@ -53,5 +59,60 @@ describe('deriveKeyPair', () => {
     await expect(deriveKeyPair(sourceKeyIndex, wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(
       false,
     );
+  });
+});
+
+describe('sign', () => {
+  it('signs the message', async () => {
+    const txMessage = {
+      message: encodedSignData,
+      password: password,
+      encryptedMasterKeySeed: encryptedMasterKeySeedString,
+      signingKeyPath: path,
+    };
+
+    const signature = await sign(txMessage);
+    expect(signature).toEqual(sourceSignature);
+  });
+
+  it("can't sign with a wrong password", async () => {
+    const txMessage = {
+      message: encodedSignData,
+      password: wrongPassword,
+      encryptedMasterKeySeed: encryptedMasterKeySeedString,
+      signingKeyPath: path,
+    };
+
+    await expect(sign(txMessage)).rejects.toEqual(false);
+  });
+});
+
+describe('verifySignature', () => {
+  it('verifies the signature ', async () => {
+    const result = await verifySignature(encodedSignData, sourceSignature, sourcePublicKey);
+
+    expect(result).toEqual(true);
+  });
+  it("can't verify the signature if public key is not authentic", async () => {
+    const result = await verifySignature(
+      encodedSignData,
+      sourceSignature,
+      masterKeySeed.masterKeySeedPublicKey,
+    );
+
+    expect(result).toEqual(false);
+  });
+  it("can't verify the signature if public key is corrupted", async () => {
+    await expect(verifySignature(encodedSignData, sourceSignature, 'foo')).resolves.toEqual(false);
+  });
+  it("can't verify the signature if signature is corrupted", async () => {
+    await expect(
+      verifySignature(encodedSignData, 'foo', masterKeySeed.masterKeySeedPublicKey),
+    ).resolves.toEqual(false);
+  });
+  it("can't verify the signature if message is corrupted", async () => {
+    await expect(
+      verifySignature('foo', sourceSignature, masterKeySeed.masterKeySeedPublicKey),
+    ).resolves.toEqual(false);
   });
 });

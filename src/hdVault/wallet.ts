@@ -1,7 +1,6 @@
 import { keyPath, keyPathSuffix } from '../config/hdVault';
 import { deriveAddress, deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
-import { decryptMasterKeySeed } from './keyUtils';
-import { bufferToUint8Array } from './utils';
+import * as keyUtils from './keyUtils';
 
 export interface KeyPairInfo {
   keyIndex: number;
@@ -9,26 +8,27 @@ export interface KeyPairInfo {
   publicKey: string;
 }
 
+export interface TransactionMessage {
+  message: string;
+  password: string;
+  encryptedMasterKeySeed: string;
+  signingKeyPath: string;
+}
+
 export const deriveKeyPair = async (
   keyIndex: number,
   password: string,
   encryptedMasterKeySeed: string,
 ): Promise<KeyPairInfo | false> => {
-  let decryptedMasterKeySeed;
+  let masterKeySeed;
 
   try {
-    decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed);
-  } catch (e) {
-    return Promise.reject(false);
-  }
-
-  if (!decryptedMasterKeySeed) {
+    masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
+  } catch (er) {
     return Promise.reject(false);
   }
 
   const path = `${keyPath}${keyIndex}${keyPathSuffix}`;
-
-  const masterKeySeed = bufferToUint8Array(decryptedMasterKeySeed);
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
 
@@ -41,8 +41,40 @@ export const deriveKeyPair = async (
   return res;
 };
 
-// export const verifyAddress = (address: string): void => {};
+export const sign = async ({
+  message,
+  password,
+  encryptedMasterKeySeed,
+  signingKeyPath,
+}: TransactionMessage): Promise<string> => {
+  let masterKeySeed;
+  try {
+    masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
+  } catch (er) {
+    return Promise.reject(false);
+  }
 
-// export const sign = (payload: string): void => {};
+  const privateKeySeed = derivePrivateKeySeed(masterKeySeed, signingKeyPath);
 
-// export const verifySignature = (payload: string): void => {};
+  const { privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+
+  try {
+    const signature = await keyUtils.sign(message, privateKey);
+    return signature;
+  } catch (error) {
+    return Promise.reject(false);
+  }
+};
+
+export const verifySignature = async (
+  message: string,
+  signature: string,
+  publicKey: string,
+): Promise<boolean> => {
+  try {
+    const verifyResult = await keyUtils.verifySignature(message, signature, publicKey);
+    return verifyResult;
+  } catch (err) {
+    return Promise.resolve(false);
+  }
+};
