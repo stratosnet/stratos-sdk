@@ -36,8 +36,8 @@ const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toStri
 
 describe('deriveKeyPair', () => {
   const sourceKeyIndex = 0;
-  const sourceAddress = 'st15882lsfs872pvwjpcx7n5wwngyv2cvdpy5jl7e';
-  const sourcePublicKey = 'qKE2mLtcTGPJmAqPO7y5aHZL1Qfpeigt/3LvZ4+De0s=';
+  const sourceAddress = 'st14e2wee4zhfg0q29y5ehk2dt8nmc9ta4rj6s598';
+  const sourcePublicKey = 'bB3/zDDHrfo964xIlogLEwv73MdL81z9Mgx7eydZbBQ=';
 
   it('should derive a keypair', async () => {
     const keyPair = await deriveKeyPair(sourceKeyIndex, password, encryptedMasterKeySeedString);

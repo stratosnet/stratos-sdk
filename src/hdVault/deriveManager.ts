@@ -1,5 +1,5 @@
+import { Slip10, Slip10Curve, stringToPath } from '@cosmjs/crypto';
 import * as bech32 from 'bech32';
-import { derivePath, getMasterKeyFromSeed } from 'ed25519-hd-key';
 import sjcl from 'sjcl';
 import nacl from 'tweetnacl';
 import naclUtil from 'tweetnacl-util';
@@ -7,12 +7,14 @@ import naclUtil from 'tweetnacl-util';
 import { stratosAddressPrefix } from '../config/hdVault';
 import { generateMasterKeySeed, getMasterKeySeedPublicKey } from './keyUtils';
 import { MnemonicPhrase } from './mnemonic';
-import { bufferToUint8Array, hexStrToUint8Array, uint8arrayToHexStr } from './utils';
+import { hexStrToUint8Array, uint8ArrayToBuffer } from './utils';
 
 export interface KeyPair {
   publicKey: string;
   privateKey: string;
 }
+
+export type KeyPairCurve = Slip10Curve.Ed25519 | Slip10Curve.Secp256k1;
 
 export const deriveAddress = (publicKey: string): string => {
   const base64PublicKey = sjcl.codec.base64.toBits(publicKey);
@@ -46,13 +48,18 @@ export const deriveKeyPairFromPrivateKeySeed = async (privateKeySeed: Buffer): P
   }
 };
 
-export const deriveMasterKey = (masterKeySeed: string): Uint8Array => {
-  const { key } = getMasterKeyFromSeed(masterKeySeed);
-  return bufferToUint8Array(key);
-};
+export const derivePrivateKeySeed = (
+  masterKey: Uint8Array,
+  keyPath: string,
+  curve: KeyPairCurve = Slip10Curve.Secp256k1,
+): Buffer => {
+  const convertedPath = stringToPath(keyPath);
 
-export const derivePrivateKeySeed = (masterKey: Uint8Array, keyPath: string): Buffer => {
-  const hexMasterKey = uint8arrayToHexStr(masterKey);
-  const { key } = derivePath(keyPath, hexMasterKey);
-  return key;
+  const derived = Slip10.derivePath(curve, masterKey, convertedPath);
+
+  const { privkey } = derived;
+
+  const privateKeySeed = uint8ArrayToBuffer(privkey);
+
+  return privateKeySeed;
 };
