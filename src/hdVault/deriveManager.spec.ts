@@ -46,6 +46,12 @@ const masterKeySeed = bufferToUint8Array(derivedMasterKeySeed);
 const seedEd25519 = 'bc5888d19db1613b1bacae2c9882b8ef27b7d2fa5b57e42b2c2077f6289865c3';
 const seedSecp256k1 = '9481736343ff4a00086271b96157ef7b01d903bbe2650f837ab30d328ce26e95';
 
+const sourcePrivateKey =
+  'lIFzY0P/SgAIYnG5YVfvewHZA7viZQ+DerMNMozibpVsHf/MMMet+j3rjEiWiAsTC/vcx0vzXP0yDHt7J1lsFA==';
+
+const sourceSecondPrivateKey =
+  'cSke/PvbqseeTr5ayQf/jI5wtUX2BBIZ6pdWPNW/ZHV/4/54+kiTgmVvltccfGJZuYpE05zVAu9jbmj1L3Edyg==';
+
 describe('deriveAddress', () => {
   it('should return an address from the public key', () => {
     const address = deriveAddress(masterKeySeedPublicKey);
@@ -68,6 +74,17 @@ describe('deriveKeyPairFromPrivateKeySeed', () => {
 
     expect(publicKey.length).toEqual(44);
     expect(privateKey.length).toEqual(88);
+    expect(privateKey).toEqual(sourcePrivateKey);
+  });
+
+  it('derives second keypair from private key seed', async () => {
+    const privateKeySeed = derivePrivateKeySeed(masterKeySeed, `${keyPath}${1}${keyPathSuffix}`);
+
+    const { publicKey, privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+
+    expect(publicKey.length).toEqual(44);
+    expect(privateKey.length).toEqual(88);
+    expect(privateKey).toEqual(sourceSecondPrivateKey);
   });
 
   it('rejects with false when wrong privateKeySeed is used', async () => {

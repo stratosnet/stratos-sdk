@@ -68,3 +68,55 @@ export const unlockMasterKeySeed = async (
     return false;
   }
 };
+
+export const getMasterKeySeed = async (
+  password: string,
+  encryptedMasterKeySeed: string,
+): Promise<Uint8Array> => {
+  let decryptedMasterKeySeed;
+
+  try {
+    decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed);
+  } catch (e) {
+    return Promise.reject(false);
+  }
+
+  if (!decryptedMasterKeySeed) {
+    return Promise.reject(false);
+  }
+
+  const masterKeySeed = bufferToUint8Array(decryptedMasterKeySeed);
+
+  return masterKeySeed;
+};
+
+export const sign = async (message: string, privateKey: string): Promise<string> => {
+  try {
+    const decodedMessage = naclUtil.decodeBase64(message);
+    const decodedPrivateKey = naclUtil.decodeBase64(privateKey);
+
+    const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
+    const ecodedSignature = naclUtil.encodeBase64(signature);
+
+    return ecodedSignature;
+  } catch (error) {
+    return Promise.reject(false);
+  }
+};
+
+export const verifySignature = async (
+  message: string,
+  signature: string,
+  publicKey: string,
+): Promise<boolean> => {
+  try {
+    const verifyResult = nacl.sign.detached.verify(
+      Uint8Array.from(naclUtil.decodeBase64(message)),
+      naclUtil.decodeBase64(signature),
+      naclUtil.decodeBase64(publicKey),
+    );
+    return verifyResult;
+  } catch (err) {
+    return Promise.reject(false);
+  }
+};
