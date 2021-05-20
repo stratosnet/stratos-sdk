@@ -246,7 +246,7 @@ const mainFour = async () => {
 
   const phrase = mnemonic.convertStringToArray(stringMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
-  // console.log('masterKeySeed', masterKeySeed);
+  console.log('masterKeySeed', masterKeySeed);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   // console.log('encryptedMasterKeySeedString', encryptedMasterKeySeedString);
