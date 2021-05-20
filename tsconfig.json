@@ -1,8 +1,5 @@
 {
-  "include": ["src", "types",
-    "**/*.config.js",
-    ".eslintrc.js"
-  ],
+  "include": ["src", "types", "decs.d.ts", "**/*.config.js", ".eslintrc.js"],
   "exclude": ["/node_modules/", "/src/*.spec.ts", "/src/**/*.spec.ts"],
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,

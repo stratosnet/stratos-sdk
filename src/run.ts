@@ -4,6 +4,7 @@ import {
   pubkeyToAddress,
   rawSecp256k1PubkeyToRawAddress,
 } from '@cosmjs/amino';
+
 import {
   Bip39,
   EnglishMnemonic,
@@ -14,17 +15,19 @@ import {
   Slip10Curve,
   Slip10RawIndex,
 } from '@cosmjs/crypto';
-import { Bech32, toBase64, fromHex } from '@cosmjs/encoding';
+import { Bech32, fromHex, toBase64 } from '@cosmjs/encoding';
 
+import { chainId } from './config/network';
 // import cosmosjs from '@cosmostation/cosmosjs';
 // import { Cosmos } from "../src/index.js";
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
-import { uint8arrayToHexStr, uint8ArrayToBuffer } from './hdVault/utils';
+import { uint8ArrayToBuffer, uint8arrayToHexStr } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
+import { broadcastTx, getCosmos, getAccountsData, createSendTx } from './transactions';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const cosmosjs = require('@cosmostation/cosmosjs');
+// const cosmosjs = require('@cosmostation/cosmosjs');
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -289,9 +292,11 @@ const mainF = async () => {
   const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
 
-  const lcdUrl = 'http://localhost:1317';
-  const chainId = 'test-chain';
-  const cosmos = cosmosjs.network(lcdUrl, chainId);
+  // const lcdUrl = 'http://localhost:1317';
+  // const chainId = 'test-chain';
+  // const cosmos = cosmosjs.network(lcdUrl, chainId);
+
+  const cosmos = getCosmos();
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
@@ -311,53 +316,65 @@ const mainF = async () => {
     return;
   }
 
-  let accountsData;
+  // let accountsData;
 
-  try {
-    accountsData = await cosmos.getAccounts(keyPairZero.address);
-    console.log('accountsData!', accountsData);
-  } catch (error) {
-    console.log('Could not get accounts', error.message);
-  }
+  // try {
+  //   accountsData = await cosmos.getAccounts(keyPairZero.address);
+  //   console.log('accountsData!', accountsData);
+  // } catch (error) {
+  //   console.log('Could not get accounts', error.message);
+  // }
+
+  // const accountsData = await getAccountsData(keyPairZero);
 
   let signedTx;
 
-  if (accountsData) {
-    let stdSignMsg = cosmos.newStdMsg({
-      msgs: [
-        {
-          type: 'cosmos-sdk/MsgSend',
-          value: {
-            amount: [
-              {
-                amount: String(100000),
-                denom: 'stos',
-              },
-            ],
-            from_address: keyPairZero.address,
-            to_address: firstAddress,
-          },
-        },
-      ],
-      chain_id: chainId,
-      fee: { amount: [{ amount: String(500), denom: 'stos' }], gas: String(200000) },
-      memo: '',
-      account_number: String(accountsData.result.value.account_number),
-      sequence: String(accountsData.result.value.sequence),
-    });
+  // if (accountsData) {
+  // const myTxA = {
+  //   msgs: [
+  //     {
+  //       type: 'cosmos-sdk/MsgSend',
+  //       value: {
+  //         amount: [
+  //           {
+  //             amount: String(100000),
+  //             denom: 'stos',
+  //           },
+  //         ],
+  //         from_address: keyPairZero.address,
+  //         to_address: firstAddress,
+  //       },
+  //     },
+  //   ],
+  //   chain_id: chainId,
+  //   fee: { amount: [{ amount: String(500), denom: 'stos' }], gas: String(200000) },
+  //   memo: '',
+  //   account_number: String(accountsData.result.value.account_number),
+  //   sequence: String(accountsData.result.value.sequence),
+  // };
 
-    const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
-    signedTx = cosmos.sign(stdSignMsg, pkey);
-  }
+  const myTx = await createSendTx(100000, keyPairZero, firstAddress);
+  const myTxMsg = cosmos.newStdMsg(myTx);
 
-  let result;
+  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+
+  signedTx = cosmos.sign(myTxMsg, pkey);
+  // }
+
   if (signedTx) {
+    console.log('signedTx!', signedTx);
     try {
-      result = await cosmos.broadcast(signedTx);
-      console.log('result!!', result);
-    } catch (error) {
-      console.log('Could not broadcast', error.message);
+      const result = await broadcastTx(signedTx);
+      console.log('broadcasting result', result);
+    } catch (err) {
+      console.log('error broadcasting', err.message);
     }
+    // try {
+    //   result = await cosmos.broadcast(signedTx);
+    //   console.log('result!!', result);
+    // } catch (error) {
+    //   console.log('Could not broadcast', error.message);
+    // }
   }
 };
 
