@@ -1,11 +1,11 @@
-import { encodeAminoPubkey } from '@cosmjs/amino';
+import { encodeAminoPubkey, pubkeyToAddress } from '@cosmjs/amino';
 import { Bip39, EnglishMnemonic, Hmac, Secp256k1, Sha512, Slip10Curve } from '@cosmjs/crypto';
 import { Bech32, fromBase64, toAscii, toBase64 } from '@cosmjs/encoding';
 import BN from 'bn.js';
 import sjcl from 'sjcl';
 import nacl from 'tweetnacl';
 
-import { bip39Password, stratosPubkeyPrefix } from '../config/hdVault';
+import { bip39Password, stratosAddressPrefix, stratosPubkeyPrefix } from '../config/hdVault';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
 
 export interface KeyPair {
@@ -96,6 +96,11 @@ export const getAminoPublicKey = async (pubkey: PubKey): Promise<Uint8Array> => 
   const encodedAminoPub = encodeAminoPubkey(pubkey);
 
   return encodedAminoPub;
+};
+
+export const getAddressFromPubKey = (pubkey: PubKey): string => {
+  const address = pubkeyToAddress(pubkey, stratosAddressPrefix);
+  return address;
 };
 
 export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<string> => {

@@ -1,9 +1,14 @@
-import { encodeAminoPubkey, pubkeyToAddress } from '@cosmjs/amino';
-import { Secp256k1, Slip10, Slip10Curve, stringToPath } from '@cosmjs/crypto';
-import { Bech32, toBase64, toHex } from '@cosmjs/encoding';
+import { Slip10, Slip10Curve, stringToPath } from '@cosmjs/crypto';
+import { toHex } from '@cosmjs/encoding';
 
-import { stratosAddressPrefix, stratosPubkeyPrefix } from '../config/hdVault';
-import { generateMasterKeySeed, getMasterKeySeedPublicKey } from './keyUtils';
+import {
+  generateMasterKeySeed,
+  getAddressFromPubKey,
+  getAminoPublicKey,
+  getEncodedPublicKey,
+  getMasterKeySeedPublicKey,
+  getPublicKeyFromPrivKey,
+} from './keyUtils';
 import { MnemonicPhrase } from './mnemonic';
 
 export interface KeyPair {
@@ -15,37 +20,20 @@ export interface KeyPair {
 
 export type KeyPairCurve = Slip10Curve.Ed25519 | Slip10Curve.Secp256k1;
 
-interface PubKey {
-  type: string;
-  value: string;
-}
-
-export const deriveAddress = (pubkey: PubKey): string => {
-  const address = pubkeyToAddress(pubkey, stratosAddressPrefix);
-  return address;
-};
-
 export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<string> => {
   const masterKeySeed = await generateMasterKeySeed(phrase);
   const pubkey = await getMasterKeySeedPublicKey(masterKeySeed);
-  return deriveAddress(pubkey);
+  return getAddressFromPubKey(pubkey);
 };
 
 export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Promise<KeyPair> => {
-  const { pubkey } = await Secp256k1.makeKeypair(privkey);
+  const pubkeyMine = await getPublicKeyFromPrivKey(privkey);
 
-  const compressedPub = Secp256k1.compressPubkey(pubkey);
+  const encodeAminoPub = await getAminoPublicKey(pubkeyMine);
 
-  const pubkeyMine = {
-    type: 'tendermint/PubKeySecp256k1',
-    value: toBase64(compressedPub),
-  };
+  const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
 
-  const encodeAminoPub = encodeAminoPubkey(pubkeyMine);
-
-  const encodedPublicKey = Bech32.encode(stratosPubkeyPrefix, encodeAminoPub);
-
-  const address = pubkeyToAddress(pubkeyMine, stratosAddressPrefix);
+  const address = getAddressFromPubKey(pubkeyMine);
 
   return {
     address,
