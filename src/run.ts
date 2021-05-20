@@ -1,54 +1,32 @@
-// import cosmosjs from '@cosmostation/cosmosjs';
 import {
-  Secp256k1HdWallet,
-  makeCosmoshubPath,
-  rawSecp256k1PubkeyToRawAddress,
-  encodeAminoPubkey,
-  encodeBech32Pubkey,
-  pubkeyToAddress,
   AccountData,
+  encodeAminoPubkey,
+  pubkeyToAddress,
+  rawSecp256k1PubkeyToRawAddress,
 } from '@cosmjs/amino';
-import { fromBase64, fromHex, Bech32, toBase64, toHex } from '@cosmjs/encoding';
 import {
-  stringToPath,
-  HdPath,
-  Slip10RawIndex,
   Bip39,
-  Secp256k1Keypair,
   EnglishMnemonic,
-  Slip10,
+  HdPath,
   Secp256k1,
+  Secp256k1Keypair,
+  Slip10,
   Slip10Curve,
+  Slip10RawIndex,
 } from '@cosmjs/crypto';
+import { Bech32, toBase64, fromHex } from '@cosmjs/encoding';
 
-import * as keyUtils from './hdVault/keyUtils';
+// import cosmosjs from '@cosmostation/cosmosjs';
+// import { Cosmos } from "../src/index.js";
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
-import { deriveKeyPair, sign, verifySignature } from './hdVault/wallet';
-import {
-  deriveAddress,
-  deriveKeyPairFromPrivateKeySeed,
-  deriveAddressFromPhrase,
-  derivePrivateKeySeed,
-} from './hdVault/deriveManager';
-import { Random } from './random';
-import { uint8ArrayToBase64str, uint8arrayToHexStr } from './hdVault/utils';
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-// const data = Random.getBytes(12);
+import { uint8arrayToHexStr, uint8ArrayToBuffer } from './hdVault/utils';
+import { deriveKeyPair } from './hdVault/wallet';
 
-// console.log('our data is:', data);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cosmosjs = require('@cosmostation/cosmosjs');
 
-// const phraseN = mnemonic.generateMnemonicPhrase(24);
-
-// console.log('phraseN', phraseN);
-
-// const stringMnemonic = mnemonic.convertArrayToString(phraseN);
-// const stringMnemonic =
-//   'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
-
-// console.log('stringMnemonic', stringMnemonic);
-
-// const phraseN = mnemonic.convertStringToArray(stringMnemonic);
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // const phrase = [
 //   { index: 1, word: 'rate' },
@@ -79,11 +57,11 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const password = '123456';
 
-const lcdUrl = 'http://localhost:1317';
-// const lcdUrl = 'http://localhost:26657';
-const chainId = 'test-chain';
-// const path = "m/44'/606'/0'/0/1";
-// const cosmos = cosmosjs.network(lcdUrl, chainId);
+// const lcdUrl = 'http://localhost:1317';
+// // const lcdUrl = 'http://localhost:26657';
+// const chainId = 'test-chain';
+// // const path = "m/44'/606'/0'/0/1";
+// // const cosmos = cosmosjs.network(lcdUrl, chainId);
 
 // const mayTwo = async () => {
 // const masterKeySeed = createMasterKeySeed(phraseN, password);
@@ -95,6 +73,7 @@ const chainId = 'test-chain';
 // };
 
 /**
+ * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
@@ -109,21 +88,25 @@ export function makeStratosHubPath(a: number): HdPath {
   ];
 }
 
+// temp helper
 interface DerivationInfo {
   readonly hdPath: HdPath;
   /** The bech32 address prefix (human readable part). */
   readonly prefix: string;
 }
 
+// temp helper
 interface AccountDataWithPrivkey extends AccountData {
   readonly privkey: Uint8Array;
 }
 
+// temp helper
 interface MySecp256k1Keypair extends Secp256k1Keypair {
   privkeyInHex: string;
   pubkeyInHex: string;
 }
 
+// temp helper
 const getKeyPair = async (hdPath: HdPath, seed: Uint8Array): Promise<MySecp256k1Keypair> => {
   const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, seed, hdPath);
 
@@ -170,6 +153,7 @@ const getKeyPair = async (hdPath: HdPath, seed: Uint8Array): Promise<MySecp256k1
   };
 };
 
+// temp helper
 const getAccountsWithPrivkeys = async (
   accounts: DerivationInfo[],
   seed: Uint8Array,
@@ -190,6 +174,7 @@ const getAccountsWithPrivkeys = async (
   );
 };
 
+// creates test account - mimic of amino implementation
 const mainThree = async () => {
   const stringMnemonic =
     'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
@@ -240,13 +225,54 @@ const mainThree = async () => {
   // const allAccounts = await wallet.getAccountsWithPrivkeys()
 };
 
+// creates an account and derives 2 keypairs
 const mainFour = async () => {
-  const stringMnemonic =
-    'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
+  /**
+   *
+- name: user1
+  type: local
+  address: st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j
+  pubkey: stpub1addwnpepqfafvmf6nvvqvsxhettht004fxmnp464u6y4gqfl6vfchsg0t0hhuqwmacg
+  mnemonic: ""
+  threshold: 0
+  pubkeys: []
 
-  const phrase = mnemonic.convertStringToArray(stringMnemonic);
+
+**Important** write this mnemonic phrase in a safe place.
+It is the only way to recover your account if you ever forget your password.
+
+athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach
+
+
+
+- name: user0
+  type: local
+  address: st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6
+  pubkey: stpub1addwnpepqdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn524sdzmh
+  mnemonic: ""
+  threshold: 0
+  pubkeys: []
+
+
+**Important** write this mnemonic phrase in a safe place.
+It is the only way to recover your account if you ever forget your password.
+
+hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion
+
+   */
+
+  // const stringMnemonic =
+  //   'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
+
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const firstUserMnemonic =
+    'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
-  console.log('masterKeySeed', masterKeySeed);
+  console.log('masterKeySeed!', masterKeySeed);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   // console.log('encryptedMasterKeySeedString', encryptedMasterKeySeedString);
@@ -258,78 +284,77 @@ const mainFour = async () => {
   console.log('keyPairOne', keyPairOne);
 };
 
+// cosmosjs send
 const mainF = async () => {
-  // const masterKeySeed = createMasterKeySeed(phraseN, password);
-  // const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
 
-  // const masterKeySeedInt = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeedString);
+  const lcdUrl = 'http://localhost:1317';
+  const chainId = 'test-chain';
+  const cosmos = cosmosjs.network(lcdUrl, chainId);
 
-  // console.log('masterKeySeedInt!!', masterKeySeedInt);
-  // const privateKeySeed = derivePrivateKeySeed(masterKeySeedInt, path);
-  // console.log('privateKeySeed!!', privateKeySeed);
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
 
-  // const masterKeySeedIntBu = keyUtils.generateMasterKeySeed(phrase);
-  // console.log('!!aa masterKeySeedIntBu', masterKeySeedIntBu);
+  const firstUserMnemonic =
+    'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
 
-  // const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
 
-  // console.log('keyPair 0!', keyPairZero);
-  // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
 
-  // console.log('keyPair 1!', keyPairOne);
+  // console.log('keyPairZero!', keyPairZero);
 
-  // const sourceAddress = 'st14e2wee4zhfg0q29y5ehk2dt8nmc9ta4rj6s598';
-
-  // const privateKeySeed = derivePrivateKeySeed(masterKeySeedInt, path);
-
-  // const { privateKey, privateKeySeed: privateKeySeedK } = await deriveKeyPairFromPrivateKeySeed(
-  //   privateKeySeed,
-  // );
-
-  // console.log('privateKeySeedK!!!!', privateKeySeedK);
+  if (!keyPairZero) {
+    return;
+  }
 
   let accountsData;
 
-  // try {
-  //   accountsData = await cosmos.getAccounts('st1m7ch70gtpug94h3vklhqmwa4jm59egez7uvjqz');
-  //   console.log('accountsData!', accountsData);
-  // } catch (error) {
-  //   console.log('Could not get accounts', error.message);
-  // }
+  try {
+    accountsData = await cosmos.getAccounts(keyPairZero.address);
+    console.log('accountsData!', accountsData);
+  } catch (error) {
+    console.log('Could not get accounts', error.message);
+  }
 
   let signedTx;
 
   if (accountsData) {
-    // let stdSignMsg = cosmos.newStdMsg({
-    //   msgs: [
-    //     {
-    //       type: 'cosmos-sdk/MsgSend',
-    //       value: {
-    //         amount: [
-    //           {
-    //             amount: String(100000),
-    //             denom: 'atom',
-    //           },
-    //         ],
-    //         from_address: keyPair.address,
-    //         to_address: 'st1sdj4dcyf5y5f24q8h57xj4dfvnuz20a2a5hun7',
-    //       },
-    //     },
-    //   ],
-    //   chain_id: chainId,
-    //   fee: { amount: [{ amount: String(5000), denom: 'atom' }], gas: String(200000) },
-    //   memo: '',
-    //   account_number: String(accountsData.result.value.account_number),
-    //   sequence: String(accountsData.result.value.account_number),
-    // });
-    // signedTx = cosmos.sign(stdSignMsg, keyPair.privateKeySeedK);
+    let stdSignMsg = cosmos.newStdMsg({
+      msgs: [
+        {
+          type: 'cosmos-sdk/MsgSend',
+          value: {
+            amount: [
+              {
+                amount: String(100000),
+                denom: 'stos',
+              },
+            ],
+            from_address: keyPairZero.address,
+            to_address: firstAddress,
+          },
+        },
+      ],
+      chain_id: chainId,
+      fee: { amount: [{ amount: String(500), denom: 'stos' }], gas: String(200000) },
+      memo: '',
+      account_number: String(accountsData.result.value.account_number),
+      sequence: String(accountsData.result.value.sequence),
+    });
+
+    const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+    signedTx = cosmos.sign(stdSignMsg, pkey);
   }
 
   let result;
   if (signedTx) {
     try {
-      // result = await cosmos.broadcast(signedTx);
-      console.log('result!', result);
+      result = await cosmos.broadcast(signedTx);
+      console.log('result!!', result);
     } catch (error) {
       console.log('Could not broadcast', error.message);
     }
@@ -338,4 +363,5 @@ const mainF = async () => {
 
 // mainThree();
 
-mainFour();
+// mainFour();
+mainF();

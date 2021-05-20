@@ -2,7 +2,6 @@ import { Slip10Curve } from '@cosmjs/crypto';
 
 import { keyPath } from '../config/hdVault';
 import {
-  deriveAddress,
   deriveAddressFromPhrase,
   deriveKeyPairFromPrivateKeySeed,
   derivePrivateKeySeed,
