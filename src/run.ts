@@ -315,66 +315,20 @@ const mainF = async () => {
   if (!keyPairZero) {
     return;
   }
-
-  // let accountsData;
-
-  // try {
-  //   accountsData = await cosmos.getAccounts(keyPairZero.address);
-  //   console.log('accountsData!', accountsData);
-  // } catch (error) {
-  //   console.log('Could not get accounts', error.message);
-  // }
-
-  // const accountsData = await getAccountsData(keyPairZero);
-
-  let signedTx;
-
-  // if (accountsData) {
-  // const myTxA = {
-  //   msgs: [
-  //     {
-  //       type: 'cosmos-sdk/MsgSend',
-  //       value: {
-  //         amount: [
-  //           {
-  //             amount: String(100000),
-  //             denom: 'stos',
-  //           },
-  //         ],
-  //         from_address: keyPairZero.address,
-  //         to_address: firstAddress,
-  //       },
-  //     },
-  //   ],
-  //   chain_id: chainId,
-  //   fee: { amount: [{ amount: String(500), denom: 'stos' }], gas: String(200000) },
-  //   memo: '',
-  //   account_number: String(accountsData.result.value.account_number),
-  //   sequence: String(accountsData.result.value.sequence),
-  // };
+  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
   const myTx = await createSendTx(100000, keyPairZero, firstAddress);
   const myTxMsg = cosmos.newStdMsg(myTx);
-
-  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
-
-  signedTx = cosmos.sign(myTxMsg, pkey);
-  // }
+  const signedTx = cosmos.sign(myTxMsg, pkey);
 
   if (signedTx) {
-    console.log('signedTx!', signedTx);
+    // console.log('signedTx!', signedTx);
     try {
       const result = await broadcastTx(signedTx);
       console.log('broadcasting result', result);
     } catch (err) {
       console.log('error broadcasting', err.message);
     }
-    // try {
-    //   result = await cosmos.broadcast(signedTx);
-    //   console.log('result!!', result);
-    // } catch (error) {
-    //   console.log('Could not broadcast', error.message);
-    // }
   }
 };
 

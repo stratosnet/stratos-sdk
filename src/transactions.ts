@@ -1,8 +1,7 @@
 import cosmosjs from '@cosmostation/cosmosjs';
 
-import { chainId, lcdUrl } from './config/network';
 import { stratosDenom } from './config/hdVault';
-
+import { chainId, lcdUrl } from './config/network';
 import { KeyPairInfo } from './hdVault/wallet';
 
 export interface AccountsData {
@@ -40,7 +39,7 @@ interface SendTransactionValue {
 
 interface TransactionMessage {
   type: string; // change to TransactionType
-  value: SendTransactionValue;
+  value: SendTransactionValue; // change to TransactionValue
 }
 
 interface Transaction {
@@ -71,16 +70,27 @@ interface CosmosInstance {
   getAccounts(address: string): Promise<AccountsData>;
 }
 
-export const getCosmos = (): CosmosInstance => {
-  const cosmos = cosmosjs.network(lcdUrl, chainId);
+class StratosCosmos {
+  public static cosmosInstance: CosmosInstance;
 
-  return cosmos;
+  public static init(): void {
+    StratosCosmos.cosmosInstance = cosmosjs.network(lcdUrl, chainId);
+  }
+}
+
+export const getCosmos = (): CosmosInstance => {
+  if (!StratosCosmos.cosmosInstance) {
+    StratosCosmos.init();
+  }
+
+  return StratosCosmos.cosmosInstance;
 };
 
 export const broadcastTx = async (signedTx: SignedTransaction): Promise<BroadcastResult> => {
   try {
     const result = await getCosmos().broadcast(signedTx);
 
+    // add pproper error handling!! check for code!
     return result;
   } catch (err) {
     console.log('Could not broadcast', err.message);
@@ -92,7 +102,6 @@ export const broadcastTx = async (signedTx: SignedTransaction): Promise<Broadcas
 export const getAccountsData = async (keyPair: KeyPairInfo): Promise<AccountsData> => {
   try {
     const accountsData = await getCosmos().getAccounts(keyPair.address);
-    console.log('accountsData!', accountsData);
     return accountsData;
   } catch (err) {
     console.log('Could not get accounts', err.message);
@@ -131,6 +140,5 @@ export const createSendTx = async (
     sequence: String(accountsData.result.value.sequence),
   };
 
-  console.log('myTx!', myTx);
   return myTx;
 };
