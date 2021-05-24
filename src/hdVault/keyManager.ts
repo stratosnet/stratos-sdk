@@ -1,24 +1,31 @@
-import { deriveAddress } from './deriveManager';
 import * as keyUtils from './keyUtils';
 import { MnemonicPhrase } from './mnemonic';
 
 export interface MasterKeyInfo {
   readonly encryptedMasterKeySeed: sjcl.SjclCipherEncrypted;
   readonly masterKeySeedAddress: string;
-  readonly masterKeySeedPublicKey: string;
+  readonly masterKeySeedPublicKey: Uint8Array;
+  readonly masterKeySeedEncodedPublicKey: string;
 }
 
-export const createMasterKeySeed = (phrase: MnemonicPhrase, password: string): MasterKeyInfo => {
-  const derivedMasterKeySeed = keyUtils.generateMasterKeySeed(phrase);
+export const createMasterKeySeed = async (
+  phrase: MnemonicPhrase,
+  password: string,
+): Promise<MasterKeyInfo> => {
+  const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
+
   const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
 
-  const masterKeySeedPublicKey = keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
-  const masterKeySeedAddress = deriveAddress(masterKeySeedPublicKey);
+  const pubkey = await keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
+  const masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
+  const masterKeySeedPublicKey = await keyUtils.getAminoPublicKey(pubkey);
+  const masterKeySeedEncodedPublicKey = await keyUtils.getEncodedPublicKey(masterKeySeedPublicKey);
 
   return {
     encryptedMasterKeySeed,
     masterKeySeedAddress,
     masterKeySeedPublicKey,
+    masterKeySeedEncodedPublicKey,
   };
 };
 

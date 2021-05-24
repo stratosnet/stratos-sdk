@@ -1,11 +1,12 @@
-import { keyPath, keyPathSuffix } from '../config/hdVault';
-import { deriveAddress, deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
+import { keyPath } from '../config/hdVault';
+import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
 import * as keyUtils from './keyUtils';
 
 export interface KeyPairInfo {
   keyIndex: number;
   address: string;
   publicKey: string;
+  privateKey: string;
 }
 
 export interface TransactionMessage {
@@ -28,15 +29,18 @@ export const deriveKeyPair = async (
     return Promise.reject(false);
   }
 
-  const path = `${keyPath}${keyIndex}${keyPathSuffix}`;
+  const path = `${keyPath}${keyIndex}`;
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
 
-  const { publicKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+  const { address, encodedPublicKey, privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
 
-  const address = deriveAddress(publicKey);
-
-  const res = { keyIndex, address, publicKey };
+  const res = {
+    keyIndex,
+    address,
+    publicKey: encodedPublicKey,
+    privateKey,
+  };
 
   return res;
 };

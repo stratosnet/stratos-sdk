@@ -1,28 +1,127 @@
-import { mnemonicToSeedSync } from 'bip39';
+import { encodeAminoPubkey, pubkeyToAddress } from '@cosmjs/amino';
+import { Bip39, EnglishMnemonic, Hmac, Secp256k1, Sha512, Slip10Curve } from '@cosmjs/crypto';
+import { Bech32, fromBase64, toAscii, toBase64 } from '@cosmjs/encoding';
+import BN from 'bn.js';
 import sjcl from 'sjcl';
 import nacl from 'tweetnacl';
-import naclUtil from 'tweetnacl-util';
 
+import { bip39Password, stratosAddressPrefix, stratosPubkeyPrefix } from '../config/hdVault';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
-import { bufferToUint8Array, uint8ArrayToBase64str, uint8ArrayToBuffer } from './utils';
 
 export interface KeyPair {
   publicKey: string;
   privateKey: string;
 }
 
-export const generateMasterKeySeed = (phrase: MnemonicPhrase): Buffer => {
-  return mnemonicToSeedSync(convertArrayToString(phrase));
+// @todo - move it
+interface Slip10Result {
+  readonly chainCode: Uint8Array;
+  readonly privkey: Uint8Array;
+}
+
+export interface PubKey {
+  type: string;
+  value: string;
+}
+
+// @todo - move it
+const isZero = (privkey: Uint8Array): boolean => {
+  return privkey.every(byte => byte === 0);
 };
 
-export const getMasterKeySeedPublicKey = (masterKeySeed: Buffer): string => {
-  const publicKey = uint8ArrayToBase64str(nacl.sign.keyPair.fromSecretKey(masterKeySeed).publicKey);
-
-  return publicKey;
+// @todo - move it
+const n = (curve: Slip10Curve): BN => {
+  switch (curve) {
+    case Slip10Curve.Secp256k1:
+      return new BN('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
+    default:
+      throw new Error('curve not supported');
+  }
 };
 
-export const encryptMasterKeySeed = (password: string, masterKeySeed: Buffer): sjcl.SjclCipherEncrypted => {
-  const strMasterKey = naclUtil.encodeBase64(bufferToUint8Array(masterKeySeed));
+// @todo - move it
+const isGteN = (curve: Slip10Curve, privkey: Uint8Array): boolean => {
+  const keyAsNumber = new BN(privkey);
+  return keyAsNumber.gte(n(curve));
+};
+
+// @todo - move it
+const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result => {
+  const i = new Hmac(Sha512, toAscii(curve)).update(seed).digest();
+  const il = i.slice(0, 32);
+  const ir = i.slice(32, 64);
+
+  if (curve !== Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
+    return getMasterKeyInfo(curve, i);
+  }
+
+  return {
+    chainCode: ir,
+    privkey: il,
+  };
+};
+
+export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
+  const stringMnemonic = convertArrayToString(phrase);
+
+  const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
+
+  const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
+
+  return seed;
+};
+
+export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array => {
+  const masterKeyInfo = getMasterKeyInfo(Slip10Curve.Secp256k1, masterKeySeed);
+
+  const { privkey } = masterKeyInfo;
+
+  return privkey;
+};
+
+export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubKey> => {
+  const { pubkey } = await Secp256k1.makeKeypair(privkey);
+
+  const compressedPub = Secp256k1.compressPubkey(pubkey);
+
+  const pubkeyMine = {
+    type: 'tendermint/PubKeySecp256k1',
+    value: toBase64(compressedPub),
+  };
+
+  return pubkeyMine;
+};
+
+export const getAminoPublicKey = async (pubkey: PubKey): Promise<Uint8Array> => {
+  const encodedAminoPub = encodeAminoPubkey(pubkey);
+
+  return encodedAminoPub;
+};
+
+export const getAddressFromPubKey = (pubkey: PubKey): string => {
+  const address = pubkeyToAddress(pubkey, stratosAddressPrefix);
+  return address;
+};
+
+export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<string> => {
+  const encodedPubKey = Bech32.encode(stratosPubkeyPrefix, encodedAminoPub);
+
+  return encodedPubKey;
+};
+
+export const getMasterKeySeedPublicKey = async (masterKeySeed: Uint8Array): Promise<PubKey> => {
+  const privkey = getMasterKeySeedPriveKey(masterKeySeed);
+
+  const pubkey = await getPublicKeyFromPrivKey(privkey);
+
+  return pubkey;
+};
+
+export const encryptMasterKeySeed = (
+  password: string,
+  masterKeySeed: Uint8Array,
+): sjcl.SjclCipherEncrypted => {
+  const strMasterKey = toBase64(masterKeySeed);
   const saltBits = sjcl.random.randomWords(4);
   const encryptParams = {
     v: 1,
@@ -32,7 +131,7 @@ export const encryptMasterKeySeed = (password: string, masterKeySeed: Buffer): s
     adata: '',
     cipher: 'aes',
     salt: saltBits,
-    iv: sjcl.random.randomWords(4, 0),
+    iv: saltBits,
   };
   return sjcl.encrypt(password, strMasterKey, encryptParams);
 };
@@ -40,12 +139,12 @@ export const encryptMasterKeySeed = (password: string, masterKeySeed: Buffer): s
 export const decryptMasterKeySeed = async (
   password: string,
   encryptedMasterKeySeed: string,
-): Promise<Buffer | false> => {
+): Promise<Uint8Array | false> => {
   let decryptedMasterKeySeed;
 
   try {
     const decrypteCypherText = sjcl.decrypt(password, encryptedMasterKeySeed);
-    decryptedMasterKeySeed = uint8ArrayToBuffer(naclUtil.decodeBase64(decrypteCypherText));
+    decryptedMasterKeySeed = fromBase64(decrypteCypherText);
   } catch (err) {
     return Promise.reject(false);
   }
@@ -85,18 +184,16 @@ export const getMasterKeySeed = async (
     return Promise.reject(false);
   }
 
-  const masterKeySeed = bufferToUint8Array(decryptedMasterKeySeed);
-
-  return masterKeySeed;
+  return decryptedMasterKeySeed;
 };
 
 export const sign = async (message: string, privateKey: string): Promise<string> => {
   try {
-    const decodedMessage = naclUtil.decodeBase64(message);
-    const decodedPrivateKey = naclUtil.decodeBase64(privateKey);
+    const decodedMessage = fromBase64(message);
+    const decodedPrivateKey = fromBase64(privateKey);
 
     const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
-    const ecodedSignature = naclUtil.encodeBase64(signature);
+    const ecodedSignature = toBase64(signature);
 
     return ecodedSignature;
   } catch (error) {
@@ -111,9 +208,9 @@ export const verifySignature = async (
 ): Promise<boolean> => {
   try {
     const verifyResult = nacl.sign.detached.verify(
-      Uint8Array.from(naclUtil.decodeBase64(message)),
-      naclUtil.decodeBase64(signature),
-      naclUtil.decodeBase64(publicKey),
+      Uint8Array.from(fromBase64(message)),
+      fromBase64(signature),
+      fromBase64(publicKey),
     );
     return verifyResult;
   } catch (err) {
