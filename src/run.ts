@@ -193,7 +193,38 @@ const mainWithdrawRewards = async () => {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
-      console.log('delegate withdrawal result!!! :)', result);
+      console.log('delegate withdrawal result :)', result);
+    } catch (err) {
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
+// cosmosjs withdraw rewards
+const mainSdsPrepay = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+
+  const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, 10);
+  const signedTx = transactions.sign(sendTxMessage, pkey);
+
+  if (signedTx) {
+    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('broadcast prepay result :)', result);
     } catch (err) {
       console.log('error broadcasting', err.message);
     }
@@ -207,4 +238,7 @@ const mainWithdrawRewards = async () => {
 // mainDelegate();
 
 //withdrawal
-mainWithdrawRewards();
+// mainWithdrawRewards();
+
+// prepay
+mainSdsPrepay();

@@ -1,14 +1,18 @@
-export enum CosmosMsgTypes {
+export enum TxMsgTypes {
   Account = 'cosmos-sdk/Account',
   Send = 'cosmos-sdk/MsgSend',
   Delegate = 'cosmos-sdk/MsgDelegate',
   WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward',
 }
 
+export enum TxMsgTypes {
+  SdsPrepay = 'sds/MsgPrepay',
+}
+
 export interface AccountsData {
   height: string;
   result: {
-    type: CosmosMsgTypes.Account;
+    type: TxMsgTypes.Account;
     value: {
       address: string;
       public_key: any;
@@ -48,10 +52,15 @@ export interface DelegateTransactionValue extends TransactionValue {
   validator_address: string;
 }
 
-type TransactionValueType = SendTransactionValue | DelegateTransactionValue;
+export interface SdsPrepayValue extends TransactionValue {
+  sender: string;
+  coins: AmountType[];
+}
+
+type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
 
 export interface TransactionMessage {
-  type: CosmosMsgTypes;
+  type: TxMsgTypes;
   value: TransactionValueType;
 }
 

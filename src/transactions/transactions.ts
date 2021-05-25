@@ -71,7 +71,7 @@ export const getSendTx = async (
   const myTx = {
     msgs: [
       {
-        type: Types.CosmosMsgTypes.Send,
+        type: Types.TxMsgTypes.Send,
         value: {
           amount: getStandardAmount([amount]),
           from_address: keyPairAddress,
@@ -98,7 +98,7 @@ export const getDelegateTx = async (
   const myTx = {
     msgs: [
       {
-        type: Types.CosmosMsgTypes.Delegate,
+        type: Types.TxMsgTypes.Delegate,
         value: {
           amount: {
             amount: String(amount),
@@ -127,7 +127,7 @@ export const getWithdrawalRewardTx = async (
   const myTx = {
     msgs: [
       {
-        type: Types.CosmosMsgTypes.WithdrawRewards,
+        type: Types.TxMsgTypes.WithdrawRewards,
         value: {
           delegator_address: delegatorAddress,
           validator_address: validatorAddress,
@@ -142,6 +142,32 @@ export const getWithdrawalRewardTx = async (
   return myTxMsg;
 };
 
+export const getSdsPrepayTx = async (
+  senderAddress: string,
+  amount: number,
+  memo = '',
+): Promise<Types.TransactionMessage> => {
+  const baseTx = await getBaseTx(senderAddress, memo);
+
+  const myTx = {
+    msgs: [
+      {
+        type: Types.TxMsgTypes.SdsPrepay,
+        value: {
+          sender: senderAddress,
+          coins: getStandardAmount([amount]),
+        },
+      },
+    ],
+    ...baseTx,
+  };
+
+  const myTxMsg = getCosmos().newStdMsg(myTx);
+
+  return myTxMsg;
+};
+
+// @todo - remove it
 export const delegate = async (
   delegateAmount: number,
   keyPairAddress: string,
@@ -182,4 +208,37 @@ export const delegate = async (
   console.log('res!', res);
 
   return res;
+};
+
+// @todo - remove it
+export const aa = async (ownerAddress: string) => {
+  const ab = [
+    {
+      network_address: 'sds://resourcenode1',
+      pubkey: { type: 'tendermint/PubKeyEd25519', value: 'AwQHdG1W5UXxOOzIDlLPkQaNuNQeJUEhRC1tTRIZuMw=' },
+      suspend: false,
+      status: 2,
+      tokens: '10000000',
+      owner_address: ownerAddress,
+      description: { moniker: 'r1', identity: '', website: '', security_contact: '', details: '' },
+      node_type: '7: computation/database/storage',
+    },
+  ];
+
+  const prepay = {
+    chain_id: 'test-chain',
+    account_number: '4',
+    sequence: '0',
+    fee: { amount: [], gas: '200000' },
+    msgs: [
+      {
+        type: 'sds/MsgPrepay',
+        value: {
+          sender: 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j',
+          coins: [{ denom: 'stos', amount: '3' }],
+        },
+      },
+    ],
+    memo: '',
+  };
 };
