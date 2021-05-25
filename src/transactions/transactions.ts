@@ -117,6 +117,31 @@ export const getDelegateTx = async (
   return myTxMsg;
 };
 
+export const getWithdrawalRewardTx = async (
+  delegatorAddress: string,
+  validatorAddress: string,
+  memo = '',
+): Promise<Types.TransactionMessage> => {
+  const baseTx = await getBaseTx(delegatorAddress, memo);
+
+  const myTx = {
+    msgs: [
+      {
+        type: Types.CosmosMsgTypes.WithdrawRewards,
+        value: {
+          delegator_address: delegatorAddress,
+          validator_address: validatorAddress,
+        },
+      },
+    ],
+    ...baseTx,
+  };
+
+  const myTxMsg = getCosmos().newStdMsg(myTx);
+
+  return myTxMsg;
+};
+
 export const delegate = async (
   delegateAmount: number,
   keyPairAddress: string,

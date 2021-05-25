@@ -166,8 +166,45 @@ const mainDelegate = async () => {
   }
 };
 
+// cosmosjs withdraw rewards
+const mainWithdrawRewards = async () => {
+  const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
+
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  const delegatorAddress = keyPairZero.address;
+
+  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+
+  const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, validatorAddress);
+  const signedTx = transactions.sign(sendTxMessage, pkey);
+
+  if (signedTx) {
+    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('delegate withdrawal result!!! :)', result);
+    } catch (err) {
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
 // cosmosjs send
 // mainSend();
 
 // delegate
-mainDelegate();
+// mainDelegate();
+
+//withdrawal
+mainWithdrawRewards();

@@ -2,6 +2,7 @@ export enum CosmosMsgTypes {
   Account = 'cosmos-sdk/Account',
   Send = 'cosmos-sdk/MsgSend',
   Delegate = 'cosmos-sdk/MsgDelegate',
+  WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward',
 }
 
 export interface AccountsData {
@@ -28,13 +29,13 @@ export interface AmountType {
   denom: string;
 }
 
-export interface TransactionValue {
-  amount: AmountType | AmountType[];
-}
-
 export interface TransactionFee {
   amount: AmountType[];
   gas: string;
+}
+
+export interface TransactionValue {
+  amount?: AmountType | AmountType[];
 }
 
 export interface SendTransactionValue extends TransactionValue {
@@ -47,13 +48,13 @@ export interface DelegateTransactionValue extends TransactionValue {
   validator_address: string;
 }
 
-type TransactionType = CosmosMsgTypes.Account | CosmosMsgTypes.Send | CosmosMsgTypes.Delegate;
 type TransactionValueType = SendTransactionValue | DelegateTransactionValue;
 
 export interface TransactionMessage {
-  type: TransactionType;
+  type: CosmosMsgTypes;
   value: TransactionValueType;
 }
+
 export interface BaseTransaction {
   chain_id: string;
   account_number: string;
