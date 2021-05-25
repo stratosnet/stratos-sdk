@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.14",
+    "@types/json-bigint": "^1.0.0",
     "@types/node": "^14.14.17",
     "@types/readable-stream": "^2.3.9",
     "@types/sjcl": "^1.0.29",
@@ -82,9 +83,11 @@
     "@cosmostation/cosmosjs": "0.9.5",
     "@types/bn.js": "^5.1.0",
     "axios": "^0.21.1",
+    "axios-retry": "^3.1.9",
     "bech32": "1.1.4",
     "bip39": "3.0.2",
     "bn.js": "^5.2.0",
+    "json-bigint": "^1.0.0",
     "sjcl": "1.0.8",
     "tweetnacl": "1.0.1",
     "tweetnacl-util": "0.15.0"
