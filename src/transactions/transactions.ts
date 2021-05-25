@@ -148,7 +148,7 @@ export const delegate = async (
     validator_address: validatorAddress,
     delegation: {
       denom: stratosDenom,
-      amount: delegateAmount, // string?
+      amount: delegateAmount,
     },
   };
 
