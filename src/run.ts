@@ -5,8 +5,7 @@ import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
 import { uint8ArrayToBuffer } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
-import { broadcastTx, createDelegateTx, createSendTx } from './transactions';
-import { getCosmos } from './transactions/cosmos';
+import * as transactions from './transactions';
 
 const password = '123456';
 
@@ -86,17 +85,15 @@ hope skin cliff bench vanish motion swear reveal police cash street example heal
 };
 
 // cosmosjs send
-const mainF = async () => {
-  const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+const mainSend = async () => {
+  // const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
-
-  const cosmos = getCosmos();
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
 
-  const firstUserMnemonic =
-    'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+  // const firstUserMnemonic =
+  //   'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -107,16 +104,19 @@ const mainF = async () => {
   if (!keyPairZero) {
     return;
   }
+
+  const fromAddress = keyPairZero.address;
+
   const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
-  const myTx = await createSendTx(100000, keyPairZero, firstAddress);
-  const myTxMsg = cosmos.newStdMsg(myTx);
-  const signedTx = cosmos.sign(myTxMsg, pkey);
+  const sendTxMessage = await transactions.getSendTx(100000, fromAddress, firstAddress);
+  const signedTx = transactions.sign(sendTxMessage, pkey);
 
   if (signedTx) {
-    // console.log('signedTx!', signedTx);
+    console.log('signedTx send', JSON.stringify(signedTx, null, 2));
+
     try {
-      const result = await broadcastTx(signedTx);
+      const result = await transactions.broadcast(signedTx);
       console.log('broadcasting result!', result);
     } catch (err) {
       console.log('error broadcasting', err.message);
@@ -127,8 +127,6 @@ const mainF = async () => {
 // cosmosjs delegate
 const mainDelegate = async () => {
   const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
-
-  const cosmos = getCosmos();
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
@@ -150,15 +148,18 @@ const mainDelegate = async () => {
 
   // console.log('result!!', result);
 
-  const myTx = await createDelegateTx(10, keyPairZero, delegatorAddress, validatorAddress);
-  const myTxMsg = cosmos.newStdMsg(myTx);
-  const signedTx = cosmos.sign(myTxMsg, pkey);
+  // const myTx = await transactions.getDelegateTx(10, keyPairZero.address, delegatorAddress, validatorAddress);
+  // const myTxMsg = cosmos.newStdMsg(myTx);
+  // const signedTx = cosmos.sign(myTxMsg, pkey);
+
+  const sendTxMessage = await transactions.getDelegateTx(10, delegatorAddress, validatorAddress);
+  const signedTx = transactions.sign(sendTxMessage, pkey);
 
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await broadcastTx(signedTx);
-      console.log('broadcasting result!!! :)', result);
+      const result = await transactions.broadcast(signedTx);
+      console.log('delegate broadcasting result!!! :)', result);
     } catch (err) {
       console.log('error broadcasting', err.message);
     }
@@ -166,7 +167,7 @@ const mainDelegate = async () => {
 };
 
 // cosmosjs send
-mainF();
+// mainSend();
 
 // delegate
-// mainDelegate();
+mainDelegate();

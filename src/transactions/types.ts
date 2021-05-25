@@ -29,7 +29,12 @@ export interface AmountType {
 }
 
 export interface TransactionValue {
+  amount: AmountType | AmountType[];
+}
+
+export interface TransactionFee {
   amount: AmountType[];
+  gas: string;
 }
 
 export interface SendTransactionValue extends TransactionValue {
@@ -45,16 +50,20 @@ export interface DelegateTransactionValue extends TransactionValue {
 type TransactionType = CosmosMsgTypes.Account | CosmosMsgTypes.Send | CosmosMsgTypes.Delegate;
 type TransactionValueType = SendTransactionValue | DelegateTransactionValue;
 
-interface TransactionMessage {
+export interface TransactionMessage {
   type: TransactionType;
   value: TransactionValueType;
 }
-
-export interface Transaction {
-  msgs: TransactionMessage[];
+export interface BaseTransaction {
   chain_id: string;
   account_number: string;
   sequence: string;
+  memo: string;
+  fee: TransactionFee;
+}
+
+export interface Transaction extends BaseTransaction {
+  msgs: TransactionMessage[];
 }
 
 export interface SignedTransaction {
