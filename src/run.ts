@@ -1,11 +1,12 @@
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 import { fromHex } from '@cosmjs/encoding';
-
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
 import { uint8ArrayToBuffer } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
+import { getTxList } from './services/network';
 import * as transactions from './transactions';
+import * as transactionTypes from './transactions/types';
 
 const password = '123456';
 
@@ -91,10 +92,14 @@ const mainSend = async () => {
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
-
+  // const encryptedMnenomicFromKeyChain =
+  // 'U2FsdGVkX191iHA1MroblptDqlsyCHzBzFiG4Q9STT2wxnWM39QbCevQgsyyfZNEQxCPmNYPrDwuYLInXRxtMD8FR92LB3Psf0Gc7aSI9JuyDSrKrJHlspTRkr4SNsHMbWSxltjcLdsZiQlqUTkbQR1Ogkngg2y022fkoPIvjAX66GBSnKR/e88feyDbHzUYhmpKBE6222eyUOZrYOnUgS4tbqPbkH2K22ZGzCDRbQs=';
   // const firstUserMnemonic =
   //   'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
-
+  /**
+   * account: "w1"
+address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
+   */
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -231,8 +236,17 @@ const mainSdsPrepay = async () => {
   }
 };
 
+const getNewTx = async () => {
+  const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+
+  const r = await transactions.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+
+  console.log('r!!', r);
+};
+
 // cosmosjs send
 // mainSend();
+getNewTx();
 
 // delegate
 // mainDelegate();
@@ -241,4 +255,4 @@ const mainSdsPrepay = async () => {
 // mainWithdrawRewards();
 
 // prepay
-mainSdsPrepay();
+// mainSdsPrepay();

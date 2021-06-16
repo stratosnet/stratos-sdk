@@ -1,6 +1,5 @@
 import axios from 'axios';
 import JSONbig from 'json-bigint';
-
 import { network as newtorkConfig } from '../../config';
 import * as Types from './types';
 
@@ -8,6 +7,14 @@ const getRestRoute = (): string => {
   const { lcdUrl, restPort } = newtorkConfig;
 
   const url = `${lcdUrl}:${restPort}`;
+
+  return url;
+};
+
+const getExplorerRoute = (): string => {
+  const { explorerUrl, explorerPort } = newtorkConfig;
+
+  const url = `${explorerUrl}:${explorerPort}`;
 
   return url;
 };
@@ -107,6 +114,22 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   console.log('url!', url);
   console.log('txData', JSON.stringify(txData, null, 4));
   const dataResult = await apiPost(url, txData, config);
+
+  return dataResult;
+};
+
+export const getTxList = async (
+  address: string,
+  type: string,
+  page = 1,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.ExplorerTxListDataResult> => {
+  // const url = `${getExplorerRoute()}/api/activeAccont/`; // page 1
+  // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
+  // const url = `${getExplorerRoute()}/api/cleanup`;
+  const url = `${getExplorerRoute()}/api/getRecentTx`;
+
+  const dataResult = await apiGet(url, { ...config, params: { page, operation: type, address } });
 
   return dataResult;
 };
