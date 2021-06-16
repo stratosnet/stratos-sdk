@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const tsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const commonConfig = {
   mode: 'production',
@@ -16,7 +16,7 @@ const commonConfig = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    plugins: [new TsconfigPathsPlugin()],
+    plugins: [new tsconfigPathsPlugin()],
   },
   plugins: [
     new webpack.IgnorePlugin({
@@ -25,23 +25,23 @@ const commonConfig = {
   ],
 };
 
-const webConfig = {
-  ...commonConfig,
-  target: 'web',
-  output: {
-    filename: 'bundle.js',
-    libraryTarget: 'umd',
-    library: 'Terra',
-  },
-  resolve: {
-    ...commonConfig.resolve,
-    fallback: {
-      stream: require.resolve('stream-browserify'),
-      buffer: require.resolve('buffer'),
-    },
-  },
-  plugins: [...commonConfig.plugins],
-};
+// const webConfig = {
+//   ...commonConfig,
+//   target: 'web',
+//   output: {
+//     filename: 'bundle.js',
+//     libraryTarget: 'umd',
+//     library: 'Terra',
+//   },
+//   resolve: {
+//     ...commonConfig.resolve,
+//     fallback: {
+//       stream: require.resolve('stream-browserify'),
+//       buffer: require.resolve('buffer'),
+//     },
+//   },
+//   plugins: [...commonConfig.plugins],
+// };
 
 const nodeConfig = {
   ...commonConfig,
@@ -52,4 +52,4 @@ const nodeConfig = {
   },
 };
 
-module.exports = [webConfig, nodeConfig];
+module.exports = [nodeConfig];
