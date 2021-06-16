@@ -80,7 +80,7 @@ export const getAccountTrasactions = async (
     return {
       to,
       sender,
-      type: Types.HistoryTxType.Transfer,
+      type,
       block,
       amount,
       time,
