@@ -9,6 +9,22 @@ export enum TxMsgTypes {
   SdsPrepay = 'sds/MsgPrepay',
 }
 
+export enum HistoryTxType {
+  Transfer,
+  Delegate,
+  Undelegate,
+  GetReward,
+  All,
+}
+
+export const TxMsgTypesMap = new Map<number, string>([
+  // [HistoryTxType.All, TxMsgTypes.All], // not implemented?
+  [HistoryTxType.Transfer, TxMsgTypes.Send],
+  [HistoryTxType.Delegate, TxMsgTypes.Delegate],
+  // [HistoryTxType.Undelegate, TxMsgTypes.Undelegate], // undelegate?
+  [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
+]);
+
 export interface AccountsData {
   height: string;
   result: {
