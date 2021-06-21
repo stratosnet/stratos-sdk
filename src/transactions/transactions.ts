@@ -271,35 +271,35 @@ export const delegate = async (
   return res;
 };
 
-// @todo - remove it
-export const aa = async (ownerAddress: string) => {
-  const ab = [
-    {
-      network_address: 'sds://resourcenode1',
-      pubkey: { type: 'tendermint/PubKeyEd25519', value: 'AwQHdG1W5UXxOOzIDlLPkQaNuNQeJUEhRC1tTRIZuMw=' },
-      suspend: false,
-      status: 2,
-      tokens: '10000000',
-      owner_address: ownerAddress,
-      description: { moniker: 'r1', identity: '', website: '', security_contact: '', details: '' },
-      node_type: '7: computation/database/storage',
-    },
-  ];
+// // @todo - remove it
+// export const aa = async (ownerAddress: string) => {
+//   const ab = [
+//     {
+//       network_address: 'sds://resourcenode1',
+//       pubkey: { type: 'tendermint/PubKeyEd25519', value: 'AwQHdG1W5UXxOOzIDlLPkQaNuNQeJUEhRC1tTRIZuMw=' },
+//       suspend: false,
+//       status: 2,
+//       tokens: '10000000',
+//       owner_address: ownerAddress,
+//       description: { moniker: 'r1', identity: '', website: '', security_contact: '', details: '' },
+//       node_type: '7: computation/database/storage',
+//     },
+//   ];
 
-  const prepay = {
-    chain_id: 'test-chain',
-    account_number: '4',
-    sequence: '0',
-    fee: { amount: [], gas: '200000' },
-    msgs: [
-      {
-        type: 'sds/MsgPrepay',
-        value: {
-          sender: 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j',
-          coins: [{ denom: 'stos', amount: '3' }],
-        },
-      },
-    ],
-    memo: '',
-  };
-};
+//   const prepay = {
+//     chain_id: 'test-chain',
+//     account_number: '4',
+//     sequence: '0',
+//     fee: { amount: [], gas: '200000' },
+//     msgs: [
+//       {
+//         type: 'sds/MsgPrepay',
+//         value: {
+//           sender: 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j',
+//           coins: [{ denom: 'stos', amount: '3' }],
+//         },
+//       },
+//     ],
+//     memo: '',
+//   };
+// };
