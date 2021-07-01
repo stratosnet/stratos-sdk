@@ -1,12 +1,13 @@
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
-import { fromHex } from '@cosmjs/encoding';
+// import { fromHex } from '@cosmjs/encoding';
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
-import { uint8ArrayToBuffer } from './hdVault/utils';
+// import { uint8ArrayToBuffer } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
-import { getTxList } from './services/network';
+import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
+import * as validators from './validators';
 
 const password = '123456';
 
@@ -112,10 +113,10 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
 
   const fromAddress = keyPairZero.address;
 
-  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
   const sendTxMessage = await transactions.getSendTx(100000, fromAddress, firstAddress);
-  const signedTx = transactions.sign(sendTxMessage, pkey);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx send', JSON.stringify(signedTx, null, 2));
@@ -147,7 +148,7 @@ const mainDelegate = async () => {
   }
   const delegatorAddress = keyPairZero.address;
 
-  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
   // const result = await delegate(10, keyPairZero, delegatorAddress, validatorAddress);
 
@@ -158,10 +159,10 @@ const mainDelegate = async () => {
   // const signedTx = cosmos.sign(myTxMsg, pkey);
 
   const sendTxMessage = await transactions.getDelegateTx(10, delegatorAddress, validatorAddress);
-  const signedTx = transactions.sign(sendTxMessage, pkey);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
-    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+    console.log('signedTx!', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('delegate broadcasting result!!! :)', result);
@@ -189,10 +190,10 @@ const mainWithdrawRewards = async () => {
   }
   const delegatorAddress = keyPairZero.address;
 
-  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
   const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, validatorAddress);
-  const signedTx = transactions.sign(sendTxMessage, pkey);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
@@ -220,10 +221,10 @@ const mainSdsPrepay = async () => {
     return;
   }
 
-  const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
   const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, 10);
-  const signedTx = transactions.sign(sendTxMessage, pkey);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
@@ -244,10 +245,33 @@ const getNewTx = async () => {
   console.log('r!!', r);
 };
 
+const getValidators = async () => {
+  const vData = await validators.getValidators();
+  console.log('vData');
+  // const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+
+  // const vPool = await getStakingPool();
+
+  // console.log('vPool', vPool);
+  // const vList = await getValidatorsList('bonded');
+
+  // console.log('vList!!', vList);
+  // console.log('vList response', vList.response);
+  // console.log('vList description', vList!.response.result[0].description);
+  // console.log('vList comission', vList!.response.result[0].commission);
+
+  // const v = await getValidator('stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63');
+  // console.log('v!', v);
+  // const {
+  //   result: [firstV],
+  // } = vList.response;
+  // console.log('fVal', firstV);
+};
+
 // cosmosjs send
 // mainSend();
-getNewTx();
-
+// mainDelegate();
+getValidators();
 // delegate
 // mainDelegate();
 

@@ -1,6 +1,8 @@
+import { fromHex } from '@cosmjs/encoding';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import { chainId } from '../config/network';
+import { uint8ArrayToBuffer } from '../hdVault/utils';
 import { getTxList, networkTypes, submitTransaction } from '../services/network';
 import { getCosmos } from './cosmos';
 import * as Types from './types';
@@ -18,7 +20,10 @@ export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Type
   }
 };
 
-export const sign = (txMessage: Types.TransactionMessage, pkey: Buffer): Types.SignedTransaction => {
+// export const sign = (txMessage: Types.TransactionMessage, pkey: Buffer): Types.SignedTransaction => {
+export const sign = (txMessage: Types.TransactionMessage, privateKey: string): Types.SignedTransaction => {
+  const pkey = uint8ArrayToBuffer(fromHex(privateKey));
+
   const signedTx = getCosmos().sign(txMessage, pkey);
   return signedTx;
 };
