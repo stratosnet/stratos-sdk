@@ -34,6 +34,7 @@ export interface AccountsData {
       public_key: any;
       account_number: string;
       sequence: string;
+      coins: AmountType[];
     };
   };
 }

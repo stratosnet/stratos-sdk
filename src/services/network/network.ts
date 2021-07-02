@@ -133,3 +133,36 @@ export const getTxList = async (
 
   return dataResult;
 };
+
+export const getValidatorsList = async (
+  status: string,
+  page = 1,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.ValidatorListDataResult> => {
+  const url = `${getRestRoute()}/staking/validators`;
+
+  const dataResult = await apiGet(url, { ...config, params: { page, status } });
+
+  return dataResult;
+};
+
+export const getValidator = async (
+  address: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.ValidatorDataResult> => {
+  const url = `${getRestRoute()}/staking/validators/${address}`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getStakingPool = async (
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.StakingPoolDataResult> => {
+  const url = `${getRestRoute()}/staking/pool`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
