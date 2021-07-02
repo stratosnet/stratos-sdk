@@ -31,6 +31,7 @@ export const sign = (txMessage: Types.TransactionMessage, privateKey: string): T
 export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
   try {
     const accountsData = await getCosmos().getAccounts(keyPairAddress);
+    console.log('accountsData!', accountsData);
     return accountsData;
   } catch (err) {
     console.log('Could not get accounts', err.message);
@@ -115,6 +116,9 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
 const getBaseTx = async (keyPairAddress: string, memo = ''): Promise<Types.BaseTransaction> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
+  console.log('accountsData! base', accountsData);
+  console.log('accountsData! base value', accountsData.result.value);
+
   const myTx = {
     chain_id: chainId,
     fee: getStandardFee(),
@@ -151,6 +155,16 @@ export const getSendTx = async (
   const myTxMsg = getCosmos().newStdMsg(myTx);
 
   return myTxMsg;
+};
+
+export const getBalance = async (keyPairAddress: string, requestedDenom: string): Promise<string> => {
+  const accountsData = await getAccountsData(keyPairAddress);
+
+  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
+
+  const coin = coins.find(item => item.denom === requestedDenom);
+
+  return coin?.amount || '0';
 };
 
 export const getDelegateTx = async (
@@ -241,8 +255,6 @@ export const delegate = async (
   validatorAddress: string,
 ): Promise<networkTypes.SubmitTransactionDataResult> => {
   const accountsData = await getAccountsData(keyPairAddress);
-
-  console.log('accountsData!', accountsData);
 
   const example = {
     base_req: {

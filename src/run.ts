@@ -268,10 +268,30 @@ const getValidators = async () => {
   // console.log('fVal', firstV);
 };
 
+const mainBalance = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  console.log('keyPairZero', keyPairZero.address);
+  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const b = await transactions.getBalance(delegatorAddress, 'stos');
+
+  console.log('our bb ', b);
+};
+
 // cosmosjs send
 // mainSend();
 // mainDelegate();
-getValidators();
+mainBalance();
 // delegate
 // mainDelegate();
 
