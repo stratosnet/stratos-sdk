@@ -282,10 +282,11 @@ const mainBalance = async () => {
     return;
   }
   console.log('keyPairZero', keyPairZero.address);
-  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-  const b = await transactions.getBalance(delegatorAddress, 'stos');
 
-  console.log('our bb ', b);
+  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const b = await transactions.getBalance(delegatorAddress, 'ustos');
+
+  console.log('our b ', b);
 };
 
 // cosmosjs send

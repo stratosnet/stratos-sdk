@@ -4,11 +4,9 @@ import { network as newtorkConfig } from '../../config';
 import * as Types from './types';
 
 const getRestRoute = (): string => {
-  const { lcdUrl, restPort } = newtorkConfig;
+  const { restUrl } = newtorkConfig;
 
-  const url = `${lcdUrl}:${restPort}`;
-
-  return url;
+  return restUrl;
 };
 
 const getExplorerRoute = (): string => {
