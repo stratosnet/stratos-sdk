@@ -1,6 +1,12 @@
-export const lcdUrl = 'http://localhost';
-export const queryPort = 26657;
-export const restPort = 1317;
-export const chainId = 'test-chain';
+// export const lcdUrl = 'http://localhost';
+// export const lcdUrl = 'http://18.117.234.228:1317';
+// export const lcdUrl = 'https://dev.qsnetwork.info';
+// export const queryPort = 26657;
+// export const restPort = 1317;
+export const restUrl = 'https://rest.dev.qsnetwork.info';
+export const rpcUrl = 'https://rpc.dev.qsnetwork.info/';
+// export const chainId = 'test-chain';
+// export const chainId = 'test-chain-1';
+export const chainId = 'dev-chain-2';
 export const explorerUrl = 'http://localhost';
 export const explorerPort = 4000;
