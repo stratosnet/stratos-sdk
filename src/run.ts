@@ -4,7 +4,8 @@ import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
 // import { uint8ArrayToBuffer } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
-import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/network';
+// import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/network';
+// import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/bigNumber';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
@@ -115,7 +116,9 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
 
   // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
-  const sendTxMessage = await transactions.getSendTx(100000, fromAddress, firstAddress);
+  const sendAmount = 1;
+
+  const sendTxMessage = await transactions.getSendTx(sendAmount, fromAddress, firstAddress);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -158,7 +161,7 @@ const mainDelegate = async () => {
   // const myTxMsg = cosmos.newStdMsg(myTx);
   // const signedTx = cosmos.sign(myTxMsg, pkey);
 
-  const sendTxMessage = await transactions.getDelegateTx(10, delegatorAddress, validatorAddress);
+  const sendTxMessage = await transactions.getDelegateTx(1, delegatorAddress, validatorAddress);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -286,7 +289,7 @@ const mainBalance = async () => {
   const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const b = await transactions.getBalance(delegatorAddress, 'ustos');
 
-  console.log('our b ', b);
+  console.log('our bb ', b);
 };
 
 // cosmosjs send

@@ -86,6 +86,7 @@
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
     "bech32": "1.1.4",
+    "bignumber.js": "^9.0.1",
     "bip39": "3.0.2",
     "bn.js": "^5.2.0",
     "json-bigint": "^1.0.0",

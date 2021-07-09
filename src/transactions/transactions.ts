@@ -2,42 +2,12 @@ import { fromHex } from '@cosmjs/encoding';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import { chainId } from '../config/network';
+import { decimalPrecision } from '../config/tokens';
 import { uint8ArrayToBuffer } from '../hdVault/utils';
-import { getTxList, networkTypes, submitTransaction } from '../services/network';
+import { getTxList } from '../services/network';
+import { create as createBigNumber, fromWei, toWei } from '../services/bigNumber';
 import { getCosmos } from './cosmos';
 import * as Types from './types';
-
-export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Types.BroadcastResult> => {
-  try {
-    const result = await getCosmos().broadcast(signedTx);
-
-    // add pproper error handling!! check for code!
-    return result;
-  } catch (err) {
-    console.log('Could not broadcast', err.message);
-
-    throw err;
-  }
-};
-
-// export const sign = (txMessage: Types.TransactionMessage, pkey: Buffer): Types.SignedTransaction => {
-export const sign = (txMessage: Types.TransactionMessage, privateKey: string): Types.SignedTransaction => {
-  const pkey = uint8ArrayToBuffer(fromHex(privateKey));
-
-  const signedTx = getCosmos().sign(txMessage, pkey);
-  return signedTx;
-};
-
-export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
-  try {
-    const accountsData = await getCosmos().getAccounts(keyPairAddress);
-    console.log('accountsData!', accountsData);
-    return accountsData;
-  } catch (err) {
-    console.log('Could not get accounts', err.message);
-    throw err;
-  }
-};
 
 interface ParsedTxItem {
   sender: string;
@@ -54,6 +24,57 @@ interface ParsedTxData {
   total: number;
   page: number;
 }
+
+export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Types.BroadcastResult> => {
+  try {
+    const result = await getCosmos().broadcast(signedTx);
+
+    // add pproper error handling!! check for code!
+    return result;
+  } catch (err) {
+    console.log('Could not broadcast', err.message);
+
+    throw err;
+  }
+};
+
+export const sign = (txMessage: Types.TransactionMessage, privateKey: string): Types.SignedTransaction => {
+  const pkey = uint8ArrayToBuffer(fromHex(privateKey));
+
+  const signedTx = getCosmos().sign(txMessage, pkey);
+  return signedTx;
+};
+
+// move to account module
+export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
+  try {
+    const accountsData = await getCosmos().getAccounts(keyPairAddress);
+    console.log('accountsData!', accountsData);
+    return accountsData;
+  } catch (err) {
+    console.log('Could not get accounts', err.message);
+    throw err;
+  }
+};
+
+// @todo move it to account module.
+export const getBalance = async (keyPairAddress: string, requestedDenom: string): Promise<string> => {
+  const accountsData = await getAccountsData(keyPairAddress);
+
+  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
+
+  const coin = coins.find(item => item.denom === requestedDenom);
+
+  const currentBalance = coin?.amount || '0';
+
+  const balanceInWei = createBigNumber(currentBalance);
+
+  console.log('balanceInWei', balanceInWei);
+
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalPrecision);
+
+  return balance;
+};
 
 export const getAccountTrasactions = async (
   address: string,
@@ -106,7 +127,7 @@ export const getStandardFee = (): Types.TransactionFee => {
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
   const result = amounts.map(amount => ({
-    amount: String(amount),
+    amount: toWei(amount, decimalPrecision).toString(),
     denom: stratosDenom,
   }));
 
@@ -157,16 +178,6 @@ export const getSendTx = async (
   return myTxMsg;
 };
 
-export const getBalance = async (keyPairAddress: string, requestedDenom: string): Promise<string> => {
-  const accountsData = await getAccountsData(keyPairAddress);
-
-  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
-
-  const coin = coins.find(item => item.denom === requestedDenom);
-
-  return coin?.amount || '0';
-};
-
 export const getDelegateTx = async (
   amount: number,
   delegatorAddress: string,
@@ -181,7 +192,7 @@ export const getDelegateTx = async (
         type: Types.TxMsgTypes.Delegate,
         value: {
           amount: {
-            amount: String(amount),
+            amount: toWei(amount, decimalPrecision).toString(),
             denom: stratosDenom,
           },
           delegator_address: delegatorAddress,
@@ -246,77 +257,3 @@ export const getSdsPrepayTx = async (
 
   return myTxMsg;
 };
-
-// @todo - remove it
-export const delegate = async (
-  delegateAmount: number,
-  keyPairAddress: string,
-  delegatorAddress: string,
-  validatorAddress: string,
-): Promise<networkTypes.SubmitTransactionDataResult> => {
-  const accountsData = await getAccountsData(keyPairAddress);
-
-  const example = {
-    base_req: {
-      from: delegatorAddress,
-      memo: '',
-      chain_id: chainId,
-      account_number: String(accountsData.result.value.account_number),
-      sequence: String(accountsData.result.value.sequence),
-      gas: '200000',
-      gas_adjustment: '1.2',
-      fees: [
-        {
-          denom: stratosDenom,
-          amount: '50',
-        },
-      ],
-      simulate: false,
-    },
-    delegator_address: delegatorAddress,
-    validator_address: validatorAddress,
-    delegation: {
-      denom: stratosDenom,
-      amount: delegateAmount,
-    },
-  };
-
-  const res = await submitTransaction(delegatorAddress, JSON.stringify(example));
-
-  console.log('res!', res);
-
-  return res;
-};
-
-// // @todo - remove it
-// export const aa = async (ownerAddress: string) => {
-//   const ab = [
-//     {
-//       network_address: 'sds://resourcenode1',
-//       pubkey: { type: 'tendermint/PubKeyEd25519', value: 'AwQHdG1W5UXxOOzIDlLPkQaNuNQeJUEhRC1tTRIZuMw=' },
-//       suspend: false,
-//       status: 2,
-//       tokens: '10000000',
-//       owner_address: ownerAddress,
-//       description: { moniker: 'r1', identity: '', website: '', security_contact: '', details: '' },
-//       node_type: '7: computation/database/storage',
-//     },
-//   ];
-
-//   const prepay = {
-//     chain_id: 'test-chain',
-//     account_number: '4',
-//     sequence: '0',
-//     fee: { amount: [], gas: '200000' },
-//     msgs: [
-//       {
-//         type: 'sds/MsgPrepay',
-//         value: {
-//           sender: 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j',
-//           coins: [{ denom: 'stos', amount: '3' }],
-//         },
-//       },
-//     ],
-//     memo: '',
-//   };
-// };

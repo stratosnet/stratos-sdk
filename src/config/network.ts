@@ -6,6 +6,7 @@
 export const restUrl = 'https://rest.dev.qsnetwork.info';
 export const rpcUrl = 'https://rpc.dev.qsnetwork.info/';
 // export const chainId = 'test-chain';
-export const chainId = 'test-chain-1';
+// export const chainId = 'test-chain-1';
+export const chainId = 'dev-chain-2';
 export const explorerUrl = 'http://localhost';
 export const explorerPort = 4000;
