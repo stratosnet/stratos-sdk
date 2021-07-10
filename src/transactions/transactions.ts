@@ -5,7 +5,7 @@ import { chainId } from '../config/network';
 import { decimalPrecision } from '../config/tokens';
 import { uint8ArrayToBuffer } from '../hdVault/utils';
 import { getTxList } from '../services/network';
-import { create as createBigNumber, fromWei, toWei } from '../services/bigNumber';
+import { create as createBigNumber, fromWei, toWei, ROUND_DOWN } from '../services/bigNumber';
 import { getCosmos } from './cosmos';
 import * as Types from './types';
 
@@ -69,9 +69,9 @@ export const getBalance = async (keyPairAddress: string, requestedDenom: string)
 
   const balanceInWei = createBigNumber(currentBalance);
 
-  console.log('balanceInWei', balanceInWei);
+  // console.log('balanceInWei!', balanceInWei);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalPrecision);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
 
   return balance;
 };
