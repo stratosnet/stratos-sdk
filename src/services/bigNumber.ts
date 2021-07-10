@@ -3,6 +3,9 @@ import { tokens } from '../config';
 
 export type BigNumberValue = BigNumber.Value;
 
+export const ROUND_UP = BigNumber.ROUND_UP;
+export const ROUND_DOWN = BigNumber.ROUND_DOWN;
+
 export const toWei = (value: BigNumberValue, precision = tokens.decimalPrecision): BigNumber => {
   return new BigNumber(value).times(10 ** precision);
 };
