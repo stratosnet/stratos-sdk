@@ -58,7 +58,11 @@ export const getAccountsData = async (keyPairAddress: string): Promise<Types.Acc
 };
 
 // @todo move it to account module.
-export const getBalance = async (keyPairAddress: string, requestedDenom: string): Promise<string> => {
+export const getBalance = async (
+  keyPairAddress: string,
+  requestedDenom: string,
+  decimals: number = 4,
+): Promise<string> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
   const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
@@ -71,7 +75,7 @@ export const getBalance = async (keyPairAddress: string, requestedDenom: string)
 
   // console.log('balanceInWei!', balanceInWei);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
 
   return balance;
 };
