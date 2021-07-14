@@ -7,6 +7,7 @@ import { deriveKeyPair } from './hdVault/wallet';
 // import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/network';
 // import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/bigNumber';
 import * as transactions from './transactions';
+import * as accounts from './accounts';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
@@ -240,10 +241,10 @@ const mainSdsPrepay = async () => {
   }
 };
 
-const getNewTx = async () => {
+const getAccountTrasactions = async () => {
   const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
 
-  const r = await transactions.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
 
   console.log('r!!', r);
 };
@@ -287,15 +288,16 @@ const mainBalance = async () => {
   console.log('keyPairZero', keyPairZero.address);
 
   const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-  const b = await transactions.getBalance(delegatorAddress, 'ustos');
+  const b = await accounts.getBalance(delegatorAddress, 'ustos');
 
-  console.log('our bb ', b);
+  console.log('our bbb ', b);
 };
 
 // cosmosjs send
 // mainSend();
 // mainDelegate();
 mainBalance();
+// mainFour();
 // delegate
 // mainDelegate();
 
