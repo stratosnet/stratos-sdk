@@ -43,6 +43,7 @@ export interface BroadcastResult {
   height: string;
   txhash: string;
   raw_log?: string;
+  error?: string;
 }
 
 export interface AmountType {
