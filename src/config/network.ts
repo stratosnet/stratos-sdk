@@ -3,6 +3,7 @@
 // export const lcdUrl = 'https://dev.qsnetwork.info';
 // export const queryPort = 26657;
 // export const restPort = 1317;
+// export const restUrl = 'http://localhost';
 export const restUrl = 'https://rest.dev.qsnetwork.info';
 export const rpcUrl = 'https://rpc.dev.qsnetwork.info/';
 // export const chainId = 'test-chain';
