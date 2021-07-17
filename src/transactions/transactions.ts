@@ -1,13 +1,13 @@
 import { fromHex } from '@cosmjs/encoding';
 import _get from 'lodash/get';
+import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { chainId } from '../config/network';
-import { decimalPrecision } from '../config/tokens';
+import { decimalPrecision, standardFeeAmount } from '../config/tokens';
 import { uint8ArrayToBuffer } from '../hdVault/utils';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import * as Types from './types';
-import { getAccountsData } from '../accounts';
 
 // interface ParsedTxItem {
 //   sender: string;
@@ -125,7 +125,7 @@ export const sign = (txMessage: Types.TransactionMessage, privateKey: string): T
 // };
 
 export const getStandardFee = (): Types.TransactionFee => {
-  const fee = { amount: [{ amount: String(5000), denom: stratosDenom }], gas: String(200000) };
+  const fee = { amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], gas: String(200000) };
   return fee;
 };
 

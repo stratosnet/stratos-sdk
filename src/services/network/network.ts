@@ -10,9 +10,10 @@ const getRestRoute = (): string => {
 };
 
 const getExplorerRoute = (): string => {
-  const { explorerUrl, explorerPort } = newtorkConfig;
+  const { explorerUrl } = newtorkConfig;
 
-  const url = `${explorerUrl}:${explorerPort}`;
+  // const url = `${explorerUrl}:${explorerPort}`;
+  const url = `${explorerUrl}`;
 
   return url;
 };
