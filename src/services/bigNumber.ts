@@ -35,3 +35,6 @@ export const totalSum = (amounts: BigNumberValue[]): BigNumber => {
 
 export const plus = (currentValue: BigNumberValue, valueToAdd: BigNumberValue): BigNumberValue =>
   new BigNumber(currentValue).plus(valueToAdd);
+
+export const minus = (currentValue: BigNumberValue, valueToSubstract: BigNumberValue): BigNumberValue =>
+  new BigNumber(currentValue).minus(valueToSubstract);

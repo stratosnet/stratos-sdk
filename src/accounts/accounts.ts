@@ -1,5 +1,5 @@
 import _get from 'lodash/get';
-import { decimalPrecision } from '../config/tokens';
+import { decimalPrecision, standardFeeAmount } from '../config/tokens';
 import { create as createBigNumber, fromWei, ROUND_DOWN } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getTxList } from '../services/network';
@@ -46,6 +46,29 @@ export const getBalance = async (
   const currentBalance = coin?.amount || '0';
 
   const balanceInWei = createBigNumber(currentBalance);
+  console.log('🚀 ~ file: accounts.ts ~ line 49 ~ balanceInWei', balanceInWei);
+
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
+
+  return balance;
+};
+
+export const getMaxAvailableBalance = async (
+  keyPairAddress: string,
+  requestedDenom: string,
+  decimals = 4,
+): Promise<string> => {
+  const accountsData = await getAccountsData(keyPairAddress);
+
+  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
+
+  const coin = coins.find(item => item.denom === requestedDenom);
+
+  const currentBalance = coin?.amount || '0';
+
+  const feeAmount = createBigNumber(standardFeeAmount);
+  const balanceInWei = createBigNumber(currentBalance).minus(feeAmount);
+  console.log('🚀 ~ file: accounts.ts ~ line 72 ~ balanceInWei minus fee', balanceInWei);
 
   const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
 
