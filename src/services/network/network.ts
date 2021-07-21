@@ -1,18 +1,17 @@
 import axios from 'axios';
 import JSONbig from 'json-bigint';
-import { network as newtorkConfig } from '../../config';
+import Sdk from '../../Sdk';
 import * as Types from './types';
 
 const getRestRoute = (): string => {
-  const { restUrl } = newtorkConfig;
+  const { restUrl } = Sdk.environment;
 
   return restUrl;
 };
 
 const getExplorerRoute = (): string => {
-  const { explorerUrl } = newtorkConfig;
+  const { explorerUrl } = Sdk.environment;
 
-  // const url = `${explorerUrl}:${explorerPort}`;
   const url = `${explorerUrl}`;
 
   return url;

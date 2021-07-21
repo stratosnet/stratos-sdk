@@ -1,17 +1,30 @@
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
-// import { fromHex } from '@cosmjs/encoding';
+import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
-// import { uint8ArrayToBuffer } from './hdVault/utils';
 import { deriveKeyPair } from './hdVault/wallet';
-// import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/network';
-// import { getStakingPool, getTxList, getValidator, getValidatorsList } from './services/bigNumber';
+import Sdk from './Sdk';
 import * as transactions from './transactions';
-import * as accounts from './accounts';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
 const password = '123456';
+
+const sdkEnvDev = {
+  restUrl: 'https://rest.dev.qsnetwork.info',
+  rpcUrl: 'https://rpc.dev.qsnetwork.info',
+  chainId: 'dev-chain-2',
+  explorerUrl: 'https://explorer.dev.qsnetwork.info',
+};
+
+const sdkEnvTest = {
+  restUrl: 'http://rest-test.thestratos.org',
+  rpcUrl: 'http://rpc-test.thestratos.org',
+  chainId: 'test-chain-1',
+  explorerUrl: 'https://explorer-test.thestratos.org',
+};
+
+Sdk.init(sdkEnvDev);
 
 /**
  * // temp helper
@@ -290,7 +303,7 @@ const mainBalance = async () => {
   const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const b = await accounts.getBalance(delegatorAddress, 'ustos');
 
-  console.log('our bbb ', b);
+  console.log('our bal ', b);
 };
 
 // cosmosjs send
