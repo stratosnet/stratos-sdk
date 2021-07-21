@@ -2,28 +2,14 @@ import { fromHex } from '@cosmjs/encoding';
 import _get from 'lodash/get';
 import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
-import { chainId } from '../config/network';
 import { decimalPrecision, standardFeeAmount } from '../config/tokens';
 import { uint8ArrayToBuffer } from '../hdVault/utils';
+import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import * as Types from './types';
 
-// interface ParsedTxItem {
-//   sender: string;
-//   to: string;
-//   type: Types.HistoryTxType;
-//   block: string;
-//   amount: string;
-//   time: string;
-//   hash: string;
-// }
-
-// interface ParsedTxData {
-//   data: ParsedTxItem[];
-//   total: number;
-//   page: number;
-// }
+const { chainId } = Sdk.environment;
 
 export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Types.BroadcastResult> => {
   try {
@@ -44,85 +30,6 @@ export const sign = (txMessage: Types.TransactionMessage, privateKey: string): T
   const signedTx = getCosmos().sign(txMessage, pkey);
   return signedTx;
 };
-
-// move to account module
-// export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
-//   try {
-//     const accountsData = await getCosmos().getAccounts(keyPairAddress);
-//     console.log('accountsData!', accountsData);
-//     return accountsData;
-//   } catch (err) {
-//     console.log('Could not get accounts', err.message);
-//     throw err;
-//   }
-// };
-
-// @todo move it to account module.
-// export const getBalance = async (
-//   keyPairAddress: string,
-//   requestedDenom: string,
-//   decimals: number = 4,
-// ): Promise<string> => {
-//   const accountsData = await getAccountsData(keyPairAddress);
-
-//   const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
-
-//   const coin = coins.find(item => item.denom === requestedDenom);
-
-//   const currentBalance = coin?.amount || '0';
-
-//   const balanceInWei = createBigNumber(currentBalance);
-
-//   // console.log('balanceInWei!', balanceInWei);
-
-//   const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
-
-//   return balance;
-// };
-
-// export const getAccountTrasactions = async (
-//   address: string,
-//   type = Types.HistoryTxType.Transfer,
-//   page?: number,
-// ): Promise<ParsedTxData> => {
-//   const txType = Types.TxMsgTypesMap.get(type) || Types.TxMsgTypes.Send;
-//   const txListResult = await getTxList(address, txType, page);
-
-//   const { response } = txListResult;
-
-//   if (!response) {
-//     throw new Error('Could not fetch tx history');
-//   }
-
-//   const { data, total } = response;
-
-//   const parsedData: ParsedTxItem[] = data.map(txItem => {
-//     const block = _get(txItem, 'block_height', '') as string;
-//     const hash = _get(txItem, 'tx_hash', '');
-//     const time = _get(txItem, 'time', '');
-
-//     const sender = _get(txItem, 'transaction_data.txData.sender', '') as string;
-//     const to = _get(txItem, 'transaction_data.txData.data.to', '') as string;
-//     const amountValue = _get(txItem, 'transaction_data.txData.data.amount[0].amount', '') as string;
-//     const amountDenom = _get(txItem, 'transaction_data.txData.data.amount[0].denom', '') as string;
-
-//     const amount = `${amountValue} ${amountDenom}`.toUpperCase().trim();
-
-//     return {
-//       to,
-//       sender,
-//       type,
-//       block,
-//       amount,
-//       time,
-//       hash,
-//     };
-//   });
-
-//   const result = { data: parsedData, total, page: page || 1 };
-
-//   return result;
-// };
 
 export const getStandardFee = (): Types.TransactionFee => {
   const fee = { amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], gas: String(200000) };

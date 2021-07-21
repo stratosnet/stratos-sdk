@@ -1,8 +1,7 @@
 import cosmosjs from '@cosmostation/cosmosjs';
-
-import { chainId, restUrl } from '../config/network';
-import { SignedTransaction, BroadcastResult, Transaction, TransactionMessage } from '../transactions/types';
 import { AccountsData } from '../accounts/types';
+import Sdk from '../Sdk';
+import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
 
 export interface CosmosInstance {
   url: string;
@@ -19,7 +18,9 @@ class StratosCosmos {
   public static cosmosInstance: CosmosInstance;
 
   public static init(): void {
-    StratosCosmos.cosmosInstance = cosmosjs.network(restUrl, chainId);
+    const { restUrl: envRestUrl, chainId: envChainId } = Sdk.environment;
+
+    StratosCosmos.cosmosInstance = cosmosjs.network(envRestUrl, envChainId);
   }
 }
 
