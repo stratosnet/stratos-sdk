@@ -51,12 +51,15 @@ const getBaseTx = async (keyPairAddress: string, memo = ''): Promise<Types.BaseT
   console.log('accountsData! base', accountsData);
   console.log('accountsData! base value', accountsData.result.value);
 
+  const oldSequence = String(accountsData.result.value.sequence);
+  // const newSequence = parseInt(oldSequence) + 1;
+  const newSequence = parseInt(oldSequence);
   const myTx = {
     chain_id: chainId,
     fee: getStandardFee(),
     memo,
     account_number: String(accountsData.result.value.account_number),
-    sequence: String(accountsData.result.value.sequence),
+    sequence: `${newSequence}`,
   };
 
   return myTx;
