@@ -9,8 +9,6 @@ import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import * as Types from './types';
 
-const { chainId } = Sdk.environment;
-
 export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Types.BroadcastResult> => {
   try {
     const result = await getCosmos().broadcast(signedTx);
@@ -48,15 +46,20 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
 const getBaseTx = async (keyPairAddress: string, memo = ''): Promise<Types.BaseTransaction> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
-  console.log('accountsData! base', accountsData);
   console.log('accountsData! base value', accountsData.result.value);
+
+  const oldSequence = String(accountsData.result.value.sequence);
+  // const newSequence = parseInt(oldSequence) + 1;
+  const newSequence = parseInt(oldSequence);
+
+  const { chainId } = Sdk.environment;
 
   const myTx = {
     chain_id: chainId,
     fee: getStandardFee(),
     memo,
     account_number: String(accountsData.result.value.account_number),
-    sequence: String(accountsData.result.value.sequence),
+    sequence: `${newSequence}`,
   };
 
   return myTx;

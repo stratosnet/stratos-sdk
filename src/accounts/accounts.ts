@@ -46,7 +46,6 @@ export const getBalance = async (
   const currentBalance = coin?.amount || '0';
 
   const balanceInWei = createBigNumber(currentBalance);
-  console.log('🚀 ~ file: accounts.ts ~ line 49 ~ balanceInWei', balanceInWei);
 
   const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
 
