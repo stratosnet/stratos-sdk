@@ -16,7 +16,6 @@ export default class Sdk {
   public static environment = { ...SdkDefaultEnvironment };
 
   public static init(sdkEnv: SdkEnvironmentConfig): void {
-    console.log('🚀 ~ file: Sdk.ts ~ line 22 ~ Sdk ~ init ~ sdkEnv', sdkEnv);
     Sdk.environment = { ...Sdk.environment, ...sdkEnv };
   }
 

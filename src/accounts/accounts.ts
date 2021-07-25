@@ -3,12 +3,14 @@ import { decimalPrecision, standardFeeAmount } from '../config/tokens';
 import { create as createBigNumber, fromWei, ROUND_DOWN } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getTxList } from '../services/network';
+import * as TxTypes from '../transactions/types';
 import * as Types from './types';
 
 interface ParsedTxItem {
   sender: string;
   to: string;
-  type: Types.HistoryTxType;
+  type: TxTypes.HistoryTxType;
+  txType: string;
   block: string;
   amount: string;
   time: string;
@@ -39,7 +41,7 @@ export const getBalance = async (
 ): Promise<string> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
-  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
+  const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 
@@ -59,7 +61,7 @@ export const getMaxAvailableBalance = async (
 ): Promise<string> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
-  const coins = _get(accountsData, 'result.value.coins', []) as Types.AmountType[];
+  const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 
@@ -76,10 +78,12 @@ export const getMaxAvailableBalance = async (
 
 export const getAccountTrasactions = async (
   address: string,
-  type = Types.HistoryTxType.Transfer,
+  type = TxTypes.HistoryTxType.All,
   page?: number,
 ): Promise<ParsedTxData> => {
-  const txType = Types.TxMsgTypesMap.get(type) || Types.TxMsgTypes.Send;
+  // console.log('Types.HistoryTxType.Transfer', TxTypes.HistoryTxType.Transfer); // 0
+  // console.log('Types.TxMsgTypes.Send', TxTypes.TxMsgTypes.Send); // cosmos-sdk/MsgSend
+  const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
   const txListResult = await getTxList(address, txType, page);
 
   const { response } = txListResult;
@@ -92,23 +96,57 @@ export const getAccountTrasactions = async (
 
   const parsedData: ParsedTxItem[] = data.map(txItem => {
     const block = _get(txItem, 'block_height', '') as string;
-    const hash = _get(txItem, 'tx_hash', '');
-    const time = _get(txItem, 'time', '');
 
-    const sender = _get(txItem, 'transaction_data.txData.sender', '') as string;
-    const to = _get(txItem, 'transaction_data.txData.data.to', '') as string;
-    const amountValue = _get(txItem, 'transaction_data.txData.data.amount[0].amount', '') as string;
-    const amountDenom = _get(txItem, 'transaction_data.txData.data.amount[0].denom', '') as string;
+    // const hash = _get(txItem, 'tx_hash', '');
+    const hash = _get(txItem, 'tx_info.tx_hash', '');
 
-    const amount = `${amountValue} ${amountDenom}`.toUpperCase().trim();
+    // const time = _get(txItem, 'time', '');
+    const time = _get(txItem, 'tx_info.time', '');
+
+    // const sender = _get(txItem, 'transaction_data.txData.sender', '') as string;
+    const sender = _get(txItem, 'tx_info.transaction_data.txData.sender', '') as string;
+
+    // const to = _get(txItem, 'transaction_data.txData.data.to', '') as string;
+    const to = _get(txItem, 'tx_info.transaction_data.txData.data.to', '') as string;
+
+    const validatorAddress = _get(
+      txItem,
+      'tx_info.transaction_data.txData.data.validator_address',
+      '',
+    ) as string;
+
+    const txType = _get(txItem, 'tx_info.transaction_data.txType', '') as string;
+
+    const amountValue = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].amount', '') as string;
+    // const amountDenom = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].denom', '') as string;
+
+    const delegationAmountValue = _get(
+      txItem,
+      'tx_info.transaction_data.txData.data.amount.amount',
+      '',
+    ) as string;
+    // const delegationAmountDenom = _get(
+    //   txItem,
+    //   'tx_info.transaction_data.txData.data.amount.denom',
+    //   '',
+    // ) as string;
+
+    const currentAmount = amountValue || delegationAmountValue || '0';
+
+    const balanceInWei = createBigNumber(currentAmount);
+
+    const txAmount = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
+
+    const dd = new Date(time);
 
     return {
-      to,
+      to: to || validatorAddress,
       sender,
       type,
-      block,
-      amount,
-      time,
+      txType,
+      block: `${block}`,
+      amount: `${txAmount} STOS`,
+      time: dd.toLocaleString(),
       hash,
     };
   });
