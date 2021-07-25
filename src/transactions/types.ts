@@ -54,6 +54,13 @@ export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
 ]);
 
+export const TxHistoryTypesMap = new Map<string, number>([
+  [TxMsgTypes.Send, HistoryTxType.Transfer],
+  [TxMsgTypes.Delegate, HistoryTxType.Delegate],
+  [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
+  [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
+]);
+
 // export interface AccountsData {
 //   height: string;
 //   result: {

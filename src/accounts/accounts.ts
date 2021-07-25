@@ -142,7 +142,7 @@ export const getAccountTrasactions = async (
     return {
       to: to || validatorAddress,
       sender,
-      type,
+      type: TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All,
       txType,
       block: `${block}`,
       amount: `${txAmount} STOS`,
