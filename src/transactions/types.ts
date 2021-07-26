@@ -2,41 +2,53 @@ export enum TxMsgTypes {
   Account = 'cosmos-sdk/Account',
   Send = 'cosmos-sdk/MsgSend',
   Delegate = 'cosmos-sdk/MsgDelegate',
+  Undelegate = 'cosmos-sdk/MsgUndelegate',
   WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward',
 }
 
 export enum TxMsgTypes {
   SdsPrepay = 'sds/MsgPrepay',
+  SdsAll = '',
 }
 
 export enum HistoryTxType {
-  Transfer,
-  Delegate,
-  Undelegate,
-  GetReward,
-  All,
+  All = 0,
+  Transfer = 1,
+  Delegate = 2,
+  Undelegate = 3,
+  GetReward = 4,
 }
 
 export const TxMsgTypesMap = new Map<number, string>([
-  // [HistoryTxType.All, TxMsgTypes.All], // not implemented?
+  [HistoryTxType.All, TxMsgTypes.SdsAll],
   [HistoryTxType.Transfer, TxMsgTypes.Send],
   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
-  // [HistoryTxType.Undelegate, TxMsgTypes.Undelegate], // undelegate?
+  [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
 ]);
 
-export interface AccountsData {
-  height: string;
-  result: {
-    type: TxMsgTypes.Account;
-    value: {
-      address: string;
-      public_key: any;
-      account_number: string;
-      sequence: string;
-      coins: AmountType[];
-    };
-  };
+export const TxHistoryTypesMap = new Map<string, number>([
+  [TxMsgTypes.Send, HistoryTxType.Transfer],
+  [TxMsgTypes.Delegate, HistoryTxType.Delegate],
+  [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
+  [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
+]);
+
+export interface ParsedTxItem {
+  sender: string;
+  to: string;
+  type: HistoryTxType;
+  txType: string;
+  block: string;
+  amount: string;
+  time: string;
+  hash: string;
+}
+
+export interface ParsedTxData {
+  data: ParsedTxItem[];
+  total: number;
+  page: number;
 }
 
 export interface BroadcastResult {
@@ -102,15 +114,4 @@ export interface SignedTransaction {
     memo: string;
   };
   mode: 'sync';
-}
-
-export interface CosmosInstance {
-  url: string;
-  chainId: string;
-  path: string;
-  bech32MainPrefix: string;
-  broadcast(signedTx: SignedTransaction): Promise<BroadcastResult>;
-  newStdMsg(tx: Transaction): TransactionMessage;
-  sign(txMessage: TransactionMessage, pkey: Buffer): SignedTransaction;
-  getAccounts(address: string): Promise<AccountsData>;
 }

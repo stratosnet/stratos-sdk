@@ -24,7 +24,7 @@ const sdkEnvTest = {
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
 
-Sdk.init(sdkEnvDev);
+Sdk.init(sdkEnvTest);
 
 /**
  * // temp helper
@@ -309,7 +309,8 @@ const mainBalance = async () => {
 // cosmosjs send
 // mainSend();
 // mainDelegate();
-mainBalance();
+// mainBalance();
+getAccountTrasactions();
 // mainFour();
 // delegate
 // mainDelegate();

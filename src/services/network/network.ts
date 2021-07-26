@@ -109,8 +109,6 @@ export const submitTransaction = async <T extends Types.TransactionData>(
     return { error };
   }
 
-  console.log('url!', url);
-  console.log('txData', JSON.stringify(txData, null, 4));
   const dataResult = await apiPost(url, txData, config);
 
   return dataResult;
@@ -125,10 +123,25 @@ export const getTxList = async (
   // const url = `${getExplorerRoute()}/api/activeAccont/`; // page 1
   // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
   // const url = `${getExplorerRoute()}/api/cleanup`;
-  const url = `${getExplorerRoute()}/api/getRecentTx`;
+  const url = `${getExplorerRoute()}/api/getAccountHistory`;
 
-  const dataResult = await apiGet(url, { ...config, params: { page, operation: type, address } });
+  const params: { page: number; account: string; limit: number; operation?: string } = {
+    page,
+    account: address,
+    limit: 5,
+  };
+  // console.log('🚀 ~ file: network.ts ~ line 129 ~ params', params);
 
+  if (type) {
+    params.operation = type;
+  }
+
+  const dataResult = await apiGet(url, {
+    ...config,
+    params,
+  });
+
+  // https://explorer-test.thestratos.org/api/getAccountHistory?account=st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6&limit=2&operation=cosmos-sdk/MsgSend
   return dataResult;
 };
 
