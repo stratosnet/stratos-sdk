@@ -6,23 +6,6 @@ import { getTxList } from '../services/network';
 import * as TxTypes from '../transactions/types';
 import * as Types from './types';
 
-interface ParsedTxItem {
-  sender: string;
-  to: string;
-  type: TxTypes.HistoryTxType;
-  txType: string;
-  block: string;
-  amount: string;
-  time: string;
-  hash: string;
-}
-
-interface ParsedTxData {
-  data: ParsedTxItem[];
-  total: number;
-  page: number;
-}
-
 export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
   try {
     const accountsData = await getCosmos().getAccounts(keyPairAddress);
@@ -80,7 +63,7 @@ export const getAccountTrasactions = async (
   address: string,
   type = TxTypes.HistoryTxType.All,
   page?: number,
-): Promise<ParsedTxData> => {
+): Promise<TxTypes.ParsedTxData> => {
   // console.log('Types.HistoryTxType.Transfer', TxTypes.HistoryTxType.Transfer); // 0
   // console.log('Types.TxMsgTypes.Send', TxTypes.TxMsgTypes.Send); // cosmos-sdk/MsgSend
   const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
@@ -94,7 +77,7 @@ export const getAccountTrasactions = async (
 
   const { data, total } = response;
 
-  const parsedData: ParsedTxItem[] = data.map(txItem => {
+  const parsedData: TxTypes.ParsedTxItem[] = data.map(txItem => {
     const block = _get(txItem, 'block_height', '') as string;
 
     // const hash = _get(txItem, 'tx_hash', '');

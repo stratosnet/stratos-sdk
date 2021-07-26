@@ -1,30 +1,3 @@
-// export enum TxMsgTypes {
-//   Account = 'cosmos-sdk/Account',
-//   Send = 'cosmos-sdk/MsgSend',
-//   Delegate = 'cosmos-sdk/MsgDelegate',
-//   WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward',
-// }
-
-// export enum TxMsgTypes {
-//   SdsPrepay = 'sds/MsgPrepay',
-// }
-
-// export enum HistoryTxType {
-//   Transfer,
-//   Delegate,
-//   Undelegate,
-//   GetReward,
-//   All,
-// }
-
-// export const TxMsgTypesMap = new Map<number, string>([
-//   // [HistoryTxType.All, TxMsgTypes.All], // not implemented?
-//   [HistoryTxType.Transfer, TxMsgTypes.Send],
-//   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
-//   // [HistoryTxType.Undelegate, TxMsgTypes.Undelegate], // undelegate?
-//   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
-// ]);
-
 export enum TxMsgTypes {
   Account = 'cosmos-sdk/Account',
   Send = 'cosmos-sdk/MsgSend',
@@ -61,19 +34,22 @@ export const TxHistoryTypesMap = new Map<string, number>([
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
 ]);
 
-// export interface AccountsData {
-//   height: string;
-//   result: {
-//     type: TxMsgTypes.Account;
-//     value: {
-//       address: string;
-//       public_key: any;
-//       account_number: string;
-//       sequence: string;
-//       coins: AmountType[];
-//     };
-//   };
-// }
+export interface ParsedTxItem {
+  sender: string;
+  to: string;
+  type: HistoryTxType;
+  txType: string;
+  block: string;
+  amount: string;
+  time: string;
+  hash: string;
+}
+
+export interface ParsedTxData {
+  data: ParsedTxItem[];
+  total: number;
+  page: number;
+}
 
 export interface BroadcastResult {
   height: string;
@@ -139,14 +115,3 @@ export interface SignedTransaction {
   };
   mode: 'sync';
 }
-
-// export interface CosmosInstance {
-//   url: string;
-//   chainId: string;
-//   path: string;
-//   bech32MainPrefix: string;
-//   broadcast(signedTx: SignedTransaction): Promise<BroadcastResult>;
-//   newStdMsg(tx: Transaction): TransactionMessage;
-//   sign(txMessage: TransactionMessage, pkey: Buffer): SignedTransaction;
-//   getAccounts(address: string): Promise<AccountsData>;
-// }
