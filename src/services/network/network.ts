@@ -203,7 +203,7 @@ export const getDelegatedBalance = async (
 export const getUnboundingBalance = async (
   delegatorAddr: string,
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.DelegatedBalanceDataResult> => {
+): Promise<Types.UnboundingBalanceDataResult> => {
   const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/unbonding_delegations`;
 
   const dataResult = await apiGet(url, config);

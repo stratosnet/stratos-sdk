@@ -1,7 +1,13 @@
 import _get from 'lodash/get';
 import { stratosDenom, stratosTopDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
-import { create as createBigNumber, fromWei, ROUND_DOWN } from '../services/bigNumber';
+import {
+  BigNumberValue,
+  create as createBigNumber,
+  fromWei,
+  plus as plusBigNumber,
+  ROUND_DOWN,
+} from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import {
   getAvailableBalance,
@@ -9,6 +15,7 @@ import {
   getRewardBalance,
   getTxList,
   getUnboundingBalance,
+  networkTypes,
 } from '../services/network';
 import * as TxTypes from '../transactions/types';
 import * as Types from './types';
@@ -96,13 +103,16 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
 
   if (!unboundingBalanceError) {
-    const amount = unboundingBalanceResponse?.result?.[0]?.balance?.amount;
-    const denom = unboundingBalanceResponse?.result?.[0]?.balance?.denom;
+    const entries = unboundingBalanceResponse?.result?.[0]?.entries;
 
-    if (denom === stratosDenom && amount) {
-      const balanceInWei = createBigNumber(amount);
+    const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.UnboundingEntry) => {
+      const balanceInWei = createBigNumber(entry.balance);
 
-      const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
+      return plusBigNumber(acc, balanceInWei);
+    }, 0);
+
+    if (amountInWei) {
+      const balance = fromWei(amountInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
       cardMetricsResult.unbounding = `${balance} ${stratosTopDenom.toUpperCase()}`;
     }
   }
@@ -112,8 +122,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
 
   if (!rewardBalanceError) {
-    console.log('r', rewardBalanceResponse?.result);
-
     const amount = rewardBalanceResponse?.result?.total?.[0]?.amount;
     const denom = rewardBalanceResponse?.result?.total?.[0]?.denom;
 
@@ -144,7 +152,6 @@ export const getMaxAvailableBalance = async (
 
   const feeAmount = createBigNumber(standardFeeAmount);
   const balanceInWei = createBigNumber(currentBalance).minus(feeAmount);
-  console.log('🚀 ~ file: accounts.ts ~ line 72 ~ balanceInWei minus fee', balanceInWei);
 
   const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
 
