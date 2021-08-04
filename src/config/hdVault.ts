@@ -6,5 +6,6 @@ export const stratosCoinType = "606'/0'/0/";
 export const stratosAddressPrefix = 'st';
 export const stratosPubkeyPrefix = 'stpub';
 export const stratosDenom = 'ustos';
+export const stratosTopDenom = 'stos';
 
 export const keyPath = `${masterkey}${bip44purpose}${stratosCoinType}`;
