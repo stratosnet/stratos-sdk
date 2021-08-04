@@ -177,3 +177,47 @@ export const getStakingPool = async (
 
   return dataResult;
 };
+
+export const getAvailableBalance = async (
+  address: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.AvailableBalanceDataResult> => {
+  const url = `${getRestRoute()}/bank/balances/${address}`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getDelegatedBalance = async (
+  delegatorAddr: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.DelegatedBalanceDataResult> => {
+  const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getUnboundingBalance = async (
+  delegatorAddr: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.DelegatedBalanceDataResult> => {
+  const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/unbonding_delegations`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getRewardBalance = async (
+  delegatorAddr: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.RewardBalanceDataResult> => {
+  const url = `${getRestRoute()}/distribution/delegators/${delegatorAddr}/rewards`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};

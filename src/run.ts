@@ -4,6 +4,7 @@ import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
 import { deriveKeyPair } from './hdVault/wallet';
 import Sdk from './Sdk';
+import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
@@ -306,17 +307,127 @@ const mainBalance = async () => {
   console.log('our bal ', b);
 };
 
-// cosmosjs send
-// mainSend();
-// mainDelegate();
-// mainBalance();
-getAccountTrasactions();
-// mainFour();
-// delegate
-// mainDelegate();
+const getAvailableBalance = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
 
-//withdrawal
-// mainWithdrawRewards();
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
 
-// prepay
-// mainSdsPrepay();
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  console.log('keyPairZero', keyPairZero.address);
+
+  const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const bResult = await Network.getAvailableBalance(address);
+
+  const { response } = bResult;
+
+  console.log('our available balanace', response?.result);
+};
+
+const getDelegatedBalance = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  console.log('keyPairZero', keyPairZero.address);
+
+  const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const bResult = await Network.getDelegatedBalance(address);
+
+  const { response } = bResult;
+
+  console.log('our delegated balanace', response?.result[0].balance);
+};
+
+const getUnboundingBalance = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  console.log('keyPairZero', keyPairZero.address);
+
+  const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const bResult = await Network.getUnboundingBalance(address);
+
+  const { response } = bResult;
+
+  console.log('our unbounding balanace', response?.result); // an array ?
+};
+
+const getRewardBalance = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  console.log('keyPairZero', keyPairZero.address);
+
+  const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const bResult = await Network.getRewardBalance(address);
+
+  const { response } = bResult;
+
+  console.log('our reward balanace', response?.result.rewards); // an array ?
+};
+
+const getBalanceCardMetrics = async () => {
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  console.log('keyPairZero', keyPairZero.address);
+
+  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const b = await accounts.getBalanceCardMetrics(delegatorAddress);
+
+  console.log('our balanace card metrics ', b);
+};
+
+// getAccountTrasactions();
+
+// getAvailableBalance(); //works
+// getDelegatedBalance(); // works
+// getUnboundingBalance(); // cant check
+// getRewardBalance();
+getBalanceCardMetrics();

@@ -26,6 +26,48 @@ export interface NetworkAxiosConfig {
 
 export interface AccountsDataResult extends NetworkAxiosDataResult {}
 
+export interface DelegatedBalanceResult {
+  delegator_address: string;
+  validator_address: string;
+  shares: string;
+  balance: any;
+}
+
+export interface Reward {
+  validator_address: 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+  reward: any;
+}
+
+export interface Rewards {
+  validator_address: 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+  reward: Reward[];
+}
+
+export interface RewardBalanceResult {
+  rewards: Rewards[];
+  total: Amount[];
+}
+
+export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
+  response?: {
+    height: number;
+    result: Amount[];
+  };
+}
+
+export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
+  response?: {
+    height: number;
+    result: DelegatedBalanceResult[];
+  };
+}
+export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
+  response?: {
+    height: number;
+    result: RewardBalanceResult;
+  };
+}
+
 export type TransactionData = string;
 
 export interface ParsedTransactionData {}
@@ -34,9 +76,15 @@ export interface SubmitTransactionDataResult extends NetworkAxiosDataResult {
   response?: string;
 }
 
+// @depricated
 export interface TxAmount {
   denom: string;
   amount: number;
+}
+
+export interface Amount {
+  denom: string;
+  amount: string;
 }
 
 export interface TxFee {
