@@ -48,6 +48,18 @@ export interface RewardBalanceResult {
   total: Amount[];
 }
 
+export interface UnboundingEntry {
+  creation_height: string;
+  completion_time: string;
+  initial_balance: string;
+  balance: string;
+}
+export interface UnboundingBalanceResult {
+  delegator_address: string;
+  validator_address: string;
+  entries: UnboundingEntry[];
+}
+
 export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
     height: number;
@@ -65,6 +77,13 @@ export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
     height: number;
     result: RewardBalanceResult;
+  };
+}
+
+export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
+  response?: {
+    height: number;
+    result: UnboundingBalanceResult[];
   };
 }
 

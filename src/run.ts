@@ -19,8 +19,8 @@ const sdkEnvDev = {
 };
 
 const sdkEnvTest = {
-  restUrl: 'http://rest-test.thestratos.org',
-  rpcUrl: 'http://rpc-test.thestratos.org',
+  restUrl: 'https://rest-test.thestratos.org',
+  rpcUrl: 'https://rpc-test.thestratos.org',
   chainId: 'test-chain-1',
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
@@ -137,7 +137,7 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
-    console.log('signedTx send', JSON.stringify(signedTx, null, 2));
+    console.log('signedTx sends', JSON.stringify(signedTx, null, 1));
 
     try {
       const result = await transactions.broadcast(signedTx);
@@ -190,9 +190,43 @@ const mainDelegate = async () => {
   }
 };
 
+// cosmosjs undelegate
+const mainUndelegate = async () => {
+  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  const delegatorAddress = keyPairZero.address;
+
+  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+
+  const sendTxMessage = await transactions.getUnDelegateTx(0.3, delegatorAddress, validatorAddress);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+
+  if (signedTx) {
+    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('undelegate result :)', result);
+    } catch (err) {
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
 // cosmosjs withdraw rewards
 const mainWithdrawRewards = async () => {
-  const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
+  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
@@ -425,9 +459,11 @@ const getBalanceCardMetrics = async () => {
 };
 
 // getAccountTrasactions();
-
+// mainSend();
 // getAvailableBalance(); //works
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
 getBalanceCardMetrics();
+// mainUndelegate();
+// mainWithdrawRewards(); // works
