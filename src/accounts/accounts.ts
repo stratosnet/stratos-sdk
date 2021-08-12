@@ -191,17 +191,15 @@ export const getAccountTrasactions = async (
   const parsedData: TxTypes.ParsedTxItem[] = data.map(txItem => {
     const block = _get(txItem, 'block_height', '') as string;
 
-    // const hash = _get(txItem, 'tx_hash', '');
     const hash = _get(txItem, 'tx_info.tx_hash', '');
 
-    // const time = _get(txItem, 'time', '');
     const time = _get(txItem, 'tx_info.time', '');
 
-    // const sender = _get(txItem, 'transaction_data.txData.sender', '') as string;
     const sender = _get(txItem, 'tx_info.transaction_data.txData.sender', '') as string;
 
-    // const to = _get(txItem, 'transaction_data.txData.data.to', '') as string;
     const to = _get(txItem, 'tx_info.transaction_data.txData.data.to', '') as string;
+
+    const originalTransactionData = _get(txItem, 'tx_info.transaction_data', {});
 
     const validatorAddress = _get(
       txItem,
@@ -212,18 +210,12 @@ export const getAccountTrasactions = async (
     const txType = _get(txItem, 'tx_info.transaction_data.txType', '') as string;
 
     const amountValue = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].amount', '') as string;
-    // const amountDenom = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].denom', '') as string;
 
     const delegationAmountValue = _get(
       txItem,
       'tx_info.transaction_data.txData.data.amount.amount',
       '',
     ) as string;
-    // const delegationAmountDenom = _get(
-    //   txItem,
-    //   'tx_info.transaction_data.txData.data.amount.denom',
-    //   '',
-    // ) as string;
 
     const currentAmount = amountValue || delegationAmountValue || '0';
 
@@ -242,6 +234,7 @@ export const getAccountTrasactions = async (
       amount: `${txAmount} STOS`,
       time: dd.toLocaleString(),
       hash,
+      originalTransactionData,
     };
   });
 
