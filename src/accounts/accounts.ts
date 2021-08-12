@@ -30,7 +30,7 @@ export interface BalanceCardMetrics {
 export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
   try {
     const accountsData = await getCosmos().getAccounts(keyPairAddress);
-    console.log('accountsData!', accountsData);
+    // console.log('accountsData!', accountsData);
     return accountsData;
   } catch (err) {
     console.log('Could not get accounts', err.message);
@@ -58,12 +58,25 @@ export const getBalance = async (
   return balance;
 };
 
+export const formatBalanceFromWei = (amount: string, requiredPrecision: number, appendDenom = false) => {
+  const balanceInWei = createBigNumber(amount);
+
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(requiredPrecision, ROUND_DOWN);
+
+  if (!appendDenom) {
+    return balance;
+  }
+  const fullBalance = `${balance} ${stratosTopDenom.toUpperCase()}`;
+
+  return fullBalance;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
-    available: 'N/A',
-    delegated: 'N/A',
+    available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
+    delegated: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     unbounding: `0.0000 ${stratosTopDenom.toUpperCase()}`,
-    reward: 'N/A',
+    reward: `0.0000 ${stratosTopDenom.toUpperCase()}`,
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -129,7 +142,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       const balanceInWei = createBigNumber(amount);
 
       const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-      console.log(`${balance} ${stratosTopDenom.toUpperCase()}`);
       cardMetricsResult.reward = `${balance} ${stratosTopDenom.toUpperCase()}`;
     }
   }
