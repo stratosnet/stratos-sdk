@@ -133,16 +133,22 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
 
   const sendAmount = 1;
 
-  const sendTxMessage = await transactions.getSendTx(sendAmount, fromAddress, firstAddress);
+  // const sendTxMessage = await transactions.getSendTx(sendAmount, fromAddress, firstAddress);
+  const sendTxMessage = await transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: firstAddress },
+    { amount: 2, toAddress: firstAddress },
+    { amount: 3, toAddress: firstAddress },
+  ]);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx sends', JSON.stringify(signedTx, null, 1));
 
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('broadcasting result!', result);
-    } catch (err) {
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('broadcasting result!', result);
+    } catch (error) {
+      const err: Error = error as Error;
       console.log('error broadcasting', err.message);
     }
   }
@@ -176,15 +182,20 @@ const mainDelegate = async () => {
   // const myTxMsg = cosmos.newStdMsg(myTx);
   // const signedTx = cosmos.sign(myTxMsg, pkey);
 
-  const sendTxMessage = await transactions.getDelegateTx(1, delegatorAddress, validatorAddress);
+  // const sendTxMessage = await transactions.getDelegateTx(1, delegatorAddress, validatorAddress);
+  const sendTxMessage = await transactions.getDelegateTx(delegatorAddress, [
+    { amount: 1, validatorAddress },
+    { amount: 2, validatorAddress },
+  ]);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx!', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('delegate broadcasting result!!! :)', result);
-    } catch (err) {
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('delegate broadcasting result!!! :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
       console.log('error broadcasting', err.message);
     }
   }
@@ -210,15 +221,20 @@ const mainUndelegate = async () => {
 
   // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
-  const sendTxMessage = await transactions.getUnDelegateTx(0.3, delegatorAddress, validatorAddress);
+  // const sendTxMessage = await transactions.getUnDelegateTx(0.3, delegatorAddress, validatorAddress);
+  const sendTxMessage = await transactions.getUnDelegateTx(delegatorAddress, [
+    { amount: 0.3, validatorAddress },
+    { amount: 0.2, validatorAddress },
+  ]);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('undelegate result :)', result);
-    } catch (err) {
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('undelegate result :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
       console.log('error broadcasting', err.message);
     }
   }
@@ -244,15 +260,19 @@ const mainWithdrawRewards = async () => {
 
   // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
-  const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, validatorAddress);
+  const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, [
+    { validatorAddress },
+    { validatorAddress },
+  ]);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('delegate withdrawal result :)', result);
-    } catch (err) {
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('delegate withdrawal result :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
       console.log('error broadcasting', err.message);
     }
   }
@@ -465,8 +485,18 @@ const formatBalanceFromWei = () => {
   const balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
   console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
-getAccountTrasactions();
+
+const getStandardFee = () => {
+  const fee = transactions.getStandardFee(3);
+  const sendTx = transactions.getSendTx;
+
+  console.log('fee', fee);
+};
+
+// getStandardFee();
+// getAccountTrasactions();
 // mainSend();
+// mainDelegate();
 // getAvailableBalance(); //works
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
@@ -474,4 +504,4 @@ getAccountTrasactions();
 // getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
-// mainWithdrawRewards(); // works
+mainWithdrawRewards(); // works
