@@ -458,12 +458,20 @@ const getBalanceCardMetrics = async () => {
   console.log('our balanace card metrics ', b);
 };
 
+const formatBalanceFromWei = () => {
+  const amount = '50000';
+  const balanceOne = accounts.formatBalanceFromWei(amount, 4);
+  console.log('🚀 ~ file: run.ts ~ line 464 ~ formatBalanceFromWei ~ balanceOne', balanceOne);
+  const balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
+  console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
+};
 // getAccountTrasactions();
 // mainSend();
 // getAvailableBalance(); //works
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
-getBalanceCardMetrics();
+// getBalanceCardMetrics();
+formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works

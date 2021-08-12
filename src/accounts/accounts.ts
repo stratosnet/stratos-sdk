@@ -58,6 +58,19 @@ export const getBalance = async (
   return balance;
 };
 
+export const formatBalanceFromWei = (amount: string, requiredPrecision: number, appendDenom = false) => {
+  const balanceInWei = createBigNumber(amount);
+
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(requiredPrecision, ROUND_DOWN);
+
+  if (!appendDenom) {
+    return balance;
+  }
+  const fullBalance = `${balance} ${stratosTopDenom.toUpperCase()}`;
+
+  return fullBalance;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
     available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
