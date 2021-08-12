@@ -34,6 +34,10 @@ export const TxHistoryTypesMap = new Map<string, number>([
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
 ]);
 
+export interface EmptyObject {
+  [key: string]: any;
+}
+
 export interface ParsedTxItem {
   sender: string;
   to: string;
@@ -43,6 +47,7 @@ export interface ParsedTxItem {
   amount: string;
   time: string;
   hash: string;
+  originalTransactionData?: EmptyObject;
 }
 
 export interface ParsedTxData {

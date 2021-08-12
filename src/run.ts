@@ -465,13 +465,13 @@ const formatBalanceFromWei = () => {
   const balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
   console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
-// getAccountTrasactions();
+getAccountTrasactions();
 // mainSend();
 // getAvailableBalance(); //works
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
 // getBalanceCardMetrics();
-formatBalanceFromWei();
+// formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
