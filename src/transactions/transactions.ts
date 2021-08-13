@@ -2,7 +2,7 @@ import { fromHex } from '@cosmjs/encoding';
 import _get from 'lodash/get';
 import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
-import { decimalPrecision, maxGasAmount, standardFeeAmount } from '../config/tokens';
+import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
 import { uint8ArrayToBuffer } from '../hdVault/utils';
 import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
@@ -19,10 +19,10 @@ export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Type
   try {
     const result = await getCosmos().broadcast(signedTx);
 
-    // add pproper error handling!! check for code!
+    // add proper error handling!! check for code!
     return result;
   } catch (err) {
-    console.log('Could not broadcast', err.message);
+    console.log('Could not broadcast', (err as Error).message);
 
     throw err;
   }
@@ -38,7 +38,7 @@ export const sign = (txMessage: Types.TransactionMessage, privateKey: string): T
 export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
   const fee = {
     amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }],
-    gas: String(maxGasAmount + standardFeeAmount * numberOfMessages),
+    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages),
   };
   return fee;
 };
