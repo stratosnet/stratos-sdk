@@ -120,3 +120,49 @@ export interface SignedTransaction {
   };
   mode: 'sync';
 }
+
+export interface SendTxMessage {
+  type: TxMsgTypes;
+  value: {
+    amount: AmountType[];
+    from_address: string;
+    to_address: string;
+  };
+}
+
+export interface DelegateTxMessage {
+  type: TxMsgTypes;
+  value: {
+    amount: AmountType;
+    delegator_address: string;
+    validator_address: string;
+  };
+}
+
+export interface UnDelegateTxMessage extends DelegateTxMessage {}
+
+export interface WithdrawalRewardTxMessage {
+  type: TxMsgTypes;
+  value: {
+    delegator_address: string;
+    validator_address: string;
+  };
+}
+
+export interface SendTxPayload {
+  amount: number;
+  toAddress: string;
+}
+
+export interface DelegateTxPayload {
+  amount: number;
+  validatorAddress: string;
+}
+
+export interface UnDelegateTxPayload extends DelegateTxPayload {}
+
+export interface WithdrawalRewardTxPayload {
+  validatorAddress: string;
+}
+
+export type TxPayload = SendTxPayload | DelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload;
