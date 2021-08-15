@@ -155,7 +155,8 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
 
 // cosmosjs delegate
 const mainDelegate = async () => {
-  const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
+  // const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
+  const validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
 
   const zeroUserMnemonic =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
@@ -275,6 +276,45 @@ const mainWithdrawRewards = async () => {
   }
 };
 
+// cosmosjs withdraw all rewards
+const mainWithdrawAllRewards = async () => {
+  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+
+  const zeroUserMnemonic =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  const delegatorAddress = keyPairZero.address;
+  console.log('🚀 ~ file: run.ts ~ line 295 ~ mainWithdrawAllRewards ~ delegatorAddress', delegatorAddress);
+
+  // const vList = await validators.getValidatorsBondedToDelegator(delegatorAddress);
+  // console.log('🚀 ~ file: run.ts ~ line 297 ~ mainWithdrawAllRewards ~ vList', vList);
+
+  // const t = await
+  const sendTxMessage = await transactions.getWithdrawalAllRewardTx(delegatorAddress);
+  // console.log('🚀 ~ file: run.ts ~ line 303 ~ mainWithdrawAllRewards ~ sendTxMessage', sendTxMessage);
+  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+
+  if (signedTx) {
+    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('delegate withdrawal all result :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
 // cosmosjs withdraw rewards
 const mainSdsPrepay = async () => {
   const zeroUserMnemonic =
@@ -309,9 +349,9 @@ const mainSdsPrepay = async () => {
 const getAccountTrasactions = async () => {
   const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
 
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
 
-  console.log('r!!', r);
+  console.log('r!!', r.data[1]);
 };
 
 const getValidators = async () => {
@@ -490,8 +530,10 @@ const getStandardFee = () => {
   console.log('fee', fee);
 };
 
+// const
+
 // getStandardFee();
-// getAccountTrasactions();
+getAccountTrasactions();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -501,4 +543,5 @@ const getStandardFee = () => {
 // getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
-mainWithdrawRewards(); // works
+// mainWithdrawRewards(); // works
+// mainWithdrawAllRewards();

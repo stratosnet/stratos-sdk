@@ -7,6 +7,7 @@ import { uint8ArrayToBuffer } from '../hdVault/utils';
 import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
+import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
@@ -234,6 +235,52 @@ export const getWithdrawalRewardTx = async (
     msgs: messagesList,
     ...baseTx,
   };
+
+  const myTxMsg = getCosmos().newStdMsg(myTx);
+
+  return myTxMsg;
+};
+
+export const getWithdrawalAllRewardTx = async (
+  delegatorAddress: string,
+  memo = '',
+): Promise<Types.TransactionMessage> => {
+  const vListResult = await getValidatorsBondedToDelegator(delegatorAddress);
+
+  const { data: withdrawalPayload } = vListResult;
+
+  const baseTx = await getBaseTx(delegatorAddress, memo, withdrawalPayload.length);
+
+  const payloadToProcess = payloadGenerator(
+    withdrawalPayload.map(item => ({ validatorAddress: item.address })),
+  );
+
+  let iteratedData = payloadToProcess.next();
+
+  const messagesList: Types.WithdrawalRewardTxMessage[] = [];
+
+  while (iteratedData.value) {
+    const { validatorAddress } = iteratedData.value as Types.WithdrawalRewardTxPayload;
+
+    const message = {
+      type: Types.TxMsgTypes.WithdrawRewards,
+      value: {
+        delegator_address: delegatorAddress,
+        validator_address: validatorAddress,
+      },
+    };
+
+    messagesList.push(message);
+
+    iteratedData = payloadToProcess.next();
+  }
+
+  const myTx = {
+    msgs: messagesList,
+    ...baseTx,
+  };
+
+  console.log('🚀 ~ file: transactions.ts ~ line 284 ~ myTx', myTx);
 
   const myTxMsg = getCosmos().newStdMsg(myTx);
 

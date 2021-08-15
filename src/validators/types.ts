@@ -33,16 +33,19 @@ export interface Validator {
   status?: ValidatorStatus;
 }
 
-export interface ParsedValidatorItem {
+export interface ParsedLightValidatorItem {
   address: string;
   name: string;
-  votingPower: string;
-  totalTokens: string;
-  comission: string;
   status: ValidatorStatus;
 }
 
+export interface ParsedValidatorItem extends ParsedLightValidatorItem {
+  votingPower: string;
+  totalTokens: string;
+  comission: string;
+}
+
 export interface ParsedValidatorsData {
-  data: ParsedValidatorItem[];
+  data: ParsedValidatorItem[] | ParsedLightValidatorItem[];
   page: number;
 }

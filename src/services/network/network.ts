@@ -157,6 +157,18 @@ export const getValidatorsList = async (
   return dataResult;
 };
 
+export const getValidatorsBondedToDelegatorList = async (
+  status: string,
+  delegatorAddress: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.ValidatorListDataResult> => {
+  const url = `${getRestRoute()}/staking/delegators/${delegatorAddress}/validators`;
+
+  const dataResult = await apiGet(url, { ...config, params: { status } });
+
+  return dataResult;
+};
+
 export const getValidator = async (
   address: string,
   config?: Types.NetworkAxiosConfig,

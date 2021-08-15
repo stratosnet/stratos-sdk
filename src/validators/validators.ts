@@ -1,6 +1,43 @@
 import _get from 'lodash/get';
-import { getStakingPool, getValidatorsList } from '../services/network';
+import { getStakingPool, getValidatorsBondedToDelegatorList, getValidatorsList } from '../services/network';
 import * as Types from './types';
+
+export const getValidatorsBondedToDelegator = async (
+  delegatorAddress: string,
+): Promise<Types.ParsedValidatorsData> => {
+  const vStatus = Types.ValidatorsNetworkStatus.All;
+  const vListResult = await getValidatorsBondedToDelegatorList(vStatus, delegatorAddress);
+
+  const { response } = vListResult;
+
+  if (!response) {
+    throw new Error('Could not fetch validators list');
+  }
+
+  const { result: validatorResultList } = response;
+
+  if (!response) {
+    throw new Error('Could not fetch validators list');
+  }
+
+  const parsedData: Types.ParsedLightValidatorItem[] = validatorResultList.map(validatorItem => {
+    const operatorAddress = _get(validatorItem, 'operator_address', '') as string;
+    const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`) as string;
+    const status = _get(validatorItem, 'status', 0);
+
+    const vStatus = Types.ParsedValidatorsStatusMap.get(status) || Types.ValidatorStatus.Bonded;
+
+    return {
+      address: operatorAddress,
+      name,
+      status: vStatus,
+    };
+  });
+
+  const result = { data: parsedData, page: 1 };
+
+  return result;
+};
 
 export const getValidators = async (
   status = Types.ValidatorStatus.Bonded,
@@ -22,6 +59,7 @@ export const getValidators = async (
   const { response: poolResponse } = vPoolResult;
 
   console.log('poolResponse', poolResponse);
+
   if (!poolResponse) {
     throw new Error('Could not fetch total staking pool info');
   }
