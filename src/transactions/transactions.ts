@@ -252,7 +252,7 @@ export const getWithdrawalAllRewardTx = async (
   const baseTx = await getBaseTx(delegatorAddress, memo, withdrawalPayload.length);
 
   const payloadToProcess = payloadGenerator(
-    withdrawalPayload.map(item => ({ validatorAddress: item.address })),
+    withdrawalPayload.map((item: { address: string }) => ({ validatorAddress: item.address })),
   );
 
   let iteratedData = payloadToProcess.next();
