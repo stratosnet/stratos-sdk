@@ -30,7 +30,8 @@
     "prepublishOnly": "npm run build",
     "start:build": "tsc -w --module commonjs ",
     "start:run": "nodemon dist/run.js",
-    "start": "concurrently npm:start:*"
+    "start": "concurrently npm:start:*",
+    "jest-coverage": "yarn run jest -- --coverage"
   },
   "lint-staged": {
     "./src/**/*.ts": [
@@ -45,6 +46,8 @@
     }
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/user-event": "^13.1.5",
     "@types/jest": "^26.0.14",
     "@types/json-bigint": "^1.0.0",
     "@types/lodash": "^4.14.170",
