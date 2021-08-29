@@ -27,7 +27,7 @@ export const apiPost = async (
   try {
     axiosResponse = await axios.post(url, data, config);
   } catch (err) {
-    return { error: { message: err.message } };
+    return { error: { message: (err as Error).message } };
   }
 
   try {
@@ -47,7 +47,7 @@ export const apiGet = async (
   try {
     axiosResponse = await axios.get(url, config);
   } catch (err) {
-    return { error: { message: err.message } };
+    return { error: { message: (err as Error).message } };
   }
 
   try {
@@ -91,7 +91,9 @@ export const getSubmitTransactionData = <T extends Types.TransactionData>(data?:
     txData = JSONbig.parse(data);
     return { response: txData };
   } catch (err) {
-    return { error: { message: `Can't submit transaction. Can't parse transaction data. ${err.message}` } };
+    return {
+      error: { message: `Can't submit transaction. Can't parse transaction data. ${(err as Error).message}` },
+    };
   }
 };
 

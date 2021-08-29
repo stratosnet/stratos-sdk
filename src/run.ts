@@ -341,7 +341,7 @@ const mainSdsPrepay = async () => {
       const result = await transactions.broadcast(signedTx);
       console.log('broadcast prepay result :)', result);
     } catch (err) {
-      console.log('error broadcasting', err.message);
+      console.log('error broadcasting', (err as Error).message);
     }
   }
 };
