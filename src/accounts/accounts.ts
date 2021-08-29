@@ -33,7 +33,7 @@ export const getAccountsData = async (keyPairAddress: string): Promise<Types.Acc
     // console.log('accountsData!', accountsData);
     return accountsData;
   } catch (err) {
-    console.log('Could not get accounts', err.message);
+    console.log('Could not get accounts', (err as Error).message);
     throw err;
   }
 };
