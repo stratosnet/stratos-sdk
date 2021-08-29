@@ -16,8 +16,8 @@ export const getValidatorsBondedToDelegator = async (
 
   const { result: validatorResultList } = response;
 
-  if (!response) {
-    throw new Error('Could not fetch validators list');
+  if (!validatorResultList) {
+    throw new Error('Response is missing. Could not fetch validators list');
   }
 
   const parsedData: Types.ParsedLightValidatorItem[] = validatorResultList.map(validatorItem => {
@@ -58,7 +58,7 @@ export const getValidators = async (
 
   const { response: poolResponse } = vPoolResult;
 
-  console.log('poolResponse', poolResponse);
+  // console.log('poolResponse', poolResponse);
 
   if (!poolResponse) {
     throw new Error('Could not fetch total staking pool info');
@@ -72,7 +72,7 @@ export const getValidators = async (
     const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`) as string;
     const status = _get(validatorItem, 'status', 0);
     const totalTokens = _get(validatorItem, 'tokens', 0);
-    console.log('validatorItem', validatorItem);
+    // console.log('validatorItem', validatorItem);
     const votingPower = (Number(totalTokens) * 100) / totalBondedTokens;
     const comission = _get(validatorItem, 'commission.commission_rates.rate', '0') as string;
 
@@ -88,7 +88,7 @@ export const getValidators = async (
     };
   });
 
-  console.log('parsedData!', parsedData);
+  // console.log('parsedData!', parsedData);
 
   const result = { data: parsedData, page: page || 1 };
 
