@@ -666,5 +666,35 @@ describe('accounts', () => {
 
       spyGetTxList.mockRestore();
     });
+    it('throws an error if network call result does not have response', async () => {
+      const txListResult = {} as NetworkTypes.ExplorerTxListDataResult;
+
+      const spyGetTxList = jest.spyOn(NetworkApi, 'getTxList').mockImplementation(() => {
+        return Promise.resolve(txListResult);
+      });
+
+      const keyPairAddress = 'myAddress';
+
+      await expect(Accounts.getAccountTrasactions(keyPairAddress)).rejects.toThrow(
+        'Could not fetch tx history',
+      );
+
+      spyGetTxList.mockRestore();
+    });
+  });
+
+  describe('getBalanceCardMetricValue', () => {
+    it('return properly formatted value for the balance card metric', () => {
+      const result = Accounts.getBalanceCardMetricValue('ustos', '123456789');
+      expect(result).toBe('0.1234 STOS');
+    });
+    it('returns default value if no amount is given', () => {
+      const result = Accounts.getBalanceCardMetricValue('ustos');
+      expect(result).toBe('0.0000 STOS');
+    });
+    it('returns default value if no denom is given', () => {
+      const result = Accounts.getBalanceCardMetricValue();
+      expect(result).toBe('0.0000 STOS');
+    });
   });
 });
