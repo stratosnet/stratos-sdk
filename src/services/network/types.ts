@@ -60,11 +60,13 @@ export interface UnboundingBalanceResult {
   entries: UnboundingEntry[];
 }
 
+export interface AvailableBalanceResponse {
+  height: number;
+  result: Amount[];
+}
+
 export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
-  response?: {
-    height: number;
-    result: Amount[];
-  };
+  response?: AvailableBalanceResponse;
 }
 
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
@@ -111,12 +113,16 @@ export interface TxFee {
   gas: string;
 }
 
+export type TxDataDataAmount = TxAmount[] | TxAmount;
+
 export interface TxData {
   sender: string;
   nonce?: number | null;
   data: {
-    to: string;
-    amount: TxAmount[];
+    to?: string;
+    delegator_address?: string;
+    validator_address?: string;
+    amount: TxDataDataAmount;
   };
 }
 
@@ -147,20 +153,23 @@ export interface TxOrigin {
 }
 
 export interface ExplorerTxData {
+  txType: string;
   txData: TxData;
   fee: TxFee;
-  txType: string;
   hash: string;
   memo: string;
 }
 
 export interface ExplorerTxItem {
-  transaction_data: ExplorerTxData;
+  account: string;
   block_height: number;
-  tx_hash: string;
   tx_type: string;
-  time: string;
-  transaction_data_orig: TxOrigin;
+  tx_info: {
+    tx_hash: string;
+    tx_type: string;
+    time: string;
+    transaction_data: ExplorerTxData;
+  };
 }
 
 export interface ExplorerTxListResponse {
