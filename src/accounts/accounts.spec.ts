@@ -655,5 +655,16 @@ describe('accounts', () => {
 
       spyGetTxList.mockRestore();
     });
+    it('throws an error if network can not fetch tx list', async () => {
+      const spyGetTxList = jest.spyOn(NetworkApi, 'getTxList').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      const keyPairAddress = 'myAddress';
+
+      await expect(Accounts.getAccountTrasactions(keyPairAddress)).rejects.toThrow('boom');
+
+      spyGetTxList.mockRestore();
+    });
   });
 });
