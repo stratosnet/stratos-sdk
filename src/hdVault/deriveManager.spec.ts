@@ -1,5 +1,6 @@
-import { toHex } from '@cosmjs/encoding';
+import '@testing-library/jest-dom/extend-expect';
 
+import { toHex } from '@cosmjs/encoding';
 import * as DeriveManager from './deriveManager';
 import * as KeyUtils from './keyUtils';
 import * as Mnemonic from './mnemonic';
