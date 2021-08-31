@@ -1,162 +1,193 @@
-import { createMasterKeySeed } from './keyManager';
-// import {
-//   decryptMasterKeySeed,
-//   encryptMasterKeySeed,
-//   generateMasterKeySeed,
-//   getMasterKeySeed,
-//   getMasterKeySeedPublicKey,
-//   sign,
-//   unlockMasterKeySeed,
-//   verifySignature,
-// } from './keyUtils';
-// import { bufferToHexStr, hexStrToBuffer, uint8arrayToHexStr } from './utils';
+import '@testing-library/jest-dom/extend-expect';
 
-// const phrase = [
-//   { index: 1, word: 'rate' },
-//   { index: 2, word: 'seminar' },
-//   { index: 3, word: 'essence' },
-//   { index: 4, word: 'abandon' },
-//   { index: 5, word: 'sure' },
-//   { index: 6, word: 'grab' },
-//   { index: 7, word: 'submit' },
-//   { index: 8, word: 'scare' },
-//   { index: 9, word: 'rather' },
-//   { index: 10, word: 'front' },
-//   { index: 11, word: 'dune' },
-//   { index: 12, word: 'planet' },
-//   { index: 13, word: 'bag' },
-//   { index: 14, word: 'cheap' },
-//   { index: 15, word: 'first' },
-//   { index: 16, word: 'rude' },
-//   { index: 17, word: 'enjoy' },
-//   { index: 18, word: 'harvest' },
-//   { index: 19, word: 'motor' },
-//   { index: 20, word: 'demise' },
-//   { index: 21, word: 'tennis' },
-//   { index: 22, word: 'erase' },
-//   { index: 23, word: 'poet' },
-//   { index: 24, word: 'pole' },
-// ];
+import nacl from 'tweetnacl';
+import sjcl from 'sjcl';
 
-// const password = '123456';
-// const wrongPassword = '123456ABC';
-
-// const masterKeySeed = createMasterKeySeed(phrase, password);
-
-// const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-// const masterKeySeedHex =
-//   'd7564333264ec1b72683b0f24e342fb35c67dd1812c173375101ed1b095e16b57c45cb2eecd216736950ceae58881894b5e7ec9a6a8c9da626b9b2928191d320';
-// const masterKeySeedPublicKey = 'fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=';
-
-// const sourcePublicKey = 'bB3/zDDHrfo964xIlogLEwv73MdL81z9Mgx7eydZbBQ=';
-// const encodedSignData = 'eyBmb286ICdiYXInLCBmb29iYXI6ICdiYXJmb28nIH0=';
-// const sourceSignature =
-//   'JqfsQ5ABWPrOcLhgORkv2j80hdypUprEhzTMGKze0N2Q5H1uBhq8zsj8lFFQQB0jc1OKJqjJ/nrIGHxXRXIGCA==';
-
-// const sourcePrivateKey =
-//   'lIFzY0P/SgAIYnG5YVfvewHZA7viZQ+DerMNMozibpVsHf/MMMet+j3rjEiWiAsTC/vcx0vzXP0yDHt7J1lsFA==';
+import { Bech32, fromBase64, toAscii, toBase64 } from '@cosmjs/encoding';
+import * as KeyUtils from './keyUtils';
 
 describe('keyUtils', () => {
-  describe('generateMasterKeySeed', () => {
-    it('returns dummy', async () => {
-      expect(1).toBe(1);
+  describe('decryptMasterKeySeed', () => {
+    it('decrypts master key seed', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+      const decryptedMasterKeySeed = new Uint8Array([1, 2]);
+      const decrypteCypherText = toBase64(decryptedMasterKeySeed);
+
+      const spyDecrypt = jest.spyOn(sjcl, 'decrypt').mockImplementation(() => {
+        return decrypteCypherText;
+      });
+
+      const result = await KeyUtils.decryptMasterKeySeed(password, encryptedMasterKeySeed);
+      expect(result).toStrictEqual(decryptedMasterKeySeed);
+
+      spyDecrypt.mockRestore();
+    });
+    it('rejects with false if sjcl.decrypt fails', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+      // const decryptedMasterKeySeed = new Uint8Array([1, 2]);
+      // const decrypteCypherText = toBase64(decryptedMasterKeySeed);
+
+      const spyDecrypt = jest.spyOn(sjcl, 'decrypt').mockImplementation(() => {
+        // return decrypteCypherText;
+        throw new Error('boom');
+      });
+
+      await expect(KeyUtils.decryptMasterKeySeed(password, encryptedMasterKeySeed)).rejects.toEqual(false);
+      // expect(result).toStrictEqual(decryptedMasterKeySeed);
+
+      spyDecrypt.mockRestore();
+    });
+  });
+
+  describe('unlockMasterKeySeed', () => {
+    it('unlocks master key seed', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+
+      const decryptedMasterKeySeed = new Uint8Array([1, 2]);
+
+      const spyDecryptMasterKeySeed = jest.spyOn(KeyUtils, 'decryptMasterKeySeed').mockImplementation(() => {
+        return Promise.resolve(decryptedMasterKeySeed);
+      });
+
+      const result = await KeyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed);
+
+      expect(result).toEqual(true);
+
+      spyDecryptMasterKeySeed.mockRestore();
+    });
+    it('resolves with false if unlocking throws an error', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+
+      const spyDecryptMasterKeySeed = jest.spyOn(KeyUtils, 'decryptMasterKeySeed').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      await expect(KeyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed)).resolves.toEqual(false);
+
+      spyDecryptMasterKeySeed.mockRestore();
+    });
+  });
+
+  describe('getMasterKeySeed', () => {
+    it('returns master key seed', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+
+      const decryptedMasterKeySeed = new Uint8Array([1, 2]);
+
+      const spyDecryptMasterKeySeed = jest.spyOn(KeyUtils, 'decryptMasterKeySeed').mockImplementation(() => {
+        return Promise.resolve(decryptedMasterKeySeed);
+      });
+
+      const result = await KeyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
+
+      expect(result).toEqual(decryptedMasterKeySeed);
+
+      spyDecryptMasterKeySeed.mockRestore();
+    });
+    it('rejects with false if decription throws an error', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+
+      const spyDecryptMasterKeySeed = jest.spyOn(KeyUtils, 'decryptMasterKeySeed').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      await expect(KeyUtils.getMasterKeySeed(password, encryptedMasterKeySeed)).rejects.toEqual(false);
+
+      spyDecryptMasterKeySeed.mockRestore();
+    });
+    it('rejects with false if decription fails and returns false', async () => {
+      const password = '123';
+      const encryptedMasterKeySeed = 'fooBar';
+
+      const decryptedMasterKeySeed = false;
+
+      const spyDecryptMasterKeySeed = jest.spyOn(KeyUtils, 'decryptMasterKeySeed').mockImplementation(() => {
+        return Promise.resolve(decryptedMasterKeySeed);
+      });
+
+      await expect(KeyUtils.getMasterKeySeed(password, encryptedMasterKeySeed)).rejects.toEqual(false);
+
+      spyDecryptMasterKeySeed.mockRestore();
+    });
+  });
+
+  describe('sign', () => {
+    it('signs the message', async () => {
+      const message = toBase64(new Uint8Array([1, 2]));
+      const privateKey = toBase64(new Uint8Array([4, 34, 1]));
+      const signature = new Uint8Array([40, 30, 20]);
+
+      const naclSign = nacl.sign;
+
+      const spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(() => {
+        return signature;
+      });
+
+      const result = await KeyUtils.sign(message, privateKey);
+
+      const expected = toBase64(signature);
+      expect(result).toBe(expected);
+
+      spyDetached.mockRestore();
+    });
+    it('rejects with false if signing throws an error', async () => {
+      const message = 'aaa';
+      const privateKey = toBase64(new Uint8Array([4, 34, 1]));
+      const signature = new Uint8Array([40, 30, 20]);
+
+      const naclSign = nacl.sign;
+
+      const spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(() => {
+        return signature;
+      });
+
+      await expect(KeyUtils.sign(message, privateKey)).rejects.toEqual(false);
+
+      spyDetached.mockRestore();
+    });
+  });
+
+  describe('verifySignature', () => {
+    it('verifies signature', async () => {
+      const message = toBase64(new Uint8Array([1, 2]));
+      const signature = toBase64(new Uint8Array([4, 34, 1]));
+      const publicKey = toBase64(new Uint8Array([5, 35, 2]));
+
+      const verifyResult = true;
+
+      const naclDetached = nacl.sign.detached;
+
+      const spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(() => {
+        return verifyResult;
+      });
+
+      const result = await KeyUtils.verifySignature(message, signature, publicKey);
+      expect(result).toBe(true);
+
+      spyVerify.mockRestore();
+    });
+    it('rejects with false if signature verification throws an error', async () => {
+      const message = toBase64(new Uint8Array([1, 2]));
+      const signature = toBase64(new Uint8Array([4, 34, 1]));
+      const publicKey = 'foo';
+
+      const verifyResult = false;
+
+      const naclDetached = nacl.sign.detached;
+
+      const spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(() => {
+        return verifyResult;
+      });
+
+      await expect(KeyUtils.verifySignature(message, signature, publicKey)).rejects.toEqual(false);
+
+      spyVerify.mockRestore();
     });
   });
 });
-
-// describe('decryptMasterKeySeed', () => {
-//   it('decrypts master key seed', async () => {
-//     const decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeedString);
-//     if (decryptedMasterKeySeed !== false) {
-//       expect(bufferToHexStr(decryptedMasterKeySeed)).toEqual(masterKeySeedHex);
-//     }
-//   });
-//   it('should fail while wrongPassword is used', async () => {
-//     await expect(decryptMasterKeySeed(wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(false);
-//   });
-// });
-
-// describe('unlockMasterKeySeed', () => {
-//   it('should unlock master key seed', async () => {
-//     const unlockResult = await unlockMasterKeySeed(password, encryptedMasterKeySeedString);
-//     expect(unlockResult).toEqual(true);
-//   });
-//   it('should fail unlocking with a pwrong password', async () => {
-//     const unlockResult = await unlockMasterKeySeed(wrongPassword, encryptedMasterKeySeedString);
-//     expect(unlockResult).toEqual(false);
-//   });
-// });
-
-// describe('encryptMasterKeySeed', () => {
-//   it('should encrypt master key seed', async () => {
-//     const encryptedMasterKeySeed = encryptMasterKeySeed(password, hexStrToBuffer(masterKeySeedHex));
-//     const decryptedMasterKeySeed = await decryptMasterKeySeed(password, encryptedMasterKeySeed.toString());
-//     expect(decryptedMasterKeySeed).toEqual(hexStrToBuffer(masterKeySeedHex));
-//   });
-// });
-
-// describe('getMasterKeySeedPublicKey', () => {
-//   it('should return a public key from the master key seed', () => {
-//     const testMasterKeySeed = hexStrToBuffer(masterKeySeedHex);
-//     const publicKey = getMasterKeySeedPublicKey(testMasterKeySeed);
-//     expect(publicKey).toEqual(masterKeySeedPublicKey);
-//   });
-// });
-
-// describe('generateMasterKeySeed', () => {
-//   it('should generate master key seed from a mnemonic phrase', () => {
-//     const testMasterKeySeed = generateMasterKeySeed(phrase);
-//     expect(testMasterKeySeed).toEqual(hexStrToBuffer(masterKeySeedHex));
-//   });
-// });
-
-// describe('getMasterKeySeed', () => {
-//   it('return master key seed', async () => {
-//     const masterKeySeedToTest = await getMasterKeySeed(password, encryptedMasterKeySeedString);
-//     expect(uint8arrayToHexStr(masterKeySeedToTest)).toEqual(masterKeySeedHex);
-//   });
-//   it('rejects with false if a password is wrong', async () => {
-//     await expect(getMasterKeySeed(wrongPassword, encryptedMasterKeySeedString)).rejects.toEqual(false);
-//   });
-// });
-
-// describe('sign', () => {
-//   it('signs the message', async () => {
-//     const signature = await sign(encodedSignData, sourcePrivateKey);
-//     expect(signature).toEqual(sourceSignature);
-//   });
-
-//   it("can't sign with a wrong private key", async () => {
-//     await expect(sign(encodedSignData, '')).rejects.toEqual(false);
-//   });
-// });
-
-// describe('verifySignature', () => {
-//   it('verifies the signature ', async () => {
-//     const result = await verifySignature(encodedSignData, sourceSignature, sourcePublicKey);
-
-//     expect(result).toEqual(true);
-//   });
-//   it("can't verify the signature if public key is not authentic  ", async () => {
-//     const result = await verifySignature(
-//       encodedSignData,
-//       sourceSignature,
-//       masterKeySeed.masterKeySeedPublicKey,
-//     );
-
-//     expect(result).toEqual(false);
-//   });
-//   it("can't verify the signature if public key is corrupted", async () => {
-//     await expect(verifySignature(encodedSignData, sourceSignature, 'foo')).rejects.toEqual(false);
-//   });
-//   it("can't verify the signature if signature is corrupted", async () => {
-//     await expect(
-//       verifySignature(encodedSignData, 'foo', masterKeySeed.masterKeySeedPublicKey),
-//     ).rejects.toEqual(false);
-//   });
-//   it("can't verify the signature if message is corrupted", async () => {
-//     await expect(
-//       verifySignature('foo', sourceSignature, masterKeySeed.masterKeySeedPublicKey),
-//     ).rejects.toEqual(false);
-//   });
-// });
