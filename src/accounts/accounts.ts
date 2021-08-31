@@ -163,7 +163,12 @@ export const getMaxAvailableBalance = async (
   const currentBalance = coin?.amount || '0';
 
   const feeAmount = createBigNumber(standardFeeAmount);
-  const balanceInWei = createBigNumber(currentBalance).minus(feeAmount);
+  const balanceInWei = createBigNumber(currentBalance);
+
+  if (balanceInWei.gt(0)) {
+    const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
+    return balance;
+  }
 
   const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
 
@@ -225,10 +230,12 @@ export const getAccountTrasactions = async (
 
     const dd = new Date(time);
 
+    const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
+
     return {
       to: to || validatorAddress,
       sender,
-      type: TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All,
+      type: resolvedType,
       txType,
       block: `${block}`,
       amount: `${txAmount} STOS`,
