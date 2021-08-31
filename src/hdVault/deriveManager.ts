@@ -1,4 +1,4 @@
-import { Slip10, Slip10Curve, stringToPath } from '@cosmjs/crypto';
+import * as CosmosCrypto from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 
 import {
@@ -18,7 +18,7 @@ export interface KeyPair {
   privateKey: string;
 }
 
-export type KeyPairCurve = Slip10Curve.Ed25519 | Slip10Curve.Secp256k1;
+export type KeyPairCurve = CosmosCrypto.Slip10Curve.Ed25519 | CosmosCrypto.Slip10Curve.Secp256k1;
 
 export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<string> => {
   const masterKeySeed = await generateMasterKeySeed(phrase);
@@ -43,14 +43,18 @@ export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Prom
   };
 };
 
+export const getSlip10 = () => {
+  return CosmosCrypto.Slip10;
+};
+
 export const derivePrivateKeySeed = (
   masterKey: Uint8Array,
   keyPath: string,
-  curve: KeyPairCurve = Slip10Curve.Secp256k1,
+  curve: KeyPairCurve = CosmosCrypto.Slip10Curve.Secp256k1,
 ): Uint8Array => {
-  const convertedPath = stringToPath(keyPath);
+  const convertedPath = CosmosCrypto.stringToPath(keyPath);
 
-  const { privkey } = Slip10.derivePath(curve, masterKey, convertedPath);
+  const { privkey } = getSlip10().derivePath(curve, masterKey, convertedPath);
 
   return privkey;
 };
