@@ -71,6 +71,22 @@ export const formatBalanceFromWei = (amount: string, requiredPrecision: number, 
   return fullBalance;
 };
 
+export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
+  const isStratosDenom = denom === stratosDenom;
+
+  if (!isStratosDenom) {
+    return '0.0000 STOS';
+  }
+  if (!amount) {
+    return '0.0000 STOS';
+  }
+  const balanceInWei = createBigNumber(amount);
+
+  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
+  const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
+  return balanceToReturn;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
     available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
@@ -87,12 +103,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     const amount = availableBalanceResponse?.result?.[0]?.amount;
     const denom = availableBalanceResponse?.result?.[0]?.denom;
 
-    if (denom === stratosDenom && amount) {
-      const balanceInWei = createBigNumber(amount);
-
-      const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-      cardMetricsResult.available = `${balance} ${stratosTopDenom.toUpperCase()}`;
-    }
+    cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
   }
 
   const delegatedBalanceResult = await getDelegatedBalance(keyPairAddress);
@@ -103,12 +114,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     const amount = delegatedBalanceResponse?.result?.[0]?.balance?.amount;
     const denom = delegatedBalanceResponse?.result?.[0]?.balance?.denom;
 
-    if (denom === stratosDenom && amount) {
-      const balanceInWei = createBigNumber(amount);
-
-      const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-      cardMetricsResult.delegated = `${balance} ${stratosTopDenom.toUpperCase()}`;
-    }
+    cardMetricsResult.delegated = getBalanceCardMetricValue(denom, amount);
   }
 
   const unboundingBalanceResult = await getUnboundingBalance(keyPairAddress);
@@ -124,10 +130,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    if (amountInWei) {
-      const balance = fromWei(amountInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-      cardMetricsResult.unbounding = `${balance} ${stratosTopDenom.toUpperCase()}`;
-    }
+    cardMetricsResult.unbounding = getBalanceCardMetricValue('ustos', `${amountInWei}`);
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);
@@ -138,12 +141,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     const amount = rewardBalanceResponse?.result?.total?.[0]?.amount;
     const denom = rewardBalanceResponse?.result?.total?.[0]?.denom;
 
-    if (denom === stratosDenom && amount) {
-      const balanceInWei = createBigNumber(amount);
-
-      const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-      cardMetricsResult.reward = `${balance} ${stratosTopDenom.toUpperCase()}`;
-    }
+    cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
   }
 
   return cardMetricsResult;

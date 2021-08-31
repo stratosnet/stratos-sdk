@@ -36,6 +36,14 @@ const phrase = [
   { index: 24, word: 'pole' },
 ];
 
+describe('deriveManager', () => {
+  describe('deriveAddressFromPhrase', () => {
+    it('returns dummy', async () => {
+      expect(1).toBe(1);
+    });
+  });
+});
+
 // const masterKeySeedPublicKey = 'fEXLLuzSFnNpUM6uWIgYlLXn7JpqjJ2mJrmykoGR0yA=';
 // const masterKeySeedAddress = 'st1yx3kkx9jnqeck59j744nc5qgtv4lt4dc45jcwz';
 // const derivedMasterKeySeed = generateMasterKeySeed(phrase);

@@ -53,7 +53,7 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
   return result;
 };
 
-const getBaseTx = async (
+export const getBaseTx = async (
   keyPairAddress: string,
   memo = '',
   numberOfMessages = 1,
@@ -279,8 +279,6 @@ export const getWithdrawalAllRewardTx = async (
     msgs: messagesList,
     ...baseTx,
   };
-
-  console.log('🚀 ~ file: transactions.ts ~ line 284 ~ myTx', myTx);
 
   const myTxMsg = getCosmos().newStdMsg(myTx);
 
