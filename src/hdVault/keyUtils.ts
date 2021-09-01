@@ -61,6 +61,9 @@ const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result =>
   };
 };
 
+/**
+ * @todo add unit test
+ */
 export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
   const stringMnemonic = convertArrayToString(phrase);
 
@@ -71,6 +74,9 @@ export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uin
   return seed;
 };
 
+/**
+ * @todo add unit test
+ */
 export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array => {
   const masterKeyInfo = getMasterKeyInfo(Slip10Curve.Secp256k1, masterKeySeed);
 
@@ -140,20 +146,13 @@ export const decryptMasterKeySeed = async (
   password: string,
   encryptedMasterKeySeed: string,
 ): Promise<Uint8Array | false> => {
-  let decryptedMasterKeySeed;
-
   try {
     const decrypteCypherText = sjcl.decrypt(password, encryptedMasterKeySeed);
-    decryptedMasterKeySeed = fromBase64(decrypteCypherText);
+    const decryptedMasterKeySeed = fromBase64(decrypteCypherText);
+    return decryptedMasterKeySeed;
   } catch (err) {
     return Promise.reject(false);
   }
-
-  if (decryptedMasterKeySeed) {
-    return decryptedMasterKeySeed;
-  }
-
-  return Promise.reject(false);
 };
 
 export const unlockMasterKeySeed = async (
@@ -207,11 +206,13 @@ export const verifySignature = async (
   publicKey: string,
 ): Promise<boolean> => {
   try {
-    const verifyResult = nacl.sign.detached.verify(
-      Uint8Array.from(fromBase64(message)),
-      fromBase64(signature),
-      fromBase64(publicKey),
-    );
+    const convertedMessage = fromBase64(message);
+    const formattedMessage = Uint8Array.from(convertedMessage);
+
+    const convertedSignature = fromBase64(signature);
+    const convertedPubKey = fromBase64(publicKey);
+
+    const verifyResult = nacl.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
     return verifyResult;
   } catch (err) {
     return Promise.reject(false);
