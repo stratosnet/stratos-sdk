@@ -17,6 +17,7 @@ export enum HistoryTxType {
   Delegate = 2,
   Undelegate = 3,
   GetReward = 4,
+  SdsPrepay = 5,
 }
 
 export const TxMsgTypesMap = new Map<number, string>([
@@ -25,6 +26,7 @@ export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
   [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
+  [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
@@ -32,6 +34,7 @@ export const TxHistoryTypesMap = new Map<string, number>([
   [TxMsgTypes.Delegate, HistoryTxType.Delegate],
   [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
+  [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
 ]);
 
 export interface EmptyObject {
@@ -149,6 +152,14 @@ export interface WithdrawalRewardTxMessage {
   };
 }
 
+export interface SdsPrepayTxMessage {
+  type: TxMsgTypes;
+  value: {
+    sender: string;
+    coins: AmountType[];
+  };
+}
+
 export interface SendTxPayload {
   amount: number;
   toAddress: string;
@@ -165,4 +176,13 @@ export interface WithdrawalRewardTxPayload {
   validatorAddress: string;
 }
 
-export type TxPayload = SendTxPayload | DelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload;
+export interface SdsPrepayTxPayload {
+  amount: number;
+}
+
+export type TxPayload =
+  | SendTxPayload
+  | DelegateTxPayload
+  | UnDelegateTxPayload
+  | WithdrawalRewardTxPayload
+  | SdsPrepayTxPayload;
