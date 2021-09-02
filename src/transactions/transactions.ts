@@ -285,23 +285,38 @@ export const getWithdrawalAllRewardTx = async (
   return myTxMsg;
 };
 
+/** @todo add unit test */
 export const getSdsPrepayTx = async (
   senderAddress: string,
-  amount: number,
+  prepayPayload: Types.SdsPrepayTxPayload[],
   memo = '',
 ): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(senderAddress, memo);
+  const baseTx = await getBaseTx(senderAddress, memo, prepayPayload.length);
+
+  const payloadToProcess = payloadGenerator(prepayPayload);
+
+  let iteratedData = payloadToProcess.next();
+
+  const messagesList: Types.SdsPrepayTxMessage[] = [];
+
+  while (iteratedData.value) {
+    const { amount } = iteratedData.value as Types.SdsPrepayTxPayload;
+
+    const message = {
+      type: Types.TxMsgTypes.SdsPrepay,
+      value: {
+        sender: senderAddress,
+        coins: getStandardAmount([amount]),
+      },
+    };
+
+    messagesList.push(message);
+
+    iteratedData = payloadToProcess.next();
+  }
 
   const myTx = {
-    msgs: [
-      {
-        type: Types.TxMsgTypes.SdsPrepay,
-        value: {
-          sender: senderAddress,
-          coins: getStandardAmount([amount]),
-        },
-      },
-    ],
+    msgs: messagesList,
     ...baseTx,
   };
 

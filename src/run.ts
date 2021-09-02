@@ -332,7 +332,9 @@ const mainSdsPrepay = async () => {
 
   // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
 
-  const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, 10);
+  // const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, 10);
+  const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }]);
+
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -533,7 +535,7 @@ const getStandardFee = () => {
 // const
 
 // getStandardFee();
-getAccountTrasactions();
+// getAccountTrasactions();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -545,3 +547,4 @@ getAccountTrasactions();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
 // mainWithdrawAllRewards();
+mainSdsPrepay();
