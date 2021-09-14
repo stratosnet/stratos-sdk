@@ -351,8 +351,9 @@ const mainSdsPrepay = async () => {
 const getAccountTrasactions = async () => {
   const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
 
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
 
+  console.log('r!!', r.data);
   console.log('r!!', r.data[1]);
 };
 
@@ -535,7 +536,7 @@ const getStandardFee = () => {
 // const
 
 // getStandardFee();
-// getAccountTrasactions();
+getAccountTrasactions();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -547,4 +548,4 @@ const getStandardFee = () => {
 // mainUndelegate();
 // mainWithdrawRewards(); // works
 // mainWithdrawAllRewards();
-mainSdsPrepay();
+// mainSdsPrepay();

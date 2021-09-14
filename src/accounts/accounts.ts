@@ -192,35 +192,70 @@ export const getAccountTrasactions = async (
   const { data, total } = response;
 
   const parsedData: TxTypes.ParsedTxItem[] = data.map(txItem => {
+    // const block = _get(txItem, 'block_height', '') as string;
+
+    // const hash = _get(txItem, 'tx_info.tx_hash', '');
+
+    // const time = _get(txItem, 'tx_info.time', '');
+
+    // const sender = _get(txItem, 'tx_info.transaction_data.txData.sender', '') as string;
+
+    // const to = _get(txItem, 'tx_info.transaction_data.txData.data.to', '') as string;
+
+    // const originalTransactionData = _get(txItem, 'tx_info.transaction_data', {});
+
+    // const validatorAddress = _get(
+    //   txItem,
+    //   'tx_info.transaction_data.txData.data.validator_address',
+    //   '',
+    // ) as string;
+
+    // const txType = _get(txItem, 'tx_info.transaction_data.txType', '') as string;
+
+    // const amountValue = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].amount', '') as string;
+
+    // const delegationAmountValue = _get(
+    //   txItem,
+    //   'tx_info.transaction_data.txData.data.amount.amount',
+    //   '',
+    // ) as string;
+
+    //
     const block = _get(txItem, 'block_height', '') as string;
 
     const hash = _get(txItem, 'tx_info.tx_hash', '');
 
     const time = _get(txItem, 'tx_info.time', '');
 
-    const sender = _get(txItem, 'tx_info.transaction_data.txData.sender', '') as string;
+    const sender = _get(txItem, 'account', '') as string;
 
-    const to = _get(txItem, 'tx_info.transaction_data.txData.data.to', '') as string;
+    const to = _get(txItem, 'tx_info.transaction_data.value.msg[0].value.to_address', '') as string;
 
-    const originalTransactionData = _get(txItem, 'tx_info.transaction_data', {});
+    const originalTransactionData = _get(txItem, 'tx_info.transaction_data.value', {});
 
     const validatorAddress = _get(
       txItem,
-      'tx_info.transaction_data.txData.data.validator_address',
+      'tx_info.transaction_data.value.msg[0].value.validator_address',
       '',
     ) as string;
 
-    const txType = _get(txItem, 'tx_info.transaction_data.txType', '') as string;
+    const txType = _get(txItem, 'tx_info.transaction_data.value.msg[0].type', '') as string;
 
-    const amountValue = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].amount', '') as string;
+    const amountValue = _get(
+      txItem,
+      'tx_info.transaction_data.value.msg[0].value.amount[0].amount',
+      '',
+    ) as string;
 
     const delegationAmountValue = _get(
       txItem,
-      'tx_info.transaction_data.txData.data.amount.amount',
+      'tx_info.transaction_data.value.msg[0].value.amount.amount',
       '',
     ) as string;
+    //
 
     const currentAmount = amountValue || delegationAmountValue || '0';
+    console.log('🚀 ~ file: accounts.ts ~ line 258 ~ currentAmount', currentAmount);
 
     const balanceInWei = createBigNumber(currentAmount);
 
