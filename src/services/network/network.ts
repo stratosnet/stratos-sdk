@@ -235,3 +235,14 @@ export const getRewardBalance = async (
 
   return dataResult;
 };
+
+export const requestBalanceIncrease = async (
+  walletAddress: string,
+  faucetUrl: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.SubmitTransactionDataResult> => {
+  const url = `${faucetUrl}/${walletAddress}`;
+  const dataResult = await apiPost(url, {}, config);
+
+  return dataResult;
+};

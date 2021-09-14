@@ -533,10 +533,19 @@ const getStandardFee = () => {
   console.log('fee', fee);
 };
 
+const runFaucet = async () => {
+  const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const faucetUrl = 'https://faucet-test.thestratos.org/faucet';
+  // const result = await Network.requestBalanceIncrease(walletAddress, faucetUrl);
+
+  const result = await accounts.increaseBalance(walletAddress, faucetUrl);
+  console.log('faucet result', result);
+};
 // const
 
 // getStandardFee();
-getAccountTrasactions();
+// getAccountTrasactions();
+
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -549,3 +558,4 @@ getAccountTrasactions();
 // mainWithdrawRewards(); // works
 // mainWithdrawAllRewards();
 // mainSdsPrepay();
+runFaucet();

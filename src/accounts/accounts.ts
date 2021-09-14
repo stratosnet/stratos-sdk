@@ -16,6 +16,7 @@ import {
   getTxList,
   getUnboundingBalance,
   networkTypes,
+  requestBalanceIncrease,
 } from '../services/network';
 import * as TxTypes from '../transactions/types';
 import * as Types from './types';
@@ -36,6 +37,27 @@ export const getAccountsData = async (keyPairAddress: string): Promise<Types.Acc
     console.log('Could not get accounts', (err as Error).message);
     throw err;
   }
+};
+
+export const increaseBalance = async (walletAddress: string, faucetUrl: string) => {
+  try {
+    const result = await requestBalanceIncrease(walletAddress, faucetUrl);
+
+    const { error: faucetError } = result;
+
+    if (faucetError) {
+      return { result: false, errorMessage: `Could not increase balance: Error: "${faucetError.message}"` };
+    }
+
+    console.log('🚀 ~ file: accounts.ts ~ line 45 ~ increaseBalance ~ result', result);
+  } catch (error) {
+    console.log('Error: Faucet returns:', (error as Error).message);
+    return {
+      result: false,
+      errorMessage: `Could not increase balance: Error: "${(error as Error).message}"`,
+    };
+  }
+  return { result: true };
 };
 
 export const getBalance = async (
