@@ -277,6 +277,7 @@ export const getAccountTrasactions = async (
     //
 
     const currentAmount = amountValue || delegationAmountValue || '0';
+
     console.log('🚀 ~ file: accounts.ts ~ line 258 ~ currentAmount', currentAmount);
 
     const balanceInWei = createBigNumber(currentAmount);

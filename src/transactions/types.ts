@@ -1,14 +1,29 @@
 export enum TxMsgTypes {
-  Account = 'cosmos-sdk/Account',
-  Send = 'cosmos-sdk/MsgSend',
-  Delegate = 'cosmos-sdk/MsgDelegate',
-  Undelegate = 'cosmos-sdk/MsgUndelegate',
-  WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward',
+  Account = 'cosmos-sdk/Account', // Account 10
+  Send = 'cosmos-sdk/MsgSend', // Transfer 1
+  Delegate = 'cosmos-sdk/MsgDelegate', // Delegate 2
+  Undelegate = 'cosmos-sdk/MsgUndelegate', // Undelegate 3
+  WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward', // GetReward 4
+  CreateValidator = 'osmos-sdk/MsgCreateValidator', // CreateValidator 9
 }
 
 export enum TxMsgTypes {
-  SdsPrepay = 'sds/MsgPrepay',
-  SdsAll = '',
+  SdsAll = '', // All 0
+  SdsPrepay = 'sds/MsgPrepay', // SdsPrepay 5
+  SdsFileUpload = 'sds/MsgFileUpload', // SdsFileUpload 6
+}
+
+export enum TxMsgTypes {
+  PotVolumeReport = 'pot/MsgVolumeReport', // PotVolumeReport 7
+  PotWithdraw = 'pot/MsgWithdraw', // PotWithdraw 8
+}
+
+export enum TxMsgTypes {
+  RegisterCreateResourceNode = 'register/MsgCreateResourceNode', // 11 RegisterCreateResourceNode
+  RegisterRemoveResourceNode = 'register/MsgRemoveResourceNode', // 12 RegisterRemoveResourceNode
+  RegisterCreateIndexingNode = 'register/MsgCreateIndexingNode', // 13 RegisterCreateIndexingNode
+  RegisterRemoveIndexingNode = 'register/MsgRemoveIndexingNode', // 14  RegisterRemoveIndexingNode
+  RegisterIndexingNodeRegistrationVote = 'register/MsgIndexingNodeRegistrationVote', // 15 RegisterIndexingNodeRegistrationVote
 }
 
 export enum HistoryTxType {
@@ -18,23 +33,54 @@ export enum HistoryTxType {
   Undelegate = 3,
   GetReward = 4,
   SdsPrepay = 5,
+  SdsFileUpload = 6,
+  PotVolumeReport = 7,
+  PotWithdraw = 8,
+  CreateValidator = 9,
+  Account = 10,
+  RegisterCreateResourceNode = 11,
+  RegisterRemoveResourceNode = 12,
+  RegisterCreateIndexingNode = 13,
+  RegisterRemoveIndexingNode = 14,
+  RegisterIndexingNodeRegistrationVote = 15,
 }
 
 export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.All, TxMsgTypes.SdsAll],
+  [HistoryTxType.Account, TxMsgTypes.Account],
   [HistoryTxType.Transfer, TxMsgTypes.Send],
   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
   [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
+  [HistoryTxType.CreateValidator, TxMsgTypes.CreateValidator],
   [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
+  [HistoryTxType.SdsFileUpload, TxMsgTypes.SdsFileUpload],
+  [HistoryTxType.PotVolumeReport, TxMsgTypes.PotVolumeReport],
+  [HistoryTxType.PotWithdraw, TxMsgTypes.PotWithdraw],
+  [HistoryTxType.RegisterCreateResourceNode, TxMsgTypes.RegisterCreateResourceNode],
+  [HistoryTxType.RegisterRemoveResourceNode, TxMsgTypes.RegisterRemoveResourceNode],
+  [HistoryTxType.RegisterCreateIndexingNode, TxMsgTypes.RegisterCreateIndexingNode],
+  [HistoryTxType.RegisterRemoveIndexingNode, TxMsgTypes.RegisterRemoveIndexingNode],
+  [HistoryTxType.RegisterIndexingNodeRegistrationVote, TxMsgTypes.RegisterIndexingNodeRegistrationVote],
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
+  [TxMsgTypes.SdsAll, HistoryTxType.All],
+  [TxMsgTypes.Account, HistoryTxType.Account],
   [TxMsgTypes.Send, HistoryTxType.Transfer],
   [TxMsgTypes.Delegate, HistoryTxType.Delegate],
   [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
+  [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
   [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
+  [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
+  [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
+  [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
+  [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
+  [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
+  [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
+  [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
+  [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
 ]);
 
 export interface EmptyObject {
