@@ -53,7 +53,7 @@ class WalletService implements AppWalletService {
   }
 
   callWalletMethod(methodName: string, params?: SimpleObject) {
-    console.log('1 callWalletMethod calling wallet method with params:', methodName, params);
+    // console.log('1 callWalletMethod calling wallet method with params:', methodName, params);
 
     // Get unique id for this call to ensure that incoming responses are unique for each call
     const msgUniqueKey = this.getMsgUniqueKey();
@@ -81,7 +81,7 @@ class WalletService implements AppWalletService {
   receiveWalletMsg(e: any) {
     const { origin, data } = e;
 
-    console.log('19 🚀 ~ file: walletService.js ~ line 80 ~ walletService ~ receiveWalletMsg ~ e', e);
+    // console.log('19 🚀 ~ file: walletService.js ~ line 80 ~ walletService ~ receiveWalletMsg ~ e', e);
 
     const { appKey: senderAppKey, appId: senderAppId } = data;
 
@@ -92,14 +92,14 @@ class WalletService implements AppWalletService {
     //   origin === allowedTargetOrigin ||
     //   (isRunningFromElectronApp && origin === fileOrigin);
 
-    console.log(
-      '20 🚀 ~ file: walletService.js ~ line 88 ~ walletService ~ receiveWalletMsg ~ isOriginValid',
-      isOriginValid,
-    );
+    // console.log(
+    //   '20 🚀 ~ file: walletService.js ~ line 88 ~ walletService ~ receiveWalletMsg ~ isOriginValid',
+    //   isOriginValid,
+    // );
 
     if (!isValidCreds || !isOriginValid) {
-      console.log(`20a Got a msg without required credentials: ${JSON.stringify(e)}`);
-      console.log('20b Given data', data);
+      // console.log(`20a Got a msg without required credentials: ${JSON.stringify(e)}`);
+      // console.log('20b Given data', data);
       return;
     }
 
@@ -108,10 +108,10 @@ class WalletService implements AppWalletService {
     }
 
     if (data.msgResultType === 'SUCCESS') {
-      console.log(
-        '21 🚀 ~ file: walletService.js ~ line 110 ~ walletService ~ receiveWalletMsg ~ isValidCreds',
-        isValidCreds,
-      );
+      // console.log(
+      //   '21 🚀 ~ file: walletService.js ~ line 110 ~ walletService ~ receiveWalletMsg ~ isValidCreds',
+      //   isValidCreds,
+      // );
       this.msgIdPromiseHandlersMap[data.msgUniqueKey].resolve(data.payload);
     } else {
       console.log(

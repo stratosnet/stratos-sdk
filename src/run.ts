@@ -12,9 +12,9 @@ import * as validators from './validators';
 const password = '123456';
 
 const sdkEnvDev = {
-  restUrl: 'https://rest.dev.qsnetwork.info',
-  rpcUrl: 'https://rpc.dev.qsnetwork.info',
-  chainId: 'dev-chain-2',
+  restUrl: 'https://rest-dev.thestratos.org',
+  rpcUrl: 'https://rpc-dev.thestratos.org',
+  chainId: 'dev-chain-38',
   explorerUrl: 'https://explorer.dev.qsnetwork.info',
 };
 
@@ -25,7 +25,7 @@ const sdkEnvTest = {
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
 
-Sdk.init(sdkEnvTest);
+Sdk.init(sdkEnvDev);
 
 /**
  * // temp helper
@@ -552,10 +552,11 @@ const runFaucet = async () => {
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
-// getBalanceCardMetrics();
+getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
 // mainWithdrawAllRewards();
 // mainSdsPrepay();
-runFaucet();
+// runFaucet();
+// mainBalance();

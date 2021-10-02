@@ -152,7 +152,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    cardMetricsResult.unbounding = getBalanceCardMetricValue('ustos', `${amountInWei}`);
+    cardMetricsResult.unbounding = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);

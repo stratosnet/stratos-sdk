@@ -19,8 +19,8 @@ var WalletService = /** @class */ (function () {
         });
     };
     WalletService.prototype.callWalletMethod = function (methodName, params) {
+        // console.log('1 callWalletMethod calling wallet method with params:', methodName, params);
         var _this = this;
-        console.log('1 callWalletMethod calling wallet method with params:', methodName, params);
         // Get unique id for this call to ensure that incoming responses are unique for each call
         var msgUniqueKey = this.getMsgUniqueKey();
         var target = this.fileOrigin;
@@ -43,24 +43,30 @@ var WalletService = /** @class */ (function () {
     };
     WalletService.prototype.receiveWalletMsg = function (e) {
         var origin = e.origin, data = e.data;
-        console.log('19 🚀 ~ file: walletService.js ~ line 80 ~ walletService ~ receiveWalletMsg ~ e', e);
+        // console.log('19 🚀 ~ file: walletService.js ~ line 80 ~ walletService ~ receiveWalletMsg ~ e', e);
         var senderAppKey = data.appKey, senderAppId = data.appId;
         var isValidCreds = senderAppKey === this.appKey && senderAppId === this.appId;
         var isOriginValid = origin === this.fileOrigin;
         // const isOriginValid =
         //   origin === allowedTargetOrigin ||
         //   (isRunningFromElectronApp && origin === fileOrigin);
-        console.log('20 🚀 ~ file: walletService.js ~ line 88 ~ walletService ~ receiveWalletMsg ~ isOriginValid', isOriginValid);
+        // console.log(
+        //   '20 🚀 ~ file: walletService.js ~ line 88 ~ walletService ~ receiveWalletMsg ~ isOriginValid',
+        //   isOriginValid,
+        // );
         if (!isValidCreds || !isOriginValid) {
-            console.log("20a Got a msg without required credentials: " + JSON.stringify(e));
-            console.log('20b Given data', data);
+            // console.log(`20a Got a msg without required credentials: ${JSON.stringify(e)}`);
+            // console.log('20b Given data', data);
             return;
         }
         if (!this.msgIdPromiseHandlersMap[data.msgUniqueKey]) {
             return;
         }
         if (data.msgResultType === 'SUCCESS') {
-            console.log('21 🚀 ~ file: walletService.js ~ line 110 ~ walletService ~ receiveWalletMsg ~ isValidCreds', isValidCreds);
+            // console.log(
+            //   '21 🚀 ~ file: walletService.js ~ line 110 ~ walletService ~ receiveWalletMsg ~ isValidCreds',
+            //   isValidCreds,
+            // );
             this.msgIdPromiseHandlersMap[data.msgUniqueKey].resolve(data.payload);
         }
         else {
