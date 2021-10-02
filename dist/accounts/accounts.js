@@ -198,7 +198,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                         var balanceInWei = (0, bigNumber_1.create)(entry.balance);
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
                     }, 0);
-                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)('ustos', "" + amountInWei);
+                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)('ustos', "" + (amountInWei || ''));
                 }
                 return [4 /*yield*/, (0, network_1.getRewardBalance)(keyPairAddress)];
             case 4:

@@ -71,9 +71,9 @@ var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
 var password = '123456';
 var sdkEnvDev = {
-    restUrl: 'https://rest.dev.qsnetwork.info',
-    rpcUrl: 'https://rpc.dev.qsnetwork.info',
-    chainId: 'dev-chain-2',
+    restUrl: 'https://rest-dev.thestratos.org',
+    rpcUrl: 'https://rpc-dev.thestratos.org',
+    chainId: 'dev-chain-38',
     explorerUrl: 'https://explorer.dev.qsnetwork.info',
 };
 var sdkEnvTest = {
@@ -82,7 +82,7 @@ var sdkEnvTest = {
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
 };
-Sdk_1.default.init(sdkEnvTest);
+Sdk_1.default.init(sdkEnvDev);
 /**
  * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -624,11 +624,12 @@ var runFaucet = function () { return __awaiter(void 0, void 0, void 0, function 
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
-// getBalanceCardMetrics();
+getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
 // mainWithdrawAllRewards();
 // mainSdsPrepay();
-runFaucet();
+// runFaucet();
+// mainBalance();
 //# sourceMappingURL=run.js.map
