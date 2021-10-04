@@ -242,7 +242,7 @@ exports.getMaxAvailableBalance = getMaxAvailableBalance;
 var getAccountTrasactions = function (address, type, page) {
     if (type === void 0) { type = TxTypes.HistoryTxType.All; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var txType, txListResult, response, data, total, parsedData, result;
+        var txType, txListResult, response, error, data, total, parsedData, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -250,30 +250,15 @@ var getAccountTrasactions = function (address, type, page) {
                     return [4 /*yield*/, (0, network_1.getTxList)(address, txType, page)];
                 case 1:
                     txListResult = _a.sent();
-                    response = txListResult.response;
+                    response = txListResult.response, error = txListResult.error;
+                    if (error) {
+                        throw new Error("Could not fetch tx history. Details: \"" + error.message + "\"");
+                    }
                     if (!response) {
                         throw new Error('Could not fetch tx history');
                     }
                     data = response.data, total = response.total;
                     parsedData = data.map(function (txItem) {
-                        // const block = _get(txItem, 'block_height', '') as string;
-                        // const hash = _get(txItem, 'tx_info.tx_hash', '');
-                        // const time = _get(txItem, 'tx_info.time', '');
-                        // const sender = _get(txItem, 'tx_info.transaction_data.txData.sender', '') as string;
-                        // const to = _get(txItem, 'tx_info.transaction_data.txData.data.to', '') as string;
-                        // const originalTransactionData = _get(txItem, 'tx_info.transaction_data', {});
-                        // const validatorAddress = _get(
-                        //   txItem,
-                        //   'tx_info.transaction_data.txData.data.validator_address',
-                        //   '',
-                        // ) as string;
-                        // const txType = _get(txItem, 'tx_info.transaction_data.txType', '') as string;
-                        // const amountValue = _get(txItem, 'tx_info.transaction_data.txData.data.amount[0].amount', '') as string;
-                        // const delegationAmountValue = _get(
-                        //   txItem,
-                        //   'tx_info.transaction_data.txData.data.amount.amount',
-                        //   '',
-                        // ) as string;
                         //
                         var block = (0, get_1.default)(txItem, 'block_height', '');
                         var hash = (0, get_1.default)(txItem, 'tx_info.tx_hash', '');
