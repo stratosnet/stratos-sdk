@@ -73,8 +73,9 @@ var password = '123456';
 var sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
-    chainId: 'dev-chain-38',
-    explorerUrl: 'https://explorer.dev.qsnetwork.info',
+    chainId: 'dev-chain-46',
+    // explorerUrl: 'https://explorer.dev.qsnetwork.info',
+    explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 var sdkEnvTest = {
     restUrl: 'https://rest-test.thestratos.org',
@@ -617,14 +618,14 @@ var runFaucet = function () { return __awaiter(void 0, void 0, void 0, function 
 }); };
 // const
 // getStandardFee();
-// getAccountTrasactions();
+getAccountTrasactions();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
-getBalanceCardMetrics();
+// getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works

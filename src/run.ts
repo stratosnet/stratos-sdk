@@ -14,8 +14,9 @@ const password = '123456';
 const sdkEnvDev = {
   restUrl: 'https://rest-dev.thestratos.org',
   rpcUrl: 'https://rpc-dev.thestratos.org',
-  chainId: 'dev-chain-38',
-  explorerUrl: 'https://explorer.dev.qsnetwork.info',
+  chainId: 'dev-chain-46',
+  // explorerUrl: 'https://explorer.dev.qsnetwork.info',
+  explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 
 const sdkEnvTest = {
@@ -544,7 +545,7 @@ const runFaucet = async () => {
 // const
 
 // getStandardFee();
-// getAccountTrasactions();
+getAccountTrasactions();
 
 // mainSend();
 // mainDelegate();
@@ -552,7 +553,7 @@ const runFaucet = async () => {
 // getDelegatedBalance(); // works
 // getUnboundingBalance(); // cant check
 // getRewardBalance();
-getBalanceCardMetrics();
+// getBalanceCardMetrics();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
