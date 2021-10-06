@@ -9,6 +9,12 @@ const getRestRoute = (): string => {
   return restUrl;
 };
 
+const getRpcRoute = (): string => {
+  const { rpcUrl } = Sdk.environment;
+
+  return rpcUrl;
+};
+
 const getExplorerRoute = (): string => {
   const { explorerUrl } = Sdk.environment;
 
@@ -245,4 +251,21 @@ export const requestBalanceIncrease = async (
   const dataResult = await apiPost(url, {}, config);
 
   return dataResult;
+};
+
+export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
+  const url = `${getRpcRoute()}/status`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getChainId = async () => {
+  const result = await getRpcStatus();
+
+  const { response } = result;
+  const chainId = response?.result?.node_info?.network;
+
+  return chainId;
 };

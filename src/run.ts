@@ -542,10 +542,16 @@ const runFaucet = async () => {
   const result = await accounts.increaseBalance(walletAddress, faucetUrl);
   console.log('faucet result', result);
 };
-// const
+
+const getChainId = async () => {
+  const chain = await Network.getChainId();
+
+  console.log('status result!!', chain);
+};
 
 // getStandardFee();
-getAccountTrasactions();
+// getAccountTrasactions();
+getChainId();
 
 // mainSend();
 // mainDelegate();

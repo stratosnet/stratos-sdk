@@ -222,6 +222,33 @@ export interface StakingPoolResponse {
     bonded_tokens: string;
   };
 }
+export interface RpcStatusResponse {
+  result: {
+    node_info: {
+      protocol_version: {
+        p2p: string;
+        block: string;
+        app: string;
+      };
+      id: string;
+      listen_addr: string;
+      network: string;
+      version: string;
+      channels: string;
+      moniker: string;
+    };
+    sync_info: {
+      latest_block_hash: string;
+      latest_app_hash: string;
+      latest_block_height: string;
+      latest_block_time: string;
+    };
+    validator_info?: {
+      address: string;
+      voting_power: string;
+    };
+  };
+}
 
 export interface ExplorerTxListDataResult extends NetworkAxiosDataResult {
   response?: ExplorerTxListResponse;
@@ -237,4 +264,7 @@ export interface ValidatorDataResult extends NetworkAxiosDataResult {
 
 export interface StakingPoolDataResult extends NetworkAxiosDataResult {
   response?: StakingPoolResponse;
+}
+export interface RpcStatusDataResult extends NetworkAxiosDataResult {
+  response?: RpcStatusResponse;
 }
