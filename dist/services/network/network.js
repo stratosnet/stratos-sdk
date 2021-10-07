@@ -50,13 +50,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
+exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
 var getRestRoute = function () {
     var restUrl = Sdk_1.default.environment.restUrl;
     return restUrl;
+};
+var getRpcRoute = function () {
+    var rpcUrl = Sdk_1.default.environment.rpcUrl;
+    return rpcUrl;
 };
 var getExplorerRoute = function () {
     var explorerUrl = Sdk_1.default.environment.explorerUrl;
@@ -333,4 +337,33 @@ var requestBalanceIncrease = function (walletAddress, faucetUrl, config) { retur
     });
 }); };
 exports.requestBalanceIncrease = requestBalanceIncrease;
+var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, function () {
+    var url, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = getRpcRoute() + "/status";
+                return [4 /*yield*/, (0, exports.apiGet)(url, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.getRpcStatus = getRpcStatus;
+var getChainId = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var result, response, chainId;
+    var _a, _b;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0: return [4 /*yield*/, (0, exports.getRpcStatus)()];
+            case 1:
+                result = _c.sent();
+                response = result.response;
+                chainId = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.network;
+                return [2 /*return*/, chainId];
+        }
+    });
+}); };
+exports.getChainId = getChainId;
 //# sourceMappingURL=network.js.map

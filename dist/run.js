@@ -616,9 +616,21 @@ var runFaucet = function () { return __awaiter(void 0, void 0, void 0, function 
         }
     });
 }); };
-// const
+var getChainId = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var chain;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Network.getChainId()];
+            case 1:
+                chain = _a.sent();
+                console.log('status result!!', chain);
+                return [2 /*return*/];
+        }
+    });
+}); };
 // getStandardFee();
-getAccountTrasactions();
+// getAccountTrasactions();
+getChainId();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works

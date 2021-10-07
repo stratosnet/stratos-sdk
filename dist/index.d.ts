@@ -6,6 +6,7 @@ export * as Sdk from './Sdk';
 export * as transactions from './transactions';
 export * as transactionTypes from './transactions/types';
 export * as validators from './validators';
+export * as networkService from './services/network/network';
 export * as validatorTypes from './validators/types';
 export * as walletService from './services/walletService';
 export * as Transformers from './services/transformers';
