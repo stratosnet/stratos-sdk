@@ -1,18 +1,20 @@
 import * as Types from '../types';
+import { formatBaseTx } from './formatBaseTx';
+import * as NetworkTypes from '../../../network/types';
 
-export const formatTxMsgCreateValidator = (msg: Types.TxMessage, sender?: string): Types.ReturnT | null => {
-  const msgDelegatorAddress = msg?.value?.delegator_address;
-  const resolvedSender = sender || msgDelegatorAddress;
+export const formatTxMsgCreateValidator = (
+  txItem: NetworkTypes.BlockChainTx,
+): Types.FormattedBlockChainTx => {
+  const baseTx = formatBaseTx(txItem);
 
-  if (!resolvedSender) {
-    // throw new Error('Sender was not found') since tx must have a sender
-    return null;
-  }
+  const msg = txItem.tx?.value?.msg[0];
+
+  const msgFrom = msg?.value?.delegator_address || baseTx.eventSender || '';
+  const msgTo = msg?.value?.validator_address || baseTx.to;
 
   return {
-    sender: resolvedSender,
-    nonce: null,
-    data: msg?.value || null,
-    msg: msg,
+    ...baseTx,
+    sender: msgFrom,
+    to: msgTo,
   };
 };
