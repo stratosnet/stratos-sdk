@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TxHistoryTypesMap = exports.TxMsgTypesMap = exports.HistoryTxType = exports.TxMsgTypes = void 0;
+exports.TxHistoryTypesMap = exports.BlockChainTxMsgTypesMap = exports.TxMsgTypesMap = exports.HistoryTxType = exports.TxMsgTypes = void 0;
 var TxMsgTypes;
 (function (TxMsgTypes) {
     TxMsgTypes["Account"] = "cosmos-sdk/Account";
@@ -18,6 +18,7 @@ var TxMsgTypes;
 (function (TxMsgTypes) {
     TxMsgTypes["PotVolumeReport"] = "pot/MsgVolumeReport";
     TxMsgTypes["PotWithdraw"] = "pot/MsgWithdraw";
+    TxMsgTypes["PotFoundationDeposit"] = "pot/MsgFoundationDeposit";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 (function (TxMsgTypes) {
     TxMsgTypes["RegisterCreateResourceNode"] = "register/MsgCreateResourceNode";
@@ -44,6 +45,7 @@ var HistoryTxType;
     HistoryTxType[HistoryTxType["RegisterCreateIndexingNode"] = 13] = "RegisterCreateIndexingNode";
     HistoryTxType[HistoryTxType["RegisterRemoveIndexingNode"] = 14] = "RegisterRemoveIndexingNode";
     HistoryTxType[HistoryTxType["RegisterIndexingNodeRegistrationVote"] = 15] = "RegisterIndexingNodeRegistrationVote";
+    HistoryTxType[HistoryTxType["PotFoundationDeposit"] = 16] = "PotFoundationDeposit";
 })(HistoryTxType = exports.HistoryTxType || (exports.HistoryTxType = {}));
 exports.TxMsgTypesMap = new Map([
     [HistoryTxType.All, TxMsgTypes.SdsAll],
@@ -56,12 +58,21 @@ exports.TxMsgTypesMap = new Map([
     [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
     [HistoryTxType.SdsFileUpload, TxMsgTypes.SdsFileUpload],
     [HistoryTxType.PotVolumeReport, TxMsgTypes.PotVolumeReport],
+    [HistoryTxType.PotFoundationDeposit, TxMsgTypes.PotFoundationDeposit],
     [HistoryTxType.PotWithdraw, TxMsgTypes.PotWithdraw],
     [HistoryTxType.RegisterCreateResourceNode, TxMsgTypes.RegisterCreateResourceNode],
     [HistoryTxType.RegisterRemoveResourceNode, TxMsgTypes.RegisterRemoveResourceNode],
     [HistoryTxType.RegisterCreateIndexingNode, TxMsgTypes.RegisterCreateIndexingNode],
     [HistoryTxType.RegisterRemoveIndexingNode, TxMsgTypes.RegisterRemoveIndexingNode],
     [HistoryTxType.RegisterIndexingNodeRegistrationVote, TxMsgTypes.RegisterIndexingNodeRegistrationVote],
+]);
+exports.BlockChainTxMsgTypesMap = new Map([
+    [HistoryTxType.All, TxMsgTypes.SdsAll],
+    [HistoryTxType.Transfer, 'send'],
+    [HistoryTxType.Delegate, 'delegate'],
+    [HistoryTxType.Undelegate, 'begin_unbonding'],
+    [HistoryTxType.GetReward, 'withdraw_delegator_reward'],
+    [HistoryTxType.SdsPrepay, 'SdsPrepayTx'],
 ]);
 exports.TxHistoryTypesMap = new Map([
     [TxMsgTypes.SdsAll, HistoryTxType.All],

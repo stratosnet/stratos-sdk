@@ -1,2 +1,3 @@
 import * as Types from '../types';
-export declare const formatTxMsgSend: (msg: Types.TxMessage | null, sender?: string | undefined) => Types.ReturnT | null;
+import * as NetworkTypes from '../../../network/types';
+export declare const formatTxMsgSend: (txItem: NetworkTypes.BlockChainTx) => Types.FormattedBlockChainTx;

@@ -628,9 +628,47 @@ var getChainId = function () { return __awaiter(void 0, void 0, void 0, function
         }
     });
 }); };
+var getTxHistoryN = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var zeroAddress, type, txType, result, response, txs, fTx;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+                type = transactionTypes.HistoryTxType.SdsPrepay;
+                txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
+                console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType', txType);
+                return [4 /*yield*/, Network.getTxListBlockchain(zeroAddress, '', 1)];
+            case 1:
+                result = _a.sent();
+                console.log('status result!!', result);
+                response = result.response;
+                if (!response) {
+                    return [2 /*return*/, 'aaa!!!'];
+                }
+                txs = response.txs;
+                fTx = txs[0];
+                return [2 /*return*/, false];
+        }
+    });
+}); };
+var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var zeroAddress, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1)];
+            case 1:
+                result = _a.sent();
+                console.log('hist result!!', result);
+                return [2 /*return*/, true];
+        }
+    });
+}); };
 // getStandardFee();
 // getAccountTrasactions();
-getChainId();
+// getChainId();
+getTxHistory();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works

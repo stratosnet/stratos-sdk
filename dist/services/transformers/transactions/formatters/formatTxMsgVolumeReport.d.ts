@@ -1,2 +1,3 @@
 import * as Types from '../types';
-export declare const formatTxMsgVolumeReport: (msg: Types.TxMessage, sender?: string | undefined) => Types.ReturnT | null;
+import * as NetworkTypes from '../../../network/types';
+export declare const formatTxMsgVolumeReport: (txItem: NetworkTypes.BlockChainTx) => Types.FormattedBlockChainTx;

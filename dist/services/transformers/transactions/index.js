@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTransformer = exports.TxHistoryTypesMap = void 0;
+exports.transformTx = exports.getTransformer = exports.TxHistoryTypesMap = void 0;
 var TxTypes = __importStar(require("../../../transactions/types"));
 var Formatters = __importStar(require("./formatters"));
 exports.TxHistoryTypesMap = new Map([
@@ -27,12 +27,13 @@ exports.TxHistoryTypesMap = new Map([
     [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault],
     [TxTypes.TxMsgTypes.Send, Formatters.formatTxMsgSend],
     [TxTypes.TxMsgTypes.Delegate, Formatters.formatTxMsgDelegate],
-    [TxTypes.TxMsgTypes.Undelegate, Formatters.formatTxdDefault],
-    [TxTypes.TxMsgTypes.WithdrawRewards, Formatters.formatTxdDefault],
+    [TxTypes.TxMsgTypes.Undelegate, Formatters.formatTxMsgUndelegate],
+    [TxTypes.TxMsgTypes.WithdrawRewards, Formatters.formatTxMsgWithdrawDelegationReward],
     [TxTypes.TxMsgTypes.CreateValidator, Formatters.formatTxMsgCreateValidator],
     [TxTypes.TxMsgTypes.SdsPrepay, Formatters.formatTxMsgPrepay],
     [TxTypes.TxMsgTypes.SdsFileUpload, Formatters.formatTxMsgFileUpload],
     [TxTypes.TxMsgTypes.PotVolumeReport, Formatters.formatTxMsgVolumeReport],
+    [TxTypes.TxMsgTypes.PotFoundationDeposit, Formatters.formatTxMsgFoundationDeposit],
     [TxTypes.TxMsgTypes.PotWithdraw, Formatters.formatTxMsgWithdraw],
     [TxTypes.TxMsgTypes.RegisterCreateResourceNode, Formatters.formatTxMsgCreateResourceNode],
     [TxTypes.TxMsgTypes.RegisterRemoveResourceNode, Formatters.formatTxMsgRemoveResourceNode],
@@ -47,4 +48,19 @@ var getTransformer = function (txType) {
     return exports.TxHistoryTypesMap.get(txType) || Formatters.formatTxdDefault;
 };
 exports.getTransformer = getTransformer;
+var transformTx = function (txItem) {
+    var _a, _b, _c;
+    var transactionType = (_c = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0]) === null || _c === void 0 ? void 0 : _c.type;
+    var transactionTransformer = (0, exports.getTransformer)(transactionType);
+    var transformedTransaction;
+    try {
+        transformedTransaction = transactionTransformer(txItem);
+    }
+    catch (err) {
+        console.log("Could not parse txItem with hash \"" + txItem.txhash + "\"", err.message);
+        throw new Error("Could not parse txItem with hash \"" + txItem.txhash + "\"");
+    }
+    return transformedTransaction;
+};
+exports.transformTx = transformTx;
 //# sourceMappingURL=index.js.map

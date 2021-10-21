@@ -5,6 +5,7 @@ export declare const getAccountsData: (address: string, config?: Types.NetworkAx
 export declare const getStakingValidators: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.AccountsDataResult>;
 export declare const getSubmitTransactionData: <T extends string>(data?: T | undefined) => Types.DataResult;
 export declare const submitTransaction: <T extends string>(delegatorAddr: string, data?: T | undefined, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.SubmitTransactionDataResult>;
+export declare const getTxListBlockchain: (address: string, type: string, page?: number, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RestTxListDataResult>;
 export declare const getTxList: (address: string, type: string, page?: number, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.ExplorerTxListDataResult>;
 export declare const getValidatorsList: (status: string, page?: number, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.ValidatorListDataResult>;
 export declare const getValidatorsBondedToDelegatorList: (status: string, delegatorAddress: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.ValidatorListDataResult>;

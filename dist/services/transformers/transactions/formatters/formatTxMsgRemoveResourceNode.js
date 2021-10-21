@@ -1,20 +1,24 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatTxMsgRemoveResourceNode = void 0;
-var formatTxMsgRemoveResourceNode = function (msg, sender) {
-    var _a;
-    var msgReporter = (_a = msg === null || msg === void 0 ? void 0 : msg.value) === null || _a === void 0 ? void 0 : _a.reporter;
-    var resolvedSender = sender || msgReporter;
-    if (!resolvedSender) {
-        // throw new Error('Sender was not found') since tx must have a sender
-        return null;
-    }
-    return {
-        sender: resolvedSender,
-        nonce: null,
-        data: (msg === null || msg === void 0 ? void 0 : msg.value) || null,
-        msg: msg,
-    };
+var formatBaseTx_1 = require("./formatBaseTx");
+var formatTxMsgRemoveResourceNode = function (txItem) {
+    var _a, _b, _c;
+    var baseTx = (0, formatBaseTx_1.formatBaseTx)(txItem);
+    var msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
+    var msgFrom = ((_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.reporter) || baseTx.eventSender || '';
+    return __assign(__assign({}, baseTx), { sender: msgFrom });
 };
 exports.formatTxMsgRemoveResourceNode = formatTxMsgRemoveResourceNode;
 //# sourceMappingURL=formatTxMsgRemoveResourceNode.js.map

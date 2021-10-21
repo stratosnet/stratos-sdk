@@ -1,23 +1,15 @@
-export interface TxAmount {
+import * as TxTypes from '../../../transactions/types';
+import * as NetworkTypes from '../../network/types';
+export declare type TxFormatter = (txItem: NetworkTypes.BlockChainTx) => FormattedBlockChainTx;
+export interface FormattedBlockChainTx {
+    eventSender?: string;
+    sender: string;
+    to: string;
+    type: TxTypes.HistoryTxType;
+    txType: string;
+    block: string;
     amount: string;
-    denom: string;
+    time: string;
+    hash: string;
+    originalTransactionData: NetworkTypes.BlockChainTx;
 }
-export interface TxMsgValue {
-    sender?: string;
-    reporter?: string;
-    delegator_address?: string;
-    from_address?: string;
-    amount?: TxAmount | TxAmount[];
-    to_address?: string;
-}
-export interface TxMessage {
-    value: TxMsgValue;
-    type: string;
-}
-export interface ReturnT {
-    sender: string | null;
-    nonce: null;
-    data: any;
-    msg?: TxMessage;
-}
-export declare type TxFormatter = (msg: TxMessage, sender?: string) => ReturnT | null;

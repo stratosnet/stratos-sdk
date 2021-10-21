@@ -1,3 +1,4 @@
+import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 export declare enum TxMsgTypes {
     Account = "cosmos-sdk/Account",
     Send = "cosmos-sdk/MsgSend",
@@ -13,7 +14,8 @@ export declare enum TxMsgTypes {
 }
 export declare enum TxMsgTypes {
     PotVolumeReport = "pot/MsgVolumeReport",
-    PotWithdraw = "pot/MsgWithdraw"
+    PotWithdraw = "pot/MsgWithdraw",
+    PotFoundationDeposit = "pot/MsgFoundationDeposit"
 }
 export declare enum TxMsgTypes {
     RegisterCreateResourceNode = "register/MsgCreateResourceNode",
@@ -38,9 +40,11 @@ export declare enum HistoryTxType {
     RegisterRemoveResourceNode = 12,
     RegisterCreateIndexingNode = 13,
     RegisterRemoveIndexingNode = 14,
-    RegisterIndexingNodeRegistrationVote = 15
+    RegisterIndexingNodeRegistrationVote = 15,
+    PotFoundationDeposit = 16
 }
 export declare const TxMsgTypesMap: Map<number, string>;
+export declare const BlockChainTxMsgTypesMap: Map<number, string>;
 export declare const TxHistoryTypesMap: Map<string, number>;
 export interface EmptyObject {
     [key: string]: any;
@@ -57,8 +61,8 @@ export interface ParsedTxItem {
     originalTransactionData?: EmptyObject;
 }
 export interface ParsedTxData {
-    data: ParsedTxItem[];
-    total: number;
+    data: FormattedBlockChainTx[];
+    total: string;
     page: number;
 }
 export interface BroadcastResult {

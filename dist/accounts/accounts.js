@@ -66,6 +66,7 @@ var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var network_1 = require("../services/network");
 var TxTypes = __importStar(require("../transactions/types"));
+var transactions_1 = require("../services/transformers/transactions");
 var getAccountsData = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
     var accountsData, err_1;
     return __generator(this, function (_a) {
@@ -242,12 +243,12 @@ exports.getMaxAvailableBalance = getMaxAvailableBalance;
 var getAccountTrasactions = function (address, type, page) {
     if (type === void 0) { type = TxTypes.HistoryTxType.All; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var txType, txListResult, response, error, data, total, parsedData, result;
+        var txType, txListResult, response, error, parsedData, data, total, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll;
-                    return [4 /*yield*/, (0, network_1.getTxList)(address, txType, page)];
+                    txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+                    return [4 /*yield*/, (0, network_1.getTxListBlockchain)(address, txType, page)];
                 case 1:
                     txListResult = _a.sent();
                     response = txListResult.response, error = txListResult.error;
@@ -257,37 +258,17 @@ var getAccountTrasactions = function (address, type, page) {
                     if (!response) {
                         throw new Error('Could not fetch tx history');
                     }
-                    data = response.data, total = response.total;
-                    parsedData = data.map(function (txItem) {
-                        //
-                        var block = (0, get_1.default)(txItem, 'block_height', '');
-                        var hash = (0, get_1.default)(txItem, 'tx_info.tx_hash', '');
-                        var time = (0, get_1.default)(txItem, 'tx_info.time', '');
-                        var sender = (0, get_1.default)(txItem, 'account', '');
-                        var to = (0, get_1.default)(txItem, 'tx_info.transaction_data.value.msg[0].value.to_address', '');
-                        var originalTransactionData = (0, get_1.default)(txItem, 'tx_info.transaction_data.value', {});
-                        var validatorAddress = (0, get_1.default)(txItem, 'tx_info.transaction_data.value.msg[0].value.validator_address', '');
-                        var txType = (0, get_1.default)(txItem, 'tx_info.transaction_data.value.msg[0].type', '');
-                        var amountValue = (0, get_1.default)(txItem, 'tx_info.transaction_data.value.msg[0].value.amount[0].amount', '');
-                        var delegationAmountValue = (0, get_1.default)(txItem, 'tx_info.transaction_data.value.msg[0].value.amount.amount', '');
-                        //
-                        var currentAmount = amountValue || delegationAmountValue || '0';
-                        console.log('🚀 ~ file: accounts.ts ~ line 258 ~ currentAmount', currentAmount);
-                        var balanceInWei = (0, bigNumber_1.create)(currentAmount);
-                        var txAmount = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(4, bigNumber_1.ROUND_DOWN);
-                        var dd = new Date(time);
-                        var resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-                        return {
-                            to: to || validatorAddress,
-                            sender: sender,
-                            type: resolvedType,
-                            txType: txType,
-                            block: "" + block,
-                            amount: txAmount + " STOS",
-                            time: dd.toLocaleString(),
-                            hash: hash,
-                            originalTransactionData: originalTransactionData,
-                        };
+                    parsedData = [];
+                    data = response.txs, total = response.total_count;
+                    console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+                    data.forEach(function (txItem) {
+                        try {
+                            var parsed = (0, transactions_1.transformTx)(txItem);
+                            parsedData.push(parsed);
+                        }
+                        catch (err) {
+                            console.log("Parsing error: " + err.message);
+                        }
                     });
                     result = { data: parsedData, total: total, page: page || 1 };
                     return [2 /*return*/, result];
