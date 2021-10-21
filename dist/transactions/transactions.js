@@ -308,6 +308,7 @@ var getWithdrawalAllRewardTx = function (delegatorAddress, memo) {
                 case 0: return [4 /*yield*/, (0, validators_1.getValidatorsBondedToDelegator)(delegatorAddress)];
                 case 1:
                     vListResult = _a.sent();
+                    console.log('🚀 ~ file: transactions.ts ~ line 249 ~ vListResult', vListResult);
                     withdrawalPayload = vListResult.data;
                     return [4 /*yield*/, (0, exports.getBaseTx)(delegatorAddress, memo, withdrawalPayload.length)];
                 case 2:

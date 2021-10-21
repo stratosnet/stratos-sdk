@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare const hexStrToBuffer: (input: string) => Buffer;
 export declare const hexStrToUint8Array: (input: string) => Uint8Array;
 export declare const bufferToHexStr: (input: Buffer) => string;

@@ -4,6 +4,6 @@ exports.baseGasAmount = exports.perMsgGasAmount = exports.standardFeeAmount = ex
 exports.decimalPrecision = 9;
 exports.decimalShortPrecision = 4;
 exports.standardFeeAmount = 200000; // in ustos
-exports.perMsgGasAmount = 50000; // just a number
-exports.baseGasAmount = 400000; // this number would give gives gas price of 50_000 / 400_000 = 0.125 USTOS per unit
+exports.perMsgGasAmount = 100000; // just a number
+exports.baseGasAmount = 500000; // this number would give gives gas price of 50_000 / 400_000 = 0.125 USTOS per unit
 //# sourceMappingURL=tokens.js.map

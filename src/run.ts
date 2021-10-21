@@ -26,7 +26,7 @@ const sdkEnvTest = {
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
 
-Sdk.init(sdkEnvDev);
+Sdk.init(sdkEnvTest);
 
 /**
  * // temp helper
@@ -307,8 +307,8 @@ const mainWithdrawAllRewards = async () => {
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('delegate withdrawal all result :)', result);
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('delegate withdrawal all result :)', result);
     } catch (error) {
       const err: Error = error as Error;
       console.log('error broadcasting', err.message);
@@ -601,7 +601,7 @@ const getTxHistory = async () => {
 // getStandardFee();
 // getAccountTrasactions();
 // getChainId();
-getTxHistory();
+// getTxHistory();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -612,7 +612,7 @@ getTxHistory();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
-// mainWithdrawAllRewards();
+mainWithdrawAllRewards();
 // mainSdsPrepay();
 // runFaucet();
 // mainBalance();
