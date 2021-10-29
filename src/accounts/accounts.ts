@@ -13,12 +13,15 @@ import {
   getAvailableBalance,
   getDelegatedBalance,
   getRewardBalance,
-  getTxList,
+  // getTxList,
+  getTxListBlockchain,
   getUnboundingBalance,
   networkTypes,
   requestBalanceIncrease,
 } from '../services/network';
 import * as TxTypes from '../transactions/types';
+import { transformTx } from '../services/transformers/transactions';
+import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 import * as Types from './types';
 
 export interface BalanceCardMetrics {
@@ -200,8 +203,12 @@ export const getAccountTrasactions = async (
   type = TxTypes.HistoryTxType.All,
   page?: number,
 ): Promise<TxTypes.ParsedTxData> => {
-  const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
-  const txListResult = await getTxList(address, txType, page);
+  // const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
+
+  const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+
+  // const txListResult = await getTxList(address, txType, page);
+  const txListResult = await getTxListBlockchain(address, txType, page);
 
   const { response, error } = txListResult;
 
@@ -213,66 +220,18 @@ export const getAccountTrasactions = async (
     throw new Error('Could not fetch tx history');
   }
 
-  const { data, total } = response;
+  const parsedData: FormattedBlockChainTx[] = [];
 
-  const parsedData: TxTypes.ParsedTxItem[] = data.map(txItem => {
-    //
-    const block = _get(txItem, 'block_height', '') as string;
+  const { txs: data, total_count: total } = response;
+  console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
 
-    const hash = _get(txItem, 'tx_info.tx_hash', '');
-
-    const time = _get(txItem, 'tx_info.time', '');
-
-    const sender = _get(txItem, 'account', '') as string;
-
-    const to = _get(txItem, 'tx_info.transaction_data.value.msg[0].value.to_address', '') as string;
-
-    const originalTransactionData = _get(txItem, 'tx_info.transaction_data.value', {});
-
-    const validatorAddress = _get(
-      txItem,
-      'tx_info.transaction_data.value.msg[0].value.validator_address',
-      '',
-    ) as string;
-
-    const txType = _get(txItem, 'tx_info.transaction_data.value.msg[0].type', '') as string;
-
-    const amountValue = _get(
-      txItem,
-      'tx_info.transaction_data.value.msg[0].value.amount[0].amount',
-      '',
-    ) as string;
-
-    const delegationAmountValue = _get(
-      txItem,
-      'tx_info.transaction_data.value.msg[0].value.amount.amount',
-      '',
-    ) as string;
-    //
-
-    const currentAmount = amountValue || delegationAmountValue || '0';
-
-    console.log('🚀 ~ file: accounts.ts ~ line 258 ~ currentAmount', currentAmount);
-
-    const balanceInWei = createBigNumber(currentAmount);
-
-    const txAmount = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
-
-    const dd = new Date(time);
-
-    const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-
-    return {
-      to: to || validatorAddress,
-      sender,
-      type: resolvedType,
-      txType,
-      block: `${block}`,
-      amount: `${txAmount} STOS`,
-      time: dd.toLocaleString(),
-      hash,
-      originalTransactionData,
-    };
+  data.forEach(txItem => {
+    try {
+      const parsed = transformTx(txItem);
+      parsedData.push(parsed);
+    } catch (err) {
+      console.log(`Parsing error: ${(err as Error).message}`);
+    }
   });
 
   const result = { data: parsedData, total, page: page || 1 };

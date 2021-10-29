@@ -1,37 +1,24 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatTxMsgSend = void 0;
-// @todo remove return null and add proper error catch
-var formatTxMsgSend = function (msg, sender) {
+var formatBaseTx_1 = require("./formatBaseTx");
+var formatTxMsgSend = function (txItem) {
     var _a, _b, _c;
-    var msgFrom = (_a = msg === null || msg === void 0 ? void 0 : msg.value) === null || _a === void 0 ? void 0 : _a.from_address;
-    var msgTo = (_b = msg === null || msg === void 0 ? void 0 : msg.value) === null || _b === void 0 ? void 0 : _b.to_address;
-    var msgAmount = (_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.amount;
-    var resolvedSender = sender || msgFrom;
-    if (!resolvedSender) {
-        // throw new Error('Sender was not found') since Send must have a sender
-        return null;
-    }
-    if (!msgTo) {
-        // throw new Error('Addressat was not found') since Send must have a receiver
-        return null;
-    }
-    if (!Array.isArray(msgAmount)) {
-        // throw new Error since Send tx must an array of amounts
-        return null;
-    }
-    var amounts = msgAmount.map(function (element) { return ({
-        amount: element.amount,
-        denom: element.denom,
-    }); });
-    return {
-        sender: resolvedSender,
-        nonce: null,
-        data: {
-            to: msgTo,
-            amount: amounts,
-        },
-    };
+    var baseTx = (0, formatBaseTx_1.formatBaseTx)(txItem);
+    var msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
+    var msgFrom = ((_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.from_address) || baseTx.eventSender || '';
+    return __assign(__assign({}, baseTx), { sender: msgFrom });
 };
 exports.formatTxMsgSend = formatTxMsgSend;
 //# sourceMappingURL=formatTxMsgSend.js.map

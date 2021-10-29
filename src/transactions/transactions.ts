@@ -246,6 +246,7 @@ export const getWithdrawalAllRewardTx = async (
   memo = '',
 ): Promise<Types.TransactionMessage> => {
   const vListResult = await getValidatorsBondedToDelegator(delegatorAddress);
+  console.log('🚀 ~ file: transactions.ts ~ line 249 ~ vListResult', vListResult);
 
   const { data: withdrawalPayload } = vListResult;
 

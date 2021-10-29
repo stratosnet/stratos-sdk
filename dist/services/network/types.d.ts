@@ -191,6 +191,74 @@ export interface StakingPoolResponse {
         bonded_tokens: string;
     };
 }
+export interface BlockChainTxEventAttribute {
+    key: string;
+    value: string;
+}
+export interface BlockChainTxEvent {
+    type: string;
+    attributes: BlockChainTxEventAttribute[];
+}
+export interface BlockChainTxLog {
+    msg_index: string;
+    log: string;
+    events: BlockChainTxEvent[];
+}
+export interface BlockChainTxMessage {
+    type: string;
+    value: {
+        from_address?: string;
+        sender?: string;
+        reporter?: string;
+        delegator_address?: string;
+        address?: string;
+        from?: string;
+        validator_address?: string;
+        to_address?: string;
+        amount: TxAmount | TxAmount[];
+    };
+}
+export interface BlockChainSentTxMessage extends BlockChainTxMessage {
+    value: {
+        from_address: string;
+        to_address: string;
+        amount: TxAmount[];
+    };
+}
+export interface BlockChainDelegatedTxMessage extends BlockChainTxMessage {
+    value: {
+        delegator_address: string;
+        validator_address: string;
+        amount: TxAmount;
+    };
+}
+export interface BlockChainSubmittedTx {
+    type: string;
+    value: {
+        msg: BlockChainTxMessage[];
+        fee: TxFee;
+        signatures: TxSignature[];
+        memo: string;
+    };
+}
+export interface BlockChainTx {
+    height: string;
+    txhash: string;
+    raw_log: string;
+    logs: BlockChainTxLog[];
+    gas_wanted: string;
+    gas_used: string;
+    tx: BlockChainSubmittedTx;
+    timestamp: string;
+}
+export interface RestTxListResponse {
+    total_count: string;
+    count: string;
+    page_number: string;
+    page_total: string;
+    limit: string;
+    txs: BlockChainTx[];
+}
 export interface RpcStatusResponse {
     result: {
         node_info: {
@@ -232,4 +300,7 @@ export interface StakingPoolDataResult extends NetworkAxiosDataResult {
 }
 export interface RpcStatusDataResult extends NetworkAxiosDataResult {
     response?: RpcStatusResponse;
+}
+export interface RestTxListDataResult extends NetworkAxiosDataResult {
+    response?: RestTxListResponse;
 }

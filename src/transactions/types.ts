@@ -1,3 +1,5 @@
+import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+
 export enum TxMsgTypes {
   Account = 'cosmos-sdk/Account', // Account 10
   Send = 'cosmos-sdk/MsgSend', // Transfer 1
@@ -16,6 +18,7 @@ export enum TxMsgTypes {
 export enum TxMsgTypes {
   PotVolumeReport = 'pot/MsgVolumeReport', // PotVolumeReport 7
   PotWithdraw = 'pot/MsgWithdraw', // PotWithdraw 8
+  PotFoundationDeposit = 'pot/MsgFoundationDeposit', // PotFoundationDeposit 16
 }
 
 export enum TxMsgTypes {
@@ -43,6 +46,7 @@ export enum HistoryTxType {
   RegisterCreateIndexingNode = 13,
   RegisterRemoveIndexingNode = 14,
   RegisterIndexingNodeRegistrationVote = 15,
+  PotFoundationDeposit = 16,
 }
 
 export const TxMsgTypesMap = new Map<number, string>([
@@ -56,12 +60,22 @@ export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
   [HistoryTxType.SdsFileUpload, TxMsgTypes.SdsFileUpload],
   [HistoryTxType.PotVolumeReport, TxMsgTypes.PotVolumeReport],
+  [HistoryTxType.PotFoundationDeposit, TxMsgTypes.PotFoundationDeposit],
   [HistoryTxType.PotWithdraw, TxMsgTypes.PotWithdraw],
   [HistoryTxType.RegisterCreateResourceNode, TxMsgTypes.RegisterCreateResourceNode],
   [HistoryTxType.RegisterRemoveResourceNode, TxMsgTypes.RegisterRemoveResourceNode],
   [HistoryTxType.RegisterCreateIndexingNode, TxMsgTypes.RegisterCreateIndexingNode],
   [HistoryTxType.RegisterRemoveIndexingNode, TxMsgTypes.RegisterRemoveIndexingNode],
   [HistoryTxType.RegisterIndexingNodeRegistrationVote, TxMsgTypes.RegisterIndexingNodeRegistrationVote],
+]);
+
+export const BlockChainTxMsgTypesMap = new Map<number, string>([
+  [HistoryTxType.All, TxMsgTypes.SdsAll],
+  [HistoryTxType.Transfer, 'send'],
+  [HistoryTxType.Delegate, 'delegate'],
+  [HistoryTxType.Undelegate, 'begin_unbonding'],
+  [HistoryTxType.GetReward, 'withdraw_delegator_reward'],
+  [HistoryTxType.SdsPrepay, 'SdsPrepayTx'],
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
@@ -100,8 +114,8 @@ export interface ParsedTxItem {
 }
 
 export interface ParsedTxData {
-  data: ParsedTxItem[];
-  total: number;
+  data: FormattedBlockChainTx[];
+  total: string;
   page: number;
 }
 

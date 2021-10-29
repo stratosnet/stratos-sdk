@@ -83,7 +83,7 @@ var sdkEnvTest = {
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
 };
-Sdk_1.default.init(sdkEnvDev);
+Sdk_1.default.init(sdkEnvTest);
 /**
  * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -314,7 +314,7 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
 }); };
 // cosmosjs withdraw all rewards
 var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_5, err;
+    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -337,22 +337,18 @@ var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void
             case 3:
                 sendTxMessage = _a.sent();
                 signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
-                console.log('signedTx', JSON.stringify(signedTx, null, 2));
-                _a.label = 4;
-            case 4:
-                _a.trys.push([4, 6, , 7]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 5:
-                result = _a.sent();
-                console.log('delegate withdrawal all result :)', result);
-                return [3 /*break*/, 7];
-            case 6:
-                error_5 = _a.sent();
-                err = error_5;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                if (signedTx) {
+                    console.log('signedTx', JSON.stringify(signedTx, null, 2));
+                    try {
+                        // const result = await transactions.broadcast(signedTx);
+                        // console.log('delegate withdrawal all result :)', result);
+                    }
+                    catch (error) {
+                        err = error;
+                        console.log('error broadcasting', err.message);
+                    }
+                }
+                return [2 /*return*/];
         }
     });
 }); };
@@ -628,9 +624,47 @@ var getChainId = function () { return __awaiter(void 0, void 0, void 0, function
         }
     });
 }); };
+var getTxHistoryN = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var zeroAddress, type, txType, result, response, txs, fTx;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+                type = transactionTypes.HistoryTxType.SdsPrepay;
+                txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
+                console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType', txType);
+                return [4 /*yield*/, Network.getTxListBlockchain(zeroAddress, '', 1)];
+            case 1:
+                result = _a.sent();
+                console.log('status result!!', result);
+                response = result.response;
+                if (!response) {
+                    return [2 /*return*/, 'aaa!!!'];
+                }
+                txs = response.txs;
+                fTx = txs[0];
+                return [2 /*return*/, false];
+        }
+    });
+}); };
+var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var zeroAddress, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1)];
+            case 1:
+                result = _a.sent();
+                console.log('hist result!!', result);
+                return [2 /*return*/, true];
+        }
+    });
+}); };
 // getStandardFee();
 // getAccountTrasactions();
-getChainId();
+// getChainId();
+// getTxHistory();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -641,7 +675,7 @@ getChainId();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
-// mainWithdrawAllRewards();
+mainWithdrawAllRewards();
 // mainSdsPrepay();
 // runFaucet();
 // mainBalance();

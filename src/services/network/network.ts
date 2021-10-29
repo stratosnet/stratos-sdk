@@ -122,6 +122,34 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   return dataResult;
 };
 
+export const getTxListBlockchain = async (
+  address: string,
+  type: string,
+  page = 1,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.RestTxListDataResult> => {
+  // const url = `${getRestRoute()}/txs?message.action=send&message.sender=${address}`;
+
+  const url = `${getRestRoute()}/txs`;
+
+  const params: { page: number; 'message.sender': string; 'message.action'?: string; limit: number } = {
+    page,
+    limit: 3,
+    'message.sender': address,
+  };
+
+  if (type) {
+    params['message.action'] = type;
+  }
+
+  const dataResult = await apiGet(url, {
+    ...config,
+    params,
+  });
+
+  return dataResult;
+};
+
 export const getTxList = async (
   address: string,
   type: string,

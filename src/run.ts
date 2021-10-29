@@ -26,7 +26,7 @@ const sdkEnvTest = {
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
 
-Sdk.init(sdkEnvDev);
+Sdk.init(sdkEnvTest);
 
 /**
  * // temp helper
@@ -307,8 +307,8 @@ const mainWithdrawAllRewards = async () => {
   if (signedTx) {
     console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('delegate withdrawal all result :)', result);
+      // const result = await transactions.broadcast(signedTx);
+      // console.log('delegate withdrawal all result :)', result);
     } catch (error) {
       const err: Error = error as Error;
       console.log('error broadcasting', err.message);
@@ -549,10 +549,59 @@ const getChainId = async () => {
   console.log('status result!!', chain);
 };
 
+const getTxHistoryN = async () => {
+  const zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+
+  const type = transactionTypes.HistoryTxType.SdsPrepay;
+  const txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
+  console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType', txType);
+
+  const result = await Network.getTxListBlockchain(zeroAddress, '', 1);
+
+  console.log('status result!!', result);
+
+  const { response } = result;
+
+  if (!response) {
+    return 'aaa!!!';
+  }
+  const { txs } = response;
+
+  const fTx = txs[0];
+
+  return false;
+
+  // console.log('txs', txs);
+  // console.log('txs', JSON.stringify(txs, null, 2));
+};
+
+const getTxHistory = async () => {
+  const zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+
+  const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+
+  console.log('hist result!!', result);
+
+  return true;
+  // const { response } = result;
+
+  // if (!response) {
+  //   return 'aaa!!!';
+  // }
+  // const { txs } = response;
+
+  // const fTx = txs[0];
+
+  // console.log('txs', txs);
+  // console.log('txs', JSON.stringify(txs, null, 2));
+};
+
 // getStandardFee();
 // getAccountTrasactions();
-getChainId();
-
+// getChainId();
+// getTxHistory();
 // mainSend();
 // mainDelegate();
 // getAvailableBalance(); //works
@@ -563,7 +612,7 @@ getChainId();
 // formatBalanceFromWei();
 // mainUndelegate();
 // mainWithdrawRewards(); // works
-// mainWithdrawAllRewards();
+mainWithdrawAllRewards();
 // mainSdsPrepay();
 // runFaucet();
 // mainBalance();

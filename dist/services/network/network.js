@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
+exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
@@ -181,6 +181,31 @@ var submitTransaction = function (delegatorAddr, data, config) { return __awaite
     });
 }); };
 exports.submitTransaction = submitTransaction;
+var getTxListBlockchain = function (address, type, page, config) {
+    if (page === void 0) { page = 1; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, params, dataResult;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = getRestRoute() + "/txs";
+                    params = {
+                        page: page,
+                        limit: 3,
+                        'message.sender': address,
+                    };
+                    if (type) {
+                        params['message.action'] = type;
+                    }
+                    return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: params }))];
+                case 1:
+                    dataResult = _a.sent();
+                    return [2 /*return*/, dataResult];
+            }
+        });
+    });
+};
+exports.getTxListBlockchain = getTxListBlockchain;
 var getTxList = function (address, type, page, config) {
     if (page === void 0) { page = 1; }
     return __awaiter(void 0, void 0, void 0, function () {
