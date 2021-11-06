@@ -76,18 +76,14 @@ athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade 
 **Important** write this mnemonic phrase in a safe place.
 It is the only way to recover your account if you ever forget your password.
 
-hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion
+XXX
 
    */
 
   // const stringMnemonic =
   //   'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
 
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
-
-  const firstUserMnemonic =
-    'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -105,19 +101,9 @@ hope skin cliff bench vanish motion swear reveal police cash street example heal
 
 // cosmosjs send
 const mainSend = async () => {
-  // const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
 
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
-  // const encryptedMnenomicFromKeyChain =
-  // 'U2FsdGVkX191iHA1MroblptDqlsyCHzBzFiG4Q9STT2wxnWM39QbCevQgsyyfZNEQxCPmNYPrDwuYLInXRxtMD8FR92LB3Psf0Gc7aSI9JuyDSrKrJHlspTRkr4SNsHMbWSxltjcLdsZiQlqUTkbQR1Ogkngg2y022fkoPIvjAX66GBSnKR/e88feyDbHzUYhmpKBE6222eyUOZrYOnUgS4tbqPbkH2K22ZGzCDRbQs=';
-  // const firstUserMnemonic =
-  //   'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
-  /**
-   * account: "w1"
-address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
-   */
+  const zeroUserMnemonic = 'XXX';
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -130,8 +116,6 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
 
   const fromAddress = keyPairZero.address;
 
-  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
-
   const sendAmount = 1;
 
   const sendTxMessage = await transactions.getSendTx(fromAddress, [
@@ -139,6 +123,7 @@ address: "cosmos1avx4zwskj36tmktp0mj60qyxffu7ep9mwmjjd6"
     { amount: 2, toAddress: firstAddress },
     { amount: 3, toAddress: firstAddress },
   ]);
+
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -159,8 +144,7 @@ const mainDelegate = async () => {
   // const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
   const validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
 
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -171,22 +155,14 @@ const mainDelegate = async () => {
   if (!keyPairZero) {
     return;
   }
+
   const delegatorAddress = keyPairZero.address;
-
-  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
-
-  // const result = await delegate(10, keyPairZero, delegatorAddress, validatorAddress);
-
-  // console.log('result!!', result);
-
-  // const myTx = await transactions.getDelegateTx(10, keyPairZero.address, delegatorAddress, validatorAddress);
-  // const myTxMsg = cosmos.newStdMsg(myTx);
-  // const signedTx = cosmos.sign(myTxMsg, pkey);
 
   const sendTxMessage = await transactions.getDelegateTx(delegatorAddress, [
     { amount: 1, validatorAddress },
     { amount: 2, validatorAddress },
   ]);
+
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -205,8 +181,7 @@ const mainDelegate = async () => {
 const mainUndelegate = async () => {
   const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
 
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -217,14 +192,14 @@ const mainUndelegate = async () => {
   if (!keyPairZero) {
     return;
   }
-  const delegatorAddress = keyPairZero.address;
 
-  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  const delegatorAddress = keyPairZero.address;
 
   const sendTxMessage = await transactions.getUnDelegateTx(delegatorAddress, [
     { amount: 0.3, validatorAddress },
     { amount: 0.2, validatorAddress },
   ]);
+
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -243,8 +218,7 @@ const mainUndelegate = async () => {
 const mainWithdrawRewards = async () => {
   const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
 
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -255,14 +229,14 @@ const mainWithdrawRewards = async () => {
   if (!keyPairZero) {
     return;
   }
-  const delegatorAddress = keyPairZero.address;
 
-  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
+  const delegatorAddress = keyPairZero.address;
 
   const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, [
     { validatorAddress },
     { validatorAddress },
   ]);
+
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -279,10 +253,7 @@ const mainWithdrawRewards = async () => {
 
 // cosmosjs withdraw all rewards
 const mainWithdrawAllRewards = async () => {
-  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -293,15 +264,11 @@ const mainWithdrawAllRewards = async () => {
   if (!keyPairZero) {
     return;
   }
+
   const delegatorAddress = keyPairZero.address;
   console.log('🚀 ~ file: run.ts ~ line 295 ~ mainWithdrawAllRewards ~ delegatorAddress', delegatorAddress);
 
-  // const vList = await validators.getValidatorsBondedToDelegator(delegatorAddress);
-  // console.log('🚀 ~ file: run.ts ~ line 297 ~ mainWithdrawAllRewards ~ vList', vList);
-
-  // const t = await
   const sendTxMessage = await transactions.getWithdrawalAllRewardTx(delegatorAddress);
-  // console.log('🚀 ~ file: run.ts ~ line 303 ~ mainWithdrawAllRewards ~ sendTxMessage', sendTxMessage);
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   if (signedTx) {
@@ -318,8 +285,7 @@ const mainWithdrawAllRewards = async () => {
 
 // cosmosjs withdraw rewards
 const mainSdsPrepay = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -331,9 +297,6 @@ const mainSdsPrepay = async () => {
     return;
   }
 
-  // const pkey = uint8ArrayToBuffer(fromHex(keyPairZero.privateKey));
-
-  // const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, 10);
   const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }]);
 
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
@@ -361,29 +324,10 @@ const getAccountTrasactions = async () => {
 const getValidators = async () => {
   const vData = await validators.getValidators();
   console.log('vData');
-  // const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-
-  // const vPool = await getStakingPool();
-
-  // console.log('vPool', vPool);
-  // const vList = await getValidatorsList('bonded');
-
-  // console.log('vList!!', vList);
-  // console.log('vList response', vList.response);
-  // console.log('vList description', vList!.response.result[0].description);
-  // console.log('vList comission', vList!.response.result[0].commission);
-
-  // const v = await getValidator('stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63');
-  // console.log('v!', v);
-  // const {
-  //   result: [firstV],
-  // } = vList.response;
-  // console.log('fVal', firstV);
 };
 
 const mainBalance = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XZX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -403,8 +347,7 @@ const mainBalance = async () => {
 };
 
 const getAvailableBalance = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -427,8 +370,7 @@ const getAvailableBalance = async () => {
 };
 
 const getDelegatedBalance = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -451,8 +393,7 @@ const getDelegatedBalance = async () => {
 };
 
 const getUnboundingBalance = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -475,8 +416,7 @@ const getUnboundingBalance = async () => {
 };
 
 const getRewardBalance = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -499,8 +439,7 @@ const getRewardBalance = async () => {
 };
 
 const getBalanceCardMetrics = async () => {
-  const zeroUserMnemonic =
-    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -511,6 +450,7 @@ const getBalanceCardMetrics = async () => {
   if (!keyPairZero) {
     return;
   }
+
   console.log('keyPairZero', keyPairZero.address);
 
   const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
@@ -537,7 +477,6 @@ const getStandardFee = () => {
 const runFaucet = async () => {
   const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
   const faucetUrl = 'https://faucet-test.thestratos.org/faucet';
-  // const result = await Network.requestBalanceIncrease(walletAddress, faucetUrl);
 
   const result = await accounts.increaseBalance(walletAddress, faucetUrl);
   console.log('faucet result', result);
@@ -570,32 +509,16 @@ const getTxHistoryN = async () => {
   const fTx = txs[0];
 
   return false;
-
-  // console.log('txs', txs);
-  // console.log('txs', JSON.stringify(txs, null, 2));
 };
 
 const getTxHistory = async () => {
   const zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-
-  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
 
   const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
 
   console.log('hist result!!', result);
 
   return true;
-  // const { response } = result;
-
-  // if (!response) {
-  //   return 'aaa!!!';
-  // }
-  // const { txs } = response;
-
-  // const fTx = txs[0];
-
-  // console.log('txs', txs);
-  // console.log('txs', JSON.stringify(txs, null, 2));
 };
 
 // getStandardFee();
