@@ -9,13 +9,12 @@ import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
-const password = '123456';
+const password = 'XXXX';
 
 const sdkEnvDev = {
   restUrl: 'https://rest-dev.thestratos.org',
   rpcUrl: 'https://rpc-dev.thestratos.org',
   chainId: 'dev-chain-46',
-  // explorerUrl: 'https://explorer.dev.qsnetwork.info',
   explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 
@@ -29,7 +28,6 @@ const sdkEnvTest = {
 Sdk.init(sdkEnvTest);
 
 /**
- * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
@@ -46,43 +44,6 @@ export function makeStratosHubPath(a: number): HdPath {
 
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
-  /**
-   *
-- name: user1
-  type: local
-  address: st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j
-  pubkey: stpub1addwnpepqfafvmf6nvvqvsxhettht004fxmnp464u6y4gqfl6vfchsg0t0hhuqwmacg
-  mnemonic: ""
-  threshold: 0
-  pubkeys: []
-
-
-**Important** write this mnemonic phrase in a safe place.
-It is the only way to recover your account if you ever forget your password.
-
-athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach
-
-
-
-- name: user0
-  type: local
-  address: st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6
-  pubkey: stpub1addwnpepqdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn524sdzmh
-  mnemonic: ""
-  threshold: 0
-  pubkeys: []
-
-
-**Important** write this mnemonic phrase in a safe place.
-It is the only way to recover your account if you ever forget your password.
-
-XXX
-
-   */
-
-  // const stringMnemonic =
-  //   'vacant cool enlist kiss van despair ethics silly route master funny door gossip athlete sword language argue alien any item desk mystery tray parade';
-
   const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -141,7 +102,6 @@ const mainSend = async () => {
 
 // cosmosjs delegate
 const mainDelegate = async () => {
-  // const validatorAddress = 'stvaloper1k4ach36c8qwuckefz94vy83y308h5uzy5ukl63';
   const validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
 
   const zeroUserMnemonic = 'XXX';
@@ -521,21 +481,4 @@ const getTxHistory = async () => {
   return true;
 };
 
-// getStandardFee();
-// getAccountTrasactions();
-// getChainId();
-// getTxHistory();
-// mainSend();
-// mainDelegate();
-// getAvailableBalance(); //works
-// getDelegatedBalance(); // works
-// getUnboundingBalance(); // cant check
-// getRewardBalance();
-// getBalanceCardMetrics();
-// formatBalanceFromWei();
-// mainUndelegate();
-// mainWithdrawRewards(); // works
 mainWithdrawAllRewards();
-// mainSdsPrepay();
-// runFaucet();
-// mainBalance();

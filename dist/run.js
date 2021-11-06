@@ -69,12 +69,11 @@ var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
-var password = '123456';
+var password = 'XXXX';
 var sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
     chainId: 'dev-chain-46',
-    // explorerUrl: 'https://explorer.dev.qsnetwork.info',
     explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 var sdkEnvTest = {
@@ -85,7 +84,6 @@ var sdkEnvTest = {
 };
 Sdk_1.default.init(sdkEnvTest);
 /**
- * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
@@ -659,22 +657,5 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-// getStandardFee();
-// getAccountTrasactions();
-// getChainId();
-// getTxHistory();
-// mainSend();
-// mainDelegate();
-// getAvailableBalance(); //works
-// getDelegatedBalance(); // works
-// getUnboundingBalance(); // cant check
-// getRewardBalance();
-// getBalanceCardMetrics();
-// formatBalanceFromWei();
-// mainUndelegate();
-// mainWithdrawRewards(); // works
 mainWithdrawAllRewards();
-// mainSdsPrepay();
-// runFaucet();
-// mainBalance();
 //# sourceMappingURL=run.js.map
