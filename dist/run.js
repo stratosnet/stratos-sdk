@@ -69,12 +69,11 @@ var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
-var password = '123456';
+var password = 'XXXX';
 var sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
     chainId: 'dev-chain-46',
-    // explorerUrl: 'https://explorer.dev.qsnetwork.info',
     explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 var sdkEnvTest = {
@@ -85,7 +84,6 @@ var sdkEnvTest = {
 };
 Sdk_1.default.init(sdkEnvTest);
 /**
- * // temp helper
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
@@ -102,12 +100,11 @@ function makeStratosHubPath(a) {
 exports.makeStratosHubPath = makeStratosHubPath;
 // creates an account and derives 2 keypairs
 var mainFour = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, firstUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne;
+    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
-                firstUserMnemonic = 'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -133,7 +130,7 @@ var mainSend = function () { return __awaiter(void 0, void 0, void 0, function (
         switch (_a.label) {
             case 0:
                 firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -181,7 +178,7 @@ var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, functi
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -227,7 +224,7 @@ var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, func
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -273,7 +270,7 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -314,12 +311,11 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
 }); };
 // cosmosjs withdraw all rewards
 var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
+    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -358,7 +354,7 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -424,7 +420,7 @@ var mainBalance = function () { return __awaiter(void 0, void 0, void 0, functio
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XZX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -451,7 +447,7 @@ var getAvailableBalance = function () { return __awaiter(void 0, void 0, void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -479,7 +475,7 @@ var getDelegatedBalance = function () { return __awaiter(void 0, void 0, void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -507,7 +503,7 @@ var getUnboundingBalance = function () { return __awaiter(void 0, void 0, void 0
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -535,7 +531,7 @@ var getRewardBalance = function () { return __awaiter(void 0, void 0, void 0, fu
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -563,7 +559,7 @@ var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -661,22 +657,5 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-// getStandardFee();
-// getAccountTrasactions();
-// getChainId();
-// getTxHistory();
-// mainSend();
-// mainDelegate();
-// getAvailableBalance(); //works
-// getDelegatedBalance(); // works
-// getUnboundingBalance(); // cant check
-// getRewardBalance();
-// getBalanceCardMetrics();
-// formatBalanceFromWei();
-// mainUndelegate();
-// mainWithdrawRewards(); // works
 mainWithdrawAllRewards();
-// mainSdsPrepay();
-// runFaucet();
-// mainBalance();
 //# sourceMappingURL=run.js.map
