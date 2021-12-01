@@ -8,8 +8,13 @@ import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const password = 'XXXX';
+
+const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
 
 const sdkEnvDev = {
   restUrl: 'https://rest-dev.thestratos.org',
@@ -24,8 +29,6 @@ const sdkEnvTest = {
   chainId: 'test-chain-1',
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
-
-Sdk.init(sdkEnvTest);
 
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -44,8 +47,6 @@ export function makeStratosHubPath(a: number): HdPath {
 
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
   console.log('masterKeySeed!', masterKeySeed);
@@ -64,7 +65,6 @@ const mainFour = async () => {
 const mainSend = async () => {
   const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
 
-  const zeroUserMnemonic = 'XXX';
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -104,8 +104,6 @@ const mainSend = async () => {
 const mainDelegate = async () => {
   const validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
 
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -140,8 +138,6 @@ const mainDelegate = async () => {
 // cosmosjs undelegate
 const mainUndelegate = async () => {
   const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-
-  const zeroUserMnemonic = 'XXX';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -178,8 +174,6 @@ const mainUndelegate = async () => {
 const mainWithdrawRewards = async () => {
   const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
 
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -213,8 +207,6 @@ const mainWithdrawRewards = async () => {
 
 // cosmosjs withdraw all rewards
 const mainWithdrawAllRewards = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -245,8 +237,6 @@ const mainWithdrawAllRewards = async () => {
 
 // cosmosjs withdraw rewards
 const mainSdsPrepay = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -287,8 +277,6 @@ const getValidators = async () => {
 };
 
 const mainBalance = async () => {
-  const zeroUserMnemonic = 'XZX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -307,8 +295,6 @@ const mainBalance = async () => {
 };
 
 const getAvailableBalance = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -330,8 +316,6 @@ const getAvailableBalance = async () => {
 };
 
 const getDelegatedBalance = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -353,8 +337,6 @@ const getDelegatedBalance = async () => {
 };
 
 const getUnboundingBalance = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -376,8 +358,6 @@ const getUnboundingBalance = async () => {
 };
 
 const getRewardBalance = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -399,21 +379,19 @@ const getRewardBalance = async () => {
 };
 
 const getBalanceCardMetrics = async () => {
-  const zeroUserMnemonic = 'XXX';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(2, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
   }
 
-  console.log('keyPairZero', keyPairZero.address);
+  console.log('keyPairZero', keyPairZero);
 
-  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const delegatorAddress = keyPairZero.address;
   const b = await accounts.getBalanceCardMetrics(delegatorAddress);
 
   console.log('our balanace card metrics ', b);
@@ -481,4 +459,23 @@ const getTxHistory = async () => {
   return true;
 };
 
-mainWithdrawAllRewards();
+const main = async () => {
+  let resolvedChainID;
+
+  try {
+    resolvedChainID = await Network.getChainId();
+  } catch (error) {
+    console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
+    throw new Error('Could not resolve chain id');
+  }
+
+  if (!resolvedChainID) {
+    throw new Error('Chain id is empty. Exiting');
+  }
+
+  Sdk.init({ ...sdkEnvTest, chainId: resolvedChainID });
+
+  getBalanceCardMetrics();
+};
+
+main();

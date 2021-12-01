@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -69,7 +80,10 @@ var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
+var dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 var password = 'XXXX';
+var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
 var sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
@@ -82,7 +96,6 @@ var sdkEnvTest = {
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
 };
-Sdk_1.default.init(sdkEnvTest);
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
@@ -100,11 +113,10 @@ function makeStratosHubPath(a) {
 exports.makeStratosHubPath = makeStratosHubPath;
 // creates an account and derives 2 keypairs
 var mainFour = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -125,12 +137,11 @@ var mainFour = function () { return __awaiter(void 0, void 0, void 0, function (
 }); };
 // cosmosjs send
 var mainSend = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var firstAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, fromAddress, sendAmount, sendTxMessage, signedTx, result, error_1, err;
+    var firstAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, fromAddress, sendAmount, sendTxMessage, signedTx, result, error_1, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -173,12 +184,11 @@ var mainSend = function () { return __awaiter(void 0, void 0, void 0, function (
 }); };
 // cosmosjs delegate
 var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_2, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_2, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -219,12 +229,11 @@ var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, functi
 }); };
 // cosmosjs undelegate
 var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_3, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_3, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -265,12 +274,11 @@ var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, func
 }); };
 // cosmosjs withdraw rewards
 var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_4, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_4, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -311,11 +319,10 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
 }); };
 // cosmosjs withdraw all rewards
 var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -350,11 +357,10 @@ var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void
 }); };
 // cosmosjs withdraw rewards
 var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, sendTxMessage, signedTx, result, err_1;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, sendTxMessage, signedTx, result, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -416,11 +422,10 @@ var getValidators = function () { return __awaiter(void 0, void 0, void 0, funct
     });
 }); };
 var mainBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XZX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -443,11 +448,10 @@ var mainBalance = function () { return __awaiter(void 0, void 0, void 0, functio
     });
 }); };
 var getAvailableBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -471,11 +475,10 @@ var getAvailableBalance = function () { return __awaiter(void 0, void 0, void 0,
     });
 }); };
 var getDelegatedBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -499,11 +502,10 @@ var getDelegatedBalance = function () { return __awaiter(void 0, void 0, void 0,
     });
 }); };
 var getUnboundingBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -527,11 +529,10 @@ var getUnboundingBalance = function () { return __awaiter(void 0, void 0, void 0
     });
 }); };
 var getRewardBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -555,24 +556,23 @@ var getRewardBalance = function () { return __awaiter(void 0, void 0, void 0, fu
     });
 }); };
 var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroUserMnemonic, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                zeroUserMnemonic = 'XXX';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
                 masterKeySeed = _a.sent();
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                console.log('keyPairZero', keyPairZero.address);
-                delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+                console.log('keyPairZero', keyPairZero);
+                delegatorAddress = keyPairZero.address;
                 return [4 /*yield*/, accounts.getBalanceCardMetrics(delegatorAddress)];
             case 3:
                 b = _a.sent();
@@ -657,5 +657,29 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-mainWithdrawAllRewards();
+var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var resolvedChainID, error_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, Network.getChainId()];
+            case 1:
+                resolvedChainID = _a.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                error_5 = _a.sent();
+                console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_5);
+                throw new Error('Could not resolve chain id');
+            case 3:
+                if (!resolvedChainID) {
+                    throw new Error('Chain id is empty. Exiting');
+                }
+                Sdk_1.default.init(__assign(__assign({}, sdkEnvTest), { chainId: resolvedChainID }));
+                getBalanceCardMetrics();
+                return [2 /*return*/];
+        }
+    });
+}); };
+main();
 //# sourceMappingURL=run.js.map

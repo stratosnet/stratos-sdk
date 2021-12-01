@@ -160,10 +160,10 @@ var getBalanceCardMetricValue = function (denom, amount) {
 };
 exports.getBalanceCardMetricValue = getBalanceCardMetricValue;
 var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
-    var cardMetricsResult, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, amount, denom, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, amount, denom;
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    return __generator(this, function (_u) {
-        switch (_u.label) {
+    var cardMetricsResult, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, entries, amountInWei, myDelegated, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, amount, denom;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    return __generator(this, function (_o) {
+        switch (_o.label) {
             case 0:
                 cardMetricsResult = {
                     available: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
@@ -173,7 +173,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                 };
                 return [4 /*yield*/, (0, network_1.getAvailableBalance)(keyPairAddress)];
             case 1:
-                availableBalanceResult = _u.sent();
+                availableBalanceResult = _o.sent();
                 availableBalanceResponse = availableBalanceResult.response, availableBalanceError = availableBalanceResult.error;
                 if (!availableBalanceError) {
                     amount = (_b = (_a = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.result) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount;
@@ -182,19 +182,23 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                 }
                 return [4 /*yield*/, (0, network_1.getDelegatedBalance)(keyPairAddress)];
             case 2:
-                delegatedBalanceResult = _u.sent();
+                delegatedBalanceResult = _o.sent();
                 delegatedBalanceResponse = delegatedBalanceResult.response, delegatedBalanceError = delegatedBalanceResult.error;
                 if (!delegatedBalanceError) {
-                    amount = (_g = (_f = (_e = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.result) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.balance) === null || _g === void 0 ? void 0 : _g.amount;
-                    denom = (_k = (_j = (_h = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.result) === null || _h === void 0 ? void 0 : _h[0]) === null || _j === void 0 ? void 0 : _j.balance) === null || _k === void 0 ? void 0 : _k.denom;
-                    cardMetricsResult.delegated = (0, exports.getBalanceCardMetricValue)(denom, amount);
+                    entries = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.result;
+                    amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce(function (acc, entry) {
+                        var balanceInWei = (0, bigNumber_1.create)(entry.balance.amount);
+                        return (0, bigNumber_1.plus)(acc, balanceInWei);
+                    }, 0);
+                    myDelegated = (0, exports.getBalanceCardMetricValue)('ustos', "" + (amountInWei || ''));
+                    cardMetricsResult.delegated = myDelegated;
                 }
                 return [4 /*yield*/, (0, network_1.getUnboundingBalance)(keyPairAddress)];
             case 3:
-                unboundingBalanceResult = _u.sent();
+                unboundingBalanceResult = _o.sent();
                 unboundingBalanceResponse = unboundingBalanceResult.response, unboundingBalanceError = unboundingBalanceResult.error;
                 if (!unboundingBalanceError) {
-                    entries = (_m = (_l = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.entries;
+                    entries = (_f = (_e = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.entries;
                     amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce(function (acc, entry) {
                         var balanceInWei = (0, bigNumber_1.create)(entry.balance);
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
@@ -203,11 +207,11 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                 }
                 return [4 /*yield*/, (0, network_1.getRewardBalance)(keyPairAddress)];
             case 4:
-                rewardBalanceResult = _u.sent();
+                rewardBalanceResult = _o.sent();
                 rewardBalanceResponse = rewardBalanceResult.response, rewardBalanceError = rewardBalanceResult.error;
                 if (!rewardBalanceError) {
-                    amount = (_q = (_p = (_o = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _o === void 0 ? void 0 : _o.total) === null || _p === void 0 ? void 0 : _p[0]) === null || _q === void 0 ? void 0 : _q.amount;
-                    denom = (_t = (_s = (_r = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _r === void 0 ? void 0 : _r.total) === null || _s === void 0 ? void 0 : _s[0]) === null || _t === void 0 ? void 0 : _t.denom;
+                    amount = (_j = (_h = (_g = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _g === void 0 ? void 0 : _g.total) === null || _h === void 0 ? void 0 : _h[0]) === null || _j === void 0 ? void 0 : _j.amount;
+                    denom = (_m = (_l = (_k = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _k === void 0 ? void 0 : _k.total) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.denom;
                     cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
                 }
                 return [2 /*return*/, cardMetricsResult];
