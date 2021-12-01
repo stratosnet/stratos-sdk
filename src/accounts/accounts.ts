@@ -13,7 +13,6 @@ import {
   getAvailableBalance,
   getDelegatedBalance,
   getRewardBalance,
-  // getTxList,
   getTxListBlockchain,
   getUnboundingBalance,
   networkTypes,
@@ -136,10 +135,17 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: delegatedBalanceResponse, error: delegatedBalanceError } = delegatedBalanceResult;
 
   if (!delegatedBalanceError) {
-    const amount = delegatedBalanceResponse?.result?.[0]?.balance?.amount;
-    const denom = delegatedBalanceResponse?.result?.[0]?.balance?.denom;
+    const entries = delegatedBalanceResponse?.result;
 
-    cardMetricsResult.delegated = getBalanceCardMetricValue(denom, amount);
+    const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.DelegatedBalanceResult) => {
+      const balanceInWei = createBigNumber(entry.balance.amount);
+
+      return plusBigNumber(acc, balanceInWei);
+    }, 0);
+
+    const myDelegated = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
+
+    cardMetricsResult.delegated = myDelegated;
   }
 
   const unboundingBalanceResult = await getUnboundingBalance(keyPairAddress);

@@ -25,7 +25,7 @@ export interface DelegatedBalanceResult {
     delegator_address: string;
     validator_address: string;
     shares: string;
-    balance: any;
+    balance: Amount;
 }
 export interface Reward {
     validator_address: 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
@@ -40,6 +40,12 @@ export interface RewardBalanceResult {
     total: Amount[];
 }
 export interface UnboundingEntry {
+    creation_height: string;
+    completion_time: string;
+    initial_balance: string;
+    balance: string;
+}
+export interface DelegatedEntry {
     creation_height: string;
     completion_time: string;
     initial_balance: string;
