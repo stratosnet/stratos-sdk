@@ -27,13 +27,9 @@ export interface DelegatedBalanceResult {
     shares: string;
     balance: Amount;
 }
-export interface Reward {
-    validator_address: 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-    reward: any;
-}
 export interface Rewards {
-    validator_address: 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
-    reward: Reward[];
+    validator_address: string;
+    reward: Amount[];
 }
 export interface RewardBalanceResult {
     rewards: Rewards[];

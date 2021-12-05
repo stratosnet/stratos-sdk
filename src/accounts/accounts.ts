@@ -18,9 +18,9 @@ import {
   networkTypes,
   requestBalanceIncrease,
 } from '../services/network';
-import * as TxTypes from '../transactions/types';
 import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+import * as TxTypes from '../transactions/types';
 import * as Types from './types';
 
 export interface BalanceCardMetrics {
@@ -28,6 +28,7 @@ export interface BalanceCardMetrics {
   delegated: string;
   unbounding: string;
   reward: string;
+  detailedBalance?: any;
 }
 
 export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
@@ -117,6 +118,12 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     delegated: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     unbounding: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     reward: `0.0000 ${stratosTopDenom.toUpperCase()}`,
+    detailedBalance: {},
+  };
+
+  const detailedBalance: { [key: string]: any } = {
+    delegated: {},
+    reward: {},
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -139,7 +146,10 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.DelegatedBalanceResult) => {
       const balanceInWei = createBigNumber(entry.balance.amount);
+      const validatorAddress = entry.validator_address;
+      const validatorBalance = getBalanceCardMetricValue(entry.balance.denom, entry.balance.amount);
 
+      detailedBalance.delegated[validatorAddress] = validatorBalance;
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
@@ -169,11 +179,22 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
 
   if (!rewardBalanceError) {
+    const entries = rewardBalanceResponse?.result?.rewards;
+
     const amount = rewardBalanceResponse?.result?.total?.[0]?.amount;
     const denom = rewardBalanceResponse?.result?.total?.[0]?.denom;
 
+    entries?.forEach((entry: networkTypes.Rewards) => {
+      const validatorAddress = entry.validator_address;
+      const validatorBalance = entry.reward[0].amount;
+
+      detailedBalance.reward[validatorAddress] = validatorBalance;
+    }, 0);
+
     cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
   }
+
+  cardMetricsResult.detailedBalance = detailedBalance;
 
   return cardMetricsResult;
 };

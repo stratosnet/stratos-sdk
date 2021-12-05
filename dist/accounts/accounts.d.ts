@@ -5,6 +5,7 @@ export interface BalanceCardMetrics {
     delegated: string;
     unbounding: string;
     reward: string;
+    detailedBalance?: any;
 }
 export declare const getAccountsData: (keyPairAddress: string) => Promise<Types.AccountsData>;
 export declare const increaseBalance: (walletAddress: string, faucetUrl: string) => Promise<{
