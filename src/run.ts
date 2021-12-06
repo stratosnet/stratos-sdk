@@ -1,4 +1,5 @@
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
+import dotenv from 'dotenv';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed } from './hdVault/keyManager';
@@ -8,7 +9,6 @@ import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
-import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -389,12 +389,13 @@ const getBalanceCardMetrics = async () => {
     return;
   }
 
-  console.log('keyPairZero', keyPairZero);
+  // console.log('keyPairZero', keyPairZero);
 
   const delegatorAddress = keyPairZero.address;
+  // const delegatorAddress = wen;
   const b = await accounts.getBalanceCardMetrics(delegatorAddress);
 
-  console.log('our balanace card metrics ', b);
+  console.log('balanace card metrics ', b);
 };
 
 const formatBalanceFromWei = () => {
