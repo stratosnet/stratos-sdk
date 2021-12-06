@@ -222,8 +222,9 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                     amount = (_k = (_j = (_h = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _h === void 0 ? void 0 : _h.total) === null || _j === void 0 ? void 0 : _j[0]) === null || _k === void 0 ? void 0 : _k.amount;
                     denom = (_o = (_m = (_l = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _l === void 0 ? void 0 : _l.total) === null || _m === void 0 ? void 0 : _m[0]) === null || _o === void 0 ? void 0 : _o.denom;
                     entries === null || entries === void 0 ? void 0 : entries.forEach(function (entry) {
+                        var _a, _b;
                         var validatorAddress = entry.validator_address;
-                        var validatorBalance = entry.reward[0].amount;
+                        var validatorBalance = ((_b = (_a = entry.reward) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount) || '0';
                         detailedBalance.reward[validatorAddress] = validatorBalance;
                     }, 0);
                     cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);

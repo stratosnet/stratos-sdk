@@ -186,7 +186,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     entries?.forEach((entry: networkTypes.Rewards) => {
       const validatorAddress = entry.validator_address;
-      const validatorBalance = entry.reward[0].amount;
+      const validatorBalance = entry.reward?.[0]?.amount || '0';
 
       detailedBalance.reward[validatorAddress] = validatorBalance;
     }, 0);

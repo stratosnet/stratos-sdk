@@ -71,6 +71,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.makeStratosHubPath = void 0;
 var crypto_1 = require("@cosmjs/crypto");
+var dotenv_1 = __importDefault(require("dotenv"));
 var accounts = __importStar(require("./accounts"));
 var hdVault_1 = require("./hdVault");
 var keyManager_1 = require("./hdVault/keyManager");
@@ -80,7 +81,6 @@ var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
-var dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 var password = 'XXXX';
 var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
@@ -571,12 +571,11 @@ var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                console.log('keyPairZero', keyPairZero);
                 delegatorAddress = keyPairZero.address;
                 return [4 /*yield*/, accounts.getBalanceCardMetrics(delegatorAddress)];
             case 3:
                 b = _a.sent();
-                console.log('our balanace card metrics ', b);
+                console.log('balanace card metrics ', b);
                 return [2 /*return*/];
         }
     });
