@@ -11,7 +11,6 @@ var StratosCosmos = /** @class */ (function () {
     }
     StratosCosmos.init = function () {
         var _a = Sdk_1.default.environment, envRestUrl = _a.restUrl, envChainId = _a.chainId;
-        console.log('🚀 ~ file: cosmos.ts ~ line 22 ~ StratosCosmos ~ init ~ Sdk.environment', Sdk_1.default.environment);
         StratosCosmos.cosmosInstance = cosmosjs_1.default.network(envRestUrl, envChainId);
     };
     return StratosCosmos;

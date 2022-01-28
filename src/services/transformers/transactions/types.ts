@@ -13,5 +13,6 @@ export interface FormattedBlockChainTx {
   amount: string;
   time: string;
   hash: string;
+  txFee: string;
   originalTransactionData: NetworkTypes.BlockChainTx;
 }
