@@ -49,16 +49,7 @@ export declare const TxHistoryTypesMap: Map<string, number>;
 export interface EmptyObject {
     [key: string]: any;
 }
-export interface ParsedTxItem {
-    sender: string;
-    to: string;
-    type: HistoryTxType;
-    txType: string;
-    block: string;
-    amount: string;
-    time: string;
-    hash: string;
-    originalTransactionData?: EmptyObject;
+export interface ParsedTxItem extends FormattedBlockChainTx {
 }
 export interface ParsedTxData {
     data: FormattedBlockChainTx[];

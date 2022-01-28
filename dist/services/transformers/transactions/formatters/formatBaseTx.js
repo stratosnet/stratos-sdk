@@ -44,6 +44,7 @@ var formatBaseTx = function (txItem) {
     var txType = msg.type;
     var resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
     var txAmount = (0, formatTxAmounts_1.formatTxAmounts)(txItem);
+    var txFee = (0, formatTxAmounts_1.formatTxFee)(txItem);
     var msgTo = ((_e = msg === null || msg === void 0 ? void 0 : msg.value) === null || _e === void 0 ? void 0 : _e.to_address) || '';
     return {
         eventSender: eventSender,
@@ -55,6 +56,7 @@ var formatBaseTx = function (txItem) {
         amount: txAmount,
         time: dateTimeString,
         hash: hash,
+        txFee: txFee,
         originalTransactionData: txItem,
     };
 };

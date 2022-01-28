@@ -137,11 +137,10 @@ var mainFour = function () { return __awaiter(void 0, void 0, void 0, function (
 }); };
 // cosmosjs send
 var mainSend = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var firstAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, fromAddress, sendAmount, sendTxMessage, signedTx, result, error_1, err;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, fromAddress, sendAmount, sendTxMessage, signedTx, result, error_1, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -153,32 +152,43 @@ var mainSend = function () { return __awaiter(void 0, void 0, void 0, function (
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
+            case 3:
+                keyPairOne = _a.sent();
+                if (!keyPairOne) {
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
+            case 4:
+                keyPairTwo = _a.sent();
+                if (!keyPairTwo) {
+                    return [2 /*return*/];
+                }
                 fromAddress = keyPairZero.address;
                 sendAmount = 1;
                 return [4 /*yield*/, transactions.getSendTx(fromAddress, [
-                        { amount: sendAmount, toAddress: firstAddress },
-                        { amount: 2, toAddress: firstAddress },
-                        { amount: 3, toAddress: firstAddress },
+                        { amount: sendAmount, toAddress: keyPairOne.address },
+                        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
                     ])];
-            case 3:
+            case 5:
                 sendTxMessage = _a.sent();
                 signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
+                if (!signedTx) return [3 /*break*/, 9];
                 console.log('signedTx sends', JSON.stringify(signedTx, null, 1));
-                _a.label = 4;
-            case 4:
-                _a.trys.push([4, 6, , 7]);
+                _a.label = 6;
+            case 6:
+                _a.trys.push([6, 8, , 9]);
                 return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 5:
+            case 7:
                 result = _a.sent();
                 console.log('broadcasting result!', result);
-                return [3 /*break*/, 7];
-            case 6:
+                return [3 /*break*/, 9];
+            case 8:
                 error_1 = _a.sent();
                 err = error_1;
                 console.log('error broadcasting', err.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 9];
+            case 9: return [2 /*return*/];
         }
     });
 }); };
@@ -422,7 +432,7 @@ var getValidators = function () { return __awaiter(void 0, void 0, void 0, funct
     });
 }); };
 var mainBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, b0, b1, b2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -437,12 +447,33 @@ var mainBalance = function () { return __awaiter(void 0, void 0, void 0, functio
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                console.log('keyPairZero', keyPairZero.address);
-                delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, accounts.getBalance(delegatorAddress, 'ustos')];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
             case 3:
-                b = _a.sent();
-                console.log('our bal ', b);
+                keyPairOne = _a.sent();
+                if (!keyPairOne) {
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
+            case 4:
+                keyPairTwo = _a.sent();
+                if (!keyPairTwo) {
+                    return [2 /*return*/];
+                }
+                console.log('keyPairZero', keyPairZero.address);
+                console.log('keyPairOne', keyPairOne.address);
+                console.log('keyPairTwo', keyPairTwo.address);
+                return [4 /*yield*/, accounts.getBalance(keyPairZero.address, 'ustos')];
+            case 5:
+                b0 = _a.sent();
+                return [4 /*yield*/, accounts.getBalance(keyPairOne.address, 'ustos')];
+            case 6:
+                b1 = _a.sent();
+                return [4 /*yield*/, accounts.getBalance(keyPairTwo.address, 'ustos')];
+            case 7:
+                b2 = _a.sent();
+                console.log('our bal keyPairZero', b0);
+                console.log('our bal keyPairOne', b1);
+                console.log('our bal keyPairTwo', b2);
                 return [2 /*return*/];
         }
     });
@@ -675,7 +706,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                     throw new Error('Chain id is empty. Exiting');
                 }
                 Sdk_1.default.init(__assign(__assign({}, sdkEnvTest), { chainId: resolvedChainID }));
-                getBalanceCardMetrics();
+                mainBalance();
                 return [2 /*return*/];
         }
     });

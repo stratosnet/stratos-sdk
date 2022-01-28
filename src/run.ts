@@ -63,15 +63,28 @@ const mainFour = async () => {
 
 // cosmosjs send
 const mainSend = async () => {
-  const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
+  // const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+
   const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
+    return;
+  }
+
+  const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+
+  if (!keyPairOne) {
+    return;
+  }
+
+  const keyPairTwo = await deriveKeyPair(2, password, encryptedMasterKeySeedString);
+
+  if (!keyPairTwo) {
     return;
   }
 
@@ -80,9 +93,8 @@ const mainSend = async () => {
   const sendAmount = 1;
 
   const sendTxMessage = await transactions.getSendTx(fromAddress, [
-    { amount: sendAmount, toAddress: firstAddress },
-    { amount: 2, toAddress: firstAddress },
-    { amount: 3, toAddress: firstAddress },
+    { amount: sendAmount, toAddress: keyPairOne.address },
+    { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
 
   const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
@@ -286,12 +298,30 @@ const mainBalance = async () => {
   if (!keyPairZero) {
     return;
   }
+
+  const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+
+  if (!keyPairOne) {
+    return;
+  }
+
+  const keyPairTwo = await deriveKeyPair(2, password, encryptedMasterKeySeedString);
+
+  if (!keyPairTwo) {
+    return;
+  }
+
   console.log('keyPairZero', keyPairZero.address);
+  console.log('keyPairOne', keyPairOne.address);
+  console.log('keyPairTwo', keyPairTwo.address);
 
-  const delegatorAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-  const b = await accounts.getBalance(delegatorAddress, 'ustos');
+  const b0 = await accounts.getBalance(keyPairZero.address, 'ustos');
+  const b1 = await accounts.getBalance(keyPairOne.address, 'ustos');
+  const b2 = await accounts.getBalance(keyPairTwo.address, 'ustos');
 
-  console.log('our bal ', b);
+  console.log('our bal keyPairZero', b0);
+  console.log('our bal keyPairOne', b1);
+  console.log('our bal keyPairTwo', b2);
 };
 
 const getAvailableBalance = async () => {
@@ -476,7 +506,8 @@ const main = async () => {
 
   Sdk.init({ ...sdkEnvTest, chainId: resolvedChainID });
 
-  getBalanceCardMetrics();
+  mainBalance();
+  // mainSend(); //
 };
 
 main();

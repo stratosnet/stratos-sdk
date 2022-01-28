@@ -20,8 +20,6 @@ class StratosCosmos {
   public static init(): void {
     const { restUrl: envRestUrl, chainId: envChainId } = Sdk.environment;
 
-    console.log('🚀 ~ file: cosmos.ts ~ line 22 ~ StratosCosmos ~ init ~ Sdk.environment', Sdk.environment);
-
     StratosCosmos.cosmosInstance = cosmosjs.network(envRestUrl, envChainId);
   }
 }

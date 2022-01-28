@@ -1,7 +1,7 @@
-import * as Types from '../../transactions/types';
 import * as TxTypes from '../../../../transactions/types';
 import * as NetworkTypes from '../../../network/types';
-import { formatTxAmounts } from './formatTxAmounts';
+import * as Types from '../../transactions/types';
+import { formatTxAmounts, formatTxFee } from './formatTxAmounts';
 
 export const formatBaseTx = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
   const msg = txItem.tx?.value?.msg[0];
@@ -33,6 +33,7 @@ export const formatBaseTx = (txItem: NetworkTypes.BlockChainTx): Types.Formatted
   const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
 
   const txAmount = formatTxAmounts(txItem);
+  const txFee = formatTxFee(txItem);
 
   const msgTo = msg?.value?.to_address || '';
 
@@ -46,6 +47,7 @@ export const formatBaseTx = (txItem: NetworkTypes.BlockChainTx): Types.Formatted
     amount: txAmount,
     time: dateTimeString,
     hash,
+    txFee,
     originalTransactionData: txItem,
   };
 };

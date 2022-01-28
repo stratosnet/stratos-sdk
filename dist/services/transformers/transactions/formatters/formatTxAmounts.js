@@ -1,34 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatTxAmounts = void 0;
-var bigNumber_1 = require("../../../../services/bigNumber");
-var tokens_1 = require("../../../../config/tokens");
+exports.formatTxFee = exports.formatTxAmounts = void 0;
 var hdVault_1 = require("../../../../config/hdVault");
+var tokens_1 = require("../../../../config/tokens");
+var bigNumber_1 = require("../../../../services/bigNumber");
 var caclulateAmount = function (singleAmount) {
     var balanceInWei = (0, bigNumber_1.create)(singleAmount);
     var txAmount = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(4, bigNumber_1.ROUND_DOWN);
     var currentAmount = txAmount + " " + hdVault_1.stratosTopDenom.toUpperCase();
-    return currentAmount || '0';
-};
-var caclulateEventAmount = function (txItem) {
-    var _a, _b;
-    var attributes = (_b = (_a = txItem === null || txItem === void 0 ? void 0 : txItem.logs[0]) === null || _a === void 0 ? void 0 : _a.events[0]) === null || _b === void 0 ? void 0 : _b.attributes;
-    // console.log(
-    //   '🚀 ~ file: formatTxAmounts.ts ~ line 17 ~ caclulateEventAmount ~ events',
-    //   JSON.stringify(txItem?.logs[0]?.events, null, 2),
-    // );
-    var eventAmount = '';
-    if (Array.isArray(attributes)) {
-        attributes.forEach(function (element) {
-            if (!eventAmount && element.key === 'amount') {
-                eventAmount = element.value;
-            }
-        });
-    }
-    if (!eventAmount) {
-        return '0';
-    }
-    var currentAmount = caclulateAmount(eventAmount);
     return currentAmount || '0';
 };
 var formatTxAmounts = function (txItem) {
@@ -51,4 +30,19 @@ var formatTxAmounts = function (txItem) {
     return currentAmount || '0';
 };
 exports.formatTxAmounts = formatTxAmounts;
+var formatTxFee = function (txItem) {
+    var _a, _b;
+    var fee = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.fee;
+    var multipleFees = fee === null || fee === void 0 ? void 0 : fee.amount;
+    if (!Array.isArray(multipleFees)) {
+        return '0';
+    }
+    var amounts = multipleFees.map(function (element) {
+        var currentAmount = caclulateAmount("" + element.amount);
+        return currentAmount || '0';
+    });
+    var currentAmount = amounts.join(' ').trim();
+    return currentAmount || '0';
+};
+exports.formatTxFee = formatTxFee;
 //# sourceMappingURL=formatTxAmounts.js.map
