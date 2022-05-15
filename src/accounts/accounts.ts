@@ -250,7 +250,7 @@ export const getAccountTrasactions = async (
   const parsedData: FormattedBlockChainTx[] = [];
 
   const { txs: data, total_count: total } = response;
-  console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+  // console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
 
   data.forEach(txItem => {
     try {

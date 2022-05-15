@@ -1,14 +1,14 @@
 import '@testing-library/jest-dom/extend-expect';
 
-import * as Cosmos from '../services/cosmos';
 import { toWei } from '../services/bigNumber';
+import * as Cosmos from '../services/cosmos';
 import * as Transactions from './transactions';
 import * as Types from './types';
 
-import * as ValidatorsApi from '../validators/validators';
-import * as ValidatorsTypes from '../validators/types';
 import { fromHex } from '@cosmjs/encoding';
 import * as Utils from '../hdVault/utils';
+import * as ValidatorsTypes from '../validators/types';
+import * as ValidatorsApi from '../validators/validators';
 
 describe('transactions', () => {
   describe('broadcast', () => {
@@ -102,10 +102,10 @@ describe('transactions', () => {
 
   describe('getStandardFee', () => {
     it('returns an expected standard fee', async () => {
-      const numberOfMessages = 2;
+      const numberOfMessages = 3;
       const expectedFee = {
-        amount: [{ amount: String(50000), denom: 'ustos' }],
-        gas: String(200000 + 50000 * numberOfMessages),
+        amount: [{ amount: String(200000), denom: 'ustos' }],
+        gas: String(500000 + 100000 * numberOfMessages),
       };
 
       const result = Transactions.getStandardFee(numberOfMessages);
