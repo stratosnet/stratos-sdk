@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "tsc --module commonjs && webpack --mode production",
-    "test": "jest --watch",
+    "test": "jest --watch --detectOpenHandles --forceExit",
     "prettier": "prettier --write ./src/**/*.ts",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
