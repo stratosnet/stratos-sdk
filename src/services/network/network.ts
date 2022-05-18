@@ -3,6 +3,18 @@ import JSONbig from 'json-bigint';
 import Sdk from '../../Sdk';
 import * as Types from './types';
 
+const _axios = axios.create({});
+
+_axios.defaults.transformResponse = [
+  data => {
+    try {
+      return JSONbig({ useNativeBigInt: true }).parse(data);
+    } catch (_) {
+      return data;
+    }
+  },
+];
+
 const getRestRoute = (): string => {
   const { restUrl } = Sdk.environment;
 
@@ -31,13 +43,13 @@ export const apiPost = async (
   let axiosResponse;
 
   try {
-    axiosResponse = await axios.post(url, data, config);
+    axiosResponse = await _axios.post(url, data, config);
   } catch (err) {
     return { error: { message: (err as Error).message } };
   }
 
   try {
-    const myResponse = JSONbig({ useNativeBigInt: true }).parse(axiosResponse.data);
+    const myResponse = axiosResponse.data;
     return { response: myResponse };
   } catch (_) {
     return { response: axiosResponse.data };
@@ -51,13 +63,13 @@ export const apiGet = async (
   let axiosResponse;
 
   try {
-    axiosResponse = await axios.get(url, config);
+    axiosResponse = await _axios.get(url, config);
   } catch (err) {
     return { error: { message: (err as Error).message } };
   }
 
   try {
-    const myResponse = JSONbig({ useNativeBigInt: true }).parse(axiosResponse.data);
+    const myResponse = axiosResponse.data;
     return { response: myResponse };
   } catch (_) {
     return { response: axiosResponse.data };
