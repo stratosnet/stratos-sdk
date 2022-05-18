@@ -162,6 +162,14 @@ export const getTxListBlockchain = async (
   return dataResult;
 };
 
+/**
+ * @param address
+ * @deprecated
+ * @param type
+ * @param page
+ * @param config
+ * @returns
+ */
 export const getTxList = async (
   address: string,
   type: string,
