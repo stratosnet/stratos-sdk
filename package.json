@@ -80,7 +80,8 @@
     "typescript": "^4.1.5",
     "webpack": "^5.11.1",
     "webpack-bundle-analyzer": "^4.3.0",
-    "webpack-cli": "^4.3.0"
+    "webpack-cli": "^4.3.0",
+    "msw": "^0.28.1"
   },
   "dependencies": {
     "@cosmjs/amino": "^0.25.3",

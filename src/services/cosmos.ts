@@ -14,7 +14,7 @@ export interface CosmosInstance {
   getAccounts(address: string): Promise<AccountsData>;
 }
 
-class StratosCosmos {
+export class StratosCosmos {
   public static cosmosInstance: CosmosInstance;
 
   public static init(): void {
