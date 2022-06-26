@@ -13,3 +13,20 @@ export interface AccountsData {
     };
   };
 }
+
+// merge with network
+export interface CosmosBaseAccount {
+  address: string;
+  pu_key: string;
+  account_number: string;
+  sequence: string;
+}
+
+// merge with network
+export interface CosmosAccountData {
+  account: {
+    '@type': string; // one of the cosmojs types - add a guard later
+    base_account: CosmosBaseAccount;
+    code_hash: string;
+  };
+}

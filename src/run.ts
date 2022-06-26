@@ -580,6 +580,24 @@ const cosmosWalletCreateTest = async () => {
   // console.log('🚀 ~ file: run.ts ~ line 668 ~ cosmosWalletCreateTest ~ result', result);
 };
 
+const testAccountData = async () => {
+  const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+  const [firstAccount] = await wallet.getAccounts();
+  // const accountBalance = await Network.getAccountBalance(firstAccount.address);
+  // console.log(
+  // '🚀 ~ file: run.ts ~ line 587 ~ testAccountData ~ accountBalance',
+  // JSON.stringify(accountBalance, null, 2),
+  // );
+
+  // const accountsData = await Network.getAccountsData(firstAccount.address);
+  // const accountsData2 = await accounts.getAccountsData(firstAccount.address);
+  const accountBalanceData = await accounts.getBalance(firstAccount.address, 'ustos');
+  console.log('🚀 ~ file: run.ts ~ line 595 ~ testAccountData ~ accountBalanceData', accountBalanceData);
+
+  // console.log('🚀 ~ file: run.ts ~ line 501 ~ testAccountData ~ accountsData', accountsData);
+  // console.log('🚀 ~ file: run.ts ~ line 588 ~ testAccountData ~ accountsData2', accountsData2);
+};
+
 const main = async () => {
   let resolvedChainID;
 
@@ -601,7 +619,8 @@ const main = async () => {
 
   await Sdk.init({ ...sdkEnv, chainId: resolvedChainID });
 
-  cosmosWalletCreateTest();
+  // cosmosWalletCreateTest();
+  testAccountData();
   // mainFour();
 
   // mainBalance();

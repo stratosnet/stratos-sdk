@@ -8,8 +8,9 @@ import {
   plus as plusBigNumber,
   ROUND_DOWN,
 } from '../services/bigNumber';
-import { getCosmos } from '../services/cosmos';
 import {
+  getAccountBalance as getBalancesDataFromNetwork,
+  getAccountsData as getAccountsDataFromNetwork,
   getAvailableBalance,
   getDelegatedBalance,
   getRewardBalance,
@@ -31,11 +32,21 @@ export interface BalanceCardMetrics {
   detailedBalance?: any;
 }
 
-export const getAccountsData = async (keyPairAddress: string): Promise<Types.AccountsData> => {
+export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
   try {
-    const accountsData = await getCosmos().getAccounts(keyPairAddress);
-    // console.log('accountsData!', accountsData);
-    return accountsData;
+    const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
+
+    const { response, error } = accountsData;
+
+    if (error) {
+      throw new Error(`Could not get account data. Details: ${error.message}`);
+    }
+
+    if (!response) {
+      throw new Error('Could not get account data. Response is empty');
+    }
+
+    return response;
   } catch (err) {
     console.log('Could not get accounts', (err as Error).message);
     throw err;
@@ -68,9 +79,11 @@ export const getBalance = async (
   requestedDenom: string,
   decimals = decimalShortPrecision,
 ): Promise<string> => {
-  const accountsData = await getAccountsData(keyPairAddress);
+  // const accountsData = await getAccountsData(keyPairAddress);
+  const accountBalanceData = await getBalancesDataFromNetwork(keyPairAddress);
 
-  const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 

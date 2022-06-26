@@ -79,8 +79,19 @@ export const apiGet = async (
 export const getAccountsData = async (
   address: string,
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.AccountsDataResult> => {
-  const url = `${getRestRoute()}/auth/acconts/${address}`;
+): Promise<Types.CosmosAccountsDataResult> => {
+  const url = `${getRestRoute()}/cosmos/auth/v1beta1/accounts/${address}`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
+export const getAccountBalance = async (
+  address: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.CosmosAccountBalanceDataResult> => {
+  const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
 
   const dataResult = await apiGet(url, config);
 
@@ -303,6 +314,7 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
+  console.log('🚀 ~ file: network.ts ~ line 306 ~ getRpcStatus ~ url', url);
 
   const dataResult = await apiGet(url, config);
 
