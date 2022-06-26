@@ -63,21 +63,26 @@ var get_1 = __importDefault(require("lodash/get"));
 var hdVault_1 = require("../config/hdVault");
 var tokens_1 = require("../config/tokens");
 var bigNumber_1 = require("../services/bigNumber");
-var cosmos_1 = require("../services/cosmos");
 var network_1 = require("../services/network");
 var transactions_1 = require("../services/transformers/transactions");
 var TxTypes = __importStar(require("../transactions/types"));
 var getAccountsData = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
-    var accountsData, err_1;
+    var accountsData, response, error, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, cosmos_1.getCosmos)().getAccounts(keyPairAddress)];
+                return [4 /*yield*/, (0, network_1.getAccountsData)(keyPairAddress)];
             case 1:
                 accountsData = _a.sent();
-                console.log('accountsData!', accountsData);
-                return [2 /*return*/, accountsData];
+                response = accountsData.response, error = accountsData.error;
+                if (error) {
+                    throw new Error("Could not get account data. Details: " + error.message);
+                }
+                if (!response) {
+                    throw new Error('Could not get account data. Response is empty');
+                }
+                return [2 /*return*/, response];
             case 2:
                 err_1 = _a.sent();
                 console.log('Could not get accounts', err_1.message);
@@ -117,13 +122,13 @@ exports.increaseBalance = increaseBalance;
 var getBalance = function (keyPairAddress, requestedDenom, decimals) {
     if (decimals === void 0) { decimals = tokens_1.decimalShortPrecision; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var accountsData, coins, coin, currentBalance, balanceInWei, balance;
+        var accountBalanceData, coins, coin, currentBalance, balanceInWei, balance;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, exports.getAccountsData)(keyPairAddress)];
+                case 0: return [4 /*yield*/, (0, network_1.getAccountBalance)(keyPairAddress)];
                 case 1:
-                    accountsData = _a.sent();
-                    coins = (0, get_1.default)(accountsData, 'result.value.coins', []);
+                    accountBalanceData = _a.sent();
+                    coins = (0, get_1.default)(accountBalanceData, 'response.balances', []);
                     coin = coins.find(function (item) { return item.denom === requestedDenom; });
                     currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
                     balanceInWei = (0, bigNumber_1.create)(currentBalance);

@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
+exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
@@ -70,7 +70,6 @@ var getRestRoute = function () {
     return restUrl;
 };
 var getRpcRoute = function () {
-    // console.log('🚀 ~ file: network.ts ~ line 26 ~ getRpcRoute ~ Sdk.environment', Sdk.environment);
     var rpcUrl = Sdk_1.default.environment.rpcUrl;
     return rpcUrl;
 };
@@ -137,8 +136,6 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
         switch (_a.label) {
             case 0:
                 url = getRestRoute() + "/cosmos/auth/v1beta1/accounts/" + address;
-                // const url = `${getRpcRoute()}/auth/v1beta1/accounts`;
-                console.log('🚀 ~ file: network.ts ~ line 86 ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -147,6 +144,20 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
     });
 }); };
 exports.getAccountsData = getAccountsData;
+var getAccountBalance = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var url, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = getRestRoute() + "/cosmos/bank/v1beta1/balances/" + address;
+                return [4 /*yield*/, (0, exports.apiGet)(url, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.getAccountBalance = getAccountBalance;
 var getStakingValidators = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {

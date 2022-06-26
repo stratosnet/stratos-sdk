@@ -1,7 +1,8 @@
 import * as Types from './types';
 export declare const apiPost: (url: string, data?: Types.ParsedTransactionData | undefined, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
 export declare const apiGet: (url: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
-export declare const getAccountsData: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.AccountsDataResult>;
+export declare const getAccountsData: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.CosmosAccountsDataResult>;
+export declare const getAccountBalance: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.CosmosAccountBalanceDataResult>;
 export declare const getStakingValidators: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.AccountsDataResult>;
 export declare const getSubmitTransactionData: <T extends string>(data?: T | undefined) => Types.DataResult;
 export declare const submitTransaction: <T extends string>(delegatorAddr: string, data?: T | undefined, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.SubmitTransactionDataResult>;

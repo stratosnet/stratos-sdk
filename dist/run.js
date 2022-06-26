@@ -704,6 +704,24 @@ var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void
         }
     });
 }); };
+var testAccountData = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var wallet, firstAccount, accountBalanceData;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
+            case 1:
+                wallet = _a.sent();
+                return [4 /*yield*/, wallet.getAccounts()];
+            case 2:
+                firstAccount = (_a.sent())[0];
+                return [4 /*yield*/, accounts.getBalance(firstAccount.address, 'ustos')];
+            case 3:
+                accountBalanceData = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 595 ~ testAccountData ~ accountBalanceData', accountBalanceData);
+                return [2 /*return*/];
+        }
+    });
+}); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var resolvedChainID, sdkEnv, error_5;
     return __generator(this, function (_a) {
@@ -731,7 +749,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID }))];
             case 6:
                 _a.sent();
-                cosmosWalletCreateTest();
+                // cosmosWalletCreateTest();
+                testAccountData();
                 return [2 /*return*/];
         }
     });

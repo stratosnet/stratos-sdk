@@ -19,7 +19,33 @@ export interface NetworkAxiosConfig {
     headers?: NetworkAxiosHeaders;
     params?: any;
 }
+export interface CosmosBaseAccount {
+    address: string;
+    pu_key: string;
+    account_number: string;
+    sequence: string;
+}
+export interface CosmosAccount {
+    '@type': string;
+    base_account: CosmosBaseAccount;
+    code_hash: string;
+}
 export interface AccountsDataResult extends NetworkAxiosDataResult {
+}
+export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
+    response?: {
+        account: CosmosAccount;
+    };
+}
+export interface CosmosAccountBalanceResponse {
+    balances: Amount[];
+    pagination: {
+        next_key: string;
+        total: string;
+    };
+}
+export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
+    response?: CosmosAccountBalanceResponse;
 }
 export interface DelegatedBalanceResult {
     delegator_address: string;
