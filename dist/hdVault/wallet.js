@@ -55,7 +55,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.sign = exports.deriveKeyPair = void 0;
+exports.deserializeEncryptedWallet = exports.deriveKeyPair = void 0;
+var proto_signing_1 = require("@cosmjs/proto-signing");
 var hdVault_1 = require("../config/hdVault");
 var deriveManager_1 = require("./deriveManager");
 var keyUtils = __importStar(require("./keyUtils"));
@@ -89,58 +90,61 @@ var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { retu
     });
 }); };
 exports.deriveKeyPair = deriveKeyPair;
-var sign = function (_a) {
-    var message = _a.message, password = _a.password, encryptedMasterKeySeed = _a.encryptedMasterKeySeed, signingKeyPath = _a.signingKeyPath;
-    return __awaiter(void 0, void 0, void 0, function () {
-        var masterKeySeed, er_2, privateKeySeed, privateKey, signature, error_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _b.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed)];
-                case 1:
-                    masterKeySeed = _b.sent();
-                    return [3 /*break*/, 3];
-                case 2:
-                    er_2 = _b.sent();
-                    return [2 /*return*/, Promise.reject(false)];
-                case 3:
-                    privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, signingKeyPath);
-                    return [4 /*yield*/, (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed)];
-                case 4:
-                    privateKey = (_b.sent()).privateKey;
-                    _b.label = 5;
-                case 5:
-                    _b.trys.push([5, 7, , 8]);
-                    return [4 /*yield*/, keyUtils.sign(message, privateKey)];
-                case 6:
-                    signature = _b.sent();
-                    return [2 /*return*/, signature];
-                case 7:
-                    error_1 = _b.sent();
-                    return [2 /*return*/, Promise.reject(false)];
-                case 8: return [2 /*return*/];
-            }
-        });
-    });
-};
-exports.sign = sign;
-var verifySignature = function (message, signature, publicKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var verifyResult, err_1;
+var deserializeEncryptedWallet = function (serializedWallet, password) { return __awaiter(void 0, void 0, void 0, function () {
+    var deserializedWallet, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, keyUtils.verifySignature(message, signature, publicKey)];
+                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.deserialize(serializedWallet, password)];
             case 1:
-                verifyResult = _a.sent();
-                return [2 /*return*/, verifyResult];
+                deserializedWallet = _a.sent();
+                return [3 /*break*/, 3];
             case 2:
-                err_1 = _a.sent();
-                return [2 /*return*/, Promise.resolve(false)];
-            case 3: return [2 /*return*/];
+                error_1 = _a.sent();
+                console.log('could not deserialize / decode wallet');
+                console.log(error_1);
+                return [2 /*return*/, Promise.reject(false)];
+            case 3:
+                if (!deserializedWallet) {
+                    return [2 /*return*/, Promise.reject(false)];
+                }
+                return [2 /*return*/, deserializedWallet];
         }
     });
 }); };
-exports.verifySignature = verifySignature;
+exports.deserializeEncryptedWallet = deserializeEncryptedWallet;
+// export const sign = async ({
+//   message,
+//   password,
+//   encryptedMasterKeySeed,
+//   signingKeyPath,
+// }: TransactionMessage): Promise<string> => {
+//   let masterKeySeed;
+//   try {
+//     masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
+//   } catch (er) {
+//     return Promise.reject(false);
+//   }
+//   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, signingKeyPath);
+//   const { privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+//   try {
+//     const signature = await keyUtils.sign(message, privateKey);
+//     return signature;
+//   } catch (error) {
+//     return Promise.reject(false);
+//   }
+// };
+// export const verifySignature = async (
+//   message: string,
+//   signature: string,
+//   publicKey: string,
+// ): Promise<boolean> => {
+//   try {
+//     const verifyResult = await keyUtils.verifySignature(message, signature, publicKey);
+//     return verifyResult;
+//   } catch (err) {
+//     return Promise.resolve(false);
+//   }
+// };
 //# sourceMappingURL=wallet.js.map

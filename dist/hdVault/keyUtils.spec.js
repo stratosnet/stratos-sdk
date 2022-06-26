@@ -59,12 +59,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("@testing-library/jest-dom/extend-expect");
-var tweetnacl_1 = __importDefault(require("tweetnacl"));
 var sjcl_1 = __importDefault(require("sjcl"));
-var encoding_1 = require("@cosmjs/encoding");
-var KeyUtils = __importStar(require("./keyUtils"));
+// import nacl from 'tweetnacl';
 var CosmosAmino = __importStar(require("@cosmjs/amino"));
 var CosmosCrypto = __importStar(require("@cosmjs/crypto"));
+var encoding_1 = require("@cosmjs/encoding");
+var KeyUtils = __importStar(require("./keyUtils"));
 describe('keyUtils', function () {
     describe('getPublicKeyFromPrivKey', function () {
         it('return a public key from private key', function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -389,94 +389,58 @@ describe('keyUtils', function () {
             });
         }); });
     });
-    describe('sign', function () {
-        it('signs the message', function () { return __awaiter(void 0, void 0, void 0, function () {
-            var message, privateKey, signature, naclSign, spyDetached, result, expected;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        message = (0, encoding_1.toBase64)(new Uint8Array([1, 2]));
-                        privateKey = (0, encoding_1.toBase64)(new Uint8Array([4, 34, 1]));
-                        signature = new Uint8Array([40, 30, 20]);
-                        naclSign = tweetnacl_1.default.sign;
-                        spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(function () {
-                            return signature;
-                        });
-                        return [4 /*yield*/, KeyUtils.sign(message, privateKey)];
-                    case 1:
-                        result = _a.sent();
-                        expected = (0, encoding_1.toBase64)(signature);
-                        expect(result).toBe(expected);
-                        spyDetached.mockRestore();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-        it('rejects with false if signing throws an error', function () { return __awaiter(void 0, void 0, void 0, function () {
-            var message, privateKey, signature, naclSign, spyDetached;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        message = 'aaa';
-                        privateKey = (0, encoding_1.toBase64)(new Uint8Array([4, 34, 1]));
-                        signature = new Uint8Array([40, 30, 20]);
-                        naclSign = tweetnacl_1.default.sign;
-                        spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(function () {
-                            return signature;
-                        });
-                        return [4 /*yield*/, expect(KeyUtils.sign(message, privateKey)).rejects.toEqual(false)];
-                    case 1:
-                        _a.sent();
-                        spyDetached.mockRestore();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
-    describe('verifySignature', function () {
-        it('verifies signature', function () { return __awaiter(void 0, void 0, void 0, function () {
-            var message, signature, publicKey, verifyResult, naclDetached, spyVerify, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        message = (0, encoding_1.toBase64)(new Uint8Array([1, 2]));
-                        signature = (0, encoding_1.toBase64)(new Uint8Array([4, 34, 1]));
-                        publicKey = (0, encoding_1.toBase64)(new Uint8Array([5, 35, 2]));
-                        verifyResult = true;
-                        naclDetached = tweetnacl_1.default.sign.detached;
-                        spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(function () {
-                            return verifyResult;
-                        });
-                        return [4 /*yield*/, KeyUtils.verifySignature(message, signature, publicKey)];
-                    case 1:
-                        result = _a.sent();
-                        expect(result).toBe(true);
-                        spyVerify.mockRestore();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-        it('rejects with false if signature verification throws an error', function () { return __awaiter(void 0, void 0, void 0, function () {
-            var message, signature, publicKey, verifyResult, naclDetached, spyVerify;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        message = (0, encoding_1.toBase64)(new Uint8Array([1, 2]));
-                        signature = (0, encoding_1.toBase64)(new Uint8Array([4, 34, 1]));
-                        publicKey = 'foo';
-                        verifyResult = false;
-                        naclDetached = tweetnacl_1.default.sign.detached;
-                        spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(function () {
-                            return verifyResult;
-                        });
-                        return [4 /*yield*/, expect(KeyUtils.verifySignature(message, signature, publicKey)).rejects.toEqual(false)];
-                    case 1:
-                        _a.sent();
-                        spyVerify.mockRestore();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
+    // describe('sign', () => {
+    //   it('signs the message', async () => {
+    //     const message = toBase64(new Uint8Array([1, 2]));
+    //     const privateKey = toBase64(new Uint8Array([4, 34, 1]));
+    //     const signature = new Uint8Array([40, 30, 20]);
+    //     const naclSign = nacl.sign;
+    //     const spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(() => {
+    //       return signature;
+    //     });
+    //     const result = await KeyUtils.sign(message, privateKey);
+    //     const expected = toBase64(signature);
+    //     expect(result).toBe(expected);
+    //     spyDetached.mockRestore();
+    //   });
+    //   it('rejects with false if signing throws an error', async () => {
+    //     const message = 'aaa';
+    //     const privateKey = toBase64(new Uint8Array([4, 34, 1]));
+    //     const signature = new Uint8Array([40, 30, 20]);
+    //     const naclSign = nacl.sign;
+    //     const spyDetached = jest.spyOn(naclSign, 'detached').mockImplementation(() => {
+    //       return signature;
+    //     });
+    //     await expect(KeyUtils.sign(message, privateKey)).rejects.toEqual(false);
+    //     spyDetached.mockRestore();
+    //   });
+    // });
+    // describe('verifySignature', () => {
+    //   it('verifies signature', async () => {
+    //     const message = toBase64(new Uint8Array([1, 2]));
+    //     const signature = toBase64(new Uint8Array([4, 34, 1]));
+    //     const publicKey = toBase64(new Uint8Array([5, 35, 2]));
+    //     const verifyResult = true;
+    //     const naclDetached = nacl.sign.detached;
+    //     const spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(() => {
+    //       return verifyResult;
+    //     });
+    //     const result = await KeyUtils.verifySignature(message, signature, publicKey);
+    //     expect(result).toBe(true);
+    //     spyVerify.mockRestore();
+    //   });
+    //   it('rejects with false if signature verification throws an error', async () => {
+    //     const message = toBase64(new Uint8Array([1, 2]));
+    //     const signature = toBase64(new Uint8Array([4, 34, 1]));
+    //     const publicKey = 'foo';
+    //     const verifyResult = false;
+    //     const naclDetached = nacl.sign.detached;
+    //     const spyVerify = jest.spyOn(naclDetached, 'verify').mockImplementation(() => {
+    //       return verifyResult;
+    //     });
+    //     await expect(KeyUtils.verifySignature(message, signature, publicKey)).rejects.toEqual(false);
+    //     spyVerify.mockRestore();
+    //   });
+    // });
 });
 //# sourceMappingURL=keyUtils.spec.js.map

@@ -1,1 +1,1 @@
-declare module '@cosmostation/cosmosjs';
+// declare module '@cosmostation/cosmosjs';

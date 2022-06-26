@@ -35,43 +35,67 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.sign = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = void 0;
-var amino_1 = require("@cosmjs/amino");
+exports.generateWallets = exports.createWallets = exports.createWalletAtPath = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 var crypto_1 = require("@cosmjs/crypto");
+var proto_signing_1 = require("@cosmjs/proto-signing");
+var crypto_2 = require("@cosmjs/crypto");
 var encoding_1 = require("@cosmjs/encoding");
 var bn_js_1 = __importDefault(require("bn.js"));
 var sjcl_1 = __importDefault(require("sjcl"));
-var tweetnacl_1 = __importDefault(require("tweetnacl"));
 var hdVault_1 = require("../config/hdVault");
 var mnemonic_1 = require("./mnemonic");
-// @todo - move it
+/**
+ * const keyPath =                            "m/44'/606'/0'/0/1";
+ * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
+ * with 0-based account index `a`.
+ */
+function makeStratosHubPath(a) {
+    return [
+        crypto_1.Slip10RawIndex.hardened(44),
+        crypto_1.Slip10RawIndex.hardened(606),
+        crypto_1.Slip10RawIndex.hardened(0),
+        crypto_1.Slip10RawIndex.normal(0),
+        crypto_1.Slip10RawIndex.normal(a),
+    ];
+}
+exports.makeStratosHubPath = makeStratosHubPath;
+// @todo - move it - used in getMasterKeyInfo
 var isZero = function (privkey) {
     return privkey.every(function (byte) { return byte === 0; });
 };
-// @todo - move it
+// @todo - move it =  used in isGteN
 var n = function (curve) {
     switch (curve) {
-        case crypto_1.Slip10Curve.Secp256k1:
+        case crypto_2.Slip10Curve.Secp256k1:
             return new bn_js_1.default('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
         default:
             throw new Error('curve not supported');
     }
 };
-// @todo - move it
+// @todo - move it - used in getMasterKeyInfo
 var isGteN = function (curve, privkey) {
     var keyAsNumber = new bn_js_1.default(privkey);
     return keyAsNumber.gte(n(curve));
 };
-// @todo - move it
+// @todo - move it - used in getMasterKeySeedPriveKey
 var getMasterKeyInfo = function (curve, seed) {
-    var i = new crypto_1.Hmac(crypto_1.Sha512, (0, encoding_1.toAscii)(curve)).update(seed).digest();
+    var i = new crypto_2.Hmac(crypto_2.Sha512, (0, encoding_1.toAscii)(curve)).update(seed).digest();
     var il = i.slice(0, 32);
     var ir = i.slice(32, 64);
-    if (curve !== crypto_1.Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
+    if (curve !== crypto_2.Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
         return getMasterKeyInfo(curve, i);
     }
     return {
@@ -79,17 +103,14 @@ var getMasterKeyInfo = function (curve, seed) {
         privkey: il,
     };
 };
-/**
- * @todo add unit test
- */
 var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0, void 0, function () {
     var stringMnemonic, mnemonicChecked, seed;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
-                mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
-                return [4 /*yield*/, crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
+                mnemonicChecked = new crypto_2.EnglishMnemonic(stringMnemonic);
+                return [4 /*yield*/, crypto_2.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
             case 1:
                 seed = _a.sent();
                 return [2 /*return*/, seed];
@@ -97,23 +118,22 @@ var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0,
     });
 }); };
 exports.generateMasterKeySeed = generateMasterKeySeed;
-/**
- * @todo add unit test
- */
+// helper, not used?
 var getMasterKeySeedPriveKey = function (masterKeySeed) {
-    var masterKeyInfo = getMasterKeyInfo(crypto_1.Slip10Curve.Secp256k1, masterKeySeed);
+    var masterKeyInfo = getMasterKeyInfo(crypto_2.Slip10Curve.Secp256k1, masterKeySeed);
     var privkey = masterKeyInfo.privkey;
     return privkey;
 };
 exports.getMasterKeySeedPriveKey = getMasterKeySeedPriveKey;
+// used in derriveManager - deriveKeyPairFromPrivateKeySeed
 var getPublicKeyFromPrivKey = function (privkey) { return __awaiter(void 0, void 0, void 0, function () {
     var pubkey, compressedPub, pubkeyMine;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, crypto_1.Secp256k1.makeKeypair(privkey)];
+            case 0: return [4 /*yield*/, crypto_2.Secp256k1.makeKeypair(privkey)];
             case 1:
                 pubkey = (_a.sent()).pubkey;
-                compressedPub = crypto_1.Secp256k1.compressPubkey(pubkey);
+                compressedPub = crypto_2.Secp256k1.compressPubkey(pubkey);
                 pubkeyMine = {
                     type: 'tendermint/PubKeySecp256k1',
                     value: (0, encoding_1.toBase64)(compressedPub),
@@ -123,23 +143,45 @@ var getPublicKeyFromPrivKey = function (privkey) { return __awaiter(void 0, void
     });
 }); };
 exports.getPublicKeyFromPrivKey = getPublicKeyFromPrivKey;
+var encodeStratosPubkey = function (pubkey) {
+    var pubkeyAminoPrefixSecp256k1 = (0, encoding_1.fromHex)('eb5ae987' + '21');
+    var pubkeyAminoPrefixSecp256k1Converted = Array.from(pubkeyAminoPrefixSecp256k1);
+    var ecodedPubkey = (0, encoding_1.fromBase64)(pubkey.value);
+    var ecodedPubkeyConverted = Array.from(ecodedPubkey);
+    var encodedFullPubKey = new Uint8Array(__spreadArray(__spreadArray([], pubkeyAminoPrefixSecp256k1Converted, true), ecodedPubkeyConverted, true));
+    return encodedFullPubKey;
+};
+// amino pubkeyToAddress - dep 1 - solved
 var getAminoPublicKey = function (pubkey) { return __awaiter(void 0, void 0, void 0, function () {
     var encodedAminoPub;
     return __generator(this, function (_a) {
-        encodedAminoPub = (0, amino_1.encodeAminoPubkey)(pubkey);
+        encodedAminoPub = encodeStratosPubkey(pubkey);
         return [2 /*return*/, encodedAminoPub];
     });
 }); };
 exports.getAminoPublicKey = getAminoPublicKey;
+function rawSecp256k1PubkeyToRawAddress(pubkeyData) {
+    if (pubkeyData.length !== 33) {
+        throw new Error("Invalid Secp256k1 pubkey length (compressed): " + pubkeyData.length);
+    }
+    return (0, crypto_2.ripemd160)((0, crypto_2.sha256)(pubkeyData));
+}
+function pubkeyToRawAddress(pubkey) {
+    var pubkeyData = (0, encoding_1.fromBase64)(pubkey.value);
+    return rawSecp256k1PubkeyToRawAddress(pubkeyData);
+}
+// amino pubkeyToAddress - dep 2 - solved
 var getAddressFromPubKey = function (pubkey) {
-    var address = (0, amino_1.pubkeyToAddress)(pubkey, hdVault_1.stratosAddressPrefix);
+    // const address = pubkeyToAddress(pubkey, stratosAddressPrefix); // obsolete - { pubkeyToAddress } from '@cosmjs/amino';
+    var prefix = hdVault_1.stratosAddressPrefix;
+    var address = (0, encoding_1.toBech32)(prefix, pubkeyToRawAddress(pubkey));
     return address;
 };
 exports.getAddressFromPubKey = getAddressFromPubKey;
 var getEncodedPublicKey = function (encodedAminoPub) { return __awaiter(void 0, void 0, void 0, function () {
     var encodedPubKey;
     return __generator(this, function (_a) {
-        encodedPubKey = encoding_1.Bech32.encode(hdVault_1.stratosPubkeyPrefix, encodedAminoPub);
+        encodedPubKey = (0, encoding_1.toBech32)(hdVault_1.stratosPubkeyPrefix, encodedAminoPub);
         return [2 /*return*/, encodedPubKey];
     });
 }); };
@@ -158,6 +200,7 @@ var getMasterKeySeedPublicKey = function (masterKeySeed) { return __awaiter(void
     });
 }); };
 exports.getMasterKeySeedPublicKey = getMasterKeySeedPublicKey;
+// only used in keyManager
 var encryptMasterKeySeed = function (password, masterKeySeed) {
     var strMasterKey = (0, encoding_1.toBase64)(masterKeySeed);
     var saltBits = sjcl_1.default.random.randomWords(4);
@@ -174,6 +217,7 @@ var encryptMasterKeySeed = function (password, masterKeySeed) {
     return sjcl_1.default.encrypt(password, strMasterKey, encryptParams);
 };
 exports.encryptMasterKeySeed = encryptMasterKeySeed;
+// used in unlockMasterKeySeed and getMasterKeySeed - here
 var decryptMasterKeySeed = function (password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
     var decrypteCypherText, decryptedMasterKeySeed;
     return __generator(this, function (_a) {
@@ -189,6 +233,7 @@ var decryptMasterKeySeed = function (password, encryptedMasterKeySeed) { return 
     });
 }); };
 exports.decryptMasterKeySeed = decryptMasterKeySeed;
+// used in keyManager to call unlockMasterKeySeed
 var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
     var e_1;
     return __generator(this, function (_a) {
@@ -207,6 +252,7 @@ var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return _
     });
 }); };
 exports.unlockMasterKeySeed = unlockMasterKeySeed;
+// used in wallet.ts to deriveKeyPair
 var getMasterKeySeed = function (password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
     var decryptedMasterKeySeed, e_2;
     return __generator(this, function (_a) {
@@ -229,39 +275,125 @@ var getMasterKeySeed = function (password, encryptedMasterKeySeed) { return __aw
     });
 }); };
 exports.getMasterKeySeed = getMasterKeySeed;
-var sign = function (message, privateKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var decodedMessage, decodedPrivateKey, signature, ecodedSignature;
-    return __generator(this, function (_a) {
-        try {
-            decodedMessage = (0, encoding_1.fromBase64)(message);
-            decodedPrivateKey = (0, encoding_1.fromBase64)(privateKey);
-            signature = tweetnacl_1.default.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
-            ecodedSignature = (0, encoding_1.toBase64)(signature);
-            return [2 /*return*/, ecodedSignature];
-        }
-        catch (error) {
-            return [2 /*return*/, Promise.reject(false)];
-        }
-        return [2 /*return*/];
+function makePathBuilder(pattern) {
+    if (pattern.indexOf('a') === -1)
+        throw new Error('Missing account index variable `a` in pattern.');
+    if (pattern.indexOf('a') !== pattern.lastIndexOf('a')) {
+        throw new Error('More than one account index variable `a` in pattern.');
+    }
+    var builder = function (a) {
+        var path = pattern.replace('a', a.toString());
+        return (0, crypto_1.stringToPath)(path);
+    };
+    // test builder
+    var _path = builder(0);
+    return builder;
+}
+exports.makePathBuilder = makePathBuilder;
+function createWalletAtPath(hdPathIndex, mnemonic) {
+    return __awaiter(this, void 0, void 0, function () {
+        var addressPrefix, hdPaths, options, wallet;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    addressPrefix = hdVault_1.stratosAddressPrefix;
+                    hdPaths = [makeStratosHubPath(hdPathIndex)];
+                    options = {
+                        bip39Password: '',
+                        prefix: addressPrefix,
+                        hdPaths: hdPaths,
+                    };
+                    return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options)];
+                case 1:
+                    wallet = _a.sent();
+                    // works - way 2
+                    // const pathBuilder = makePathBuilder(keyPathPattern);
+                    // const path = pathBuilder(hdPathIndex);
+                    // const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+                    //   hdPaths: [path],
+                    //   prefix: addressPrefix,
+                    // });
+                    return [2 /*return*/, wallet];
+            }
+        });
     });
-}); };
-exports.sign = sign;
-var verifySignature = function (message, signature, publicKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var convertedMessage, formattedMessage, convertedSignature, convertedPubKey, verifyResult;
-    return __generator(this, function (_a) {
-        try {
-            convertedMessage = (0, encoding_1.fromBase64)(message);
-            formattedMessage = Uint8Array.from(convertedMessage);
-            convertedSignature = (0, encoding_1.fromBase64)(signature);
-            convertedPubKey = (0, encoding_1.fromBase64)(publicKey);
-            verifyResult = tweetnacl_1.default.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
-            return [2 /*return*/, verifyResult];
-        }
-        catch (err) {
-            return [2 /*return*/, Promise.reject(false)];
-        }
-        return [2 /*return*/];
+}
+exports.createWalletAtPath = createWalletAtPath;
+function createWallets(mnemonic, pathBuilder, addressPrefix, numberOfDistributors) {
+    return __awaiter(this, void 0, void 0, function () {
+        var wallets, numberOfIdentities, i, path, wallet, account, address;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    wallets = new Array();
+                    numberOfIdentities = 1 + numberOfDistributors;
+                    i = 0;
+                    _a.label = 1;
+                case 1:
+                    if (!(i < numberOfIdentities)) return [3 /*break*/, 5];
+                    path = pathBuilder(i);
+                    return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+                            hdPaths: [path],
+                            prefix: addressPrefix,
+                        })];
+                case 2:
+                    wallet = _a.sent();
+                    return [4 /*yield*/, wallet.getAccounts()];
+                case 3:
+                    account = (_a.sent())[0];
+                    address = account.address;
+                    wallets.push([address, wallet]);
+                    _a.label = 4;
+                case 4:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 5: return [2 /*return*/, wallets];
+            }
+        });
     });
-}); };
-exports.verifySignature = verifySignature;
+}
+exports.createWallets = createWallets;
+function generateWallets(quantity, mnemonic) {
+    return __awaiter(this, void 0, void 0, function () {
+        var pathBuilder, wallets;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    pathBuilder = makePathBuilder(hdVault_1.keyPathPattern);
+                    return [4 /*yield*/, createWallets(mnemonic, pathBuilder, hdVault_1.stratosAddressPrefix, quantity)];
+                case 1:
+                    wallets = _a.sent();
+                    return [2 /*return*/, wallets];
+            }
+        });
+    });
+}
+exports.generateWallets = generateWallets;
+// export const sign = async (message: string, privateKey: string): Promise<string> => {
+//   try {
+//     const decodedMessage = fromBase64(message);
+//     const decodedPrivateKey = fromBase64(privateKey);
+//     const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
+//     const ecodedSignature = toBase64(signature);
+//     return ecodedSignature;
+//   } catch (error) {
+//     return Promise.reject(false);
+//   }
+// };
+// export const verifySignature = async (
+//   message: string,
+//   signature: string,
+//   publicKey: string,
+// ): Promise<boolean> => {
+//   try {
+//     const convertedMessage = fromBase64(message);
+//     const formattedMessage = Uint8Array.from(convertedMessage);
+//     const convertedSignature = fromBase64(signature);
+//     const convertedPubKey = fromBase64(publicKey);
+//     const verifyResult = nacl.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
+//     return verifyResult;
+//   } catch (err) {
+//     return Promise.reject(false);
+//   }
+// };
 //# sourceMappingURL=keyUtils.js.map

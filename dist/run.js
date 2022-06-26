@@ -69,18 +69,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeStratosHubPath = void 0;
-var crypto_1 = require("@cosmjs/crypto");
 var dotenv_1 = __importDefault(require("dotenv"));
 var accounts = __importStar(require("./accounts"));
 var hdVault_1 = require("./hdVault");
 var keyManager_1 = require("./hdVault/keyManager");
+var keyUtils = __importStar(require("./hdVault/keyUtils"));
 var wallet_1 = require("./hdVault/wallet");
 var Sdk_1 = __importDefault(require("./Sdk"));
 var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
+// import {
+//   assertIsDeliverTxSuccess,
+//   calculateFee,
+//   coins,
+//   GasPrice,
+//   SigningStargateClient,
+//   StdFee,
+// } from '@cosmjs/stargate';
 dotenv_1.default.config();
 var password = 'XXXX';
 var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
@@ -96,24 +103,10 @@ var sdkEnvTest = {
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
 };
-/**
- * const keyPath =                            "m/44'/606'/0'/0/1";
- * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
- * with 0-based account index `a`.
- */
-function makeStratosHubPath(a) {
-    return [
-        crypto_1.Slip10RawIndex.hardened(44),
-        crypto_1.Slip10RawIndex.hardened(606),
-        crypto_1.Slip10RawIndex.hardened(0),
-        crypto_1.Slip10RawIndex.normal(0),
-        crypto_1.Slip10RawIndex.normal(a),
-    ];
-}
-exports.makeStratosHubPath = makeStratosHubPath;
+// export type PathBuilder = (account_index: number) => HdPath;
 // creates an account and derives 2 keypairs
 var mainFour = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -121,16 +114,11 @@ var mainFour = function () { return __awaiter(void 0, void 0, void 0, function (
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
                 masterKeySeed = _a.sent();
-                console.log('masterKeySeed!', masterKeySeed);
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
                 return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 console.log('keyPairZero', keyPairZero);
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
-            case 3:
-                keyPairOne = _a.sent();
-                console.log('keyPairOne', keyPairOne);
                 return [2 /*return*/];
         }
     });
@@ -687,26 +675,63 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, error_5;
+var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, firstAccountRestored;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, Network.getChainId()];
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
-                resolvedChainID = _a.sent();
-                return [3 /*break*/, 3];
+                masterKeySeedInfo = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created', masterKeySeedInfo);
+                return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
             case 2:
+                wallet = _a.sent();
+                serialized = masterKeySeedInfo.encryptedWalletInfo;
+                return [4 /*yield*/, wallet.getAccounts()];
+            case 3:
+                firstAccount = (_a.sent())[0];
+                console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
+                return [4 /*yield*/, (0, wallet_1.deserializeEncryptedWallet)(serialized, password)];
+            case 4:
+                deserializedWallet = _a.sent();
+                return [4 /*yield*/, deserializedWallet.getAccounts()];
+            case 5:
+                firstAccountRestored = (_a.sent())[0];
+                console.log('🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored', firstAccountRestored);
+                return [2 /*return*/];
+        }
+    });
+}); };
+var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var resolvedChainID, sdkEnv, error_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                sdkEnv = sdkEnvDev;
+                return [4 /*yield*/, Sdk_1.default.init(__assign({}, sdkEnv))];
+            case 1:
+                _a.sent();
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, Network.getChainId()];
+            case 3:
+                resolvedChainID = _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
                 error_5 = _a.sent();
                 console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_5);
                 throw new Error('Could not resolve chain id');
-            case 3:
+            case 5:
                 if (!resolvedChainID) {
                     throw new Error('Chain id is empty. Exiting');
                 }
-                Sdk_1.default.init(__assign(__assign({}, sdkEnvTest), { chainId: resolvedChainID }));
-                mainBalance();
+                return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID }))];
+            case 6:
+                _a.sent();
+                cosmosWalletCreateTest();
                 return [2 /*return*/];
         }
     });

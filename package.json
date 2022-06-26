@@ -1,6 +1,6 @@
 {
   "name": "@stratos-network/stratos-sdk.js",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "The JavaScript SDK for Stratos Network",
   "license": "ISC",
   "author": "Stratos Network",
@@ -69,6 +69,7 @@
     "husky": "^4.3.6",
     "jest": "^26.6.3",
     "lint-staged": "^10.5.3",
+    "msw": "^0.28.1",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
     "stream-browserify": "^3.0.0",
@@ -80,26 +81,27 @@
     "typescript": "^4.1.5",
     "webpack": "^5.11.1",
     "webpack-bundle-analyzer": "^4.3.0",
-    "webpack-cli": "^4.3.0",
-    "msw": "^0.28.1"
+    "webpack-cli": "^4.3.0"
   },
   "dependencies": {
-    "@cosmjs/amino": "^0.25.3",
-    "@cosmjs/crypto": "^0.24.1",
-    "@cosmostation/cosmosjs": "0.9.5",
-    "@types/bn.js": "^5.1.0",
+    "@cosmjs/crypto": "0.28.9",
+    "@cosmjs/encoding": "0.28.9",
+    "@cosmjs/proto-signing": "0.28.9",
+    "@cosmjs/stargate": "0.28.9",
+    "@types/bn.js": "5.1.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
     "bech32": "1.1.4",
-    "bignumber.js": "^9.0.1",
+    "bignumber.js": "9.0.1",
     "bip39": "3.0.2",
     "bn.js": "^5.2.0",
+    "cosmjs-types": "^0.5.0",
+    "dotenv": "^10.0.0",
     "json-bigint": "^1.0.0",
     "lodash": "^4.17.21",
     "sjcl": "1.0.8",
+    "sleep-promise": "^9.1.0",
     "tweetnacl": "1.0.1",
-    "tweetnacl-util": "0.15.0",
-    "dotenv": "^10.0.0",
-    "sleep-promise": "^9.1.0"
+    "tweetnacl-util": "0.15.0"
   }
 }

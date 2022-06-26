@@ -1,14 +1,23 @@
-import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 import dotenv from 'dotenv';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
-import { createMasterKeySeed } from './hdVault/keyManager';
-import { deriveKeyPair } from './hdVault/wallet';
+import { createMasterKeySeed, createMasterKeySeedFromGivenSeed } from './hdVault/keyManager';
+import * as keyUtils from './hdVault/keyUtils';
+import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
 import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
+
+// import {
+//   assertIsDeliverTxSuccess,
+//   calculateFee,
+//   coins,
+//   GasPrice,
+//   SigningStargateClient,
+//   StdFee,
+// } from '@cosmjs/stargate';
 
 dotenv.config();
 
@@ -30,35 +39,24 @@ const sdkEnvTest = {
   explorerUrl: 'https://explorer-test.thestratos.org',
 };
 
-/**
- * const keyPath =                            "m/44'/606'/0'/0/1";
- * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
- * with 0-based account index `a`.
- */
-export function makeStratosHubPath(a: number): HdPath {
-  return [
-    Slip10RawIndex.hardened(44),
-    Slip10RawIndex.hardened(606),
-    Slip10RawIndex.hardened(0),
-    Slip10RawIndex.normal(0),
-    Slip10RawIndex.normal(a),
-  ];
-}
+// export type PathBuilder = (account_index: number) => HdPath;
 
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
+  // const mm =
+  // 'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+  // const phrase = mnemonic.convertStringToArray(mm);
+
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
-  console.log('masterKeySeed!', masterKeySeed);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
 
   const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
-
   console.log('keyPairZero', keyPairZero);
-  const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
 
-  console.log('keyPairOne', keyPairOne);
+  // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+  // console.log('keyPairOne', keyPairOne);
 };
 
 // cosmosjs send
@@ -490,8 +488,105 @@ const getTxHistory = async () => {
   return true;
 };
 
+const cosmosWalletCreateTest = async () => {
+  // const accountsData = await Network.getAccountsData(address);
+  // console.log('🚀 ~ file: run.ts ~ line 501 ~ cosmosWalletCreateTest ~ accountsData', accountsData);
+
+  // Old way
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  console.log(
+    '🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created',
+    masterKeySeedInfo,
+  );
+
+  // const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+  // console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
+
+  // 1
+  const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+
+  // 2
+  // const wallets = await keyUtils.generateWallets(3, zeroUserMnemonic);
+  // const [walletInfo] = wallets;
+  // const [_walletAddress, wallet] = walletInfo;
+
+  // const walletMasterKeySeed = (wallet as any).seed; // accessing a private field
+  // const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, walletMasterKeySeed);
+  // const encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
+  // const derivedMasterKeySeed = await keyUtils.decryptMasterKeySeed(password, encryptedMasterKeySeedString);
+
+  // if (!derivedMasterKeySeed) {
+  //   return;
+  // }
+
+  // const masterKeySeedInfoTwo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
+
+  // const keyPairZeroB = await deriveKeyPair(
+  //   0,
+  //   password,
+  //   masterKeySeedInfoTwo.encryptedMasterKeySeed.toString(),
+  // );
+  // console.log('keyPairZeroB from descripted and restored masterKeySeedInfoTwo', keyPairZeroB);
+
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 651 ~ cosmosWalletCreateTest ~ masterKeySeedInfoTwo restored',
+  //   masterKeySeedInfoTwo,
+  // );
+
+  // const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  // console.log('keyPairZero from new wallet seed', keyPairZero);
+
+  const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  // console.log('🚀 ~ file: run.ts ~ line 652 ~ cosmosWalletCreateTest ~ serialized', serialized);
+
+  const [firstAccount] = await wallet.getAccounts();
+  console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
+
+  const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
+
+  const [firstAccountRestored] = await deserializedWallet.getAccounts();
+  console.log(
+    '🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored',
+    firstAccountRestored,
+  );
+
+  // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet);
+
+  // const recipient = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
+  // const amount = {
+  //   denom: 'ustos',
+  //   amount: '1234567',
+  // };
+
+  // const fee = {
+  //   amount: [
+  //     {
+  //       denom: 'ustos',
+  //       amount: '2000',
+  //     },
+  //   ],
+  //   gas: '180000', // 180k
+  // };
+
+  // const result = await client.sendTokens(
+  //   firstAccount.address,
+  //   recipient,
+  //   [amount],
+  //   fee,
+  //   'Have fun with your star coins',
+  // );
+
+  // console.log('🚀 ~ file: run.ts ~ line 668 ~ cosmosWalletCreateTest ~ result', result);
+};
+
 const main = async () => {
   let resolvedChainID;
+
+  // // const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvDev;
+
+  await Sdk.init({ ...sdkEnv });
 
   try {
     resolvedChainID = await Network.getChainId();
@@ -504,10 +599,12 @@ const main = async () => {
     throw new Error('Chain id is empty. Exiting');
   }
 
-  Sdk.init({ ...sdkEnvTest, chainId: resolvedChainID });
+  await Sdk.init({ ...sdkEnv, chainId: resolvedChainID });
 
-  mainBalance();
-  // mainSend(); //
+  cosmosWalletCreateTest();
+  // mainFour();
+
+  // mainBalance();
 };
 
 main();

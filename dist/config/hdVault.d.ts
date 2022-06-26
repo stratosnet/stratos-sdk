@@ -7,3 +7,4 @@ export declare const stratosPubkeyPrefix = "stpub";
 export declare const stratosDenom = "ustos";
 export declare const stratosTopDenom = "stos";
 export declare const keyPath: string;
+export declare const keyPathPattern: string;

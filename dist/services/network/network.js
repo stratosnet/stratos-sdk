@@ -54,11 +54,23 @@ exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exp
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
+var _axios = axios_1.default.create({});
+_axios.defaults.transformResponse = [
+    function (data) {
+        try {
+            return (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(data);
+        }
+        catch (_) {
+            return data;
+        }
+    },
+];
 var getRestRoute = function () {
     var restUrl = Sdk_1.default.environment.restUrl;
     return restUrl;
 };
 var getRpcRoute = function () {
+    // console.log('🚀 ~ file: network.ts ~ line 26 ~ getRpcRoute ~ Sdk.environment', Sdk.environment);
     var rpcUrl = Sdk_1.default.environment.rpcUrl;
     return rpcUrl;
 };
@@ -73,7 +85,7 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.post(url, data, config)];
+                return [4 /*yield*/, _axios.post(url, data, config)];
             case 1:
                 axiosResponse = _a.sent();
                 return [3 /*break*/, 3];
@@ -82,7 +94,7 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
                 return [2 /*return*/, { error: { message: err_1.message } }];
             case 3:
                 try {
-                    myResponse = (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(axiosResponse.data);
+                    myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];
                 }
                 catch (_) {
@@ -99,7 +111,7 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.get(url, config)];
+                return [4 /*yield*/, _axios.get(url, config)];
             case 1:
                 axiosResponse = _a.sent();
                 return [3 /*break*/, 3];
@@ -108,7 +120,7 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
                 return [2 /*return*/, { error: { message: err_2.message } }];
             case 3:
                 try {
-                    myResponse = (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(axiosResponse.data);
+                    myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];
                 }
                 catch (_) {
@@ -124,7 +136,9 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/auth/acconts/" + address;
+                url = getRestRoute() + "/cosmos/auth/v1beta1/accounts/" + address;
+                // const url = `${getRpcRoute()}/auth/v1beta1/accounts`;
+                console.log('🚀 ~ file: network.ts ~ line 86 ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -206,6 +220,14 @@ var getTxListBlockchain = function (address, type, page, config) {
     });
 };
 exports.getTxListBlockchain = getTxListBlockchain;
+/**
+ * @param address
+ * @deprecated
+ * @param type
+ * @param page
+ * @param config
+ * @returns
+ */
 var getTxList = function (address, type, page, config) {
     if (page === void 0) { page = 1; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -368,6 +390,7 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
         switch (_a.label) {
             case 0:
                 url = getRpcRoute() + "/status";
+                console.log('🚀 ~ file: network.ts ~ line 306 ~ getRpcStatus ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();

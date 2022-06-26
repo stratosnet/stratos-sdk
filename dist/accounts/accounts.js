@@ -76,7 +76,7 @@ var getAccountsData = function (keyPairAddress) { return __awaiter(void 0, void 
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)().getAccounts(keyPairAddress)];
             case 1:
                 accountsData = _a.sent();
-                // console.log('accountsData!', accountsData);
+                console.log('accountsData!', accountsData);
                 return [2 /*return*/, accountsData];
             case 2:
                 err_1 = _a.sent();
@@ -280,7 +280,7 @@ var getAccountTrasactions = function (address, type, page) {
                     }
                     parsedData = [];
                     data = response.txs, total = response.total_count;
-                    console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+                    // console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
                     data.forEach(function (txItem) {
                         try {
                             var parsed = (0, transactions_1.transformTx)(txItem);

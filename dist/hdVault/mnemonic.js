@@ -28,6 +28,8 @@ var generateMnemonicPhrase = function (phraseLength) {
     }
     var entropy = crypto_1.default.randomBytes(32);
     mnemonicString = (0, bip39_1.entropyToMnemonic)(entropy);
+    // another option
+    // const mnemonic = Bip39.encode(Random.getBytes(16)).toString(); // using { Bip39 } '@cosmjs/crypto'
     return (0, exports.convertStringToArray)(mnemonicString);
 };
 exports.generateMnemonicPhrase = generateMnemonicPhrase;

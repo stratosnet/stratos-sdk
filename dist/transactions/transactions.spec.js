@@ -67,12 +67,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("@testing-library/jest-dom/extend-expect");
-var Cosmos = __importStar(require("../services/cosmos"));
 var bigNumber_1 = require("../services/bigNumber");
+var Cosmos = __importStar(require("../services/cosmos"));
 var Transactions = __importStar(require("./transactions"));
-var ValidatorsApi = __importStar(require("../validators/validators"));
 var encoding_1 = require("@cosmjs/encoding");
 var Utils = __importStar(require("../hdVault/utils"));
+var ValidatorsApi = __importStar(require("../validators/validators"));
 describe('transactions', function () {
     describe('broadcast', function () {
         it('broadcasts transaction', function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -173,10 +173,10 @@ describe('transactions', function () {
         it('returns an expected standard fee', function () { return __awaiter(void 0, void 0, void 0, function () {
             var numberOfMessages, expectedFee, result;
             return __generator(this, function (_a) {
-                numberOfMessages = 2;
+                numberOfMessages = 3;
                 expectedFee = {
-                    amount: [{ amount: String(50000), denom: 'ustos' }],
-                    gas: String(200000 + 50000 * numberOfMessages),
+                    amount: [{ amount: String(200000), denom: 'ustos' }],
+                    gas: String(500000 + 100000 * numberOfMessages),
                 };
                 result = Transactions.getStandardFee(numberOfMessages);
                 expect(result).toStrictEqual(expectedFee);

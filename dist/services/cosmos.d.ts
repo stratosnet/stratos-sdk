@@ -11,4 +11,8 @@ export interface CosmosInstance {
     sign(txMessage: TransactionMessage, pkey: Buffer): SignedTransaction;
     getAccounts(address: string): Promise<AccountsData>;
 }
+export declare class StratosCosmos {
+    static cosmosInstance: CosmosInstance;
+    static init(): void;
+}
 export declare const getCosmos: () => CosmosInstance;
