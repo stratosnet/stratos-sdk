@@ -1,4 +1,4 @@
-import cosmosjs from '@cosmostation/cosmosjs';
+// import cosmosjs from '@cosmostation/cosmosjs';
 import { AccountsData } from '../accounts/types';
 import Sdk from '../Sdk';
 import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
@@ -20,7 +20,7 @@ export class StratosCosmos {
   public static init(): void {
     const { restUrl: envRestUrl, chainId: envChainId } = Sdk.environment;
 
-    StratosCosmos.cosmosInstance = cosmosjs.network(envRestUrl, envChainId);
+    // StratosCosmos.cosmosInstance = cosmosjs.network(envRestUrl, envChainId);
   }
 }
 
