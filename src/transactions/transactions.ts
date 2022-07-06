@@ -1,14 +1,19 @@
-import { fromHex } from '@cosmjs/encoding';
+import { defaultRegistryTypes } from '@cosmjs/stargate';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
-import { uint8ArrayToBuffer } from '../hdVault/utils';
 import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
+
+import { GeneratedType } from '@cosmjs/proto-signing';
+import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
+
+import { DeliverTxResponse } from '@cosmjs/stargate';
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
@@ -16,11 +21,37 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
   }
 }
 
-export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Types.BroadcastResult> => {
-  try {
-    const result = await getCosmos().broadcast(signedTx);
+export const getStratosTransactionRegistryTypes = () => {
+  const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
+    ...defaultRegistryTypes,
+    [Types.TxMsgTypes.SdsPrepay, Coin],
+    [Types.TxMsgTypes.SdsFileUpload, Coin],
 
-    // add proper error handling!! check for code!
+    [Types.TxMsgTypes.PotVolumeReport, Coin],
+    [Types.TxMsgTypes.PotWithdraw, Coin],
+    [Types.TxMsgTypes.PotFoundationDeposit, Coin],
+
+    [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
+    [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
+    [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
+    [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
+    [Types.TxMsgTypes.RegisterIndexingNodeRegistrationVote, Coin],
+  ];
+
+  return stratosTxRegistryTypes;
+};
+
+export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
+  try {
+    const client = await getCosmos();
+
+    const txBytes = TxRaw.encode(signedTx).finish();
+    console.log(
+      '🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted',
+      JSON.stringify(txBytes),
+    );
+    const result = await client.broadcastTx(txBytes);
+
     return result;
   } catch (err) {
     console.log('Could not broadcast', (err as Error).message);
@@ -29,10 +60,17 @@ export const broadcast = async (signedTx: Types.SignedTransaction): Promise<Type
   }
 };
 
-export const sign = (txMessage: Types.TransactionMessage, privateKey: string): Types.SignedTransaction => {
-  const pkey = uint8ArrayToBuffer(fromHex(privateKey));
+export const sign = async (
+  address: string,
+  txMessages: Types.TxMessage[],
+  memo = '',
+  givenFee?: Types.TransactionFee,
+): Promise<TxRaw> => {
+  const fee = givenFee ? givenFee : getStandardFee();
 
-  const signedTx = getCosmos().sign(txMessage, pkey);
+  const client = await getCosmos();
+  const signedTx = client.sign(address, txMessages, fee, memo);
+
   return signedTx;
 };
 
@@ -53,6 +91,7 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
   return result;
 };
 
+// @depricated ?
 export const getBaseTx = async (
   keyPairAddress: string,
   memo = '',
@@ -60,7 +99,7 @@ export const getBaseTx = async (
 ): Promise<Types.BaseTransaction> => {
   const accountsData = await getAccountsData(keyPairAddress);
 
-  const oldSequence = String(accountsData.result.value.sequence);
+  const oldSequence = String(accountsData.account.sequence);
   const newSequence = parseInt(oldSequence);
 
   const { chainId } = Sdk.environment;
@@ -69,7 +108,7 @@ export const getBaseTx = async (
     chain_id: chainId,
     fee: getStandardFee(numberOfMessages),
     memo,
-    account_number: String(accountsData.result.value.account_number),
+    account_number: String(accountsData.account.account_number),
     sequence: `${newSequence}`,
   };
 
@@ -79,10 +118,7 @@ export const getBaseTx = async (
 export const getSendTx = async (
   keyPairAddress: string,
   sendPayload: Types.SendTxPayload[],
-  memo = '',
-): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(keyPairAddress, memo, sendPayload.length);
-
+): Promise<Types.SendTxMessage[]> => {
   const payloadToProcess = payloadGenerator(sendPayload);
 
   let iteratedData = payloadToProcess.next();
@@ -93,11 +129,11 @@ export const getSendTx = async (
     const { amount, toAddress } = iteratedData.value as Types.SendTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.Send,
+      typeUrl: Types.TxMsgTypes.Send,
       value: {
         amount: getStandardAmount([amount]),
-        from_address: keyPairAddress,
-        to_address: toAddress,
+        fromAddress: keyPairAddress,
+        toAddress: toAddress,
       },
     };
 
@@ -106,23 +142,13 @@ export const getSendTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };
 
 export const getDelegateTx = async (
   delegatorAddress: string,
   delegatePayload: Types.DelegateTxPayload[],
-  memo = '',
-): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(delegatorAddress, memo, delegatePayload.length);
-
+): Promise<Types.DelegateTxMessage[]> => {
   const payloadToProcess = payloadGenerator(delegatePayload);
 
   let iteratedData = payloadToProcess.next();
@@ -133,14 +159,14 @@ export const getDelegateTx = async (
     const { amount, validatorAddress } = iteratedData.value as Types.DelegateTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.Delegate,
+      typeUrl: Types.TxMsgTypes.Delegate,
       value: {
         amount: {
           amount: toWei(amount, decimalPrecision).toString(),
           denom: stratosDenom,
         },
-        delegator_address: delegatorAddress,
-        validator_address: validatorAddress,
+        delegatorAddress: delegatorAddress,
+        validatorAddress: validatorAddress,
       },
     };
 
@@ -149,23 +175,13 @@ export const getDelegateTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };
 
 export const getUnDelegateTx = async (
   delegatorAddress: string,
   unDelegatePayload: Types.UnDelegateTxPayload[],
-  memo = '',
-): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(delegatorAddress, memo, unDelegatePayload.length);
-
+): Promise<Types.UnDelegateTxMessage[]> => {
   const payloadToProcess = payloadGenerator(unDelegatePayload);
 
   let iteratedData = payloadToProcess.next();
@@ -176,14 +192,14 @@ export const getUnDelegateTx = async (
     const { amount, validatorAddress } = iteratedData.value as Types.DelegateTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.Undelegate,
+      typeUrl: Types.TxMsgTypes.Undelegate,
       value: {
         amount: {
           amount: toWei(amount, decimalPrecision).toString(),
           denom: stratosDenom,
         },
-        delegator_address: delegatorAddress,
-        validator_address: validatorAddress,
+        delegatorAddress: delegatorAddress,
+        validatorAddress: validatorAddress,
       },
     };
 
@@ -192,23 +208,13 @@ export const getUnDelegateTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };
 
 export const getWithdrawalRewardTx = async (
   delegatorAddress: string,
   withdrawalPayload: Types.WithdrawalRewardTxPayload[],
-  memo = '',
-): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(delegatorAddress, memo, withdrawalPayload.length);
-
+): Promise<Types.WithdrawalRewardTxMessage[]> => {
   const payloadToProcess = payloadGenerator(withdrawalPayload);
 
   let iteratedData = payloadToProcess.next();
@@ -219,10 +225,10 @@ export const getWithdrawalRewardTx = async (
     const { validatorAddress } = iteratedData.value as Types.WithdrawalRewardTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.WithdrawRewards,
+      typeUrl: Types.TxMsgTypes.WithdrawRewards,
       value: {
-        delegator_address: delegatorAddress,
-        validator_address: validatorAddress,
+        delegatorAddress: delegatorAddress,
+        validatorAddress: validatorAddress,
       },
     };
 
@@ -231,26 +237,15 @@ export const getWithdrawalRewardTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };
 
 export const getWithdrawalAllRewardTx = async (
   delegatorAddress: string,
-  memo = '',
-): Promise<Types.TransactionMessage> => {
+): Promise<Types.WithdrawalRewardTxMessage[]> => {
   const vListResult = await getValidatorsBondedToDelegator(delegatorAddress);
-  console.log('🚀 ~ file: transactions.ts ~ line 249 ~ vListResult', vListResult);
 
   const { data: withdrawalPayload } = vListResult;
-
-  const baseTx = await getBaseTx(delegatorAddress, memo, withdrawalPayload.length);
 
   const payloadToProcess = payloadGenerator(
     withdrawalPayload.map((item: { address: string }) => ({ validatorAddress: item.address })),
@@ -264,10 +259,10 @@ export const getWithdrawalAllRewardTx = async (
     const { validatorAddress } = iteratedData.value as Types.WithdrawalRewardTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.WithdrawRewards,
+      typeUrl: Types.TxMsgTypes.WithdrawRewards,
       value: {
-        delegator_address: delegatorAddress,
-        validator_address: validatorAddress,
+        delegatorAddress: delegatorAddress,
+        validatorAddress: validatorAddress,
       },
     };
 
@@ -276,24 +271,13 @@ export const getWithdrawalAllRewardTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };
 
-/** @todo add unit test */
 export const getSdsPrepayTx = async (
   senderAddress: string,
   prepayPayload: Types.SdsPrepayTxPayload[],
-  memo = '',
-): Promise<Types.TransactionMessage> => {
-  const baseTx = await getBaseTx(senderAddress, memo, prepayPayload.length);
-
+): Promise<Types.SdsPrepayTxMessage[]> => {
   const payloadToProcess = payloadGenerator(prepayPayload);
 
   let iteratedData = payloadToProcess.next();
@@ -304,7 +288,7 @@ export const getSdsPrepayTx = async (
     const { amount } = iteratedData.value as Types.SdsPrepayTxPayload;
 
     const message = {
-      type: Types.TxMsgTypes.SdsPrepay,
+      typeUrl: Types.TxMsgTypes.SdsPrepay,
       value: {
         sender: senderAddress,
         coins: getStandardAmount([amount]),
@@ -316,12 +300,5 @@ export const getSdsPrepayTx = async (
     iteratedData = payloadToProcess.next();
   }
 
-  const myTx = {
-    msgs: messagesList,
-    ...baseTx,
-  };
-
-  const myTxMsg = getCosmos().newStdMsg(myTx);
-
-  return myTxMsg;
+  return messagesList;
 };

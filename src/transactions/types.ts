@@ -1,32 +1,32 @@
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 
 export enum TxMsgTypes {
-  Account = 'cosmos-sdk/Account', // Account 10
-  Send = 'cosmos-sdk/MsgSend', // Transfer 1
-  Delegate = 'cosmos-sdk/MsgDelegate', // Delegate 2
-  Undelegate = 'cosmos-sdk/MsgUndelegate', // Undelegate 3
-  WithdrawRewards = 'cosmos-sdk/MsgWithdrawDelegationReward', // GetReward 4
-  CreateValidator = 'osmos-sdk/MsgCreateValidator', // CreateValidator 9
+  Account = '/cosmos.auth.v1beta1.BaseAccount', // Account 10
+  Send = '/cosmos.bank.v1beta1.MsgSend', // Transfer 1
+  Delegate = '/cosmos.staking.v1beta1.MsgDelegate', // Delegate 2
+  Undelegate = '/cosmos.staking.v1beta1.MsgUndelegate', // Undelegate 3
+  WithdrawRewards = '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', // GetReward 4
+  CreateValidator = '/cosmos.staking.v1beta1.MsgCreateValidator', // CreateValidator 9
 }
 
 export enum TxMsgTypes {
   SdsAll = '', // All 0
-  SdsPrepay = 'sds/MsgPrepay', // SdsPrepay 5
-  SdsFileUpload = 'sds/MsgFileUpload', // SdsFileUpload 6
+  SdsPrepay = '/stratos.sds.v1.MsgPrepay', // SdsPrepay 5
+  SdsFileUpload = '/stratos.sds.v1.MsgFileUpload', // SdsFileUpload 6
 }
 
 export enum TxMsgTypes {
-  PotVolumeReport = 'pot/MsgVolumeReport', // PotVolumeReport 7
-  PotWithdraw = 'pot/MsgWithdraw', // PotWithdraw 8
-  PotFoundationDeposit = 'pot/MsgFoundationDeposit', // PotFoundationDeposit 16
+  PotVolumeReport = '/stratos.pot.v1.MsgVolumeReport', // PotVolumeReport 7
+  PotWithdraw = '/stratos.pot.v1.MsgWithdraw', // PotWithdraw 8
+  PotFoundationDeposit = '/stratos.pot.v1.MsgFoundationDeposit', // PotFoundationDeposit 16
 }
 
 export enum TxMsgTypes {
-  RegisterCreateResourceNode = 'register/MsgCreateResourceNode', // 11 RegisterCreateResourceNode
-  RegisterRemoveResourceNode = 'register/MsgRemoveResourceNode', // 12 RegisterRemoveResourceNode
-  RegisterCreateIndexingNode = 'register/MsgCreateIndexingNode', // 13 RegisterCreateIndexingNode
-  RegisterRemoveIndexingNode = 'register/MsgRemoveIndexingNode', // 14  RegisterRemoveIndexingNode
-  RegisterIndexingNodeRegistrationVote = 'register/MsgIndexingNodeRegistrationVote', // 15 RegisterIndexingNodeRegistrationVote
+  RegisterCreateResourceNode = '/stratos.register.v1.MsgCreateResourceNode', // 11 RegisterCreateResourceNode
+  RegisterRemoveResourceNode = '/stratos.register.v1.MsgRemoveResourceNode', // 12 RegisterRemoveResourceNode
+  RegisterCreateIndexingNode = '/stratos.register.v1.MsgCreateMetaNode', // 13 RegisterCreateIndexingNode
+  RegisterRemoveIndexingNode = '/stratos.register.v1.MsgRemoveMetaNode', // 14  RegisterRemoveIndexingNode
+  RegisterIndexingNodeRegistrationVote = '/stratos.register.v1.MsgIndexingNodeRegistrationVote', // 15 RegisterIndexingNodeRegistrationVote
 }
 
 export enum HistoryTxType {
@@ -131,13 +131,13 @@ export interface TransactionValue {
 }
 
 export interface SendTransactionValue extends TransactionValue {
-  from_address: string;
-  to_address: string;
+  fromAddress: string;
+  toAddress: string;
 }
 
 export interface DelegateTransactionValue extends TransactionValue {
-  delegator_address: string;
-  validator_address: string;
+  delegatorAddress: string;
+  validatorAddress: string;
 }
 
 export interface SdsPrepayValue extends TransactionValue {
@@ -148,7 +148,7 @@ export interface SdsPrepayValue extends TransactionValue {
 type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
 
 export interface TransactionMessage {
-  type: TxMsgTypes;
+  typeUrl: TxMsgTypes;
   value: TransactionValueType;
 }
 
@@ -175,40 +175,42 @@ export interface SignedTransaction {
 }
 
 export interface SendTxMessage {
-  type: TxMsgTypes;
+  typeUrl: TxMsgTypes;
   value: {
     amount: AmountType[];
-    from_address: string;
-    to_address: string;
+    fromAddress: string;
+    toAddress: string;
   };
 }
 
 export interface DelegateTxMessage {
-  type: TxMsgTypes;
+  typeUrl: TxMsgTypes;
   value: {
     amount: AmountType;
-    delegator_address: string;
-    validator_address: string;
+    delegatorAddress: string;
+    validatorAddress: string;
   };
 }
 
 export interface UnDelegateTxMessage extends DelegateTxMessage {}
 
 export interface WithdrawalRewardTxMessage {
-  type: TxMsgTypes;
+  typeUrl: TxMsgTypes;
   value: {
-    delegator_address: string;
-    validator_address: string;
+    delegatorAddress: string;
+    validatorAddress: string;
   };
 }
 
 export interface SdsPrepayTxMessage {
-  type: TxMsgTypes;
+  typeUrl: TxMsgTypes;
   value: {
     sender: string;
     coins: AmountType[];
   };
 }
+
+export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
 
 export interface SendTxPayload {
   amount: number;
