@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParsedValidatorsStatusMap = exports.ValidatorsStatusMap = exports.ValidatorStatus = exports.ValidatorsNetworkStatus = void 0;
 var ValidatorsNetworkStatus;
 (function (ValidatorsNetworkStatus) {
-    ValidatorsNetworkStatus["Unbonded"] = "unbonded";
-    ValidatorsNetworkStatus["Unbonding"] = "unbounding";
-    ValidatorsNetworkStatus["Bonded"] = "bonded";
-    ValidatorsNetworkStatus["All"] = "all";
+    ValidatorsNetworkStatus["Unbonded"] = "BOND_STATUS_UNBONDED";
+    ValidatorsNetworkStatus["Unbonding"] = "BOND_STATUS_UNBONDING";
+    ValidatorsNetworkStatus["Bonded"] = "BOND_STATUS_BONDED";
+    ValidatorsNetworkStatus["All"] = "BOND_STATUS_UNSPECIFIED";
 })(ValidatorsNetworkStatus = exports.ValidatorsNetworkStatus || (exports.ValidatorsNetworkStatus = {}));
 var ValidatorStatus;
 (function (ValidatorStatus) {

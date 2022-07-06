@@ -1,23 +1,22 @@
 import dotenv from 'dotenv';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
-import { createMasterKeySeed, createMasterKeySeedFromGivenSeed } from './hdVault/keyManager';
+import {
+  createMasterKeySeed,
+  // createMasterKeySeedFromGivenSeed,
+  getSerializedWalletFromPhrase,
+} from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
+import { getCosmos } from './services/cosmos';
 import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
-// import {
-//   assertIsDeliverTxSuccess,
-//   calculateFee,
-//   coins,
-//   GasPrice,
-//   SigningStargateClient,
-//   StdFee,
-// } from '@cosmjs/stargate';
+import { SigningStargateClient } from '@cosmjs/stargate';
+// import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 dotenv.config();
 
@@ -88,18 +87,18 @@ const mainSend = async () => {
 
   const fromAddress = keyPairZero.address;
 
-  const sendAmount = 1;
+  const sendAmount = 2.5;
 
-  const sendTxMessage = await transactions.getSendTx(fromAddress, [
+  const sendTxMessages = await transactions.getSendTx(fromAddress, [
     { amount: sendAmount, toAddress: keyPairOne.address },
     { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
 
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+
+  const signedTx = await transactions.sign(fromAddress, sendTxMessages);
 
   if (signedTx) {
-    console.log('signedTx sends', JSON.stringify(signedTx, null, 1));
-
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('broadcasting result!', result);
@@ -112,7 +111,7 @@ const mainSend = async () => {
 
 // cosmosjs delegate
 const mainDelegate = async () => {
-  const validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
+  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -125,16 +124,17 @@ const mainDelegate = async () => {
   }
 
   const delegatorAddress = keyPairZero.address;
+  console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
 
-  const sendTxMessage = await transactions.getDelegateTx(delegatorAddress, [
+  const sendTxMessages = await transactions.getDelegateTx(delegatorAddress, [
     { amount: 1, validatorAddress },
     { amount: 2, validatorAddress },
   ]);
 
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
 
   if (signedTx) {
-    console.log('signedTx!', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('delegate broadcasting result!!! :)', result);
@@ -147,7 +147,7 @@ const mainDelegate = async () => {
 
 // cosmosjs undelegate
 const mainUndelegate = async () => {
-  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -161,15 +161,15 @@ const mainUndelegate = async () => {
 
   const delegatorAddress = keyPairZero.address;
 
-  const sendTxMessage = await transactions.getUnDelegateTx(delegatorAddress, [
+  const sendTxMessages = await transactions.getUnDelegateTx(delegatorAddress, [
     { amount: 0.3, validatorAddress },
     { amount: 0.2, validatorAddress },
   ]);
 
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
 
   if (signedTx) {
-    console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('undelegate result :)', result);
@@ -182,7 +182,7 @@ const mainUndelegate = async () => {
 
 // cosmosjs withdraw rewards
 const mainWithdrawRewards = async () => {
-  const validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -196,15 +196,14 @@ const mainWithdrawRewards = async () => {
 
   const delegatorAddress = keyPairZero.address;
 
-  const sendTxMessage = await transactions.getWithdrawalRewardTx(delegatorAddress, [
+  const sendTxMessages = await transactions.getWithdrawalRewardTx(delegatorAddress, [
     { validatorAddress },
     { validatorAddress },
   ]);
 
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
 
   if (signedTx) {
-    console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('delegate withdrawal result :)', result);
@@ -231,13 +230,12 @@ const mainWithdrawAllRewards = async () => {
   console.log('🚀 ~ file: run.ts ~ line 295 ~ mainWithdrawAllRewards ~ delegatorAddress', delegatorAddress);
 
   const sendTxMessage = await transactions.getWithdrawalAllRewardTx(delegatorAddress);
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessage);
 
   if (signedTx) {
-    console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
-      // const result = await transactions.broadcast(signedTx);
-      // console.log('delegate withdrawal all result :)', result);
+      const result = await transactions.broadcast(signedTx);
+      console.log('delegate withdrawal all result :)', result);
     } catch (error) {
       const err: Error = error as Error;
       console.log('error broadcasting', err.message);
@@ -257,12 +255,11 @@ const mainSdsPrepay = async () => {
     return;
   }
 
-  const sendTxMessage = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }]);
+  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }]);
 
-  const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+  const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
 
   if (signedTx) {
-    console.log('signedTx', JSON.stringify(signedTx, null, 2));
     try {
       const result = await transactions.broadcast(signedTx);
       console.log('broadcast prepay result :)', result);
@@ -551,19 +548,25 @@ const cosmosWalletCreateTest = async () => {
     firstAccountRestored,
   );
 
-  // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet);
+  const rpcEndpoint = Sdk.environment.rpcUrl;
+
+  const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet);
 
   // const recipient = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
+  const recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+
   // const amount = {
   //   denom: 'ustos',
-  //   amount: '1234567',
+  //   amount: '10_000_000_000',
   // };
+
+  // const fee = transactions.getStandardFee();
 
   // const fee = {
   //   amount: [
   //     {
   //       denom: 'ustos',
-  //       amount: '2000',
+  //       amount: '200000',
   //     },
   //   ],
   //   gas: '180000', // 180k
@@ -577,25 +580,41 @@ const cosmosWalletCreateTest = async () => {
   //   'Have fun with your star coins',
   // );
 
-  // console.log('🚀 ~ file: run.ts ~ line 668 ~ cosmosWalletCreateTest ~ result', result);
+  const sendAmount = 2;
+
+  const sendTxMessages = await transactions.getSendTx(firstAccount.address, [
+    { amount: sendAmount, toAddress: recipient },
+    { amount: sendAmount + 1, toAddress: recipient },
+  ]);
+
+  console.log(
+    '🚀 ~ file: run.ts ~ line 592 ~ cosmosWalletCreateTest ~ sendTxMessages',
+    JSON.stringify(sendTxMessages, null, 2),
+  );
+
+  const signedTx = await transactions.sign(firstAccount.address, sendTxMessages);
+  console.log('🚀 ~ file: run.ts ~ line 595 ~ cosmosWalletCreateTest ~ signedTx', signedTx);
+
+  const result = await transactions.broadcast(signedTx);
+
+  console.log('🚀 ~ file: run.ts ~ line 598 ~ cosmosWalletCreateTest ~ result!', result);
 };
 
 const testAccountData = async () => {
+  // const list = await Network.getValidatorsList();
   const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
   const [firstAccount] = await wallet.getAccounts();
-  // const accountBalance = await Network.getAccountBalance(firstAccount.address);
-  // console.log(
-  // '🚀 ~ file: run.ts ~ line 587 ~ testAccountData ~ accountBalance',
-  // JSON.stringify(accountBalance, null, 2),
-  // );
+  // console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
+  // const vData = await validators.getValidatorsBondedToDelegator(firstAccount.address);
 
-  // const accountsData = await Network.getAccountsData(firstAccount.address);
+  // console.log('st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6');
+  // console.log('vData', vData);
+
+  const vInfo = await Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u');
+  console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
+
   // const accountsData2 = await accounts.getAccountsData(firstAccount.address);
-  const accountBalanceData = await accounts.getBalance(firstAccount.address, 'ustos');
-  console.log('🚀 ~ file: run.ts ~ line 595 ~ testAccountData ~ accountBalanceData', accountBalanceData);
-
-  // console.log('🚀 ~ file: run.ts ~ line 501 ~ testAccountData ~ accountsData', accountsData);
-  // console.log('🚀 ~ file: run.ts ~ line 588 ~ testAccountData ~ accountsData2', accountsData2);
+  // console.log('🚀 ~ file: run.ts ~ line 598 ~ testAccountData ~ accountsData2', accountsData2);
 };
 
 const main = async () => {
@@ -619,8 +638,22 @@ const main = async () => {
 
   await Sdk.init({ ...sdkEnv, chainId: resolvedChainID });
 
+  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  // const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
+
+  // we have to initialize a client prior to use cosmos
+  const _cosmosClient = await getCosmos(serialized, password);
+
   // cosmosWalletCreateTest();
-  testAccountData();
+  // testAccountData();
+  // mainSend();
+  // mainDelegate();
+  // mainUndelegate();
+  // mainWithdrawRewards();
+  mainWithdrawAllRewards();
+  // mainSdsPrepay();
   // mainFour();
 
   // mainBalance();

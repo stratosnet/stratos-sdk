@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -65,21 +54,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getBaseTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = void 0;
-var encoding_1 = require("@cosmjs/encoding");
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getBaseTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
+var stargate_1 = require("@cosmjs/stargate");
+var tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 var accounts_1 = require("../accounts");
 var hdVault_1 = require("../config/hdVault");
 var tokens_1 = require("../config/tokens");
-var utils_1 = require("../hdVault/utils");
 var Sdk_1 = __importDefault(require("../Sdk"));
 var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var validators_1 = require("../validators");
 var Types = __importStar(require("./types"));
+var coin_1 = require("cosmjs-types/cosmos/base/v1beta1/coin");
 function payloadGenerator(dataList) {
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -93,30 +92,62 @@ function payloadGenerator(dataList) {
         }
     });
 }
+var getStratosTransactionRegistryTypes = function () {
+    var stratosTxRegistryTypes = __spreadArray(__spreadArray([], stargate_1.defaultRegistryTypes, true), [
+        [Types.TxMsgTypes.SdsPrepay, coin_1.Coin],
+        [Types.TxMsgTypes.SdsFileUpload, coin_1.Coin],
+        [Types.TxMsgTypes.PotVolumeReport, coin_1.Coin],
+        [Types.TxMsgTypes.PotWithdraw, coin_1.Coin],
+        [Types.TxMsgTypes.PotFoundationDeposit, coin_1.Coin],
+        [Types.TxMsgTypes.RegisterCreateResourceNode, coin_1.Coin],
+        [Types.TxMsgTypes.RegisterRemoveResourceNode, coin_1.Coin],
+        [Types.TxMsgTypes.RegisterCreateIndexingNode, coin_1.Coin],
+        [Types.TxMsgTypes.RegisterRemoveIndexingNode, coin_1.Coin],
+        [Types.TxMsgTypes.RegisterIndexingNodeRegistrationVote, coin_1.Coin],
+    ], false);
+    return stratosTxRegistryTypes;
+};
+exports.getStratosTransactionRegistryTypes = getStratosTransactionRegistryTypes;
 var broadcast = function (signedTx) { return __awaiter(void 0, void 0, void 0, function () {
-    var result, err_1;
+    var client, txBytes, result, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, cosmos_1.getCosmos)().broadcast(signedTx)];
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, (0, cosmos_1.getCosmos)()];
             case 1:
-                result = _a.sent();
-                // add proper error handling!! check for code!
-                return [2 /*return*/, result];
+                client = _a.sent();
+                txBytes = tx_1.TxRaw.encode(signedTx).finish();
+                console.log('🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted', JSON.stringify(txBytes));
+                return [4 /*yield*/, client.broadcastTx(txBytes)];
             case 2:
+                result = _a.sent();
+                return [2 /*return*/, result];
+            case 3:
                 err_1 = _a.sent();
                 console.log('Could not broadcast', err_1.message);
                 throw err_1;
-            case 3: return [2 /*return*/];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
 exports.broadcast = broadcast;
-var sign = function (txMessage, privateKey) {
-    var pkey = (0, utils_1.uint8ArrayToBuffer)((0, encoding_1.fromHex)(privateKey));
-    var signedTx = (0, cosmos_1.getCosmos)().sign(txMessage, pkey);
-    return signedTx;
+var sign = function (address, txMessages, memo, givenFee) {
+    if (memo === void 0) { memo = ''; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var fee, client, signedTx;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    fee = givenFee ? givenFee : (0, exports.getStandardFee)();
+                    return [4 /*yield*/, (0, cosmos_1.getCosmos)()];
+                case 1:
+                    client = _a.sent();
+                    signedTx = client.sign(address, txMessages, fee, memo);
+                    return [2 /*return*/, signedTx];
+            }
+        });
+    });
 };
 exports.sign = sign;
 var getStandardFee = function (numberOfMessages) {
@@ -136,6 +167,7 @@ var getStandardAmount = function (amounts) {
     return result;
 };
 exports.getStandardAmount = getStandardAmount;
+// @depricated ?
 var getBaseTx = function (keyPairAddress, memo, numberOfMessages) {
     if (memo === void 0) { memo = ''; }
     if (numberOfMessages === void 0) { numberOfMessages = 1; }
@@ -146,14 +178,14 @@ var getBaseTx = function (keyPairAddress, memo, numberOfMessages) {
                 case 0: return [4 /*yield*/, (0, accounts_1.getAccountsData)(keyPairAddress)];
                 case 1:
                     accountsData = _a.sent();
-                    oldSequence = String(accountsData.result.value.sequence);
+                    oldSequence = String(accountsData.account.sequence);
                     newSequence = parseInt(oldSequence);
                     chainId = Sdk_1.default.environment.chainId;
                     myTx = {
                         chain_id: chainId,
                         fee: (0, exports.getStandardFee)(numberOfMessages),
                         memo: memo,
-                        account_number: String(accountsData.result.value.account_number),
+                        account_number: String(accountsData.account.account_number),
                         sequence: "" + newSequence,
                     };
                     return [2 /*return*/, myTx];
@@ -162,211 +194,151 @@ var getBaseTx = function (keyPairAddress, memo, numberOfMessages) {
     });
 };
 exports.getBaseTx = getBaseTx;
-var getSendTx = function (keyPairAddress, sendPayload, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var baseTx, payloadToProcess, iteratedData, messagesList, _a, amount, toAddress, message, myTx, myTxMsg;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, (0, exports.getBaseTx)(keyPairAddress, memo, sendPayload.length)];
-                case 1:
-                    baseTx = _b.sent();
-                    payloadToProcess = payloadGenerator(sendPayload);
-                    iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        _a = iteratedData.value, amount = _a.amount, toAddress = _a.toAddress;
-                        message = {
-                            type: Types.TxMsgTypes.Send,
-                            value: {
-                                amount: (0, exports.getStandardAmount)([amount]),
-                                from_address: keyPairAddress,
-                                to_address: toAddress,
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+var getSendTx = function (keyPairAddress, sendPayload) { return __awaiter(void 0, void 0, void 0, function () {
+    var payloadToProcess, iteratedData, messagesList, _a, amount, toAddress, message;
+    return __generator(this, function (_b) {
+        payloadToProcess = payloadGenerator(sendPayload);
+        iteratedData = payloadToProcess.next();
+        messagesList = [];
+        while (iteratedData.value) {
+            _a = iteratedData.value, amount = _a.amount, toAddress = _a.toAddress;
+            message = {
+                typeUrl: Types.TxMsgTypes.Send,
+                value: {
+                    amount: (0, exports.getStandardAmount)([amount]),
+                    fromAddress: keyPairAddress,
+                    toAddress: toAddress,
+                },
+            };
+            messagesList.push(message);
+            iteratedData = payloadToProcess.next();
+        }
+        return [2 /*return*/, messagesList];
     });
-};
+}); };
 exports.getSendTx = getSendTx;
-var getDelegateTx = function (delegatorAddress, delegatePayload, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var baseTx, payloadToProcess, iteratedData, messagesList, _a, amount, validatorAddress, message, myTx, myTxMsg;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, (0, exports.getBaseTx)(delegatorAddress, memo, delegatePayload.length)];
-                case 1:
-                    baseTx = _b.sent();
-                    payloadToProcess = payloadGenerator(delegatePayload);
-                    iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        _a = iteratedData.value, amount = _a.amount, validatorAddress = _a.validatorAddress;
-                        message = {
-                            type: Types.TxMsgTypes.Delegate,
-                            value: {
-                                amount: {
-                                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
-                                    denom: hdVault_1.stratosDenom,
-                                },
-                                delegator_address: delegatorAddress,
-                                validator_address: validatorAddress,
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+var getDelegateTx = function (delegatorAddress, delegatePayload) { return __awaiter(void 0, void 0, void 0, function () {
+    var payloadToProcess, iteratedData, messagesList, _a, amount, validatorAddress, message;
+    return __generator(this, function (_b) {
+        payloadToProcess = payloadGenerator(delegatePayload);
+        iteratedData = payloadToProcess.next();
+        messagesList = [];
+        while (iteratedData.value) {
+            _a = iteratedData.value, amount = _a.amount, validatorAddress = _a.validatorAddress;
+            message = {
+                typeUrl: Types.TxMsgTypes.Delegate,
+                value: {
+                    amount: {
+                        amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
+                        denom: hdVault_1.stratosDenom,
+                    },
+                    delegatorAddress: delegatorAddress,
+                    validatorAddress: validatorAddress,
+                },
+            };
+            messagesList.push(message);
+            iteratedData = payloadToProcess.next();
+        }
+        return [2 /*return*/, messagesList];
     });
-};
+}); };
 exports.getDelegateTx = getDelegateTx;
-var getUnDelegateTx = function (delegatorAddress, unDelegatePayload, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var baseTx, payloadToProcess, iteratedData, messagesList, _a, amount, validatorAddress, message, myTx, myTxMsg;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, (0, exports.getBaseTx)(delegatorAddress, memo, unDelegatePayload.length)];
-                case 1:
-                    baseTx = _b.sent();
-                    payloadToProcess = payloadGenerator(unDelegatePayload);
-                    iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        _a = iteratedData.value, amount = _a.amount, validatorAddress = _a.validatorAddress;
-                        message = {
-                            type: Types.TxMsgTypes.Undelegate,
-                            value: {
-                                amount: {
-                                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
-                                    denom: hdVault_1.stratosDenom,
-                                },
-                                delegator_address: delegatorAddress,
-                                validator_address: validatorAddress,
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+var getUnDelegateTx = function (delegatorAddress, unDelegatePayload) { return __awaiter(void 0, void 0, void 0, function () {
+    var payloadToProcess, iteratedData, messagesList, _a, amount, validatorAddress, message;
+    return __generator(this, function (_b) {
+        payloadToProcess = payloadGenerator(unDelegatePayload);
+        iteratedData = payloadToProcess.next();
+        messagesList = [];
+        while (iteratedData.value) {
+            _a = iteratedData.value, amount = _a.amount, validatorAddress = _a.validatorAddress;
+            message = {
+                typeUrl: Types.TxMsgTypes.Undelegate,
+                value: {
+                    amount: {
+                        amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
+                        denom: hdVault_1.stratosDenom,
+                    },
+                    delegatorAddress: delegatorAddress,
+                    validatorAddress: validatorAddress,
+                },
+            };
+            messagesList.push(message);
+            iteratedData = payloadToProcess.next();
+        }
+        return [2 /*return*/, messagesList];
     });
-};
+}); };
 exports.getUnDelegateTx = getUnDelegateTx;
-var getWithdrawalRewardTx = function (delegatorAddress, withdrawalPayload, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var baseTx, payloadToProcess, iteratedData, messagesList, validatorAddress, message, myTx, myTxMsg;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, exports.getBaseTx)(delegatorAddress, memo, withdrawalPayload.length)];
-                case 1:
-                    baseTx = _a.sent();
-                    payloadToProcess = payloadGenerator(withdrawalPayload);
-                    iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        validatorAddress = iteratedData.value.validatorAddress;
-                        message = {
-                            type: Types.TxMsgTypes.WithdrawRewards,
-                            value: {
-                                delegator_address: delegatorAddress,
-                                validator_address: validatorAddress,
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+var getWithdrawalRewardTx = function (delegatorAddress, withdrawalPayload) { return __awaiter(void 0, void 0, void 0, function () {
+    var payloadToProcess, iteratedData, messagesList, validatorAddress, message;
+    return __generator(this, function (_a) {
+        payloadToProcess = payloadGenerator(withdrawalPayload);
+        iteratedData = payloadToProcess.next();
+        messagesList = [];
+        while (iteratedData.value) {
+            validatorAddress = iteratedData.value.validatorAddress;
+            message = {
+                typeUrl: Types.TxMsgTypes.WithdrawRewards,
+                value: {
+                    delegatorAddress: delegatorAddress,
+                    validatorAddress: validatorAddress,
+                },
+            };
+            messagesList.push(message);
+            iteratedData = payloadToProcess.next();
+        }
+        return [2 /*return*/, messagesList];
     });
-};
+}); };
 exports.getWithdrawalRewardTx = getWithdrawalRewardTx;
-var getWithdrawalAllRewardTx = function (delegatorAddress, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var vListResult, withdrawalPayload, baseTx, payloadToProcess, iteratedData, messagesList, validatorAddress, message, myTx, myTxMsg;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, validators_1.getValidatorsBondedToDelegator)(delegatorAddress)];
-                case 1:
-                    vListResult = _a.sent();
-                    console.log('🚀 ~ file: transactions.ts ~ line 249 ~ vListResult', vListResult);
-                    withdrawalPayload = vListResult.data;
-                    return [4 /*yield*/, (0, exports.getBaseTx)(delegatorAddress, memo, withdrawalPayload.length)];
-                case 2:
-                    baseTx = _a.sent();
-                    payloadToProcess = payloadGenerator(withdrawalPayload.map(function (item) { return ({ validatorAddress: item.address }); }));
+var getWithdrawalAllRewardTx = function (delegatorAddress) { return __awaiter(void 0, void 0, void 0, function () {
+    var vListResult, withdrawalPayload, payloadToProcess, iteratedData, messagesList, validatorAddress, message;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, (0, validators_1.getValidatorsBondedToDelegator)(delegatorAddress)];
+            case 1:
+                vListResult = _a.sent();
+                withdrawalPayload = vListResult.data;
+                payloadToProcess = payloadGenerator(withdrawalPayload.map(function (item) { return ({ validatorAddress: item.address }); }));
+                iteratedData = payloadToProcess.next();
+                messagesList = [];
+                while (iteratedData.value) {
+                    validatorAddress = iteratedData.value.validatorAddress;
+                    message = {
+                        typeUrl: Types.TxMsgTypes.WithdrawRewards,
+                        value: {
+                            delegatorAddress: delegatorAddress,
+                            validatorAddress: validatorAddress,
+                        },
+                    };
+                    messagesList.push(message);
                     iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        validatorAddress = iteratedData.value.validatorAddress;
-                        message = {
-                            type: Types.TxMsgTypes.WithdrawRewards,
-                            value: {
-                                delegator_address: delegatorAddress,
-                                validator_address: validatorAddress,
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+                }
+                return [2 /*return*/, messagesList];
+        }
     });
-};
+}); };
 exports.getWithdrawalAllRewardTx = getWithdrawalAllRewardTx;
-/** @todo add unit test */
-var getSdsPrepayTx = function (senderAddress, prepayPayload, memo) {
-    if (memo === void 0) { memo = ''; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var baseTx, payloadToProcess, iteratedData, messagesList, amount, message, myTx, myTxMsg;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, exports.getBaseTx)(senderAddress, memo, prepayPayload.length)];
-                case 1:
-                    baseTx = _a.sent();
-                    payloadToProcess = payloadGenerator(prepayPayload);
-                    iteratedData = payloadToProcess.next();
-                    messagesList = [];
-                    while (iteratedData.value) {
-                        amount = iteratedData.value.amount;
-                        message = {
-                            type: Types.TxMsgTypes.SdsPrepay,
-                            value: {
-                                sender: senderAddress,
-                                coins: (0, exports.getStandardAmount)([amount]),
-                            },
-                        };
-                        messagesList.push(message);
-                        iteratedData = payloadToProcess.next();
-                    }
-                    myTx = __assign({ msgs: messagesList }, baseTx);
-                    myTxMsg = (0, cosmos_1.getCosmos)().newStdMsg(myTx);
-                    return [2 /*return*/, myTxMsg];
-            }
-        });
+var getSdsPrepayTx = function (senderAddress, prepayPayload) { return __awaiter(void 0, void 0, void 0, function () {
+    var payloadToProcess, iteratedData, messagesList, amount, message;
+    return __generator(this, function (_a) {
+        payloadToProcess = payloadGenerator(prepayPayload);
+        iteratedData = payloadToProcess.next();
+        messagesList = [];
+        while (iteratedData.value) {
+            amount = iteratedData.value.amount;
+            message = {
+                typeUrl: Types.TxMsgTypes.SdsPrepay,
+                value: {
+                    sender: senderAddress,
+                    coins: (0, exports.getStandardAmount)([amount]),
+                },
+            };
+            messagesList.push(message);
+            iteratedData = payloadToProcess.next();
+        }
+        return [2 /*return*/, messagesList];
     });
-};
+}); };
 exports.getSdsPrepayTx = getSdsPrepayTx;
 //# sourceMappingURL=transactions.js.map

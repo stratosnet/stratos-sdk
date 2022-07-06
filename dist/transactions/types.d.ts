@@ -1,28 +1,28 @@
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 export declare enum TxMsgTypes {
-    Account = "cosmos-sdk/Account",
-    Send = "cosmos-sdk/MsgSend",
-    Delegate = "cosmos-sdk/MsgDelegate",
-    Undelegate = "cosmos-sdk/MsgUndelegate",
-    WithdrawRewards = "cosmos-sdk/MsgWithdrawDelegationReward",
-    CreateValidator = "osmos-sdk/MsgCreateValidator"
+    Account = "/cosmos.auth.v1beta1.BaseAccount",
+    Send = "/cosmos.bank.v1beta1.MsgSend",
+    Delegate = "/cosmos.staking.v1beta1.MsgDelegate",
+    Undelegate = "/cosmos.staking.v1beta1.MsgUndelegate",
+    WithdrawRewards = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+    CreateValidator = "/cosmos.staking.v1beta1.MsgCreateValidator"
 }
 export declare enum TxMsgTypes {
     SdsAll = "",
-    SdsPrepay = "sds/MsgPrepay",
-    SdsFileUpload = "sds/MsgFileUpload"
+    SdsPrepay = "/stratos.sds.v1.MsgPrepay",
+    SdsFileUpload = "/stratos.sds.v1.MsgFileUpload"
 }
 export declare enum TxMsgTypes {
-    PotVolumeReport = "pot/MsgVolumeReport",
-    PotWithdraw = "pot/MsgWithdraw",
-    PotFoundationDeposit = "pot/MsgFoundationDeposit"
+    PotVolumeReport = "/stratos.pot.v1.MsgVolumeReport",
+    PotWithdraw = "/stratos.pot.v1.MsgWithdraw",
+    PotFoundationDeposit = "/stratos.pot.v1.MsgFoundationDeposit"
 }
 export declare enum TxMsgTypes {
-    RegisterCreateResourceNode = "register/MsgCreateResourceNode",
-    RegisterRemoveResourceNode = "register/MsgRemoveResourceNode",
-    RegisterCreateIndexingNode = "register/MsgCreateIndexingNode",
-    RegisterRemoveIndexingNode = "register/MsgRemoveIndexingNode",
-    RegisterIndexingNodeRegistrationVote = "register/MsgIndexingNodeRegistrationVote"
+    RegisterCreateResourceNode = "/stratos.register.v1.MsgCreateResourceNode",
+    RegisterRemoveResourceNode = "/stratos.register.v1.MsgRemoveResourceNode",
+    RegisterCreateIndexingNode = "/stratos.register.v1.MsgCreateMetaNode",
+    RegisterRemoveIndexingNode = "/stratos.register.v1.MsgRemoveMetaNode",
+    RegisterIndexingNodeRegistrationVote = "/stratos.register.v1.MsgIndexingNodeRegistrationVote"
 }
 export declare enum HistoryTxType {
     All = 0,
@@ -74,12 +74,12 @@ export interface TransactionValue {
     amount?: AmountType | AmountType[];
 }
 export interface SendTransactionValue extends TransactionValue {
-    from_address: string;
-    to_address: string;
+    fromAddress: string;
+    toAddress: string;
 }
 export interface DelegateTransactionValue extends TransactionValue {
-    delegator_address: string;
-    validator_address: string;
+    delegatorAddress: string;
+    validatorAddress: string;
 }
 export interface SdsPrepayValue extends TransactionValue {
     sender: string;
@@ -87,7 +87,7 @@ export interface SdsPrepayValue extends TransactionValue {
 }
 declare type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
 export interface TransactionMessage {
-    type: TxMsgTypes;
+    typeUrl: TxMsgTypes;
     value: TransactionValueType;
 }
 export interface BaseTransaction {
@@ -110,37 +110,38 @@ export interface SignedTransaction {
     mode: 'sync';
 }
 export interface SendTxMessage {
-    type: TxMsgTypes;
+    typeUrl: TxMsgTypes;
     value: {
         amount: AmountType[];
-        from_address: string;
-        to_address: string;
+        fromAddress: string;
+        toAddress: string;
     };
 }
 export interface DelegateTxMessage {
-    type: TxMsgTypes;
+    typeUrl: TxMsgTypes;
     value: {
         amount: AmountType;
-        delegator_address: string;
-        validator_address: string;
+        delegatorAddress: string;
+        validatorAddress: string;
     };
 }
 export interface UnDelegateTxMessage extends DelegateTxMessage {
 }
 export interface WithdrawalRewardTxMessage {
-    type: TxMsgTypes;
+    typeUrl: TxMsgTypes;
     value: {
-        delegator_address: string;
-        validator_address: string;
+        delegatorAddress: string;
+        validatorAddress: string;
     };
 }
 export interface SdsPrepayTxMessage {
-    type: TxMsgTypes;
+    typeUrl: TxMsgTypes;
     value: {
         sender: string;
         coins: AmountType[];
     };
 }
+export declare type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
 export interface SendTxPayload {
     amount: number;
     toAddress: string;

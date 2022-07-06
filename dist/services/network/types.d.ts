@@ -29,6 +29,10 @@ export interface CosmosAccount {
     '@type': string;
     base_account: CosmosBaseAccount;
     code_hash: string;
+    address: string;
+    pub_key: string;
+    account_number: string;
+    sequence: string;
 }
 export interface AccountsDataResult extends NetworkAxiosDataResult {
 }
@@ -205,15 +209,16 @@ export interface ValidatorItem {
     min_self_delegation: string;
 }
 export interface ValidatorListResponse {
-    height: number;
-    result: ValidatorItem[];
+    validators: ValidatorItem[];
+    pagination: {
+        next_key: string;
+        total: string;
+    };
 }
 export interface ValidatorResponse {
-    height: number;
-    result: ValidatorItem;
+    validator: ValidatorItem;
 }
 export interface StakingPoolResponse {
-    height: number;
     result: {
         not_bonded_tokens: string;
         bonded_tokens: string;

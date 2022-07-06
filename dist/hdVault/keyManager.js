@@ -66,7 +66,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unlockMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = exports.createMasterKeySeed = void 0;
+exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = exports.createMasterKeySeed = void 0;
 var keyUtils = __importStar(require("./keyUtils"));
 var mnemonic_1 = require("./mnemonic");
 // exposed outside, used in the DesktopWallet to "create" a wallet
@@ -98,7 +98,6 @@ var createMasterKeySeedFromGivenSeed = function (derivedMasterKeySeed, password)
         switch (_a.label) {
             case 0:
                 encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
-                console.log('🚀 ~ file: keyManager.ts ~ line 28 ~ derivedMasterKeySeed', derivedMasterKeySeed);
                 return [4 /*yield*/, keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed)];
             case 1:
                 pubkey = _a.sent();
@@ -130,4 +129,20 @@ var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return _
     });
 }); };
 exports.unlockMasterKeySeed = unlockMasterKeySeed;
+// helper to provide an encripted, serialized wallet from a given mnemonic
+var getSerializedWalletFromPhrase = function (userMnemonic, password) { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, serialized;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                phrase = (0, mnemonic_1.convertStringToArray)(userMnemonic);
+                return [4 /*yield*/, (0, exports.createMasterKeySeed)(phrase, password)];
+            case 1:
+                masterKeySeedInfo = _a.sent();
+                serialized = masterKeySeedInfo.encryptedWalletInfo;
+                return [2 /*return*/, serialized];
+        }
+    });
+}); };
+exports.getSerializedWalletFromPhrase = getSerializedWalletFromPhrase;
 //# sourceMappingURL=keyManager.js.map

@@ -76,18 +76,13 @@ var keyManager_1 = require("./hdVault/keyManager");
 var keyUtils = __importStar(require("./hdVault/keyUtils"));
 var wallet_1 = require("./hdVault/wallet");
 var Sdk_1 = __importDefault(require("./Sdk"));
+var cosmos_1 = require("./services/cosmos");
 var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
-// import {
-//   assertIsDeliverTxSuccess,
-//   calculateFee,
-//   coins,
-//   GasPrice,
-//   SigningStargateClient,
-//   StdFee,
-// } from '@cosmjs/stargate';
+var stargate_1 = require("@cosmjs/stargate");
+// import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 dotenv_1.default.config();
 var password = 'XXXX';
 var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
@@ -125,7 +120,7 @@ var mainFour = function () { return __awaiter(void 0, void 0, void 0, function (
 }); };
 // cosmosjs send
 var mainSend = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, fromAddress, sendAmount, sendTxMessage, signedTx, result, error_1, err;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, fromAddress, sendAmount, sendTxMessages, signedTx, result, error_1, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -153,40 +148,41 @@ var mainSend = function () { return __awaiter(void 0, void 0, void 0, function (
                     return [2 /*return*/];
                 }
                 fromAddress = keyPairZero.address;
-                sendAmount = 1;
+                sendAmount = 2.5;
                 return [4 /*yield*/, transactions.getSendTx(fromAddress, [
                         { amount: sendAmount, toAddress: keyPairOne.address },
                         { amount: sendAmount + 1, toAddress: keyPairTwo.address },
                     ])];
             case 5:
-                sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 9];
-                console.log('signedTx sends', JSON.stringify(signedTx, null, 1));
-                _a.label = 6;
+                sendTxMessages = _a.sent();
+                return [4 /*yield*/, transactions.sign(fromAddress, sendTxMessages)];
             case 6:
-                _a.trys.push([6, 8, , 9]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 10];
+                _a.label = 7;
             case 7:
+                _a.trys.push([7, 9, , 10]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 8:
                 result = _a.sent();
                 console.log('broadcasting result!', result);
-                return [3 /*break*/, 9];
-            case 8:
+                return [3 /*break*/, 10];
+            case 9:
                 error_1 = _a.sent();
                 err = error_1;
                 console.log('error broadcasting', err.message);
-                return [3 /*break*/, 9];
-            case 9: return [2 /*return*/];
+                return [3 /*break*/, 10];
+            case 10: return [2 /*return*/];
         }
     });
 }); };
 // cosmosjs delegate
 var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_2, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_2, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1g23pphr8zrt6jzguh0t30g02hludkt9a50axgh';
+                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -199,39 +195,41 @@ var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, functi
                     return [2 /*return*/];
                 }
                 delegatorAddress = keyPairZero.address;
+                console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
                 return [4 /*yield*/, transactions.getDelegateTx(delegatorAddress, [
                         { amount: 1, validatorAddress: validatorAddress },
                         { amount: 2, validatorAddress: validatorAddress },
                     ])];
             case 3:
-                sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
-                console.log('signedTx!', JSON.stringify(signedTx, null, 2));
-                _a.label = 4;
+                sendTxMessages = _a.sent();
+                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
             case 4:
-                _a.trys.push([4, 6, , 7]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 8];
+                _a.label = 5;
             case 5:
+                _a.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 6:
                 result = _a.sent();
                 console.log('delegate broadcasting result!!! :)', result);
-                return [3 /*break*/, 7];
-            case 6:
+                return [3 /*break*/, 8];
+            case 7:
                 error_2 = _a.sent();
                 err = error_2;
                 console.log('error broadcasting', err.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
 // cosmosjs undelegate
 var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_3, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_3, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -249,34 +247,35 @@ var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, func
                         { amount: 0.2, validatorAddress: validatorAddress },
                     ])];
             case 3:
-                sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
-                console.log('signedTx', JSON.stringify(signedTx, null, 2));
-                _a.label = 4;
+                sendTxMessages = _a.sent();
+                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
             case 4:
-                _a.trys.push([4, 6, , 7]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 8];
+                _a.label = 5;
             case 5:
+                _a.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 6:
                 result = _a.sent();
                 console.log('undelegate result :)', result);
-                return [3 /*break*/, 7];
-            case 6:
+                return [3 /*break*/, 8];
+            case 7:
                 error_3 = _a.sent();
                 err = error_3;
                 console.log('error broadcasting', err.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
 // cosmosjs withdraw rewards
 var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_4, err;
+    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_4, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1x8a6ug6wu8d269n5s75260grv60lkln0pewk5n';
+                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -294,30 +293,31 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
                         { validatorAddress: validatorAddress },
                     ])];
             case 3:
-                sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
-                console.log('signedTx', JSON.stringify(signedTx, null, 2));
-                _a.label = 4;
+                sendTxMessages = _a.sent();
+                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
             case 4:
-                _a.trys.push([4, 6, , 7]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 8];
+                _a.label = 5;
             case 5:
+                _a.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 6:
                 result = _a.sent();
                 console.log('delegate withdrawal result :)', result);
-                return [3 /*break*/, 7];
-            case 6:
+                return [3 /*break*/, 8];
+            case 7:
                 error_4 = _a.sent();
                 err = error_4;
                 console.log('error broadcasting', err.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
 // cosmosjs withdraw all rewards
 var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, err;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_5, err;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -337,25 +337,30 @@ var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void
                 return [4 /*yield*/, transactions.getWithdrawalAllRewardTx(delegatorAddress)];
             case 3:
                 sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (signedTx) {
-                    console.log('signedTx', JSON.stringify(signedTx, null, 2));
-                    try {
-                        // const result = await transactions.broadcast(signedTx);
-                        // console.log('delegate withdrawal all result :)', result);
-                    }
-                    catch (error) {
-                        err = error;
-                        console.log('error broadcasting', err.message);
-                    }
-                }
-                return [2 /*return*/];
+                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessage)];
+            case 4:
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 8];
+                _a.label = 5;
+            case 5:
+                _a.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 6:
+                result = _a.sent();
+                console.log('delegate withdrawal all result :)', result);
+                return [3 /*break*/, 8];
+            case 7:
+                error_5 = _a.sent();
+                err = error_5;
+                console.log('error broadcasting', err.message);
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
 // cosmosjs withdraw rewards
 var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, sendTxMessage, signedTx, result, err_1;
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, sendTxMessages, signedTx, result, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -372,23 +377,24 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
                 }
                 return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }])];
             case 3:
-                sendTxMessage = _a.sent();
-                signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
-                if (!signedTx) return [3 /*break*/, 7];
-                console.log('signedTx', JSON.stringify(signedTx, null, 2));
-                _a.label = 4;
+                sendTxMessages = _a.sent();
+                return [4 /*yield*/, transactions.sign(keyPairZero.address, sendTxMessages)];
             case 4:
-                _a.trys.push([4, 6, , 7]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
+                signedTx = _a.sent();
+                if (!signedTx) return [3 /*break*/, 8];
+                _a.label = 5;
             case 5:
+                _a.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 6:
                 result = _a.sent();
                 console.log('broadcast prepay result :)', result);
-                return [3 /*break*/, 7];
-            case 6:
+                return [3 /*break*/, 8];
+            case 7:
                 err_1 = _a.sent();
                 console.log('error broadcasting', err_1.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 8];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
@@ -676,7 +682,7 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, firstAccountRestored;
+    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, firstAccountRestored, rpcEndpoint, client, recipient, sendAmount, sendTxMessages, signedTx, result;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -700,12 +706,33 @@ var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void
             case 5:
                 firstAccountRestored = (_a.sent())[0];
                 console.log('🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored', firstAccountRestored);
+                rpcEndpoint = Sdk_1.default.environment.rpcUrl;
+                return [4 /*yield*/, stargate_1.SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet)];
+            case 6:
+                client = _a.sent();
+                recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+                sendAmount = 2;
+                return [4 /*yield*/, transactions.getSendTx(firstAccount.address, [
+                        { amount: sendAmount, toAddress: recipient },
+                        { amount: sendAmount + 1, toAddress: recipient },
+                    ])];
+            case 7:
+                sendTxMessages = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 592 ~ cosmosWalletCreateTest ~ sendTxMessages', JSON.stringify(sendTxMessages, null, 2));
+                return [4 /*yield*/, transactions.sign(firstAccount.address, sendTxMessages)];
+            case 8:
+                signedTx = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 595 ~ cosmosWalletCreateTest ~ signedTx', signedTx);
+                return [4 /*yield*/, transactions.broadcast(signedTx)];
+            case 9:
+                result = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 598 ~ cosmosWalletCreateTest ~ result!', result);
                 return [2 /*return*/];
         }
     });
 }); };
 var testAccountData = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var wallet, firstAccount, accountBalanceData;
+    var wallet, firstAccount, vInfo;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
@@ -714,16 +741,16 @@ var testAccountData = function () { return __awaiter(void 0, void 0, void 0, fun
                 return [4 /*yield*/, wallet.getAccounts()];
             case 2:
                 firstAccount = (_a.sent())[0];
-                return [4 /*yield*/, accounts.getBalance(firstAccount.address, 'ustos')];
+                return [4 /*yield*/, Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u')];
             case 3:
-                accountBalanceData = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 595 ~ testAccountData ~ accountBalanceData', accountBalanceData);
+                vInfo = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
                 return [2 /*return*/];
         }
     });
 }); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, error_5;
+    var resolvedChainID, sdkEnv, error_6, serialized, _cosmosClient;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -739,8 +766,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 resolvedChainID = _a.sent();
                 return [3 /*break*/, 5];
             case 4:
-                error_5 = _a.sent();
-                console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_5);
+                error_6 = _a.sent();
+                console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_6);
                 throw new Error('Could not resolve chain id');
             case 5:
                 if (!resolvedChainID) {
@@ -749,8 +776,19 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID }))];
             case 6:
                 _a.sent();
+                return [4 /*yield*/, (0, keyManager_1.getSerializedWalletFromPhrase)(zeroUserMnemonic, password)];
+            case 7:
+                serialized = _a.sent();
+                return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
+            case 8:
+                _cosmosClient = _a.sent();
                 // cosmosWalletCreateTest();
-                testAccountData();
+                // testAccountData();
+                // mainSend();
+                // mainDelegate();
+                // mainUndelegate();
+                // mainWithdrawRewards();
+                mainWithdrawAllRewards();
                 return [2 /*return*/];
         }
     });

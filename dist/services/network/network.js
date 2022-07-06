@@ -266,6 +266,7 @@ var getTxList = function (address, type, page, config) {
     });
 };
 exports.getTxList = getTxList;
+// done
 var getValidatorsList = function (status, page, config) {
     if (page === void 0) { page = 1; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -273,7 +274,7 @@ var getValidatorsList = function (status, page, config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = getRestRoute() + "/staking/validators";
+                    url = getRestRoute() + "/cosmos/staking/v1beta1/validators";
                     return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { page: page, status: status } }))];
                 case 1:
                     dataResult = _a.sent();
@@ -283,12 +284,13 @@ var getValidatorsList = function (status, page, config) {
     });
 };
 exports.getValidatorsList = getValidatorsList;
+// done
 var getValidatorsBondedToDelegatorList = function (status, delegatorAddress, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/delegators/" + delegatorAddress + "/validators";
+                url = getRestRoute() + "/cosmos/staking/v1beta1/delegators/" + delegatorAddress + "/validators";
                 return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { status: status } }))];
             case 1:
                 dataResult = _a.sent();
@@ -297,12 +299,13 @@ var getValidatorsBondedToDelegatorList = function (status, delegatorAddress, con
     });
 }); };
 exports.getValidatorsBondedToDelegatorList = getValidatorsBondedToDelegatorList;
+// done
 var getValidator = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/validators/" + address;
+                url = getRestRoute() + "/cosmos/staking/v1beta1/validators/" + address;
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -311,12 +314,13 @@ var getValidator = function (address, config) { return __awaiter(void 0, void 0,
     });
 }); };
 exports.getValidator = getValidator;
+// done
 var getStakingPool = function (config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/pool";
+                url = getRestRoute() + "/cosmos/staking/v1beta1/pool";
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -401,7 +405,6 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
         switch (_a.label) {
             case 0:
                 url = getRpcRoute() + "/status";
-                console.log('🚀 ~ file: network.ts ~ line 306 ~ getRpcStatus ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();

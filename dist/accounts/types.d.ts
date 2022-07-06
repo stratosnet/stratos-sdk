@@ -1,3 +1,4 @@
+import { CosmosAccount as CosmosAccountNetwork, CosmosBaseAccount as CosmosBaseAccountNetwork } from '../services/network/types';
 import { AmountType, TxMsgTypes } from '../transactions/types';
 export interface AccountsData {
     height: string;
@@ -12,16 +13,8 @@ export interface AccountsData {
         };
     };
 }
-export interface CosmosBaseAccount {
-    address: string;
-    pu_key: string;
-    account_number: string;
-    sequence: string;
+export interface CosmosBaseAccount extends CosmosBaseAccountNetwork {
 }
 export interface CosmosAccountData {
-    account: {
-        '@type': string;
-        base_account: CosmosBaseAccount;
-        code_hash: string;
-    };
+    account: CosmosAccountNetwork;
 }
