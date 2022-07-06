@@ -14,7 +14,7 @@ export const getValidatorsBondedToDelegator = async (
     throw new Error('Could not fetch validators list');
   }
 
-  const { result: validatorResultList } = response;
+  const { validators: validatorResultList } = response;
 
   if (!validatorResultList) {
     throw new Error('Response is missing. Could not fetch validators list');
@@ -52,19 +52,17 @@ export const getValidators = async (
     throw new Error('Could not fetch validators list');
   }
 
-  const { result: validatorResultList } = response;
+  const { validators: validatorResultList } = response;
 
   const vPoolResult = await getStakingPool();
 
   const { response: poolResponse } = vPoolResult;
 
-  // console.log('poolResponse', poolResponse);
-
   if (!poolResponse) {
     throw new Error('Could not fetch total staking pool info');
   }
 
-  const totalBondedTokens = _get(poolResponse, 'result.bonded_tokens', 0);
+  const totalBondedTokens = _get(poolResponse, 'pool.bonded_tokens', 0);
   console.log('totalBondedTokens', totalBondedTokens);
 
   const parsedData: Types.ParsedValidatorItem[] = validatorResultList.map(validatorItem => {
@@ -72,7 +70,6 @@ export const getValidators = async (
     const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`) as string;
     const status = _get(validatorItem, 'status', 0);
     const totalTokens = _get(validatorItem, 'tokens', 0);
-    // console.log('validatorItem', validatorItem);
     const votingPower = (Number(totalTokens) * 100) / totalBondedTokens;
     const comission = _get(validatorItem, 'commission.commission_rates.rate', '0') as string;
 
@@ -87,8 +84,6 @@ export const getValidators = async (
       status: vStatus,
     };
   });
-
-  // console.log('parsedData!', parsedData);
 
   const result = { data: parsedData, page: page || 1 };
 

@@ -32,9 +32,13 @@ export interface CosmosBaseAccount {
 }
 
 export interface CosmosAccount {
-  '@type': string; // one of the cosmojs types - add a guard later
+  '@type': string;
   base_account: CosmosBaseAccount;
   code_hash: string;
+  address: string;
+  pub_key: string;
+  account_number: string;
+  sequence: string;
 }
 
 export interface AccountsDataResult extends NetworkAxiosDataResult {}
@@ -243,17 +247,18 @@ export interface ValidatorItem {
 }
 
 export interface ValidatorListResponse {
-  height: number;
-  result: ValidatorItem[];
+  validators: ValidatorItem[];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
 }
 
 export interface ValidatorResponse {
-  height: number;
-  result: ValidatorItem;
+  validator: ValidatorItem;
 }
 
 export interface StakingPoolResponse {
-  height: number;
   result: {
     not_bonded_tokens: string;
     bonded_tokens: string;

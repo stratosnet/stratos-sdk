@@ -212,45 +212,49 @@ export const getTxList = async (
   return dataResult;
 };
 
+// done
 export const getValidatorsList = async (
   status: string,
   page = 1,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.ValidatorListDataResult> => {
-  const url = `${getRestRoute()}/staking/validators`;
+  const url = `${getRestRoute()}/cosmos/staking/v1beta1/validators`;
 
   const dataResult = await apiGet(url, { ...config, params: { page, status } });
 
   return dataResult;
 };
 
+// done
 export const getValidatorsBondedToDelegatorList = async (
   status: string,
   delegatorAddress: string,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.ValidatorListDataResult> => {
-  const url = `${getRestRoute()}/staking/delegators/${delegatorAddress}/validators`;
+  const url = `${getRestRoute()}/cosmos/staking/v1beta1/delegators/${delegatorAddress}/validators`;
 
   const dataResult = await apiGet(url, { ...config, params: { status } });
 
   return dataResult;
 };
 
+// done
 export const getValidator = async (
   address: string,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.ValidatorDataResult> => {
-  const url = `${getRestRoute()}/staking/validators/${address}`;
+  const url = `${getRestRoute()}/cosmos/staking/v1beta1/validators/${address}`;
 
   const dataResult = await apiGet(url, config);
 
   return dataResult;
 };
 
+// done
 export const getStakingPool = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.StakingPoolDataResult> => {
-  const url = `${getRestRoute()}/staking/pool`;
+  const url = `${getRestRoute()}/cosmos/staking/v1beta1/pool`;
 
   const dataResult = await apiGet(url, config);
 
@@ -314,7 +318,6 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  console.log('🚀 ~ file: network.ts ~ line 306 ~ getRpcStatus ~ url', url);
 
   const dataResult = await apiGet(url, config);
 
