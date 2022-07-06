@@ -1,5 +1,5 @@
 import * as keyUtils from './keyUtils';
-import { convertArrayToString, MnemonicPhrase } from './mnemonic';
+import { convertArrayToString, convertStringToArray, MnemonicPhrase } from './mnemonic';
 export interface LegacyMasterKeyInfo {
   readonly encryptedMasterKeySeed: sjcl.SjclCipherEncrypted;
   readonly masterKeySeedAddress: string;
@@ -37,8 +37,6 @@ export const createMasterKeySeedFromGivenSeed = async (
 ): Promise<LegacyMasterKeyInfo> => {
   const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
 
-  console.log('🚀 ~ file: keyManager.ts ~ line 28 ~ derivedMasterKeySeed', derivedMasterKeySeed);
-
   const pubkey = await keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
   const masterKeySeedPublicKey = await keyUtils.getAminoPublicKey(pubkey); // 1 amino dep  - encodeAminoPubkey
   const masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey); // 2 amino dep  - pubkeyToAddress
@@ -60,4 +58,13 @@ export const unlockMasterKeySeed = async (
   encryptedMasterKeySeed: string,
 ): Promise<boolean> => {
   return await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed);
+};
+
+// helper to provide an encripted, serialized wallet from a given mnemonic
+export const getSerializedWalletFromPhrase = async (userMnemonic: string, password: string) => {
+  const phrase = convertStringToArray(userMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  const serialized = masterKeySeedInfo.encryptedWalletInfo;
+
+  return serialized;
 };
