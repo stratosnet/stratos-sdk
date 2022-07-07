@@ -375,7 +375,7 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }])];
+                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }])];
             case 3:
                 sendTxMessages = _a.sent();
                 return [4 /*yield*/, transactions.sign(keyPairZero.address, sendTxMessages)];
@@ -388,7 +388,7 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
                 return [4 /*yield*/, transactions.broadcast(signedTx)];
             case 6:
                 result = _a.sent();
-                console.log('broadcast prepay result :)', result);
+                console.log('broadcast prepay result', result);
                 return [3 /*break*/, 8];
             case 7:
                 err_1 = _a.sent();
@@ -788,7 +788,10 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // mainDelegate();
                 // mainUndelegate();
                 // mainWithdrawRewards();
-                mainWithdrawAllRewards();
+                // mainWithdrawAllRewards();
+                // mainSdsPrepay();
+                // mainFour();
+                mainBalance();
                 return [2 /*return*/];
         }
     });

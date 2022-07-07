@@ -78,7 +78,7 @@ var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var validators_1 = require("../validators");
 var Types = __importStar(require("./types"));
-var coin_1 = require("cosmjs-types/cosmos/base/v1beta1/coin");
+var stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 function payloadGenerator(dataList) {
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -93,17 +93,9 @@ function payloadGenerator(dataList) {
     });
 }
 var getStratosTransactionRegistryTypes = function () {
+    var msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
     var stratosTxRegistryTypes = __spreadArray(__spreadArray([], stargate_1.defaultRegistryTypes, true), [
-        [Types.TxMsgTypes.SdsPrepay, coin_1.Coin],
-        [Types.TxMsgTypes.SdsFileUpload, coin_1.Coin],
-        [Types.TxMsgTypes.PotVolumeReport, coin_1.Coin],
-        [Types.TxMsgTypes.PotWithdraw, coin_1.Coin],
-        [Types.TxMsgTypes.PotFoundationDeposit, coin_1.Coin],
-        [Types.TxMsgTypes.RegisterCreateResourceNode, coin_1.Coin],
-        [Types.TxMsgTypes.RegisterRemoveResourceNode, coin_1.Coin],
-        [Types.TxMsgTypes.RegisterCreateIndexingNode, coin_1.Coin],
-        [Types.TxMsgTypes.RegisterRemoveIndexingNode, coin_1.Coin],
-        [Types.TxMsgTypes.RegisterIndexingNodeRegistrationVote, coin_1.Coin],
+        [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
     ], false);
     return stratosTxRegistryTypes;
 };

@@ -255,14 +255,14 @@ const mainSdsPrepay = async () => {
     return;
   }
 
-  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 5 }]);
+  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
 
   const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
 
   if (signedTx) {
     try {
       const result = await transactions.broadcast(signedTx);
-      console.log('broadcast prepay result :)', result);
+      console.log('broadcast prepay result', result);
     } catch (err) {
       console.log('error broadcasting', (err as Error).message);
     }
@@ -652,11 +652,11 @@ const main = async () => {
   // mainDelegate();
   // mainUndelegate();
   // mainWithdrawRewards();
-  mainWithdrawAllRewards();
+  // mainWithdrawAllRewards();
   // mainSdsPrepay();
   // mainFour();
 
-  // mainBalance();
+  mainBalance();
 };
 
 main();

@@ -11,7 +11,7 @@ import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
 
 import { GeneratedType } from '@cosmjs/proto-signing';
-import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
+import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
@@ -22,20 +22,18 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
 }
 
 export const getStratosTransactionRegistryTypes = () => {
+  const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
-    [Types.TxMsgTypes.SdsPrepay, Coin],
-    [Types.TxMsgTypes.SdsFileUpload, Coin],
+    [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
 
-    [Types.TxMsgTypes.PotVolumeReport, Coin],
-    [Types.TxMsgTypes.PotWithdraw, Coin],
-    [Types.TxMsgTypes.PotFoundationDeposit, Coin],
+    // [Types.TxMsgTypes.PotWithdraw, Coin],
+    // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
 
-    [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
-    [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
-    [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
-    [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
-    [Types.TxMsgTypes.RegisterIndexingNodeRegistrationVote, Coin],
+    // [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
+    // [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
+    // [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
+    // [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
   ];
 
   return stratosTxRegistryTypes;
