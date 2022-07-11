@@ -24,7 +24,42 @@ export interface NetworkAxiosConfig {
   params?: any;
 }
 
+export interface CosmosBaseAccount {
+  address: string;
+  pu_key: string;
+  account_number: string;
+  sequence: string;
+}
+
+export interface CosmosAccount {
+  '@type': string;
+  base_account: CosmosBaseAccount;
+  code_hash: string;
+  address: string;
+  pub_key: string;
+  account_number: string;
+  sequence: string;
+}
+
 export interface AccountsDataResult extends NetworkAxiosDataResult {}
+
+export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
+  response?: {
+    account: CosmosAccount;
+  };
+}
+
+export interface CosmosAccountBalanceResponse {
+  balances: Amount[];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
+}
+
+export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
+  response?: CosmosAccountBalanceResponse;
+}
 
 export interface DelegatedBalanceResult {
   delegator_address: string;
@@ -212,17 +247,18 @@ export interface ValidatorItem {
 }
 
 export interface ValidatorListResponse {
-  height: number;
-  result: ValidatorItem[];
+  validators: ValidatorItem[];
+  pagination: {
+    next_key: string;
+    total: string;
+  };
 }
 
 export interface ValidatorResponse {
-  height: number;
-  result: ValidatorItem;
+  validator: ValidatorItem;
 }
 
 export interface StakingPoolResponse {
-  height: number;
   result: {
     not_bonded_tokens: string;
     bonded_tokens: string;

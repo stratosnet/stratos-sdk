@@ -50,10 +50,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
+exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
+var _axios = axios_1.default.create({});
+_axios.defaults.transformResponse = [
+    function (data) {
+        try {
+            return (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(data);
+        }
+        catch (_) {
+            return data;
+        }
+    },
+];
 var getRestRoute = function () {
     var restUrl = Sdk_1.default.environment.restUrl;
     return restUrl;
@@ -73,7 +84,7 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.post(url, data, config)];
+                return [4 /*yield*/, _axios.post(url, data, config)];
             case 1:
                 axiosResponse = _a.sent();
                 return [3 /*break*/, 3];
@@ -82,7 +93,7 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
                 return [2 /*return*/, { error: { message: err_1.message } }];
             case 3:
                 try {
-                    myResponse = (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(axiosResponse.data);
+                    myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];
                 }
                 catch (_) {
@@ -99,7 +110,7 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, axios_1.default.get(url, config)];
+                return [4 /*yield*/, _axios.get(url, config)];
             case 1:
                 axiosResponse = _a.sent();
                 return [3 /*break*/, 3];
@@ -108,7 +119,7 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
                 return [2 /*return*/, { error: { message: err_2.message } }];
             case 3:
                 try {
-                    myResponse = (0, json_bigint_1.default)({ useNativeBigInt: true }).parse(axiosResponse.data);
+                    myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];
                 }
                 catch (_) {
@@ -124,7 +135,7 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/auth/acconts/" + address;
+                url = getRestRoute() + "/cosmos/auth/v1beta1/accounts/" + address;
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -133,6 +144,20 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
     });
 }); };
 exports.getAccountsData = getAccountsData;
+var getAccountBalance = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var url, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = getRestRoute() + "/cosmos/bank/v1beta1/balances/" + address;
+                return [4 /*yield*/, (0, exports.apiGet)(url, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.getAccountBalance = getAccountBalance;
 var getStakingValidators = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
@@ -206,6 +231,14 @@ var getTxListBlockchain = function (address, type, page, config) {
     });
 };
 exports.getTxListBlockchain = getTxListBlockchain;
+/**
+ * @param address
+ * @deprecated
+ * @param type
+ * @param page
+ * @param config
+ * @returns
+ */
 var getTxList = function (address, type, page, config) {
     if (page === void 0) { page = 1; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -233,6 +266,7 @@ var getTxList = function (address, type, page, config) {
     });
 };
 exports.getTxList = getTxList;
+// done
 var getValidatorsList = function (status, page, config) {
     if (page === void 0) { page = 1; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -240,7 +274,7 @@ var getValidatorsList = function (status, page, config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = getRestRoute() + "/staking/validators";
+                    url = getRestRoute() + "/cosmos/staking/v1beta1/validators";
                     return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { page: page, status: status } }))];
                 case 1:
                     dataResult = _a.sent();
@@ -250,12 +284,13 @@ var getValidatorsList = function (status, page, config) {
     });
 };
 exports.getValidatorsList = getValidatorsList;
+// done
 var getValidatorsBondedToDelegatorList = function (status, delegatorAddress, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/delegators/" + delegatorAddress + "/validators";
+                url = getRestRoute() + "/cosmos/staking/v1beta1/delegators/" + delegatorAddress + "/validators";
                 return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { status: status } }))];
             case 1:
                 dataResult = _a.sent();
@@ -264,12 +299,13 @@ var getValidatorsBondedToDelegatorList = function (status, delegatorAddress, con
     });
 }); };
 exports.getValidatorsBondedToDelegatorList = getValidatorsBondedToDelegatorList;
+// done
 var getValidator = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/validators/" + address;
+                url = getRestRoute() + "/cosmos/staking/v1beta1/validators/" + address;
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -278,12 +314,13 @@ var getValidator = function (address, config) { return __awaiter(void 0, void 0,
     });
 }); };
 exports.getValidator = getValidator;
+// done
 var getStakingPool = function (config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/pool";
+                url = getRestRoute() + "/cosmos/staking/v1beta1/pool";
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();

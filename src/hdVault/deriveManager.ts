@@ -29,11 +29,11 @@ export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<s
 export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Promise<KeyPair> => {
   const pubkeyMine = await getPublicKeyFromPrivKey(privkey);
 
-  const encodeAminoPub = await getAminoPublicKey(pubkeyMine);
+  const encodeAminoPub = await getAminoPublicKey(pubkeyMine); // 1 amino dep - amino encodeAminoPubkey
+
+  const address = getAddressFromPubKey(pubkeyMine); // 2 amino dep - amino pubkeyToAddress
 
   const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
-
-  const address = getAddressFromPubKey(pubkeyMine);
 
   return {
     address,

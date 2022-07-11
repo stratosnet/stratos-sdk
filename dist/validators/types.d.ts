@@ -1,8 +1,8 @@
 export declare enum ValidatorsNetworkStatus {
-    Unbonded = "unbonded",
-    Unbonding = "unbounding",
-    Bonded = "bonded",
-    All = "all"
+    Unbonded = "BOND_STATUS_UNBONDED",
+    Unbonding = "BOND_STATUS_UNBONDING",
+    Bonded = "BOND_STATUS_BONDED",
+    All = "BOND_STATUS_UNSPECIFIED"
 }
 export declare enum ValidatorStatus {
     Unbonded = 0,

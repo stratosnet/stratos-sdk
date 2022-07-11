@@ -29,7 +29,7 @@ describe('validators', () => {
 
       const vListResult = {
         response: {
-          result: validatorResultList,
+          validators: validatorResultList,
         },
       } as NetworkTypes.ValidatorListDataResult;
 
@@ -110,7 +110,7 @@ describe('validators', () => {
       const comissionOne = '45';
       const comissionTwo = '50';
 
-      const validatorOne = ({
+      const validatorOne = {
         operator_address: 'myAddress1',
         description: {
           moniker: 'myName1',
@@ -122,9 +122,9 @@ describe('validators', () => {
             rate: 45,
           },
         },
-      } as unknown) as NetworkTypes.ValidatorItem;
+      } as unknown as NetworkTypes.ValidatorItem;
 
-      const validatorTwo = ({
+      const validatorTwo = {
         operator_address: 'myAddress2',
         description: {
           moniker: 'myName2',
@@ -136,13 +136,13 @@ describe('validators', () => {
             rate: 50,
           },
         },
-      } as unknown) as NetworkTypes.ValidatorItem;
+      } as unknown as NetworkTypes.ValidatorItem;
 
       const validatorResultList = [validatorOne, validatorTwo];
 
       const vListResult = {
         response: {
-          result: validatorResultList,
+          validators: validatorResultList,
         },
       } as NetworkTypes.ValidatorListDataResult;
 
@@ -150,11 +150,11 @@ describe('validators', () => {
         return Promise.resolve(vListResult);
       });
 
-      const poolResponse = ({
+      const poolResponse = {
         result: {
           bonded_tokens: 10000,
         },
-      } as unknown) as NetworkTypes.StakingPoolResponse;
+      } as unknown as NetworkTypes.StakingPoolResponse;
 
       const vPoolResult = {
         response: poolResponse,
@@ -207,7 +207,7 @@ describe('validators', () => {
     });
 
     it('throws an error if it can not get a network response about the validaotrs pool', async () => {
-      const validatorOne = ({
+      const validatorOne = {
         operator_address: 'myAddress1',
         description: {
           moniker: 'myName1',
@@ -219,9 +219,9 @@ describe('validators', () => {
             rate: 45,
           },
         },
-      } as unknown) as NetworkTypes.ValidatorItem;
+      } as unknown as NetworkTypes.ValidatorItem;
 
-      const validatorTwo = ({
+      const validatorTwo = {
         operator_address: 'myAddress2',
         description: {
           moniker: 'myName2',
@@ -233,13 +233,13 @@ describe('validators', () => {
             rate: 50,
           },
         },
-      } as unknown) as NetworkTypes.ValidatorItem;
+      } as unknown as NetworkTypes.ValidatorItem;
 
       const validatorResultList = [validatorOne, validatorTwo];
 
       const vListResult = {
         response: {
-          result: validatorResultList,
+          validators: validatorResultList,
         },
       } as NetworkTypes.ValidatorListDataResult;
 

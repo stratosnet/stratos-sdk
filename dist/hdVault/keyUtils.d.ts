@@ -1,3 +1,5 @@
+import { HdPath } from '@cosmjs/crypto';
+import { DirectSecp256k1HdWallet, OfflineSigner } from '@cosmjs/proto-signing';
 import sjcl from 'sjcl';
 import { MnemonicPhrase } from './mnemonic';
 export interface KeyPair {
@@ -9,12 +11,12 @@ export interface PubKey {
     value: string;
 }
 /**
- * @todo add unit test
+ * const keyPath =                            "m/44'/606'/0'/0/1";
+ * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
+ * with 0-based account index `a`.
  */
+export declare function makeStratosHubPath(a: number): HdPath;
 export declare const generateMasterKeySeed: (phrase: MnemonicPhrase) => Promise<Uint8Array>;
-/**
- * @todo add unit test
- */
 export declare const getMasterKeySeedPriveKey: (masterKeySeed: Uint8Array) => Uint8Array;
 export declare const getPublicKeyFromPrivKey: (privkey: Uint8Array) => Promise<PubKey>;
 export declare const getAminoPublicKey: (pubkey: PubKey) => Promise<Uint8Array>;
@@ -25,5 +27,8 @@ export declare const encryptMasterKeySeed: (password: string, masterKeySeed: Uin
 export declare const decryptMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array | false>;
 export declare const unlockMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<boolean>;
 export declare const getMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array>;
-export declare const sign: (message: string, privateKey: string) => Promise<string>;
-export declare const verifySignature: (message: string, signature: string, publicKey: string) => Promise<boolean>;
+export declare type PathBuilder = (account_index: number) => HdPath;
+export declare function makePathBuilder(pattern: string): PathBuilder;
+export declare function createWalletAtPath(hdPathIndex: number, mnemonic: string): Promise<DirectSecp256k1HdWallet>;
+export declare function createWallets(mnemonic: string, pathBuilder: PathBuilder, addressPrefix: string, numberOfDistributors: number): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;
+export declare function generateWallets(quantity: number, mnemonic: string): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;

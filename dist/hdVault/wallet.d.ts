@@ -1,3 +1,4 @@
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 export interface KeyPairInfo {
     keyIndex: number;
     address: string;
@@ -11,5 +12,4 @@ export interface TransactionMessage {
     signingKeyPath: string;
 }
 export declare const deriveKeyPair: (keyIndex: number, password: string, encryptedMasterKeySeed: string) => Promise<KeyPairInfo | false>;
-export declare const sign: ({ message, password, encryptedMasterKeySeed, signingKeyPath, }: TransactionMessage) => Promise<string>;
-export declare const verifySignature: (message: string, signature: string, publicKey: string) => Promise<boolean>;
+export declare const deserializeEncryptedWallet: (serializedWallet: string, password: string) => Promise<DirectSecp256k1HdWallet>;

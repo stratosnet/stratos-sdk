@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -55,36 +66,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unlockMasterKeySeed = exports.createMasterKeySeed = void 0;
+exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = exports.createMasterKeySeed = void 0;
 var keyUtils = __importStar(require("./keyUtils"));
+var mnemonic_1 = require("./mnemonic");
+// exposed outside, used in the DesktopWallet to "create" a wallet
 var createMasterKeySeed = function (phrase, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var derivedMasterKeySeed, encryptedMasterKeySeed, pubkey, masterKeySeedAddress, masterKeySeedPublicKey, masterKeySeedEncodedPublicKey;
+    var derivedMasterKeySeed, wallet, encryptedWalletInfo, legacyMasterKeyInfo, masterKeyInfo;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, keyUtils.generateMasterKeySeed(phrase)];
             case 1:
                 derivedMasterKeySeed = _a.sent();
-                encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
-                return [4 /*yield*/, keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed)];
+                return [4 /*yield*/, keyUtils.createWalletAtPath(0, (0, mnemonic_1.convertArrayToString)(phrase))];
             case 2:
-                pubkey = _a.sent();
-                masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
-                return [4 /*yield*/, keyUtils.getAminoPublicKey(pubkey)];
+                wallet = _a.sent();
+                return [4 /*yield*/, wallet.serialize(password)];
             case 3:
-                masterKeySeedPublicKey = _a.sent();
-                return [4 /*yield*/, keyUtils.getEncodedPublicKey(masterKeySeedPublicKey)];
+                encryptedWalletInfo = _a.sent();
+                return [4 /*yield*/, (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password)];
             case 4:
-                masterKeySeedEncodedPublicKey = _a.sent();
-                return [2 /*return*/, {
-                        encryptedMasterKeySeed: encryptedMasterKeySeed,
-                        masterKeySeedAddress: masterKeySeedAddress,
-                        masterKeySeedPublicKey: masterKeySeedPublicKey,
-                        masterKeySeedEncodedPublicKey: masterKeySeedEncodedPublicKey,
-                    }];
+                legacyMasterKeyInfo = _a.sent();
+                masterKeyInfo = __assign(__assign({}, legacyMasterKeyInfo), { encryptedWalletInfo: encryptedWalletInfo });
+                return [2 /*return*/, masterKeyInfo];
         }
     });
 }); };
 exports.createMasterKeySeed = createMasterKeySeed;
+var createMasterKeySeedFromGivenSeed = function (derivedMasterKeySeed, password) { return __awaiter(void 0, void 0, void 0, function () {
+    var encryptedMasterKeySeed, pubkey, masterKeySeedPublicKey, masterKeySeedAddress, masterKeySeedEncodedPublicKey, masterKeyInfo;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
+                return [4 /*yield*/, keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed)];
+            case 1:
+                pubkey = _a.sent();
+                return [4 /*yield*/, keyUtils.getAminoPublicKey(pubkey)];
+            case 2:
+                masterKeySeedPublicKey = _a.sent();
+                masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
+                return [4 /*yield*/, keyUtils.getEncodedPublicKey(masterKeySeedPublicKey)];
+            case 3:
+                masterKeySeedEncodedPublicKey = _a.sent();
+                masterKeyInfo = {
+                    encryptedMasterKeySeed: encryptedMasterKeySeed,
+                    masterKeySeedAddress: masterKeySeedAddress,
+                    masterKeySeedPublicKey: masterKeySeedPublicKey,
+                    masterKeySeedEncodedPublicKey: masterKeySeedEncodedPublicKey,
+                };
+                return [2 /*return*/, masterKeyInfo];
+        }
+    });
+}); };
+exports.createMasterKeySeedFromGivenSeed = createMasterKeySeedFromGivenSeed;
+// exposed outside, used in the DesktopWallet to login
 var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -94,4 +129,20 @@ var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return _
     });
 }); };
 exports.unlockMasterKeySeed = unlockMasterKeySeed;
+// helper to provide an encripted, serialized wallet from a given mnemonic
+var getSerializedWalletFromPhrase = function (userMnemonic, password) { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, serialized;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                phrase = (0, mnemonic_1.convertStringToArray)(userMnemonic);
+                return [4 /*yield*/, (0, exports.createMasterKeySeed)(phrase, password)];
+            case 1:
+                masterKeySeedInfo = _a.sent();
+                serialized = masterKeySeedInfo.encryptedWalletInfo;
+                return [2 /*return*/, serialized];
+        }
+    });
+}); };
+exports.getSerializedWalletFromPhrase = getSerializedWalletFromPhrase;
 //# sourceMappingURL=keyManager.js.map

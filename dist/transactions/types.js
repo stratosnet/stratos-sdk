@@ -3,29 +3,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TxHistoryTypesMap = exports.BlockChainTxMsgTypesMap = exports.TxMsgTypesMap = exports.HistoryTxType = exports.TxMsgTypes = void 0;
 var TxMsgTypes;
 (function (TxMsgTypes) {
-    TxMsgTypes["Account"] = "cosmos-sdk/Account";
-    TxMsgTypes["Send"] = "cosmos-sdk/MsgSend";
-    TxMsgTypes["Delegate"] = "cosmos-sdk/MsgDelegate";
-    TxMsgTypes["Undelegate"] = "cosmos-sdk/MsgUndelegate";
-    TxMsgTypes["WithdrawRewards"] = "cosmos-sdk/MsgWithdrawDelegationReward";
-    TxMsgTypes["CreateValidator"] = "osmos-sdk/MsgCreateValidator";
+    TxMsgTypes["Account"] = "/cosmos.auth.v1beta1.BaseAccount";
+    TxMsgTypes["Send"] = "/cosmos.bank.v1beta1.MsgSend";
+    TxMsgTypes["Delegate"] = "/cosmos.staking.v1beta1.MsgDelegate";
+    TxMsgTypes["Undelegate"] = "/cosmos.staking.v1beta1.MsgUndelegate";
+    TxMsgTypes["WithdrawRewards"] = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward";
+    TxMsgTypes["CreateValidator"] = "/cosmos.staking.v1beta1.MsgCreateValidator";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 (function (TxMsgTypes) {
     TxMsgTypes["SdsAll"] = "";
-    TxMsgTypes["SdsPrepay"] = "sds/MsgPrepay";
-    TxMsgTypes["SdsFileUpload"] = "sds/MsgFileUpload";
+    TxMsgTypes["SdsPrepay"] = "/stratos.sds.v1.MsgPrepay";
+    TxMsgTypes["SdsFileUpload"] = "/stratos.sds.v1.MsgFileUpload";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 (function (TxMsgTypes) {
-    TxMsgTypes["PotVolumeReport"] = "pot/MsgVolumeReport";
-    TxMsgTypes["PotWithdraw"] = "pot/MsgWithdraw";
-    TxMsgTypes["PotFoundationDeposit"] = "pot/MsgFoundationDeposit";
+    TxMsgTypes["PotVolumeReport"] = "/stratos.pot.v1.MsgVolumeReport";
+    TxMsgTypes["PotWithdraw"] = "/stratos.pot.v1.MsgWithdraw";
+    TxMsgTypes["PotFoundationDeposit"] = "/stratos.pot.v1.MsgFoundationDeposit";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 (function (TxMsgTypes) {
-    TxMsgTypes["RegisterCreateResourceNode"] = "register/MsgCreateResourceNode";
-    TxMsgTypes["RegisterRemoveResourceNode"] = "register/MsgRemoveResourceNode";
-    TxMsgTypes["RegisterCreateIndexingNode"] = "register/MsgCreateIndexingNode";
-    TxMsgTypes["RegisterRemoveIndexingNode"] = "register/MsgRemoveIndexingNode";
-    TxMsgTypes["RegisterIndexingNodeRegistrationVote"] = "register/MsgIndexingNodeRegistrationVote";
+    TxMsgTypes["RegisterCreateResourceNode"] = "/stratos.register.v1.MsgCreateResourceNode";
+    TxMsgTypes["RegisterRemoveResourceNode"] = "/stratos.register.v1.MsgRemoveResourceNode";
+    TxMsgTypes["RegisterCreateIndexingNode"] = "/stratos.register.v1.MsgCreateMetaNode";
+    TxMsgTypes["RegisterRemoveIndexingNode"] = "/stratos.register.v1.MsgRemoveMetaNode";
+    TxMsgTypes["RegisterIndexingNodeRegistrationVote"] = "/stratos.register.v1.MsgIndexingNodeRegistrationVote";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 var HistoryTxType;
 (function (HistoryTxType) {

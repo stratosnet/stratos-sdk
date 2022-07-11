@@ -7,7 +7,7 @@ export interface BalanceCardMetrics {
     reward: string;
     detailedBalance?: any;
 }
-export declare const getAccountsData: (keyPairAddress: string) => Promise<Types.AccountsData>;
+export declare const getAccountsData: (keyPairAddress: string) => Promise<Types.CosmosAccountData>;
 export declare const increaseBalance: (walletAddress: string, faucetUrl: string) => Promise<{
     result: boolean;
     errorMessage: string;

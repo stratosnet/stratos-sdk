@@ -1,3 +1,7 @@
+import {
+  CosmosAccount as CosmosAccountNetwork,
+  CosmosBaseAccount as CosmosBaseAccountNetwork,
+} from '../services/network/types';
 import { AmountType, TxMsgTypes } from '../transactions/types';
 
 export interface AccountsData {
@@ -12,4 +16,10 @@ export interface AccountsData {
       coins: AmountType[];
     };
   };
+}
+
+export interface CosmosBaseAccount extends CosmosBaseAccountNetwork {}
+
+export interface CosmosAccountData {
+  account: CosmosAccountNetwork;
 }

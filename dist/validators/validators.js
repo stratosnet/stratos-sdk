@@ -75,7 +75,7 @@ var getValidatorsBondedToDelegator = function (delegatorAddress) { return __awai
                 if (!response) {
                     throw new Error('Could not fetch validators list');
                 }
-                validatorResultList = response.result;
+                validatorResultList = response.validators;
                 if (!validatorResultList) {
                     throw new Error('Response is missing. Could not fetch validators list');
                 }
@@ -111,23 +111,21 @@ var getValidators = function (status, page) {
                     if (!response) {
                         throw new Error('Could not fetch validators list');
                     }
-                    validatorResultList = response.result;
+                    validatorResultList = response.validators;
                     return [4 /*yield*/, (0, network_1.getStakingPool)()];
                 case 2:
                     vPoolResult = _a.sent();
                     poolResponse = vPoolResult.response;
-                    // console.log('poolResponse', poolResponse);
                     if (!poolResponse) {
                         throw new Error('Could not fetch total staking pool info');
                     }
-                    totalBondedTokens = (0, get_1.default)(poolResponse, 'result.bonded_tokens', 0);
+                    totalBondedTokens = (0, get_1.default)(poolResponse, 'pool.bonded_tokens', 0);
                     console.log('totalBondedTokens', totalBondedTokens);
                     parsedData = validatorResultList.map(function (validatorItem) {
                         var operatorAddress = (0, get_1.default)(validatorItem, 'operator_address', '');
                         var name = (0, get_1.default)(validatorItem, 'description.moniker', "v_" + operatorAddress);
                         var status = (0, get_1.default)(validatorItem, 'status', 0);
                         var totalTokens = (0, get_1.default)(validatorItem, 'tokens', 0);
-                        // console.log('validatorItem', validatorItem);
                         var votingPower = (Number(totalTokens) * 100) / totalBondedTokens;
                         var comission = (0, get_1.default)(validatorItem, 'commission.commission_rates.rate', '0');
                         var vStatus = Types.ParsedValidatorsStatusMap.get(status) || Types.ValidatorStatus.Bonded;

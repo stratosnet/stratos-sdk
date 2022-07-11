@@ -84,7 +84,7 @@ describe('validators', function () {
                         validatorResultList = [validatorOne, validatorTwo];
                         vListResult = {
                             response: {
-                                result: validatorResultList,
+                                validators: validatorResultList,
                             },
                         };
                         spyGetValidatorsBondedToDelegatorList = jest
@@ -200,7 +200,7 @@ describe('validators', function () {
                         validatorResultList = [validatorOne, validatorTwo];
                         vListResult = {
                             response: {
-                                result: validatorResultList,
+                                validators: validatorResultList,
                             },
                         };
                         spyGetValidatorsList = jest.spyOn(NetworkApi, 'getValidatorsList').mockImplementation(function () {
@@ -299,7 +299,7 @@ describe('validators', function () {
                         validatorResultList = [validatorOne, validatorTwo];
                         vListResult = {
                             response: {
-                                result: validatorResultList,
+                                validators: validatorResultList,
                             },
                         };
                         spyGetValidatorsList = jest.spyOn(NetworkApi, 'getValidatorsList').mockImplementation(function () {

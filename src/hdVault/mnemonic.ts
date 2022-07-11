@@ -33,6 +33,9 @@ export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPh
   const entropy = crypto.randomBytes(32);
   mnemonicString = entropyToMnemonic(entropy);
 
+  // another option
+  // const mnemonic = Bip39.encode(Random.getBytes(16)).toString(); // using { Bip39 } '@cosmjs/crypto'
+
   return convertStringToArray(mnemonicString);
 };
 

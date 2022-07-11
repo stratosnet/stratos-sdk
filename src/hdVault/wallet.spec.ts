@@ -1,4 +1,4 @@
-import { createMasterKeySeed } from './keyManager';
+// import { createMasterKeySeed } from './keyManager';
 // import { deriveKeyPair, sign, verifySignature } from './wallet';
 
 // const phrase = [

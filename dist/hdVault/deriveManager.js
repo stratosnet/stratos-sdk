@@ -75,7 +75,7 @@ var deriveAddressFromPhrase = function (phrase) { return __awaiter(void 0, void 
 }); };
 exports.deriveAddressFromPhrase = deriveAddressFromPhrase;
 var deriveKeyPairFromPrivateKeySeed = function (privkey) { return __awaiter(void 0, void 0, void 0, function () {
-    var pubkeyMine, encodeAminoPub, encodedPublicKey, address;
+    var pubkeyMine, encodeAminoPub, address, encodedPublicKey;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, (0, keyUtils_1.getPublicKeyFromPrivKey)(privkey)];
@@ -84,10 +84,10 @@ var deriveKeyPairFromPrivateKeySeed = function (privkey) { return __awaiter(void
                 return [4 /*yield*/, (0, keyUtils_1.getAminoPublicKey)(pubkeyMine)];
             case 2:
                 encodeAminoPub = _a.sent();
+                address = (0, keyUtils_1.getAddressFromPubKey)(pubkeyMine);
                 return [4 /*yield*/, (0, keyUtils_1.getEncodedPublicKey)(encodeAminoPub)];
             case 3:
                 encodedPublicKey = _a.sent();
-                address = (0, keyUtils_1.getAddressFromPubKey)(pubkeyMine);
                 return [2 /*return*/, {
                         address: address,
                         publicKey: encodeAminoPub,

@@ -9,3 +9,5 @@ export const stratosDenom = 'ustos';
 export const stratosTopDenom = 'stos';
 
 export const keyPath = `${masterkey}${bip44purpose}${stratosCoinType}`;
+
+export const keyPathPattern = `${keyPath}a`;
