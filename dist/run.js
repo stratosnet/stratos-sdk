@@ -148,7 +148,7 @@ var mainSend = function () { return __awaiter(void 0, void 0, void 0, function (
                     return [2 /*return*/];
                 }
                 fromAddress = keyPairZero.address;
-                sendAmount = 2.5;
+                sendAmount = 4.2;
                 return [4 /*yield*/, transactions.getSendTx(fromAddress, [
                         { amount: sendAmount, toAddress: keyPairOne.address },
                         { amount: sendAmount + 1, toAddress: keyPairTwo.address },
@@ -182,7 +182,7 @@ var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, functi
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -229,7 +229,7 @@ var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, func
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -275,7 +275,7 @@ var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
@@ -650,9 +650,9 @@ var getTxHistoryN = function () { return __awaiter(void 0, void 0, void 0, funct
         switch (_a.label) {
             case 0:
                 zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-                type = transactionTypes.HistoryTxType.SdsPrepay;
+                type = transactionTypes.HistoryTxType.Delegate;
                 txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
-                console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType', txType);
+                console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType !', txType);
                 return [4 /*yield*/, Network.getTxListBlockchain(zeroAddress, '', 1)];
             case 1:
                 result = _a.sent();
@@ -668,15 +668,20 @@ var getTxHistoryN = function () { return __awaiter(void 0, void 0, void 0, funct
     });
 }); };
 var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroAddress, result;
+    var wallet, firstAccount, zeroAddress, result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1)];
+            case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
             case 1:
+                wallet = _a.sent();
+                return [4 /*yield*/, wallet.getAccounts()];
+            case 2:
+                firstAccount = (_a.sent())[0];
+                zeroAddress = firstAccount.address;
+                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1)];
+            case 3:
                 result = _a.sent();
-                console.log('hist result!!', result);
+                console.log('hist result!! !', result);
                 return [2 /*return*/, true];
         }
     });
@@ -791,7 +796,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // mainWithdrawAllRewards();
                 // mainSdsPrepay();
                 // mainFour();
-                mainBalance();
+                // mainBalance();
+                getTxHistory();
                 return [2 /*return*/];
         }
     });

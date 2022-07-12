@@ -43,6 +43,14 @@ export declare enum HistoryTxType {
     RegisterIndexingNodeRegistrationVote = 15,
     PotFoundationDeposit = 16
 }
+export declare enum TxHistoryTypes {
+    SdsAll = "",
+    Transfer = "cosmos-sdk/MsgSend",
+    Delegate = "cosmos-sdk/MsgDelegate",
+    Undelegate = "cosmos-sdk/MsgUndelegate",
+    GetReward = "cosmos-sdk/MsgWithdrawDelegationReward",
+    SdsPrepay = "sds/PrepayTx"
+}
 export declare const TxMsgTypesMap: Map<number, string>;
 export declare const BlockChainTxMsgTypesMap: Map<number, string>;
 export declare const TxHistoryTypesMap: Map<string, number>;
