@@ -678,7 +678,7 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
             case 2:
                 firstAccount = (_a.sent())[0];
                 zeroAddress = firstAccount.address;
-                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1)];
+                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1)];
             case 3:
                 result = _a.sent();
                 console.log('hist result!! !', result);
@@ -784,7 +784,6 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, keyManager_1.getSerializedWalletFromPhrase)(zeroUserMnemonic, password)];
             case 7:
                 serialized = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 629 ~ main ~ serialized', serialized);
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 8:
                 _cosmosClient = _a.sent();
@@ -797,7 +796,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // mainWithdrawAllRewards();
                 // mainSdsPrepay();
                 // mainFour();
-                mainBalance();
+                // mainBalance();
+                getTxHistory();
                 return [2 /*return*/];
         }
     });

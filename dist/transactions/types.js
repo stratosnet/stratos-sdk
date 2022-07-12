@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TxHistoryTypesMap = exports.BlockChainTxMsgTypesMap = exports.TxMsgTypesMap = exports.HistoryTxType = exports.TxMsgTypes = void 0;
+exports.TxHistoryTypesMap = exports.BlockChainTxMsgTypesMap = exports.TxMsgTypesMap = exports.TxHistoryTypes = exports.HistoryTxType = exports.TxMsgTypes = void 0;
 var TxMsgTypes;
 (function (TxMsgTypes) {
     TxMsgTypes["Account"] = "/cosmos.auth.v1beta1.BaseAccount";
@@ -47,6 +47,15 @@ var HistoryTxType;
     HistoryTxType[HistoryTxType["RegisterIndexingNodeRegistrationVote"] = 15] = "RegisterIndexingNodeRegistrationVote";
     HistoryTxType[HistoryTxType["PotFoundationDeposit"] = 16] = "PotFoundationDeposit";
 })(HistoryTxType = exports.HistoryTxType || (exports.HistoryTxType = {}));
+var TxHistoryTypes;
+(function (TxHistoryTypes) {
+    TxHistoryTypes["SdsAll"] = "";
+    TxHistoryTypes["Transfer"] = "cosmos-sdk/MsgSend";
+    TxHistoryTypes["Delegate"] = "cosmos-sdk/MsgDelegate";
+    TxHistoryTypes["Undelegate"] = "cosmos-sdk/MsgUndelegate";
+    TxHistoryTypes["GetReward"] = "cosmos-sdk/MsgWithdrawDelegationReward";
+    TxHistoryTypes["SdsPrepay"] = "sds/PrepayTx";
+})(TxHistoryTypes = exports.TxHistoryTypes || (exports.TxHistoryTypes = {}));
 exports.TxMsgTypesMap = new Map([
     [HistoryTxType.All, TxMsgTypes.SdsAll],
     [HistoryTxType.Account, TxMsgTypes.Account],
@@ -68,28 +77,28 @@ exports.TxMsgTypesMap = new Map([
 ]);
 exports.BlockChainTxMsgTypesMap = new Map([
     [HistoryTxType.All, TxMsgTypes.SdsAll],
-    [HistoryTxType.Transfer, 'send'],
-    [HistoryTxType.Delegate, 'delegate'],
-    [HistoryTxType.Undelegate, 'begin_unbonding'],
-    [HistoryTxType.GetReward, 'withdraw_delegator_reward'],
-    [HistoryTxType.SdsPrepay, 'SdsPrepayTx'],
+    [HistoryTxType.Transfer, TxMsgTypes.Send],
+    [HistoryTxType.Delegate, TxMsgTypes.Delegate],
+    [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
+    [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
+    [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
 ]);
 exports.TxHistoryTypesMap = new Map([
-    [TxMsgTypes.SdsAll, HistoryTxType.All],
-    [TxMsgTypes.Account, HistoryTxType.Account],
-    [TxMsgTypes.Send, HistoryTxType.Transfer],
-    [TxMsgTypes.Delegate, HistoryTxType.Delegate],
-    [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
-    [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
-    [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
-    [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
-    [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
-    [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
-    [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
-    [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
-    [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
-    [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
-    [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
-    [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
+    [TxHistoryTypes.SdsAll, HistoryTxType.All],
+    // [TxMsgTypes.Account, HistoryTxType.Account],
+    [TxHistoryTypes.Transfer, HistoryTxType.Transfer],
+    [TxHistoryTypes.Delegate, HistoryTxType.Delegate],
+    [TxHistoryTypes.Undelegate, HistoryTxType.Undelegate],
+    [TxHistoryTypes.GetReward, HistoryTxType.GetReward],
+    // [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
+    [TxHistoryTypes.SdsPrepay, HistoryTxType.SdsPrepay],
+    // [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
+    // [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
+    // [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
+    // [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
+    // [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
+    // [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
+    // [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
+    // [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
 ]);
 //# sourceMappingURL=types.js.map

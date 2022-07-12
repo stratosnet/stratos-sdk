@@ -49,6 +49,15 @@ export enum HistoryTxType {
   PotFoundationDeposit = 16,
 }
 
+export enum TxHistoryTypes {
+  SdsAll = '',
+  Transfer = 'cosmos-sdk/MsgSend',
+  Delegate = 'cosmos-sdk/MsgDelegate',
+  Undelegate = 'cosmos-sdk/MsgUndelegate',
+  GetReward = 'cosmos-sdk/MsgWithdrawDelegationReward',
+  SdsPrepay = 'sds/PrepayTx',
+}
+
 export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.All, TxMsgTypes.SdsAll],
   [HistoryTxType.Account, TxMsgTypes.Account],
@@ -71,30 +80,30 @@ export const TxMsgTypesMap = new Map<number, string>([
 
 export const BlockChainTxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.All, TxMsgTypes.SdsAll],
-  [HistoryTxType.Transfer, 'send'],
-  [HistoryTxType.Delegate, 'delegate'],
-  [HistoryTxType.Undelegate, 'begin_unbonding'],
-  [HistoryTxType.GetReward, 'withdraw_delegator_reward'],
-  [HistoryTxType.SdsPrepay, 'SdsPrepayTx'],
+  [HistoryTxType.Transfer, TxMsgTypes.Send],
+  [HistoryTxType.Delegate, TxMsgTypes.Delegate],
+  [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
+  [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
+  [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
-  [TxMsgTypes.SdsAll, HistoryTxType.All],
-  [TxMsgTypes.Account, HistoryTxType.Account],
-  [TxMsgTypes.Send, HistoryTxType.Transfer],
-  [TxMsgTypes.Delegate, HistoryTxType.Delegate],
-  [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
-  [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
-  [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
-  [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
-  [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
-  [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
-  [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
-  [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
-  [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
-  [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
-  [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
-  [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
+  [TxHistoryTypes.SdsAll, HistoryTxType.All],
+  // [TxMsgTypes.Account, HistoryTxType.Account],
+  [TxHistoryTypes.Transfer, HistoryTxType.Transfer],
+  [TxHistoryTypes.Delegate, HistoryTxType.Delegate],
+  [TxHistoryTypes.Undelegate, HistoryTxType.Undelegate],
+  [TxHistoryTypes.GetReward, HistoryTxType.GetReward],
+  // [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
+  [TxHistoryTypes.SdsPrepay, HistoryTxType.SdsPrepay],
+  // [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
+  // [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
+  // [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
+  // [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
+  // [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
+  // [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
+  // [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
+  // [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
 ]);
 
 export interface EmptyObject {

@@ -484,7 +484,7 @@ const getTxHistory = async () => {
 
   const result = await accounts.getAccountTrasactions(
     zeroAddress,
-    transactionTypes.HistoryTxType.Delegate,
+    transactionTypes.HistoryTxType.Transfer,
     1,
   );
 
@@ -626,7 +626,6 @@ const main = async () => {
   // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
   // const serialized = masterKeySeedInfo.encryptedWalletInfo;
   const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
-  console.log('🚀 ~ file: run.ts ~ line 629 ~ main ~ serialized', serialized);
 
   // we have to initialize a client prior to use cosmos
   const _cosmosClient = await getCosmos(serialized, password);
@@ -641,8 +640,8 @@ const main = async () => {
   // mainSdsPrepay();
   // mainFour();
 
-  mainBalance();
-  // getTxHistory();
+  // mainBalance();
+  getTxHistory();
 };
 
 main();
