@@ -268,14 +268,14 @@ exports.getMaxAvailableBalance = getMaxAvailableBalance;
 var getAccountTrasactions = function (address, type, page) {
     if (type === void 0) { type = TxTypes.HistoryTxType.All; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var txType, txListResult, response, error, parsedData, data, total, result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var txType, txListResult, response, error, parsedData, _a, data, total, result;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
                     return [4 /*yield*/, (0, network_1.getTxListBlockchain)(address, txType, page)];
                 case 1:
-                    txListResult = _a.sent();
+                    txListResult = _b.sent();
                     response = txListResult.response, error = txListResult.error;
                     if (error) {
                         throw new Error("Could not fetch tx history. Details: \"" + error.message + "\"");
@@ -284,8 +284,8 @@ var getAccountTrasactions = function (address, type, page) {
                         throw new Error('Could not fetch tx history');
                     }
                     parsedData = [];
-                    data = response.txs, total = response.total_count;
-                    // console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+                    _a = response.txs, data = _a === void 0 ? [] : _a, total = response.total_count;
+                    console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
                     data.forEach(function (txItem) {
                         try {
                             var parsed = (0, transactions_1.transformTx)(txItem);

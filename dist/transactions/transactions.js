@@ -114,6 +114,7 @@ var broadcast = function (signedTx) { return __awaiter(void 0, void 0, void 0, f
                 return [4 /*yield*/, client.broadcastTx(txBytes)];
             case 2:
                 result = _a.sent();
+                console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
                 return [2 /*return*/, result];
             case 3:
                 err_1 = _a.sent();

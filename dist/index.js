@@ -19,16 +19,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Transformers = exports.walletService = exports.validatorTypes = exports.networkService = exports.validators = exports.transactionTypes = exports.transactions = exports.Sdk = exports.hdVault = exports.accountTypes = exports.accounts = void 0;
+exports.validatorTypes = exports.validators = exports.transactionTypes = exports.transactions = exports.walletService = exports.Transformers = exports.networkService = exports.cosmosService = exports.Sdk = exports.hdVault = exports.accountTypes = exports.accounts = void 0;
 exports.accounts = __importStar(require("./accounts"));
 exports.accountTypes = __importStar(require("./accounts/types"));
 exports.hdVault = __importStar(require("./hdVault"));
 exports.Sdk = __importStar(require("./Sdk"));
+exports.cosmosService = __importStar(require("./services/cosmos"));
+exports.networkService = __importStar(require("./services/network/network"));
+exports.Transformers = __importStar(require("./services/transformers"));
+exports.walletService = __importStar(require("./services/walletService"));
 exports.transactions = __importStar(require("./transactions"));
 exports.transactionTypes = __importStar(require("./transactions/types"));
 exports.validators = __importStar(require("./validators"));
-exports.networkService = __importStar(require("./services/network/network"));
 exports.validatorTypes = __importStar(require("./validators/types"));
-exports.walletService = __importStar(require("./services/walletService"));
-exports.Transformers = __importStar(require("./services/transformers"));
 //# sourceMappingURL=index.js.map
