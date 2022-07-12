@@ -87,7 +87,7 @@ const mainSend = async () => {
 
   const fromAddress = keyPairZero.address;
 
-  const sendAmount = 2.5;
+  const sendAmount = 4.2;
 
   const sendTxMessages = await transactions.getSendTx(fromAddress, [
     { amount: sendAmount, toAddress: keyPairOne.address },
@@ -111,7 +111,7 @@ const mainSend = async () => {
 
 // cosmosjs delegate
 const mainDelegate = async () => {
-  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+  const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -147,7 +147,7 @@ const mainDelegate = async () => {
 
 // cosmosjs undelegate
 const mainUndelegate = async () => {
-  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+  const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -182,7 +182,7 @@ const mainUndelegate = async () => {
 
 // cosmosjs withdraw rewards
 const mainWithdrawRewards = async () => {
-  const validatorAddress = 'stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u';
+  const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -455,9 +455,9 @@ const getChainId = async () => {
 const getTxHistoryN = async () => {
   const zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
 
-  const type = transactionTypes.HistoryTxType.SdsPrepay;
+  const type = transactionTypes.HistoryTxType.Delegate;
   const txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
-  console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType', txType);
+  console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType !', txType);
 
   const result = await Network.getTxListBlockchain(zeroAddress, '', 1);
 
@@ -476,11 +476,19 @@ const getTxHistoryN = async () => {
 };
 
 const getTxHistory = async () => {
-  const zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+  const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
 
-  const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+  const [firstAccount] = await wallet.getAccounts();
 
-  console.log('hist result!!', result);
+  const zeroAddress = firstAccount.address;
+
+  const result = await accounts.getAccountTrasactions(
+    zeroAddress,
+    transactionTypes.HistoryTxType.Delegate,
+    1,
+  );
+
+  console.log('hist result!! !', result);
 
   return true;
 };
@@ -543,6 +551,7 @@ const cosmosWalletCreateTest = async () => {
   const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
 
   const [firstAccountRestored] = await deserializedWallet.getAccounts();
+
   console.log(
     '🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored',
     firstAccountRestored,
@@ -554,31 +563,6 @@ const cosmosWalletCreateTest = async () => {
 
   // const recipient = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
   const recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-
-  // const amount = {
-  //   denom: 'ustos',
-  //   amount: '10_000_000_000',
-  // };
-
-  // const fee = transactions.getStandardFee();
-
-  // const fee = {
-  //   amount: [
-  //     {
-  //       denom: 'ustos',
-  //       amount: '200000',
-  //     },
-  //   ],
-  //   gas: '180000', // 180k
-  // };
-
-  // const result = await client.sendTokens(
-  //   firstAccount.address,
-  //   recipient,
-  //   [amount],
-  //   fee,
-  //   'Have fun with your star coins',
-  // );
 
   const sendAmount = 2;
 
@@ -642,6 +626,7 @@ const main = async () => {
   // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
   // const serialized = masterKeySeedInfo.encryptedWalletInfo;
   const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
+  console.log('🚀 ~ file: run.ts ~ line 629 ~ main ~ serialized', serialized);
 
   // we have to initialize a client prior to use cosmos
   const _cosmosClient = await getCosmos(serialized, password);
@@ -657,6 +642,7 @@ const main = async () => {
   // mainFour();
 
   mainBalance();
+  // getTxHistory();
 };
 
 main();

@@ -21,6 +21,8 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
   }
 }
 
+export interface CosmosSignedTxRaw extends TxRaw {}
+
 export const getStratosTransactionRegistryTypes = () => {
   const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
@@ -49,6 +51,7 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
       JSON.stringify(txBytes),
     );
     const result = await client.broadcastTx(txBytes);
+    console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
 
     return result;
   } catch (err) {

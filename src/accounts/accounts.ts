@@ -249,6 +249,7 @@ export const getAccountTrasactions = async (
 
   // const txListResult = await getTxList(address, txType, page);
   const txListResult = await getTxListBlockchain(address, txType, page);
+  // console.log('🚀 ~ file: accounts.ts ~ line 252 ~ txListResult', JSON.stringify(txListResult, null, 2));
 
   const { response, error } = txListResult;
 
@@ -262,8 +263,8 @@ export const getAccountTrasactions = async (
 
   const parsedData: FormattedBlockChainTx[] = [];
 
-  const { txs: data, total_count: total } = response;
-  // console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+  const { txs: data = [], total_count: total } = response;
+  console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
 
   data.forEach(txItem => {
     try {
