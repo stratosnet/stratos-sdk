@@ -8,7 +8,9 @@ export interface CosmosInstance {
     getAccounts(address: string): Promise<AccountsData>;
 }
 export declare class StratosCosmos {
-    static cosmosInstance: SigningStargateClient;
+    static cosmosInstance: SigningStargateClient | null;
     static init(serialized: string, password: string): Promise<void>;
+    static reset(): void;
 }
+export declare const resetCosmos: () => void;
 export declare const getCosmos: (serialized?: string, password?: string) => Promise<SigningStargateClient>;

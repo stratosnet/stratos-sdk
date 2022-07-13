@@ -405,6 +405,7 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
         switch (_a.label) {
             case 0:
                 url = getRpcRoute() + "/status";
+                console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();

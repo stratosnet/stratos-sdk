@@ -306,6 +306,9 @@ function createWalletAtPath(hdPathIndex, mnemonic) {
                     return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options)];
                 case 1:
                     wallet = _a.sent();
+                    // const accounts = await wallet.getAccounts();
+                    // console.log('🚀 ~ file: keyUtils.ts ~ line 279 ~ hdPathIndex', hdPathIndex);
+                    // console.log('🚀 ~ file: keyUtils.ts ~ line 288 ~ accounts createWalletAtPath ', accounts);
                     // works - way 2
                     // const pathBuilder = makePathBuilder(keyPathPattern);
                     // const path = pathBuilder(hdPathIndex);

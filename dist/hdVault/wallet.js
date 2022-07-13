@@ -61,24 +61,25 @@ var hdVault_1 = require("../config/hdVault");
 var deriveManager_1 = require("./deriveManager");
 var keyUtils = __importStar(require("./keyUtils"));
 var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
-    var masterKeySeed, er_1, path, privateKeySeed, _a, address, encodedPublicKey, privateKey, res;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+    var masterKeySeed, er_1, path, privateKeySeed, derivedKeyPair, address, encodedPublicKey, privateKey, res;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed)];
             case 1:
-                masterKeySeed = _b.sent();
+                masterKeySeed = _a.sent();
                 return [3 /*break*/, 3];
             case 2:
-                er_1 = _b.sent();
+                er_1 = _a.sent();
                 return [2 /*return*/, Promise.reject(false)];
             case 3:
                 path = "" + hdVault_1.keyPath + keyIndex;
                 privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, path);
                 return [4 /*yield*/, (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed)];
             case 4:
-                _a = _b.sent(), address = _a.address, encodedPublicKey = _a.encodedPublicKey, privateKey = _a.privateKey;
+                derivedKeyPair = _a.sent();
+                address = derivedKeyPair.address, encodedPublicKey = derivedKeyPair.encodedPublicKey, privateKey = derivedKeyPair.privateKey;
                 res = {
                     keyIndex: keyIndex,
                     address: address,

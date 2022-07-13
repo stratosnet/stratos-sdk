@@ -1,3 +1,5 @@
+import { DeliverTxResponse } from '@cosmjs/stargate';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 
 export enum TxMsgTypes {
@@ -118,12 +120,26 @@ export interface ParsedTxData {
   page: number;
 }
 
-export interface BroadcastResult {
-  height: string;
-  txhash: string;
-  raw_log?: string;
-  error?: string;
-}
+export interface BroadcastResult extends DeliverTxResponse {}
+
+// export interface BroadcastResult {
+//   height: string;
+//   txhash: string;
+//   raw_log?: string;
+//   error?: string;
+// }
+
+export interface SignedTransaction extends TxRaw {}
+
+// export interface SignedTransaction {
+//   tx: {
+//     msg: any[];
+//     fee: any;
+//     signatures: any[];
+//     memo: string;
+//   };
+//   mode: 'sync';
+// }
 
 export interface AmountType {
   amount: string;
@@ -171,16 +187,6 @@ export interface BaseTransaction {
 
 export interface Transaction extends BaseTransaction {
   msgs: TransactionMessage[];
-}
-
-export interface SignedTransaction {
-  tx: {
-    msg: any[];
-    fee: any;
-    signatures: any[];
-    memo: string;
-  };
-  mode: 'sync';
 }
 
 export interface SendTxMessage {

@@ -18,10 +18,11 @@ export interface MasterKeyInfo extends LegacyMasterKeyInfo {
 export const createMasterKeySeed = async (
   phrase: MnemonicPhrase,
   password: string,
+  hdPathIndex = 0,
 ): Promise<MasterKeyInfo> => {
   const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
 
-  const wallet = await keyUtils.createWalletAtPath(0, convertArrayToString(phrase));
+  const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
   const encryptedWalletInfo = await wallet.serialize(password);
 
   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
@@ -61,9 +62,13 @@ export const unlockMasterKeySeed = async (
 };
 
 // helper to provide an encripted, serialized wallet from a given mnemonic
-export const getSerializedWalletFromPhrase = async (userMnemonic: string, password: string) => {
+export const getSerializedWalletFromPhrase = async (
+  userMnemonic: string,
+  password: string,
+  hdPathIndex = 0,
+) => {
   const phrase = convertStringToArray(userMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
   return serialized;

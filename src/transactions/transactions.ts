@@ -21,8 +21,6 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
   }
 }
 
-export interface CosmosSignedTxRaw extends TxRaw {}
-
 export const getStratosTransactionRegistryTypes = () => {
   const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
