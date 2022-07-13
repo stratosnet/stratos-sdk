@@ -2,8 +2,6 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import * as Types from './types';
 import { GeneratedType } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-export interface CosmosSignedTxRaw extends TxRaw {
-}
 export declare const getStratosTransactionRegistryTypes: () => readonly [string, GeneratedType][];
 export declare const broadcast: (signedTx: TxRaw) => Promise<DeliverTxResponse>;
 export declare const sign: (address: string, txMessages: Types.TxMessage[], memo?: string, givenFee?: Types.TransactionFee | undefined) => Promise<TxRaw>;

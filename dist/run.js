@@ -81,8 +81,6 @@ var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
 var transactionTypes = __importStar(require("./transactions/types"));
 var validators = __importStar(require("./validators"));
-var stargate_1 = require("@cosmjs/stargate");
-// import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 dotenv_1.default.config();
 var password = 'XXXX';
 var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
@@ -674,6 +672,7 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
             case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
             case 1:
                 wallet = _a.sent();
+                console.log('running getTxHistory');
                 return [4 /*yield*/, wallet.getAccounts()];
             case 2:
                 firstAccount = (_a.sent())[0];
@@ -687,51 +686,31 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, firstAccountRestored, rpcEndpoint, client, recipient, sendAmount, sendTxMessages, signedTx, result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, _a, _b, _c, _d, _e;
+    return __generator(this, function (_f) {
+        switch (_f.label) {
             case 0:
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
-                masterKeySeedInfo = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created', masterKeySeedInfo);
+                masterKeySeedInfo = _f.sent();
                 return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
             case 2:
-                wallet = _a.sent();
+                wallet = _f.sent();
                 serialized = masterKeySeedInfo.encryptedWalletInfo;
                 return [4 /*yield*/, wallet.getAccounts()];
             case 3:
-                firstAccount = (_a.sent())[0];
+                firstAccount = (_f.sent())[0];
                 console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
                 return [4 /*yield*/, (0, wallet_1.deserializeEncryptedWallet)(serialized, password)];
             case 4:
-                deserializedWallet = _a.sent();
+                deserializedWallet = _f.sent();
+                _b = (_a = console).log;
+                _c = ['🚀 ~ file: run.ts ~ line 554 ~ cosmosWalletCreateTest ~ deserializedWallet'];
+                _e = (_d = JSON).stringify;
                 return [4 /*yield*/, deserializedWallet.getAccounts()];
             case 5:
-                firstAccountRestored = (_a.sent())[0];
-                console.log('🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored', firstAccountRestored);
-                rpcEndpoint = Sdk_1.default.environment.rpcUrl;
-                return [4 /*yield*/, stargate_1.SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet)];
-            case 6:
-                client = _a.sent();
-                recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-                sendAmount = 2;
-                return [4 /*yield*/, transactions.getSendTx(firstAccount.address, [
-                        { amount: sendAmount, toAddress: recipient },
-                        { amount: sendAmount + 1, toAddress: recipient },
-                    ])];
-            case 7:
-                sendTxMessages = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 592 ~ cosmosWalletCreateTest ~ sendTxMessages', JSON.stringify(sendTxMessages, null, 2));
-                return [4 /*yield*/, transactions.sign(firstAccount.address, sendTxMessages)];
-            case 8:
-                signedTx = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 595 ~ cosmosWalletCreateTest ~ signedTx', signedTx);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 9:
-                result = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 598 ~ cosmosWalletCreateTest ~ result!', result);
+                _b.apply(_a, _c.concat([_e.apply(_d, [_f.sent(), null, 2])]));
                 return [2 /*return*/];
         }
     });
@@ -787,17 +766,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 8:
                 _cosmosClient = _a.sent();
-                // cosmosWalletCreateTest();
-                // testAccountData();
-                // mainSend();
-                // mainDelegate();
-                // mainUndelegate();
-                // mainWithdrawRewards();
-                // mainWithdrawAllRewards();
-                // mainSdsPrepay();
-                // mainFour();
-                // mainBalance();
-                getTxHistory();
+                cosmosWalletCreateTest();
                 return [2 /*return*/];
         }
     });

@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCosmos = exports.StratosCosmos = void 0;
+exports.getCosmos = exports.resetCosmos = exports.StratosCosmos = void 0;
 var proto_signing_1 = require("@cosmjs/proto-signing");
 var stargate_1 = require("@cosmjs/stargate");
 var wallet_1 = require("../hdVault/wallet");
@@ -70,9 +70,16 @@ var StratosCosmos = /** @class */ (function () {
             });
         });
     };
+    StratosCosmos.reset = function () {
+        StratosCosmos.cosmosInstance = null;
+    };
     return StratosCosmos;
 }());
 exports.StratosCosmos = StratosCosmos;
+var resetCosmos = function () {
+    StratosCosmos.reset();
+};
+exports.resetCosmos = resetCosmos;
 var getCosmos = function (serialized, password) {
     if (serialized === void 0) { serialized = ''; }
     if (password === void 0) { password = ''; }
