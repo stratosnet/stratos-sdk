@@ -31,10 +31,31 @@ export const deriveKeyPair = async (
   }
 
   const path = `${keyPath}${keyIndex}`;
+  // console.log('🚀 ~ file: wallet.ts ~ line 34 ~ path', path);
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
+  // console.log('🚀 ~ file: wallet.ts ~ line 37 ~ privateKeySeed', privateKeySeed);
 
-  const { address, encodedPublicKey, privateKey } = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+  // const pathZero = `${keyPath}0`;
+  // console.log('🚀 ~ file: wallet.ts ~ line 40 ~ pathZero', pathZero);
+
+  // const privateKeySeedZero = derivePrivateKeySeed(masterKeySeed, pathZero);
+  // console.log('🚀 ~ file: wallet.ts ~ line 43 ~ privateKeySeedZero', privateKeySeedZero);
+
+  // const pathOne = `${keyPath}1`;
+  // console.log('🚀 ~ file: wallet.ts ~ line 46 ~ pathOne', pathOne);
+
+  // const privateKeySeedOne = derivePrivateKeySeed(masterKeySeed, pathOne);
+  // console.log('🚀 ~ file: wallet.ts ~ line 49 ~ privateKeySeedOne', privateKeySeedOne);
+
+  const derivedKeyPair = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
+  // console.log('🚀 ~ file: wallet.ts ~ line 52 ~ derivedKeyPair', derivedKeyPair);
+  // const derivedKeyPairZero = await deriveKeyPairFromPrivateKeySeed(privateKeySeedZero);
+  // console.log('🚀 ~ file: wallet.ts ~ line 54 ~ derivedKeyPairZero', derivedKeyPairZero);
+  // const derivedKeyPairOne = await deriveKeyPairFromPrivateKeySeed(privateKeySeedOne);
+  // console.log('🚀 ~ file: wallet.ts ~ line 56 ~ derivedKeyPairOne', derivedKeyPairOne);
+
+  const { address, encodedPublicKey, privateKey } = derivedKeyPair;
 
   const res = {
     keyIndex,

@@ -284,6 +284,9 @@ export async function createWalletAtPath(
 
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
 
+  // const accounts = await wallet.getAccounts();
+  // console.log('🚀 ~ file: keyUtils.ts ~ line 279 ~ hdPathIndex', hdPathIndex);
+  // console.log('🚀 ~ file: keyUtils.ts ~ line 288 ~ accounts createWalletAtPath ', accounts);
   // works - way 2
   // const pathBuilder = makePathBuilder(keyPathPattern);
   // const path = pathBuilder(hdPathIndex);

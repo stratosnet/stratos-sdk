@@ -1,11 +1,7 @@
 import dotenv from 'dotenv';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
-import {
-  createMasterKeySeed,
-  // createMasterKeySeedFromGivenSeed,
-  getSerializedWalletFromPhrase,
-} from './hdVault/keyManager';
+import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
@@ -16,7 +12,6 @@ import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
 import { SigningStargateClient } from '@cosmjs/stargate';
-// import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 dotenv.config();
 
@@ -478,6 +473,7 @@ const getTxHistoryN = async () => {
 const getTxHistory = async () => {
   const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
 
+  console.log('running getTxHistory');
   const [firstAccount] = await wallet.getAccounts();
 
   const zeroAddress = firstAccount.address;
@@ -500,16 +496,17 @@ const cosmosWalletCreateTest = async () => {
   // Old way
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-  console.log(
-    '🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created',
-    masterKeySeedInfo,
-  );
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created',
+  //   masterKeySeedInfo,
+  // );
 
   // const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
   // console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
 
   // 1
   const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+  // const walletOne = await keyUtils.createWalletAtPath(1, zeroUserMnemonic);
 
   // 2
   // const wallets = await keyUtils.generateWallets(3, zeroUserMnemonic);
@@ -545,43 +542,56 @@ const cosmosWalletCreateTest = async () => {
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
   // console.log('🚀 ~ file: run.ts ~ line 652 ~ cosmosWalletCreateTest ~ serialized', serialized);
 
+  // const serializedOne = await walletOne.serialize(password);
+  // console.log('🚀 ~ file: run.ts ~ line 546 ~ cosmosWalletCreateTest ~ serializedOne', serializedOne);
+
   const [firstAccount] = await wallet.getAccounts();
   console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
+  // const [firstAccountOne] = await walletOne.getAccounts();
+  // console.log('🚀 ~ file: run.ts ~ line 548 ~ cosmosWalletCreateTest ~ firstAccountOne', firstAccountOne);
 
   const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
-
-  const [firstAccountRestored] = await deserializedWallet.getAccounts();
-
   console.log(
-    '🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored',
-    firstAccountRestored,
+    '🚀 ~ file: run.ts ~ line 554 ~ cosmosWalletCreateTest ~ deserializedWallet',
+    JSON.stringify(await deserializedWallet.getAccounts(), null, 2),
   );
+  // const deserializedWalletOne = await deserializeEncryptedWallet(serializedOne, password);
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 556 ~ cosmosWalletCreateTest ~ deserializedWalletOne',
+  //   JSON.stringify(await deserializedWalletOne.getAccounts(), null, 2),
+  // );
 
-  const rpcEndpoint = Sdk.environment.rpcUrl;
+  // const [firstAccountRestored] = await deserializedWallet.getAccounts();
 
-  const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet);
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 656 ~ cosmosWalletCreateTest ~ firstAccountRestored',
+  //   firstAccountRestored,
+  // );
 
-  // const recipient = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
-  const recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
+  // const rpcEndpoint = Sdk.environment.rpcUrl;
 
-  const sendAmount = 2;
+  // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet);
 
-  const sendTxMessages = await transactions.getSendTx(firstAccount.address, [
-    { amount: sendAmount, toAddress: recipient },
-    { amount: sendAmount + 1, toAddress: recipient },
-  ]);
+  // const recipient = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
 
-  console.log(
-    '🚀 ~ file: run.ts ~ line 592 ~ cosmosWalletCreateTest ~ sendTxMessages',
-    JSON.stringify(sendTxMessages, null, 2),
-  );
+  // const sendAmount = 2;
 
-  const signedTx = await transactions.sign(firstAccount.address, sendTxMessages);
-  console.log('🚀 ~ file: run.ts ~ line 595 ~ cosmosWalletCreateTest ~ signedTx', signedTx);
+  // const sendTxMessages = await transactions.getSendTx(firstAccount.address, [
+  //   { amount: sendAmount, toAddress: recipient },
+  //   { amount: sendAmount + 1, toAddress: recipient },
+  // ]);
 
-  const result = await transactions.broadcast(signedTx);
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 592 ~ cosmosWalletCreateTest ~ sendTxMessages',
+  //   JSON.stringify(sendTxMessages, null, 2),
+  // );
 
-  console.log('🚀 ~ file: run.ts ~ line 598 ~ cosmosWalletCreateTest ~ result!', result);
+  // const signedTx = await transactions.sign(firstAccount.address, sendTxMessages);
+  // console.log('🚀 ~ file: run.ts ~ line 595 ~ cosmosWalletCreateTest ~ signedTx', signedTx);
+
+  // const result = await transactions.broadcast(signedTx);
+
+  // console.log('🚀 ~ file: run.ts ~ line 598 ~ cosmosWalletCreateTest ~ result!', result);
 };
 
 const testAccountData = async () => {
@@ -630,7 +640,7 @@ const main = async () => {
   // we have to initialize a client prior to use cosmos
   const _cosmosClient = await getCosmos(serialized, password);
 
-  // cosmosWalletCreateTest();
+  cosmosWalletCreateTest();
   // testAccountData();
   // mainSend();
   // mainDelegate();
@@ -641,7 +651,7 @@ const main = async () => {
   // mainFour();
 
   // mainBalance();
-  getTxHistory();
+  // getTxHistory();
 };
 
 main();

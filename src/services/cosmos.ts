@@ -19,7 +19,7 @@ export interface CosmosInstance {
 }
 
 export class StratosCosmos {
-  public static cosmosInstance: SigningStargateClient;
+  public static cosmosInstance: SigningStargateClient | null;
 
   public static async init(serialized: string, password: string): Promise<void> {
     if (!serialized) {
@@ -34,14 +34,22 @@ export class StratosCosmos {
 
     StratosCosmos.cosmosInstance = client;
   }
+
+  public static reset() {
+    StratosCosmos.cosmosInstance = null;
+  }
 }
+
+export const resetCosmos = () => {
+  StratosCosmos.reset();
+};
 
 export const getCosmos = async (serialized = '', password = ''): Promise<SigningStargateClient> => {
   if (!StratosCosmos.cosmosInstance) {
     await StratosCosmos.init(serialized, password);
   }
 
-  return StratosCosmos.cosmosInstance;
+  return StratosCosmos.cosmosInstance!;
 };
 
 const getCosmosClient = async (rpcEndpoint: string, deserializedWallet: DirectSecp256k1HdWallet) => {
