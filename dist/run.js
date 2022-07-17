@@ -766,7 +766,16 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 8:
                 _cosmosClient = _a.sent();
-                cosmosWalletCreateTest();
+                // cosmosWalletCreateTest();
+                // testAccountData();
+                // mainSend();
+                // mainDelegate();
+                // mainUndelegate();
+                // mainWithdrawRewards();
+                // mainWithdrawAllRewards();
+                // mainSdsPrepay();
+                // mainFour();
+                mainBalance();
                 return [2 /*return*/];
         }
     });
