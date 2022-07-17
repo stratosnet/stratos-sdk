@@ -640,7 +640,7 @@ const main = async () => {
   // we have to initialize a client prior to use cosmos
   const _cosmosClient = await getCosmos(serialized, password);
 
-  cosmosWalletCreateTest();
+  // cosmosWalletCreateTest();
   // testAccountData();
   // mainSend();
   // mainDelegate();
@@ -650,7 +650,7 @@ const main = async () => {
   // mainSdsPrepay();
   // mainFour();
 
-  // mainBalance();
+  mainBalance();
   // getTxHistory();
 };
 

@@ -39,15 +39,29 @@ export const getStratosTransactionRegistryTypes = () => {
   return stratosTxRegistryTypes;
 };
 
+declare global {
+  interface Window {
+    encoder: any;
+  }
+  /* eslint-disable-next-line @typescript-eslint/no-namespace */
+  namespace NodeJS {
+    interface Global {
+      encoder: any;
+    }
+  }
+}
+
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
     const client = await getCosmos();
 
     const txBytes = TxRaw.encode(signedTx).finish();
+
     console.log(
       '🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted',
       JSON.stringify(txBytes),
     );
+
     const result = await client.broadcastTx(txBytes);
     console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
 

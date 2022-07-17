@@ -3,6 +3,16 @@ import * as Types from './types';
 import { GeneratedType } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 export declare const getStratosTransactionRegistryTypes: () => readonly [string, GeneratedType][];
+declare global {
+    interface Window {
+        encoder: any;
+    }
+    namespace NodeJS {
+        interface Global {
+            encoder: any;
+        }
+    }
+}
 export declare const broadcast: (signedTx: TxRaw) => Promise<DeliverTxResponse>;
 export declare const sign: (address: string, txMessages: Types.TxMessage[], memo?: string, givenFee?: Types.TransactionFee | undefined) => Promise<TxRaw>;
 export declare const getStandardFee: (numberOfMessages?: number) => Types.TransactionFee;
