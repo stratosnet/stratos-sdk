@@ -337,3 +337,49 @@ export interface RpcStatusDataResult extends NetworkAxiosDataResult {
 export interface RestTxListDataResult extends NetworkAxiosDataResult {
     response?: RestTxListResponse;
 }
+export interface MainRpcResponse {
+    id: string;
+    jsonrpc: string;
+    error?: {
+        code: number;
+        message: string;
+        data?: any;
+    };
+}
+export interface EthProtocolRpcResponse extends MainRpcResponse {
+    result: string;
+}
+export interface EthProtocolRpcResult extends NetworkAxiosDataResult {
+    response?: EthProtocolRpcResponse;
+}
+export interface FileUserRequestUploadParams {
+    filename: string;
+    filesize: number;
+    filehash: string;
+    walletaddr: string;
+    walletpubkey: string;
+}
+export interface FileUserRequestUploadResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        offsetstart?: string;
+        offsetend?: string;
+    };
+}
+export interface FileUserRequestUploadResult extends NetworkAxiosDataResult {
+    response?: FileUserRequestUploadResponse;
+}
+export interface FileUserUploadDataParams {
+    filehash: string;
+    data: string;
+}
+export interface FileUserUploadDataResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        offsetstart?: string;
+        offsetend?: string;
+    };
+}
+export interface FileUserUploadDataResult extends NetworkAxiosDataResult {
+    response?: FileUserUploadDataResponse;
+}

@@ -70,6 +70,8 @@ export const deriveKeyPair = async (
 export const deserializeEncryptedWallet = async (serializedWallet: string, password: string) => {
   let deserializedWallet;
 
+  console.log('serialized wallet - ', serializedWallet);
+  console.log('pp wallet - ', password);
   try {
     deserializedWallet = await DirectSecp256k1HdWallet.deserialize(serializedWallet, password);
   } catch (error) {

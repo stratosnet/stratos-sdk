@@ -1,4 +1,11 @@
+import { SigningStargateClient } from '@cosmjs/stargate';
 import dotenv from 'dotenv';
+import fs from 'fs';
+// import keccak256 from 'keccak256';
+// import md5File from 'md5-file';
+import multihashing from 'multihashing-async';
+import path from 'path';
+// import { Keccak } from 'sha3';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
@@ -6,12 +13,18 @@ import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
 import { getCosmos } from './services/cosmos';
+import * as FilesystemService from './services/filesystem';
 import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
-import { SigningStargateClient } from '@cosmjs/stargate';
+// import md5 from 'blueimp-md5';
+
+import crypto from 'crypto';
+// import multihash from 'multihashes';
+
+import CID from 'cids';
 
 dotenv.config();
 
@@ -611,6 +624,274 @@ const testAccountData = async () => {
   // console.log('🚀 ~ file: run.ts ~ line 598 ~ testAccountData ~ accountsData2', accountsData2);
 };
 
+// async function processFile(path: string, handler: any) {
+//   const stream = fs.createReadStream(path);
+//   for await (const chunk of stream) {
+//     await handler(chunk);
+//   }
+// }
+
+async function processChunk(chunk: any) {
+  console.log('process chunk...');
+
+  await delay(2000);
+
+  console.log('process chunk... done');
+
+  const base64data = chunk.toString('base64');
+
+  return base64data;
+}
+
+async function wait(fn: any, ms: number) {
+  while (!fn()) {
+    await delay(ms);
+  }
+}
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function processFileByChunk(filePath: string, chunkSize = 10000) {
+  let foo: Buffer[] = [];
+  try {
+    const fileStream = fs.createReadStream(filePath);
+    const stats = fs.statSync(filePath);
+
+    foo = await new Promise((resolve, reject) => {
+      let bytesRead = 0;
+      const result: Buffer[] = [];
+
+      fileStream.on('readable', async function () {
+        /* eslint-disable-next-line no-constant-condition */
+        while (true) {
+          // await wait(() => countCurrentUploads <= 0, 10000);
+
+          const chunk = fileStream.read(chunkSize);
+
+          if (!chunk || !chunk.length) {
+            break;
+          }
+
+          bytesRead += chunk.length;
+
+          result.push(chunk);
+        }
+
+        if (bytesRead >= stats.size) {
+          resolve(result);
+        }
+      });
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return foo;
+}
+
+const testFile = async () => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const fileReadPath = path.resolve(SRC_ROOT, 'my_image.png');
+  const fileWritePath = path.resolve(SRC_ROOT, 'my_image_new.png');
+  console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
+
+  let buff = fs.readFileSync(fileReadPath);
+  let base64dataOriginal = buff.toString('base64');
+
+  const chunksOfBuffers = await processFileByChunk(fileReadPath);
+  const fullBuf = Buffer.concat(chunksOfBuffers);
+  const base64dataFullBuf = fullBuf.toString('base64');
+
+  const chunksOfBase64Promises = chunksOfBuffers.map(async chunk => {
+    const pp = await processChunk(chunk);
+    return pp;
+  });
+
+  const chunksOfBase64 = await Promise.all(chunksOfBase64Promises);
+
+  const restoredChunksOfBuffers = chunksOfBase64.map(base64dataChunk =>
+    Buffer.from(base64dataChunk, 'base64'),
+  );
+
+  const buffWriteT = Buffer.concat(restoredChunksOfBuffers);
+  const base64data = buffWriteT.toString('base64');
+
+  console.log('🚀 ~ file: run.ts ~ line 720 ~ testFile ~ base64dataOriginal', base64dataOriginal.length);
+  console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64data', base64data.length);
+  console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64dataFullBuf', base64dataFullBuf.length);
+
+  // const buffWrite = Buffer.from(base64dataOriginal, 'base64'); // ok 1
+  // const buffWrite = fullBuf; // ok 2
+  const buffWrite = Buffer.from(base64dataFullBuf, 'base64'); // ok 3
+  // const buffWrite = buffWriteT; // ok 4
+  // const buffWrite = Buffer.from(base64data, 'base64'); // ok 5
+
+  fs.writeFileSync(fileWritePath, buffWrite);
+};
+
+const calcFileHash = async (fileBuffer: Buffer) => {
+  const md5Digest = crypto.createHash('md5').update(fileBuffer).digest();
+  console.log(
+    '🚀 ~ file: run.ts ~ line 823 ~ calcFileHash2 ~ md5Digest in string',
+    md5Digest.toString('hex'),
+  );
+
+  console.log('🚀 ~ file: run.ts ~ line 807 ~ calcFileHash2 ~ md5Digest (buffer in hex)', md5Digest);
+
+  const data = new Uint8Array(md5Digest);
+  console.log('🚀 ~ file: run.ts ~ line 831 ~ calcFileHash2 ~ data (in dec, matching w go, 16 bites)', data);
+
+  const ecodedHash = await multihashing(md5Digest, 'keccak-256');
+
+  console.log('🚀 ~ file: run.ts ~ line 811 ~ calcFileHash2 ~ ecodedHash (flieHash in go)', ecodedHash);
+
+  const cid = new CID(1, 'raw', ecodedHash, 'base32hex');
+
+  console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
+
+  const realFileHash = cid.toString();
+
+  // old
+  // const ecodedHash2 = await multihash.encode(md5Digest, 'keccak-256');
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 845 ~ calcFileHash2 ~ ecodedHash2 (thats where it is fucked. it looks like data, but prepended with 27 and 16)',
+  //   ecodedHash2,
+  // );
+
+  // const cid2 = new CID(1, 'raw', ecodedHash2, 'base32hex');
+
+  // const realFileHash2 = cid2.toString();
+  // console.log('🚀 ~ file: run.ts ~ line 853 ~ calcFileHash2 ~ fucked realFileHash2', realFileHash2);
+  //
+
+  return realFileHash;
+};
+
+const calcFileHash3 = async (fileHash: string) => {
+  const a = Buffer.from(fileHash);
+  console.log('🚀 ~ file: run.ts ~ line 808 ~ calcFileHash3 ~ a', a);
+  const ecodedHash = await multihashing(a, 'keccak-256', 20);
+  console.log('🚀 ~ file: run.ts ~ line 809 ~ calcFileHash3 ~ ecodedHash', ecodedHash);
+
+  const cid = new CID(1, 'raw', ecodedHash, 'base32hex');
+
+  console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
+
+  const realFileHash = cid.toString();
+
+  return realFileHash;
+};
+
+// working file hash
+const calcFileHash2 = async (fileBuffer: Buffer) => {
+  const md5Digest = crypto.createHash('md5').update(fileBuffer).digest();
+
+  console.log(
+    '🚀 ~ file: run.ts ~ line 823 ~ calcFileHash2 ~ md5Digest in string',
+    md5Digest.toString('hex'),
+  );
+
+  console.log('🚀 ~ file: run.ts ~ line 807 ~ calcFileHash2 ~ md5Digest (buffer in hex)', md5Digest);
+
+  // const data = new Uint8Array(md5Digest);
+  // console.log('🚀 ~ file: run.ts ~ line 831 ~ calcFileHash2 ~ data (in dec, matching w go, 16 bites)', data);
+
+  const ecodedHash = await multihashing(md5Digest, 'keccak-256', 20);
+
+  console.log('🚀 ~ file: run.ts ~ line 811 ~ calcFileHash2 ~ ecodedHash (flieHash in go)', ecodedHash);
+
+  const cid = new CID(1, 'raw', ecodedHash, 'base32hex');
+
+  console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
+
+  const realFileHash = cid.toString();
+
+  return realFileHash;
+};
+
+const testB = async () => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const expectedHash = 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg';
+  const fileReadPath = path.resolve(SRC_ROOT, 'my_test_read.t');
+
+  const fileBuffer = fs.readFileSync(fileReadPath);
+
+  const realFileHash2 = await calcFileHash2(fileBuffer);
+
+  console.log('🚀 ~  ~ realFileHash2', realFileHash2);
+  console.log('🚀 ~   ~ expectedHash', expectedHash);
+};
+
+const testIt = async () => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  // const expectedHash = 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg';
+  // const fileReadPath = path.resolve(SRC_ROOT, 'my_test_read.t');
+  const fileReadPath = path.resolve(SRC_ROOT, 'my_image.png');
+
+  const realHash = await FilesystemService.calculateFileHash(fileReadPath);
+
+  // console.log('expected:', expectedHash);
+  // console.log('real:', realHash);
+
+  //  const fileWritePath = path.resolve(SRC_ROOT, 'my_image_new2.png');
+
+  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath);
+
+  //console.log('encoded file chunks', encodedFileChunks);
+  //  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+  //const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+  // const encodedFile = await FilesystemService.encodeFile(decodedFile);
+  //   FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+
+  const extraParams = {
+    filename: 't9.t',
+    filesize: 68,
+    filehash: 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg',
+    walletaddr: 'st1macvxhdy33kphmwv7kvvk28hpg0xn7nums5klu',
+    walletpubkey: 'stpub1',
+  };
+
+  const callResult = await Network.sendUserRequestUpload(extraParams);
+
+  const { response } = callResult;
+
+  if (!response) {
+    return;
+  }
+
+  const {
+    result: { offsetend, offsetstart, return: isContinue },
+  } = response;
+
+  const chunkSize = offsetstart!;
+
+  const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath);
+
+  const pCalls = encodedFileChunks.map(async currentChunk => {
+    const extraParamsUpload = {
+      filehash: 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg',
+      data: currentChunk,
+    };
+
+    const callTwoResult = await Network.sendUserUploadData(extraParamsUpload);
+
+    console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', callTwoResult);
+  });
+
+  const res = await Promise.all(pCalls);
+  console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
+};
+
 const main = async () => {
   let resolvedChainID;
 
@@ -650,7 +931,10 @@ const main = async () => {
   // mainSdsPrepay();
   // mainFour();
 
-  mainBalance();
+  // mainBalance();
+  // testFile();
+  // testB();
+  testIt();
   // getTxHistory();
 };
 

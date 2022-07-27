@@ -24,6 +24,7 @@ export const createMasterKeySeed = async (
 
   const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
   const encryptedWalletInfo = await wallet.serialize(password);
+  console.log('🚀 ~ file: keyManager.ts ~ line 27 ~ encryptedWalletInfo', encryptedWalletInfo);
 
   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
 
