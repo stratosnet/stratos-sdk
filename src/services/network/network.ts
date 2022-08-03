@@ -110,7 +110,7 @@ export const sendRpcCall = async <N>(
     method: 'eth_protocolVersion',
     params: [],
   };
-
+  console.log('h', config);
   const url = `${getRpcRoute()}/status`;
 
   const payload = { ...defaultPayload, ...givenPayload };

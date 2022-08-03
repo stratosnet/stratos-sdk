@@ -1,26 +1,35 @@
-import { HdPath, Slip10RawIndex, stringToPath } from '@cosmjs/crypto';
-
-import {
-  DirectSecp256k1HdWallet,
-  DirectSecp256k1HdWalletOptions,
-  OfflineSigner,
-} from '@cosmjs/proto-signing';
-
 import {
   Bip39,
   EnglishMnemonic,
+  HdPath,
   Hmac,
   ripemd160,
   Secp256k1,
   sha256,
   Sha512,
   Slip10Curve,
+  Slip10RawIndex,
+  stringToPath,
 } from '@cosmjs/crypto';
 import { fromBase64, fromHex, toAscii, toBase64, toBech32 } from '@cosmjs/encoding';
+import {
+  DirectSecp256k1HdWallet,
+  DirectSecp256k1HdWalletOptions,
+  OfflineSigner,
+} from '@cosmjs/proto-signing';
 import BN from 'bn.js';
+import CryptoJS from 'crypto-js';
 import sjcl from 'sjcl';
-
-import { bip39Password, keyPathPattern, stratosAddressPrefix, stratosPubkeyPrefix } from '../config/hdVault';
+import {
+  bip39Password,
+  encryptionIterations,
+  encryptionKeyLength,
+  kdfConfiguration,
+  keyPathPattern,
+  stratosAddressPrefix,
+  stratosPubkeyPrefix,
+} from '../config/hdVault';
+import { log } from '../services/helpers';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
 
 export interface KeyPair {
@@ -122,6 +131,24 @@ export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubK
   };
 
   return pubkeyMine;
+};
+
+// used in wallet serialization and desirialization
+// meant to replace cosmos.js encryption key generation, which uses executeKdf
+// and that is using libsodium, (wasm) which is extremelly slow on mobile devices
+export const getEncryptionKey = async (password: string) => {
+  const base64SaltBits = 'my salt';
+
+  const cryptoJsKey = CryptoJS.PBKDF2(password, base64SaltBits, {
+    keySize: encryptionKeyLength / 4,
+    iterations: encryptionIterations,
+    hasher: CryptoJS.algo.SHA256,
+  });
+  const cryptoJsKeyEncoded = cryptoJsKey.toString(CryptoJS.enc.Base64);
+
+  const keyBuffer = Buffer.from(cryptoJsKeyEncoded, 'base64');
+  const encryptionKey = new Uint8Array(keyBuffer);
+  return encryptionKey;
 };
 
 const encodeStratosPubkey = (pubkey: PubKey) => {
@@ -267,6 +294,85 @@ export function makePathBuilder(pattern: string): PathBuilder {
 
   return builder;
 }
+
+// @todo clena up this function and extract different encryption methods into helper functions
+export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password: string) => {
+  log('Beginning serializing..');
+
+  // const encryptedWalletInfo = await wallet.serialize(password);
+  // log('1. Serialization is done. ', encryptedWalletInfo);
+
+  // log('2. Executing kdf (preparing encription key (Uint8)');
+  // const encryptionKeyN = await executeKdf(password, kdfConfiguration);
+  // log('2. Encription using "executeKdf" is done. Uint8 key is ready', encryptionKeyN);
+
+  // log('2. Now serializing with prepared by executeKdf  Uint8 encription key');
+  // const encryptedWalletInfoTwo = await wallet.serializeWithEncryptionKey(encryptionKeyN, kdfConfiguration);
+  // log('2. Serialization with prepared by executeKdf Uint8 is done. ', encryptedWalletInfoTwo);
+
+  // const argonHash = await argon2.hash(password, { raw: true });
+  // log('4. 🚀 ~ file: keyUtils.ts ~ line 293 ~ serializeWal ~ argonHash', argonHash);
+  // const argonData = new Uint8Array(argonHash);
+  // log('4. 🚀 ~ file: keyUtils.ts ~ line 322 ~ serializeWal ~ argonData', argonData);
+
+  // log('4. Now serializing with prepared argon Uint8 encription key');
+  // const encryptedWalletInfoThree = await wallet.serializeWithEncryptionKey(argonData, kdfConfiguration);
+  // log('4. Serialization with prepared argon Uint8 is done. ', encryptedWalletInfoThree);
+
+  // const cryptoJsKey = CryptoJS.PBKDF2(password, salt, {
+  //   keySize: keylen / 4,
+  //   iterations: iterations,
+  //   hasher: CryptoJS.algo.SHA256,
+  // });
+  // const cryptoJsKeyEncoded = cryptoJsKey.toString(CryptoJS.enc.Base64);
+
+  // log('5. Utils.ts ~ line 303 ~ cryptoJsKey', cryptoJsKey);
+  // log('5. Utils.ts ~ line 303 ~ cryptoJsKeyEncoded key', cryptoJsKeyEncoded);
+
+  // const buffWrite = Buffer.from(cryptoJsKeyEncoded, 'base64'); // ok 3
+  // console.log('🚀 5. ~ file: keyUtils.ts ~ line 317 ~ serializeWal ~ buffWrite', buffWrite);
+  // const data = new Uint8Array(buffWrite);
+  const encryptionKey = await getEncryptionKey(password);
+  console.log('🚀  generated encryption key', encryptionKey);
+  const encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
+  log('Serialization with prepared cryptoJs data Uint8 is done. ');
+
+  // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+  //   encryptedWalletInfoTwo,
+  //   encryptionKeyN,
+  // );
+  // log(
+  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
+  //   deserializedWalletTwo,
+  // );
+  // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
+  // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
+
+  // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+  //   encryptedWalletInfoThree,
+  //   argonData,
+  // );
+  // log(
+  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
+  //   deserializedWalletThree,
+  // );
+  // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
+  // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
+
+  const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+    encryptedWalletInfoFour,
+    encryptionKey,
+  );
+  // log(
+  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
+  //   deserializedWalletFour,
+  // );
+  // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
+  // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
+
+  // return encryptedWalletInfo;
+  return encryptedWalletInfoFour;
+};
 
 export async function createWalletAtPath(
   hdPathIndex: number,

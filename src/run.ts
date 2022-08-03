@@ -509,6 +509,15 @@ const cosmosWalletCreateTest = async () => {
   // Old way
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
+
+  const { encryptedMasterKeySeed } = masterKeySeedInfo;
+  const encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
+  const derivedMasterKeySeed = await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString);
+  console.log(
+    '🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed',
+    derivedMasterKeySeed,
+  );
   // console.log(
   //   '🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created',
   //   masterKeySeedInfo,
@@ -518,7 +527,7 @@ const cosmosWalletCreateTest = async () => {
   // console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
 
   // 1
-  const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+  // const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
   // const walletOne = await keyUtils.createWalletAtPath(1, zeroUserMnemonic);
 
   // 2
@@ -552,22 +561,22 @@ const cosmosWalletCreateTest = async () => {
   // const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
   // console.log('keyPairZero from new wallet seed', keyPairZero);
 
-  const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  // const serialized = masterKeySeedInfo.encryptedWalletInfo;
   // console.log('🚀 ~ file: run.ts ~ line 652 ~ cosmosWalletCreateTest ~ serialized', serialized);
 
   // const serializedOne = await walletOne.serialize(password);
   // console.log('🚀 ~ file: run.ts ~ line 546 ~ cosmosWalletCreateTest ~ serializedOne', serializedOne);
 
-  const [firstAccount] = await wallet.getAccounts();
-  console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
+  // const [firstAccount] = await wallet.getAccounts();
+  // console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
   // const [firstAccountOne] = await walletOne.getAccounts();
   // console.log('🚀 ~ file: run.ts ~ line 548 ~ cosmosWalletCreateTest ~ firstAccountOne', firstAccountOne);
 
-  const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
-  console.log(
-    '🚀 ~ file: run.ts ~ line 554 ~ cosmosWalletCreateTest ~ deserializedWallet',
-    JSON.stringify(await deserializedWallet.getAccounts(), null, 2),
-  );
+  // const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
+  // console.log(
+  // '🚀 ~ file: run.ts ~ line 554 ~ cosmosWalletCreateTest ~ deserializedWallet',
+  // JSON.stringify(await deserializedWallet.getAccounts(), null, 2),
+  // );
   // const deserializedWalletOne = await deserializeEncryptedWallet(serializedOne, password);
   // console.log(
   //   '🚀 ~ file: run.ts ~ line 556 ~ cosmosWalletCreateTest ~ deserializedWalletOne',
@@ -611,14 +620,14 @@ const testAccountData = async () => {
   // const list = await Network.getValidatorsList();
   const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
   const [firstAccount] = await wallet.getAccounts();
-  // console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
+  console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
   // const vData = await validators.getValidatorsBondedToDelegator(firstAccount.address);
 
   // console.log('st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6');
   // console.log('vData', vData);
 
-  const vInfo = await Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u');
-  console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
+  // const vInfo = await Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u');
+  // console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
 
   // const accountsData2 = await accounts.getAccountsData(firstAccount.address);
   // console.log('🚀 ~ file: run.ts ~ line 598 ~ testAccountData ~ accountsData2', accountsData2);
@@ -916,12 +925,12 @@ const main = async () => {
   // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
   // const serialized = masterKeySeedInfo.encryptedWalletInfo;
-  const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
+  // const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
 
   // we have to initialize a client prior to use cosmos
-  const _cosmosClient = await getCosmos(serialized, password);
+  // const _cosmosClient = await getCosmos(serialized, password);
 
-  // cosmosWalletCreateTest();
+  cosmosWalletCreateTest();
   // testAccountData();
   // mainSend();
   // mainDelegate();
@@ -931,10 +940,10 @@ const main = async () => {
   // mainSdsPrepay();
   // mainFour();
 
-  // mainBalance();
+  //   mainBalance();
   // testFile();
   // testB();
-  testIt();
+  // testIt();
   // getTxHistory();
 };
 
