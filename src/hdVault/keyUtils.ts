@@ -359,10 +359,10 @@ export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password:
   // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
   // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
 
-  const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-    encryptedWalletInfoFour,
-    encryptionKey,
-  );
+  // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+  //   encryptedWalletInfoFour,
+  //   encryptionKey,
+  // );
   // log(
   //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
   //   deserializedWalletFour,

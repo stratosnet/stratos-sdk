@@ -312,7 +312,7 @@ function makePathBuilder(pattern) {
 exports.makePathBuilder = makePathBuilder;
 // @todo clena up this function and extract different encryption methods into helper functions
 var serializeWallet = function (wallet, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var encryptionKey, encryptedWalletInfoFour, deserializedWalletFour;
+    var encryptionKey, encryptedWalletInfoFour;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -325,9 +325,30 @@ var serializeWallet = function (wallet, password) { return __awaiter(void 0, voi
             case 2:
                 encryptedWalletInfoFour = _a.sent();
                 (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
-                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.deserializeWithEncryptionKey(encryptedWalletInfoFour, encryptionKey)];
-            case 3:
-                deserializedWalletFour = _a.sent();
+                // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoTwo,
+                //   encryptionKeyN,
+                // );
+                // log(
+                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
+                //   deserializedWalletTwo,
+                // );
+                // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
+                // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
+                // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoThree,
+                //   argonData,
+                // );
+                // log(
+                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
+                //   deserializedWalletThree,
+                // );
+                // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
+                // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
+                // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoFour,
+                //   encryptionKey,
+                // );
                 // log(
                 //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
                 //   deserializedWalletFour,
