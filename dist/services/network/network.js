@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.apiGet = exports.apiPost = void 0;
+exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestUpload = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
@@ -78,7 +78,7 @@ var getExplorerRoute = function () {
     var url = "" + explorerUrl;
     return url;
 };
-var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
+var apiPostLegacy = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
     var axiosResponse, err_1, myResponse;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -103,9 +103,37 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
         }
     });
 }); };
+exports.apiPostLegacy = apiPostLegacy;
+var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var axiosResponse, err_2, e, myResponse, e;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, _axios.post(url, data, config)];
+            case 1:
+                axiosResponse = _a.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                err_2 = _a.sent();
+                e = err_2;
+                return [2 /*return*/, { error: { message: e.message } }];
+            case 3:
+                try {
+                    myResponse = axiosResponse.data;
+                    return [2 /*return*/, { response: myResponse }];
+                }
+                catch (err) {
+                    e = err;
+                    return [2 /*return*/, { error: { message: e.message } }];
+                }
+                return [2 /*return*/];
+        }
+    });
+}); };
 exports.apiPost = apiPost;
 var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var axiosResponse, err_2, myResponse;
+    var axiosResponse, err_3, myResponse;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -115,8 +143,8 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
                 axiosResponse = _a.sent();
                 return [3 /*break*/, 3];
             case 2:
-                err_2 = _a.sent();
-                return [2 /*return*/, { error: { message: err_2.message } }];
+                err_3 = _a.sent();
+                return [2 /*return*/, { error: { message: err_3.message } }];
             case 3:
                 try {
                     myResponse = axiosResponse.data;
@@ -130,6 +158,30 @@ var apiGet = function (url, config) { return __awaiter(void 0, void 0, void 0, f
     });
 }); };
 exports.apiGet = apiGet;
+var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var defaultPayload, url, payload, dataResult;
+    return __generator(this, function (_a) {
+        defaultPayload = {
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'eth_protocolVersion',
+            params: [],
+        };
+        console.log('h', config);
+        url = getRpcRoute() + "/status";
+        payload = __assign(__assign({}, defaultPayload), givenPayload);
+        console.log('call', payload);
+        dataResult = {
+            response: {
+                jsonrpc: '2.0',
+                id: 1,
+                result: { return: '1', offsetstart: 0, offsetend: 1234 },
+            },
+        };
+        return [2 /*return*/, dataResult];
+    });
+}); };
+exports.sendRpcCall = sendRpcCall;
 var getAccountsData = function (address, config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
     return __generator(this, function (_a) {
@@ -414,6 +466,62 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 exports.getRpcStatus = getRpcStatus;
+var uploadFile = function (config) { return __awaiter(void 0, void 0, void 0, function () {
+    var url, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = getRpcRoute() + "/status";
+                console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
+                return [4 /*yield*/, (0, exports.apiGet)(url, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.uploadFile = uploadFile;
+var getRpcPayload = function (msgId, method, extraParams) {
+    var payload = {
+        id: msgId,
+        method: method,
+        params: extraParams,
+    };
+    return payload;
+};
+exports.getRpcPayload = getRpcPayload;
+var sendUserRequestUpload = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_requestUpload';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserRequestUpload = sendUserRequestUpload;
+var sendUserUploadData = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_uploadData';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserUploadData = sendUserUploadData;
 var getChainId = function () { return __awaiter(void 0, void 0, void 0, function () {
     var result, response, chainId;
     var _a, _b;

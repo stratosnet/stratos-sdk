@@ -1,3 +1,4 @@
+import { log } from '../services/helpers';
 import * as keyUtils from './keyUtils';
 import { convertArrayToString, convertStringToArray, MnemonicPhrase } from './mnemonic';
 export interface LegacyMasterKeyInfo {
@@ -20,13 +21,19 @@ export const createMasterKeySeed = async (
   password: string,
   hdPathIndex = 0,
 ): Promise<MasterKeyInfo> => {
+  log('Generating master key seed');
   const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
 
+  log('Creating wallet');
   const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
-  const encryptedWalletInfo = await wallet.serialize(password);
 
+  log('Calling helper to serialize the wallet');
+  const encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+
+  log('Creating master key seed info from the seed');
   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
 
+  log('Master key info is ready');
   const masterKeyInfo = { ...legacyMasterKeyInfo, encryptedWalletInfo };
 
   return masterKeyInfo;

@@ -19,6 +19,7 @@ export declare function makeStratosHubPath(a: number): HdPath;
 export declare const generateMasterKeySeed: (phrase: MnemonicPhrase) => Promise<Uint8Array>;
 export declare const getMasterKeySeedPriveKey: (masterKeySeed: Uint8Array) => Uint8Array;
 export declare const getPublicKeyFromPrivKey: (privkey: Uint8Array) => Promise<PubKey>;
+export declare const getEncryptionKey: (password: string) => Promise<Uint8Array>;
 export declare const getAminoPublicKey: (pubkey: PubKey) => Promise<Uint8Array>;
 export declare const getAddressFromPubKey: (pubkey: PubKey) => string;
 export declare const getEncodedPublicKey: (encodedAminoPub: Uint8Array) => Promise<string>;
@@ -29,6 +30,7 @@ export declare const unlockMasterKeySeed: (password: string, encryptedMasterKeyS
 export declare const getMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array>;
 export declare type PathBuilder = (account_index: number) => HdPath;
 export declare function makePathBuilder(pattern: string): PathBuilder;
+export declare const serializeWallet: (wallet: DirectSecp256k1HdWallet, password: string) => Promise<string>;
 export declare function createWalletAtPath(hdPathIndex: number, mnemonic: string): Promise<DirectSecp256k1HdWallet>;
 export declare function createWallets(mnemonic: string, pathBuilder: PathBuilder, addressPrefix: string, numberOfDistributors: number): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;
 export declare function generateWallets(quantity: number, mnemonic: string): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;

@@ -48,14 +48,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateWallets = exports.createWallets = exports.createWalletAtPath = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
+exports.generateWallets = exports.createWallets = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 var crypto_1 = require("@cosmjs/crypto");
-var proto_signing_1 = require("@cosmjs/proto-signing");
-var crypto_2 = require("@cosmjs/crypto");
 var encoding_1 = require("@cosmjs/encoding");
+var proto_signing_1 = require("@cosmjs/proto-signing");
 var bn_js_1 = __importDefault(require("bn.js"));
+var crypto_js_1 = __importDefault(require("crypto-js"));
 var sjcl_1 = __importDefault(require("sjcl"));
 var hdVault_1 = require("../config/hdVault");
+var helpers_1 = require("../services/helpers");
 var mnemonic_1 = require("./mnemonic");
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -79,7 +80,7 @@ var isZero = function (privkey) {
 // @todo - move it =  used in isGteN
 var n = function (curve) {
     switch (curve) {
-        case crypto_2.Slip10Curve.Secp256k1:
+        case crypto_1.Slip10Curve.Secp256k1:
             return new bn_js_1.default('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
         default:
             throw new Error('curve not supported');
@@ -92,10 +93,10 @@ var isGteN = function (curve, privkey) {
 };
 // @todo - move it - used in getMasterKeySeedPriveKey
 var getMasterKeyInfo = function (curve, seed) {
-    var i = new crypto_2.Hmac(crypto_2.Sha512, (0, encoding_1.toAscii)(curve)).update(seed).digest();
+    var i = new crypto_1.Hmac(crypto_1.Sha512, (0, encoding_1.toAscii)(curve)).update(seed).digest();
     var il = i.slice(0, 32);
     var ir = i.slice(32, 64);
-    if (curve !== crypto_2.Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
+    if (curve !== crypto_1.Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
         return getMasterKeyInfo(curve, i);
     }
     return {
@@ -109,8 +110,8 @@ var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0,
         switch (_a.label) {
             case 0:
                 stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
-                mnemonicChecked = new crypto_2.EnglishMnemonic(stringMnemonic);
-                return [4 /*yield*/, crypto_2.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
+                mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
+                return [4 /*yield*/, crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
             case 1:
                 seed = _a.sent();
                 return [2 /*return*/, seed];
@@ -120,7 +121,7 @@ var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0,
 exports.generateMasterKeySeed = generateMasterKeySeed;
 // helper, not used?
 var getMasterKeySeedPriveKey = function (masterKeySeed) {
-    var masterKeyInfo = getMasterKeyInfo(crypto_2.Slip10Curve.Secp256k1, masterKeySeed);
+    var masterKeyInfo = getMasterKeyInfo(crypto_1.Slip10Curve.Secp256k1, masterKeySeed);
     var privkey = masterKeyInfo.privkey;
     return privkey;
 };
@@ -130,10 +131,10 @@ var getPublicKeyFromPrivKey = function (privkey) { return __awaiter(void 0, void
     var pubkey, compressedPub, pubkeyMine;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, crypto_2.Secp256k1.makeKeypair(privkey)];
+            case 0: return [4 /*yield*/, crypto_1.Secp256k1.makeKeypair(privkey)];
             case 1:
                 pubkey = (_a.sent()).pubkey;
-                compressedPub = crypto_2.Secp256k1.compressPubkey(pubkey);
+                compressedPub = crypto_1.Secp256k1.compressPubkey(pubkey);
                 pubkeyMine = {
                     type: 'tendermint/PubKeySecp256k1',
                     value: (0, encoding_1.toBase64)(compressedPub),
@@ -143,6 +144,25 @@ var getPublicKeyFromPrivKey = function (privkey) { return __awaiter(void 0, void
     });
 }); };
 exports.getPublicKeyFromPrivKey = getPublicKeyFromPrivKey;
+// used in wallet serialization and desirialization
+// meant to replace cosmos.js encryption key generation, which uses executeKdf
+// and that is using libsodium, (wasm) which is extremelly slow on mobile devices
+var getEncryptionKey = function (password) { return __awaiter(void 0, void 0, void 0, function () {
+    var base64SaltBits, cryptoJsKey, cryptoJsKeyEncoded, keyBuffer, encryptionKey;
+    return __generator(this, function (_a) {
+        base64SaltBits = 'my salt';
+        cryptoJsKey = crypto_js_1.default.PBKDF2(password, base64SaltBits, {
+            keySize: hdVault_1.encryptionKeyLength / 4,
+            iterations: hdVault_1.encryptionIterations,
+            hasher: crypto_js_1.default.algo.SHA256,
+        });
+        cryptoJsKeyEncoded = cryptoJsKey.toString(crypto_js_1.default.enc.Base64);
+        keyBuffer = Buffer.from(cryptoJsKeyEncoded, 'base64');
+        encryptionKey = new Uint8Array(keyBuffer);
+        return [2 /*return*/, encryptionKey];
+    });
+}); };
+exports.getEncryptionKey = getEncryptionKey;
 var encodeStratosPubkey = function (pubkey) {
     var pubkeyAminoPrefixSecp256k1 = (0, encoding_1.fromHex)('eb5ae987' + '21');
     var pubkeyAminoPrefixSecp256k1Converted = Array.from(pubkeyAminoPrefixSecp256k1);
@@ -164,7 +184,7 @@ function rawSecp256k1PubkeyToRawAddress(pubkeyData) {
     if (pubkeyData.length !== 33) {
         throw new Error("Invalid Secp256k1 pubkey length (compressed): " + pubkeyData.length);
     }
-    return (0, crypto_2.ripemd160)((0, crypto_2.sha256)(pubkeyData));
+    return (0, crypto_1.ripemd160)((0, crypto_1.sha256)(pubkeyData));
 }
 function pubkeyToRawAddress(pubkey) {
     var pubkeyData = (0, encoding_1.fromBase64)(pubkey.value);
@@ -290,6 +310,57 @@ function makePathBuilder(pattern) {
     return builder;
 }
 exports.makePathBuilder = makePathBuilder;
+// @todo clena up this function and extract different encryption methods into helper functions
+var serializeWallet = function (wallet, password) { return __awaiter(void 0, void 0, void 0, function () {
+    var encryptionKey, encryptedWalletInfoFour;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                (0, helpers_1.log)('Beginning serializing..');
+                return [4 /*yield*/, (0, exports.getEncryptionKey)(password)];
+            case 1:
+                encryptionKey = _a.sent();
+                console.log('🚀  generated encryption key', encryptionKey);
+                return [4 /*yield*/, wallet.serializeWithEncryptionKey(encryptionKey, hdVault_1.kdfConfiguration)];
+            case 2:
+                encryptedWalletInfoFour = _a.sent();
+                (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
+                // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoTwo,
+                //   encryptionKeyN,
+                // );
+                // log(
+                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
+                //   deserializedWalletTwo,
+                // );
+                // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
+                // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
+                // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoThree,
+                //   argonData,
+                // );
+                // log(
+                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
+                //   deserializedWalletThree,
+                // );
+                // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
+                // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
+                // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                //   encryptedWalletInfoFour,
+                //   encryptionKey,
+                // );
+                // log(
+                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
+                //   deserializedWalletFour,
+                // );
+                // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
+                // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
+                // return encryptedWalletInfo;
+                return [2 /*return*/, encryptedWalletInfoFour];
+        }
+    });
+}); };
+exports.serializeWallet = serializeWallet;
 function createWalletAtPath(hdPathIndex, mnemonic) {
     return __awaiter(this, void 0, void 0, function () {
         var addressPrefix, hdPaths, options, wallet;

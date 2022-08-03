@@ -1,6 +1,8 @@
 import * as Types from './types';
+export declare const apiPostLegacy: (url: string, data?: Types.ParsedTransactionData | undefined, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
 export declare const apiPost: (url: string, data?: Types.ParsedTransactionData | undefined, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
 export declare const apiGet: (url: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
+export declare const sendRpcCall: <N>(givenPayload: N, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.NetworkAxiosDataResult>;
 export declare const getAccountsData: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.CosmosAccountsDataResult>;
 export declare const getAccountBalance: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.CosmosAccountBalanceDataResult>;
 export declare const getStakingValidators: (address: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.AccountsDataResult>;
@@ -26,4 +28,12 @@ export declare const getUnboundingBalance: (delegatorAddr: string, config?: Type
 export declare const getRewardBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RewardBalanceDataResult>;
 export declare const requestBalanceIncrease: (walletAddress: string, faucetUrl: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.SubmitTransactionDataResult>;
 export declare const getRpcStatus: (config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RpcStatusDataResult>;
+export declare const uploadFile: (config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RpcStatusDataResult>;
+export declare const getRpcPayload: <T>(msgId: number, method: string, extraParams?: T | undefined) => {
+    id: number;
+    method: string;
+    params: T | undefined;
+};
+export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestUploadResult>;
+export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserUploadDataResult>;
 export declare const getChainId: () => Promise<string | undefined>;

@@ -67,6 +67,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = exports.createMasterKeySeed = void 0;
+var helpers_1 = require("../services/helpers");
 var keyUtils = __importStar(require("./keyUtils"));
 var mnemonic_1 = require("./mnemonic");
 // exposed outside, used in the DesktopWallet to "create" a wallet
@@ -76,18 +77,24 @@ var createMasterKeySeed = function (phrase, password, hdPathIndex) {
         var derivedMasterKeySeed, wallet, encryptedWalletInfo, legacyMasterKeyInfo, masterKeyInfo;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, keyUtils.generateMasterKeySeed(phrase)];
+                case 0:
+                    (0, helpers_1.log)('Generating master key seed');
+                    return [4 /*yield*/, keyUtils.generateMasterKeySeed(phrase)];
                 case 1:
                     derivedMasterKeySeed = _a.sent();
+                    (0, helpers_1.log)('Creating wallet');
                     return [4 /*yield*/, keyUtils.createWalletAtPath(hdPathIndex, (0, mnemonic_1.convertArrayToString)(phrase))];
                 case 2:
                     wallet = _a.sent();
-                    return [4 /*yield*/, wallet.serialize(password)];
+                    (0, helpers_1.log)('Calling helper to serialize the wallet');
+                    return [4 /*yield*/, keyUtils.serializeWallet(wallet, password)];
                 case 3:
                     encryptedWalletInfo = _a.sent();
+                    (0, helpers_1.log)('Creating master key seed info from the seed');
                     return [4 /*yield*/, (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password)];
                 case 4:
                     legacyMasterKeyInfo = _a.sent();
+                    (0, helpers_1.log)('Master key info is ready');
                     masterKeyInfo = __assign(__assign({}, legacyMasterKeyInfo), { encryptedWalletInfo: encryptedWalletInfo });
                     return [2 /*return*/, masterKeyInfo];
             }

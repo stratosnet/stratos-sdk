@@ -1,6 +1,6 @@
 {
   "name": "@stratos-network/stratos-sdk.js",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "The JavaScript SDK for Stratos Network",
   "license": "ISC",
   "author": "Stratos Network",
@@ -34,7 +34,10 @@
     "start": "concurrently npm:start:*",
     "jest-coverage": "yarn run jest -- --coverage",
     "doc": "typedoc --out docs src",
-    "update-proto": "yarn upgrade @stratos-network/stratos-cosmosjs-types"
+    "update-proto": "yarn upgrade @stratos-network/stratos-cosmosjs-types",
+    "start:once": "yarn cli:build; yarn start:run:once",
+    "start:run:once": "node dist/run.js ",
+    "cli:build": "tsc"
   },
   "lint-staged": {
     "./src/**/*.ts": [
@@ -51,6 +54,8 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/user-event": "^13.1.5",
+    "@types/blueimp-md5": "^2.18.0",
+    "@types/crypto-js": "^4.1.1",
     "@types/jest": "^26.0.14",
     "@types/json-bigint": "^1.0.0",
     "@types/lodash": "^4.14.170",
@@ -97,11 +102,19 @@
     "bech32": "1.1.4",
     "bignumber.js": "9.0.1",
     "bip39": "3.0.2",
+    "blueimp-md5": "^2.19.0",
     "bn.js": "^5.2.0",
+    "cids": "^1.1.9",
     "cosmjs-types": "^0.5.0",
+    "crypto-js": "3.1",
     "dotenv": "^10.0.0",
     "json-bigint": "^1.0.0",
+    "keccak256": "^1.0.6",
     "lodash": "^4.17.21",
+    "md5-file": "^5.0.0",
+    "multihashes": "^4.0.3",
+    "multihashing-async": "^2.1.4",
+    "sha3": "^2.1.4",
     "sjcl": "1.0.8",
     "sleep-promise": "^9.1.0",
     "tweetnacl": "1.0.1",
