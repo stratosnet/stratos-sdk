@@ -114,7 +114,9 @@ var getFileChunks = function (filePath, chunkSize) {
                             var bytesRead = 0;
                             var result = [];
                             fileStream_1.on('readable', function () {
+                                /* eslint-disable-next-line no-constant-condition */
                                 while (true) {
+                                    // no-constant-condition
                                     var chunk = fileStream_1.read(chunkSize);
                                     if (!chunk || !chunk.length) {
                                         break;

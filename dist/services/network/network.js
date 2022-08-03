@@ -167,6 +167,7 @@ var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, voi
             method: 'eth_protocolVersion',
             params: [],
         };
+        console.log('h', config);
         url = getRpcRoute() + "/status";
         payload = __assign(__assign({}, defaultPayload), givenPayload);
         console.log('call', payload);

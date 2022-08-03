@@ -1,3 +1,4 @@
+import { KdfConfiguration } from '@cosmjs/proto-signing';
 export declare const masterkey = "m/";
 export declare const bip44purpose = "44'/";
 export declare const bip39Password = "";
@@ -8,3 +9,6 @@ export declare const stratosDenom = "ustos";
 export declare const stratosTopDenom = "stos";
 export declare const keyPath: string;
 export declare const keyPathPattern: string;
+export declare const kdfConfiguration: KdfConfiguration;
+export declare const encryptionKeyLength = 32;
+export declare const encryptionIterations = 10000;

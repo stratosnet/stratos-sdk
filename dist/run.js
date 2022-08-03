@@ -82,7 +82,6 @@ var keyManager_1 = require("./hdVault/keyManager");
 var keyUtils = __importStar(require("./hdVault/keyUtils"));
 var wallet_1 = require("./hdVault/wallet");
 var Sdk_1 = __importDefault(require("./Sdk"));
-var cosmos_1 = require("./services/cosmos");
 var FilesystemService = __importStar(require("./services/filesystem"));
 var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
@@ -697,37 +696,27 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, wallet, serialized, firstAccount, deserializedWallet, _a, _b, _c, _d, _e;
-    return __generator(this, function (_f) {
-        switch (_f.label) {
+    var phrase, masterKeySeedInfo, encryptedMasterKeySeed, encryptedMasterKeySeedString, derivedMasterKeySeed;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
             case 0:
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 1:
-                masterKeySeedInfo = _f.sent();
-                return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
+                masterKeySeedInfo = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
+                encryptedMasterKeySeed = masterKeySeedInfo.encryptedMasterKeySeed;
+                encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
+                return [4 /*yield*/, keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString)];
             case 2:
-                wallet = _f.sent();
-                serialized = masterKeySeedInfo.encryptedWalletInfo;
-                return [4 /*yield*/, wallet.getAccounts()];
-            case 3:
-                firstAccount = (_f.sent())[0];
-                console.log('🚀 ~ file: run.ts ~ line 632 ~ cosmosWalletCreateTest ~ firstAccount', firstAccount);
-                return [4 /*yield*/, (0, wallet_1.deserializeEncryptedWallet)(serialized, password)];
-            case 4:
-                deserializedWallet = _f.sent();
-                _b = (_a = console).log;
-                _c = ['🚀 ~ file: run.ts ~ line 554 ~ cosmosWalletCreateTest ~ deserializedWallet'];
-                _e = (_d = JSON).stringify;
-                return [4 /*yield*/, deserializedWallet.getAccounts()];
-            case 5:
-                _b.apply(_a, _c.concat([_e.apply(_d, [_f.sent(), null, 2])]));
+                derivedMasterKeySeed = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed', derivedMasterKeySeed);
                 return [2 /*return*/];
         }
     });
 }); };
 var testAccountData = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var wallet, firstAccount, vInfo;
+    var wallet, firstAccount;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
@@ -736,10 +725,7 @@ var testAccountData = function () { return __awaiter(void 0, void 0, void 0, fun
                 return [4 /*yield*/, wallet.getAccounts()];
             case 2:
                 firstAccount = (_a.sent())[0];
-                return [4 /*yield*/, Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u')];
-            case 3:
-                vInfo = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
+                console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
                 return [2 /*return*/];
         }
     });
@@ -805,6 +791,7 @@ function processFileByChunk(filePath, chunkSize) {
                                 return __awaiter(this, void 0, void 0, function () {
                                     var chunk;
                                     return __generator(this, function (_a) {
+                                        /* eslint-disable-next-line no-constant-condition */
                                         while (true) {
                                             chunk = fileStream_1.read(chunkSize);
                                             if (!chunk || !chunk.length) {
@@ -1027,7 +1014,7 @@ var testIt = function () { return __awaiter(void 0, void 0, void 0, function () 
     });
 }); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, error_7, serialized, _cosmosClient;
+    var resolvedChainID, sdkEnv, error_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1053,25 +1040,13 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID }))];
             case 6:
                 _a.sent();
-                return [4 /*yield*/, (0, keyManager_1.getSerializedWalletFromPhrase)(zeroUserMnemonic, password)];
-            case 7:
-                serialized = _a.sent();
-                return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
-            case 8:
-                _cosmosClient = _a.sent();
-                // cosmosWalletCreateTest();
-                // testAccountData();
-                // mainSend();
-                // mainDelegate();
-                // mainUndelegate();
-                // mainWithdrawRewards();
-                // mainWithdrawAllRewards();
-                // mainSdsPrepay();
-                // mainFour();
-                // mainBalance();
-                // testFile();
-                // testB();
-                testIt();
+                // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+                // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+                // const serialized = masterKeySeedInfo.encryptedWalletInfo;
+                // const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
+                // we have to initialize a client prior to use cosmos
+                // const _cosmosClient = await getCosmos(serialized, password);
+                cosmosWalletCreateTest();
                 return [2 /*return*/];
         }
     });
