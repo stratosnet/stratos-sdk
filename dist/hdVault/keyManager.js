@@ -102,24 +102,6 @@ var createMasterKeySeed = function (phrase, password, hdPathIndex) {
     });
 };
 exports.createMasterKeySeed = createMasterKeySeed;
-// export const createMasterKeySeedLegacy = async (
-//   phrase: MnemonicPhrase,
-//   password: string,
-//   hdPathIndex = 0,
-// ): Promise<MasterKeyInfo> => {
-//   console.log('km 1');
-//   const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
-//   console.log('km 2');
-//   const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
-//   console.log('km 3');
-//   const encryptedWalletInfo = await wallet.serialize(password);
-//   console.log('🚀 ~ file: keyManager.ts ~ line 27 ~ encryptedWalletInfo', encryptedWalletInfo);
-//   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
-//   // console.log('km 4');
-//   const masterKeyInfo = { ...legacyMasterKeyInfo, encryptedWalletInfo };
-//   // const masterKeyInfo = {} as MasterKeyInfo;
-//   return masterKeyInfo;
-// };
 var createMasterKeySeedFromGivenSeed = function (derivedMasterKeySeed, password) { return __awaiter(void 0, void 0, void 0, function () {
     var encryptedMasterKeySeed, pubkey, masterKeySeedPublicKey, masterKeySeedAddress, masterKeySeedEncodedPublicKey, masterKeyInfo;
     return __generator(this, function (_a) {
