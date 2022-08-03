@@ -1046,7 +1046,20 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
                 // we have to initialize a client prior to use cosmos
                 // const _cosmosClient = await getCosmos(serialized, password);
-                cosmosWalletCreateTest();
+                // cosmosWalletCreateTest();
+                // testAccountData();
+                // mainSend();
+                // mainDelegate();
+                // mainUndelegate();
+                // mainWithdrawRewards();
+                // mainWithdrawAllRewards();
+                // mainSdsPrepay();
+                // mainFour();
+                //   mainBalance();
+                // testFile();
+                // testB();
+                // testIt();
+                getTxHistory();
                 return [2 /*return*/];
         }
     });
