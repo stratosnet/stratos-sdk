@@ -92,25 +92,31 @@ var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { retu
 }); };
 exports.deriveKeyPair = deriveKeyPair;
 var deserializeEncryptedWallet = function (serializedWallet, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var deserializedWallet, encryptionKey, error_1;
+    var deserializedWallet, encryptionKey, error_1, error_2, msg, errorMsg;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, keyUtils.getEncryptionKey(password)];
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, keyUtils.getEncryptionKey(password)];
             case 1:
                 encryptionKey = _a.sent();
-                _a.label = 2;
+                return [3 /*break*/, 3];
             case 2:
-                _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.deserializeWithEncryptionKey(serializedWallet, encryptionKey)];
-            case 3:
-                deserializedWallet = _a.sent();
-                return [3 /*break*/, 5];
-            case 4:
                 error_1 = _a.sent();
-                console.log('could not deserialize / decode wallet');
-                console.log(error_1);
-                return [2 /*return*/, Promise.reject(false)];
+                throw new Error("Can not get encrypted key (wallet). " + error_1.message);
+            case 3:
+                _a.trys.push([3, 5, , 6]);
+                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.deserializeWithEncryptionKey(serializedWallet, encryptionKey)];
+            case 4:
+                deserializedWallet = _a.sent();
+                return [3 /*break*/, 6];
             case 5:
+                error_2 = _a.sent();
+                msg = "\"" + error_2.message + "\", w \"" + serializedWallet + "\"";
+                errorMsg = "could not deserialize / decode wallet " + msg;
+                console.log(errorMsg);
+                throw new Error(errorMsg);
+            case 6:
                 if (!deserializedWallet) {
                     return [2 /*return*/, Promise.reject(false)];
                 }

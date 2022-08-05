@@ -28,11 +28,20 @@ export class StratosCosmos {
 
     const { rpcUrl: rpcEndpoint } = Sdk.environment;
 
-    const deserializedWallet = await deserializeEncryptedWallet(serialized, password);
+    let deserializedWallet;
 
-    const client = await getCosmosClient(rpcEndpoint, deserializedWallet);
+    try {
+      deserializedWallet = await deserializeEncryptedWallet(serialized, password);
+    } catch (error) {
+      throw new Error(`Can not deserialize encrypted wallet (cosmos). ${(error as Error).message}`);
+    }
 
-    StratosCosmos.cosmosInstance = client;
+    try {
+      const client = await getCosmosClient(rpcEndpoint, deserializedWallet);
+      StratosCosmos.cosmosInstance = client;
+    } catch (error) {
+      throw new Error(`Can not get cosmos client (cosmos). ${(error as Error).message}`);
+    }
   }
 
   public static reset() {
@@ -46,7 +55,11 @@ export const resetCosmos = () => {
 
 export const getCosmos = async (serialized = '', password = ''): Promise<SigningStargateClient> => {
   if (!StratosCosmos.cosmosInstance) {
-    await StratosCosmos.init(serialized, password);
+    try {
+      await StratosCosmos.init(serialized, password);
+    } catch (error) {
+      throw new Error(`Can not initialize cosmos (cosmos). ${(error as Error).message}`);
+    }
   }
 
   return StratosCosmos.cosmosInstance!;
@@ -61,7 +74,10 @@ const getCosmosClient = async (rpcEndpoint: string, deserializedWallet: DirectSe
     registry: clientRegistry,
   };
 
-  const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
-
-  return client;
+  try {
+    const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
+    return client;
+  } catch (error) {
+    throw new Error(`Can not connect with a signer (cosmos). ${(error as Error).message}`);
+  }
 };

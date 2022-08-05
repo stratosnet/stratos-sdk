@@ -70,7 +70,13 @@ export const deriveKeyPair = async (
 export const deserializeEncryptedWallet = async (serializedWallet: string, password: string) => {
   let deserializedWallet;
 
-  const encryptionKey = await keyUtils.getEncryptionKey(password);
+  let encryptionKey;
+
+  try {
+    encryptionKey = await keyUtils.getEncryptionKey(password);
+  } catch (error) {
+    throw new Error(`Can not get encrypted key (wallet). ${(error as Error).message}`);
+  }
 
   try {
     deserializedWallet = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
@@ -78,9 +84,12 @@ export const deserializeEncryptedWallet = async (serializedWallet: string, passw
       encryptionKey,
     );
   } catch (error) {
-    console.log('could not deserialize / decode wallet');
-    console.log(error);
-    return Promise.reject(false);
+    const msg = `"${(error as Error).message}", w "${serializedWallet}"`;
+    const errorMsg = `could not deserialize / decode wallet ${msg}`;
+    console.log(errorMsg);
+    throw new Error(errorMsg);
+
+    // return Promise.reject(false);
   }
 
   if (!deserializedWallet) {
