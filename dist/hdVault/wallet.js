@@ -56,8 +56,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deserializeEncryptedWallet = exports.deriveKeyPair = void 0;
-var proto_signing_1 = require("@cosmjs/proto-signing");
 var hdVault_1 = require("../config/hdVault");
+var cosmosUtils_1 = require("./cosmosUtils");
 var deriveManager_1 = require("./deriveManager");
 var keyUtils = __importStar(require("./keyUtils"));
 var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
@@ -92,31 +92,23 @@ var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { retu
 }); };
 exports.deriveKeyPair = deriveKeyPair;
 var deserializeEncryptedWallet = function (serializedWallet, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var deserializedWallet, encryptionKey, error_1, error_2, msg, errorMsg;
+    var deserializedWallet, error_1, msg, errorMsg;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, keyUtils.getEncryptionKey(password)];
+                return [4 /*yield*/, (0, cosmosUtils_1.deserializeWithEncryptionKey)(password, serializedWallet)];
             case 1:
-                encryptionKey = _a.sent();
+                // deserializedWallet = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+                deserializedWallet = _a.sent();
                 return [3 /*break*/, 3];
             case 2:
                 error_1 = _a.sent();
-                throw new Error("Can not get encrypted key (wallet). " + error_1.message);
-            case 3:
-                _a.trys.push([3, 5, , 6]);
-                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.deserializeWithEncryptionKey(serializedWallet, encryptionKey)];
-            case 4:
-                deserializedWallet = _a.sent();
-                return [3 /*break*/, 6];
-            case 5:
-                error_2 = _a.sent();
-                msg = "\"" + error_2.message + "\", w \"" + serializedWallet + "\"";
+                msg = "\"" + error_1.message + "\", w \"" + serializedWallet + "\"";
                 errorMsg = "could not deserialize / decode wallet " + msg;
                 console.log(errorMsg);
                 throw new Error(errorMsg);
-            case 6:
+            case 3:
                 if (!deserializedWallet) {
                     return [2 /*return*/, Promise.reject(false)];
                 }

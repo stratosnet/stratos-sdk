@@ -78,6 +78,7 @@ var path_1 = __importDefault(require("path"));
 // import { Keccak } from 'sha3';
 var accounts = __importStar(require("./accounts"));
 var hdVault_1 = require("./hdVault");
+var cosmosUtils_1 = require("./hdVault/cosmosUtils");
 var keyManager_1 = require("./hdVault/keyManager");
 var keyUtils = __importStar(require("./hdVault/keyUtils"));
 var wallet_1 = require("./hdVault/wallet");
@@ -696,7 +697,7 @@ var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, encryptedMasterKeySeed, encryptedMasterKeySeedString, derivedMasterKeySeed;
+    var phrase, masterKeySeedInfo, encryptedMasterKeySeed, encryptedWalletInfo, encryptedMasterKeySeedString, derivedMasterKeySeed, newWallet, f;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -705,12 +706,20 @@ var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void
             case 1:
                 masterKeySeedInfo = _a.sent();
                 console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
-                encryptedMasterKeySeed = masterKeySeedInfo.encryptedMasterKeySeed;
+                encryptedMasterKeySeed = masterKeySeedInfo.encryptedMasterKeySeed, encryptedWalletInfo = masterKeySeedInfo.encryptedWalletInfo;
                 encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
                 return [4 /*yield*/, keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString)];
             case 2:
                 derivedMasterKeySeed = _a.sent();
                 console.log('🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed', derivedMasterKeySeed);
+                return [4 /*yield*/, (0, cosmosUtils_1.deserializeWithEncryptionKey)(password, encryptedWalletInfo)];
+            case 3:
+                newWallet = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 524 ~ cosmosWalletCreateTest ~ newWallet', newWallet);
+                return [4 /*yield*/, newWallet.getAccounts()];
+            case 4:
+                f = (_a.sent())[0];
+                console.log('🚀 ~ file: run.ts ~ line 527 ~ cosmosWalletCreateTest ~ f', f);
                 return [2 /*return*/];
         }
     });
@@ -1046,20 +1055,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
                 // we have to initialize a client prior to use cosmos
                 // const _cosmosClient = await getCosmos(serialized, password);
-                // cosmosWalletCreateTest();
-                // testAccountData();
-                // mainSend();
-                // mainDelegate();
-                // mainUndelegate();
-                // mainWithdrawRewards();
-                // mainWithdrawAllRewards();
-                // mainSdsPrepay();
-                // mainFour();
-                //   mainBalance();
-                // testFile();
-                // testB();
-                // testIt();
-                getTxHistory();
+                cosmosWalletCreateTest();
                 return [2 /*return*/];
         }
     });

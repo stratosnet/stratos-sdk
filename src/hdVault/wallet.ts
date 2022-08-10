@@ -1,8 +1,7 @@
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { keyPath } from '../config/hdVault';
+import { deserializeWithEncryptionKey } from './cosmosUtils';
 import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
 import * as keyUtils from './keyUtils';
-
 export interface KeyPairInfo {
   keyIndex: number;
   address: string;
@@ -70,18 +69,20 @@ export const deriveKeyPair = async (
 export const deserializeEncryptedWallet = async (serializedWallet: string, password: string) => {
   let deserializedWallet;
 
-  let encryptionKey;
+  // let encryptionKey;
+
+  // try {
+  //   encryptionKey = await keyUtils.getEncryptionKey(password);
+  // } catch (error) {
+  //   throw new Error(`Can not get encrypted key (wallet). ${(error as Error).message}`);
+  // }
 
   try {
-    encryptionKey = await keyUtils.getEncryptionKey(password);
-  } catch (error) {
-    throw new Error(`Can not get encrypted key (wallet). ${(error as Error).message}`);
-  }
-
-  try {
-    deserializedWallet = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+    // deserializedWallet = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+    deserializedWallet = await deserializeWithEncryptionKey(
+      password,
       serializedWallet,
-      encryptionKey,
+      // encryptionKey,
     );
   } catch (error) {
     const msg = `"${(error as Error).message}", w "${serializedWallet}"`;
