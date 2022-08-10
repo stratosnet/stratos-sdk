@@ -57,6 +57,7 @@ var crypto_js_1 = __importDefault(require("crypto-js"));
 var sjcl_1 = __importDefault(require("sjcl"));
 var hdVault_1 = require("../config/hdVault");
 var helpers_1 = require("../services/helpers");
+var cosmosUtils_1 = require("./cosmosUtils");
 var mnemonic_1 = require("./mnemonic");
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -151,11 +152,16 @@ var getEncryptionKey = function (password) { return __awaiter(void 0, void 0, vo
     var base64SaltBits, cryptoJsKey, cryptoJsKeyEncoded, keyBuffer, encryptionKey;
     return __generator(this, function (_a) {
         base64SaltBits = 'my salt';
-        cryptoJsKey = crypto_js_1.default.PBKDF2(password, base64SaltBits, {
-            keySize: hdVault_1.encryptionKeyLength / 4,
-            iterations: hdVault_1.encryptionIterations,
-            hasher: crypto_js_1.default.algo.SHA256,
-        });
+        try {
+            cryptoJsKey = crypto_js_1.default.PBKDF2(password, base64SaltBits, {
+                keySize: hdVault_1.encryptionKeyLength / 4,
+                iterations: hdVault_1.encryptionIterations,
+                hasher: crypto_js_1.default.algo.SHA256,
+            });
+        }
+        catch (error) {
+            throw new Error("Could not call PBKDF2. Error - " + error.message);
+        }
         cryptoJsKeyEncoded = cryptoJsKey.toString(crypto_js_1.default.enc.Base64);
         keyBuffer = Buffer.from(cryptoJsKeyEncoded, 'base64');
         encryptionKey = new Uint8Array(keyBuffer);
@@ -312,51 +318,58 @@ function makePathBuilder(pattern) {
 exports.makePathBuilder = makePathBuilder;
 // @todo clena up this function and extract different encryption methods into helper functions
 var serializeWallet = function (wallet, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var encryptionKey, encryptedWalletInfoFour;
+    var encryptedWalletInfoFour, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 (0, helpers_1.log)('Beginning serializing..');
-                return [4 /*yield*/, (0, exports.getEncryptionKey)(password)];
+                _a.label = 1;
             case 1:
-                encryptionKey = _a.sent();
-                console.log('🚀  generated encryption key', encryptionKey);
-                return [4 /*yield*/, wallet.serializeWithEncryptionKey(encryptionKey, hdVault_1.kdfConfiguration)];
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, (0, cosmosUtils_1.serializeWithEncryptionKey)(password, wallet)];
             case 2:
+                // encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
                 encryptedWalletInfoFour = _a.sent();
                 (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
-                // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-                //   encryptedWalletInfoTwo,
-                //   encryptionKeyN,
-                // );
-                // log(
-                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
-                //   deserializedWalletTwo,
-                // );
-                // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
-                // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
-                // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-                //   encryptedWalletInfoThree,
-                //   argonData,
-                // );
-                // log(
-                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
-                //   deserializedWalletThree,
-                // );
-                // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
-                // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
-                // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-                //   encryptedWalletInfoFour,
-                //   encryptionKey,
-                // );
-                // log(
-                //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
-                //   deserializedWalletFour,
-                // );
-                // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
-                // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
-                // return encryptedWalletInfo;
-                return [2 /*return*/, encryptedWalletInfoFour];
+                return [3 /*break*/, 4];
+            case 3:
+                error_1 = _a.sent();
+                // const ss = await import('serialize-error');
+                // const convertedError = ss.serializeError(error as Error);
+                throw new Error("Could not serialize a wallet with the encryption key. Error4 - " + error_1.message);
+            case 4: 
+            // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+            //   encryptedWalletInfoTwo,
+            //   encrypTIONKeyN,
+            // );
+            // log(
+            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
+            //   deserializedWalletTwo,
+            // );
+            // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
+            // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
+            // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+            //   encryptedWalletInfoThree,
+            //   argonData,
+            // );
+            // log(
+            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
+            //   deserializedWalletThree,
+            // );
+            // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
+            // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
+            // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+            //   encryptedWalletInfoFour,
+            //   encryptionKey,
+            // );
+            // log(
+            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
+            //   deserializedWalletFour,
+            // );
+            // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
+            // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
+            // return encryptedWalletInfo;
+            return [2 /*return*/, encryptedWalletInfoFour];
         }
     });
 }); };

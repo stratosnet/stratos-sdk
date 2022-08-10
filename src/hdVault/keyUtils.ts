@@ -30,6 +30,7 @@ import {
   stratosPubkeyPrefix,
 } from '../config/hdVault';
 import { log } from '../services/helpers';
+import { serializeWithEncryptionKey } from './cosmosUtils';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
 
 export interface KeyPair {
@@ -139,11 +140,18 @@ export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubK
 export const getEncryptionKey = async (password: string) => {
   const base64SaltBits = 'my salt';
 
-  const cryptoJsKey = CryptoJS.PBKDF2(password, base64SaltBits, {
-    keySize: encryptionKeyLength / 4,
-    iterations: encryptionIterations,
-    hasher: CryptoJS.algo.SHA256,
-  });
+  let cryptoJsKey;
+
+  try {
+    cryptoJsKey = CryptoJS.PBKDF2(password, base64SaltBits, {
+      keySize: encryptionKeyLength / 4,
+      iterations: encryptionIterations,
+      hasher: CryptoJS.algo.SHA256,
+    });
+  } catch (error) {
+    throw new Error(`Could not call PBKDF2. Error - ${(error as Error).message}`);
+  }
+
   const cryptoJsKeyEncoded = cryptoJsKey.toString(CryptoJS.enc.Base64);
 
   const keyBuffer = Buffer.from(cryptoJsKeyEncoded, 'base64');
@@ -332,14 +340,35 @@ export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password:
   // const buffWrite = Buffer.from(cryptoJsKeyEncoded, 'base64'); // ok 3
   // console.log('🚀 5. ~ file: keyUtils.ts ~ line 317 ~ serializeWal ~ buffWrite', buffWrite);
   // const data = new Uint8Array(buffWrite);
-  const encryptionKey = await getEncryptionKey(password);
-  console.log('🚀  generated encryption key', encryptionKey);
-  const encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
-  log('Serialization with prepared cryptoJs data Uint8 is done. ');
+  // let encryptionKey;
+
+  // try {
+  //   encryptionKey = await getEncryptionKey(password);
+  //   console.log('🚀  generated encryption key', encryptionKey);
+  // } catch (error) {
+  //   throw new Error(`Could not generate an encryption key. Error - ${(error as Error).message}`);
+  // }
+
+  // if (!encryptionKey) throw new Error(`Could not generate an encryption key. The key is empty`);
+
+  let encryptedWalletInfoFour;
+
+  try {
+    // encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
+    encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
+    log('Serialization with prepared cryptoJs data Uint8 is done. ');
+  } catch (error) {
+    // const ss = await import('serialize-error');
+    // const convertedError = ss.serializeError(error as Error);
+    throw new Error(
+      `Could not serialize a wallet with the encryption key. Error4 - ${(error as Error).message}`,
+      // `Could not serialize a wallet with the encryption key. Error - ${(error as Error).message}`,
+    );
+  }
 
   // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
   //   encryptedWalletInfoTwo,
-  //   encryptionKeyN,
+  //   encrypTIONKeyN,
   // );
   // log(
   //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',

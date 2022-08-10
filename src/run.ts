@@ -8,6 +8,7 @@ import path from 'path';
 // import { Keccak } from 'sha3';
 import * as accounts from './accounts';
 import { mnemonic } from './hdVault';
+import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
@@ -511,13 +512,20 @@ const cosmosWalletCreateTest = async () => {
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
   console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
 
-  const { encryptedMasterKeySeed } = masterKeySeedInfo;
+  const { encryptedMasterKeySeed, encryptedWalletInfo } = masterKeySeedInfo;
   const encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
   const derivedMasterKeySeed = await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString);
   console.log(
     '🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed',
     derivedMasterKeySeed,
   );
+
+  const newWallet = await deserializeWithEncryptionKey(password, encryptedWalletInfo);
+  console.log('🚀 ~ file: run.ts ~ line 524 ~ cosmosWalletCreateTest ~ newWallet', newWallet);
+
+  const [f] = await newWallet.getAccounts();
+  console.log('🚀 ~ file: run.ts ~ line 527 ~ cosmosWalletCreateTest ~ f', f);
+
   // console.log(
   //   '🚀 ~ file: run.ts ~ line 633 ~ cosmosWalletCreateTest ~ masterKeySeedInfo created',
   //   masterKeySeedInfo,
@@ -930,7 +938,7 @@ const main = async () => {
   // we have to initialize a client prior to use cosmos
   // const _cosmosClient = await getCosmos(serialized, password);
 
-  // cosmosWalletCreateTest();
+  cosmosWalletCreateTest();
   // testAccountData();
   // mainSend();
   // mainDelegate();
@@ -944,7 +952,8 @@ const main = async () => {
   // testFile();
   // testB();
   // testIt();
-  getTxHistory();
+  // getTxHistory();
+  // testAccountData();
 };
 
 main();

@@ -28,7 +28,14 @@ export const createMasterKeySeed = async (
   const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
 
   log('Calling helper to serialize the wallet');
-  const encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+
+  let encryptedWalletInfo;
+
+  try {
+    encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+  } catch (error) {
+    throw new Error(`could not serialize wallet (sdk), ${(error as Error).message}`);
+  }
 
   log('Creating master key seed info from the seed');
   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);

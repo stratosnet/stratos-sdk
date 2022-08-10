@@ -74,7 +74,7 @@ var mnemonic_1 = require("./mnemonic");
 var createMasterKeySeed = function (phrase, password, hdPathIndex) {
     if (hdPathIndex === void 0) { hdPathIndex = 0; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var derivedMasterKeySeed, wallet, encryptedWalletInfo, legacyMasterKeyInfo, masterKeyInfo;
+        var derivedMasterKeySeed, wallet, encryptedWalletInfo, error_1, legacyMasterKeyInfo, masterKeyInfo;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -87,12 +87,20 @@ var createMasterKeySeed = function (phrase, password, hdPathIndex) {
                 case 2:
                     wallet = _a.sent();
                     (0, helpers_1.log)('Calling helper to serialize the wallet');
-                    return [4 /*yield*/, keyUtils.serializeWallet(wallet, password)];
+                    _a.label = 3;
                 case 3:
+                    _a.trys.push([3, 5, , 6]);
+                    return [4 /*yield*/, keyUtils.serializeWallet(wallet, password)];
+                case 4:
                     encryptedWalletInfo = _a.sent();
+                    return [3 /*break*/, 6];
+                case 5:
+                    error_1 = _a.sent();
+                    throw new Error("could not serialize wallet (sdk), " + error_1.message);
+                case 6:
                     (0, helpers_1.log)('Creating master key seed info from the seed');
                     return [4 /*yield*/, (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password)];
-                case 4:
+                case 7:
                     legacyMasterKeyInfo = _a.sent();
                     (0, helpers_1.log)('Master key info is ready');
                     masterKeyInfo = __assign(__assign({}, legacyMasterKeyInfo), { encryptedWalletInfo: encryptedWalletInfo });
