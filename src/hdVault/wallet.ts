@@ -33,7 +33,6 @@ export const deriveKeyPair = async (
   // console.log('🚀 ~ file: wallet.ts ~ line 34 ~ path', path);
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
-  // console.log('🚀 ~ file: wallet.ts ~ line 37 ~ privateKeySeed', privateKeySeed);
 
   // const pathZero = `${keyPath}0`;
   // console.log('🚀 ~ file: wallet.ts ~ line 40 ~ pathZero', pathZero);

@@ -5,13 +5,14 @@ import {
   Hmac,
   ripemd160,
   Secp256k1,
+  Secp256k1Signature,
   sha256,
   Sha512,
   Slip10Curve,
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toAscii, toBase64, toBech32 } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
@@ -471,35 +472,43 @@ export async function generateWallets(
   return wallets;
 }
 
-// export const sign = async (message: string, privateKey: string): Promise<string> => {
-//   try {
-//     const decodedMessage = fromBase64(message);
-//     const decodedPrivateKey = fromBase64(privateKey);
+export const encodeSignatureMessage = (message: string) => {
+  const messageHash = CryptoJS.SHA256(message).toString();
+  const signHashBuf = Buffer.from(messageHash, `hex`);
+  const encodedMessage = Uint8Array.from(signHashBuf);
+  return encodedMessage;
+};
 
-//     const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
-//     const ecodedSignature = toBase64(signature);
+export const signWithPrivateKey = async (signMessageString: string, privateKey: string): Promise<string> => {
+  const defaultPrivkey = fromHex(privateKey);
 
-//     return ecodedSignature;
-//   } catch (error) {
-//     return Promise.reject(false);
-//   }
-// };
+  const encodedMessage = encodeSignatureMessage(signMessageString);
 
-// export const verifySignature = async (
-//   message: string,
-//   signature: string,
-//   publicKey: string,
-// ): Promise<boolean> => {
-//   try {
-//     const convertedMessage = fromBase64(message);
-//     const formattedMessage = Uint8Array.from(convertedMessage);
+  const signature = await Secp256k1.createSignature(encodedMessage, defaultPrivkey);
 
-//     const convertedSignature = fromBase64(signature);
-//     const convertedPubKey = fromBase64(publicKey);
+  const signatureBytes = signature.toFixedLength().slice(0, -1);
 
-//     const verifyResult = nacl.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
-//     return verifyResult;
-//   } catch (err) {
-//     return Promise.reject(false);
-//   }
-// };
+  const sigString = toHex(signatureBytes);
+
+  return sigString;
+};
+
+export const verifySignature = async (
+  signatureMessage: string,
+  signature: string,
+  publicKey: string,
+): Promise<boolean> => {
+  try {
+    const compressedPubkey = fromBase64(publicKey);
+
+    const encodedMessage = encodeSignatureMessage(signatureMessage);
+    const signatureData = fromHex(signature);
+
+    const restoredSignature = Secp256k1Signature.fromFixedLength(signatureData);
+
+    const verifyResult = await Secp256k1.verifySignature(restoredSignature, encodedMessage, compressedPubkey);
+    return verifyResult;
+  } catch (err) {
+    return Promise.reject(false);
+  }
+};
