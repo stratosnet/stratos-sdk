@@ -86,6 +86,7 @@ var keyManager_1 = require("./hdVault/keyManager");
 var keyUtils = __importStar(require("./hdVault/keyUtils"));
 var wallet_1 = require("./hdVault/wallet");
 var Sdk_1 = __importDefault(require("./Sdk"));
+var cosmos_1 = require("./services/cosmos");
 var FilesystemService = __importStar(require("./services/filesystem"));
 var Network = __importStar(require("./services/network"));
 var transactions = __importStar(require("./transactions"));
@@ -404,7 +405,7 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
             case 1:
                 masterKeySeed = _a.sent();
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 if (!keyPairZero) {
@@ -623,6 +624,30 @@ var getRewardBalance = function () { return __awaiter(void 0, void 0, void 0, fu
         }
     });
 }); };
+var getOzoneBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, callResultB;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
+            case 1:
+                masterKeySeed = _a.sent();
+                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
+            case 2:
+                keyPairZero = _a.sent();
+                if (!keyPairZero) {
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }])];
+            case 3:
+                callResultB = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
+                return [2 /*return*/];
+        }
+    });
+}); };
 var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 0, function () {
     var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
     return __generator(this, function (_a) {
@@ -633,7 +658,7 @@ var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 
             case 1:
                 masterKeySeed = _a.sent();
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 if (!keyPairZero) {
@@ -925,7 +950,7 @@ var testBigInt = function () { return __awaiter(void 0, void 0, void 0, function
     });
 }); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, error_6, portPP_0, portPP_4, portPP_8, portPP_12;
+    var resolvedChainID, sdkEnv, error_6, portPP_0, portPP_4, portPP_8, portPP_12, phrase, masterKeySeedInfo, serialized, _cosmosClient;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -952,17 +977,28 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 portPP_4 = '8139';
                 portPP_8 = '8143';
                 portPP_12 = '8147';
-                // await Sdk.init({ ...sdkEnv, chainId: resolvedChainID, ppNodePort: portPP_4 });
-                // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-                // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-                // const serialized = masterKeySeedInfo.encryptedWalletInfo;
-                // const _cosmosClient = await getCosmos(serialized, password);
+                return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, ppNodePort: portPP_4 }))];
+            case 6:
+                _a.sent();
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
+            case 7:
+                masterKeySeedInfo = _a.sent();
+                serialized = masterKeySeedInfo.encryptedWalletInfo;
+                return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
+            case 8:
+                _cosmosClient = _a.sent();
                 // cosmosWalletCreateTest();
                 // testFile();
                 // testFileHash();
                 // await mainSdsPrepay();
+                return [4 /*yield*/, getBalanceCardMetrics()];
+            case 9:
+                // cosmosWalletCreateTest();
+                // testFile();
+                // testFileHash();
                 // await mainSdsPrepay();
-                uploadRequest();
+                _a.sent();
                 return [2 /*return*/];
         }
     });

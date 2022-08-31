@@ -7,6 +7,8 @@ export declare const stratosAddressPrefix = "st";
 export declare const stratosPubkeyPrefix = "stpub";
 export declare const stratosDenom = "ustos";
 export declare const stratosTopDenom = "stos";
+export declare const stratosUozDenom = "uoz";
+export declare const stratosOzDenom = "oz";
 export declare const keyPath: string;
 export declare const keyPathPattern: string;
 export declare const kdfConfiguration: KdfConfiguration;

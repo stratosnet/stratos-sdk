@@ -284,7 +284,7 @@ const mainSdsPrepay = async () => {
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
@@ -436,12 +436,27 @@ const getRewardBalance = async () => {
   console.log('our reward balanace', response?.result.rewards); // an array ?
 };
 
+const getOzoneBalance = async () => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
+  console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
+};
+
 const getBalanceCardMetrics = async () => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(2, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
@@ -770,21 +785,24 @@ const main = async () => {
   const portPP_8 = '8143';
   const portPP_12 = '8147';
 
-  // await Sdk.init({ ...sdkEnv, chainId: resolvedChainID, ppNodePort: portPP_4 });
+  await Sdk.init({ ...sdkEnv, chainId: resolvedChainID, ppNodePort: portPP_4 });
 
-  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-  // const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
-  // const _cosmosClient = await getCosmos(serialized, password);
+  const _cosmosClient = await getCosmos(serialized, password);
 
   // cosmosWalletCreateTest();
   // testFile();
   // testFileHash();
   // await mainSdsPrepay();
 
+  await getBalanceCardMetrics();
+
+  // await getOzoneBalance();
   // await mainSdsPrepay();
-  uploadRequest();
+  // uploadRequest();
   // testUploadRequest();
   // testBigInt();
 };

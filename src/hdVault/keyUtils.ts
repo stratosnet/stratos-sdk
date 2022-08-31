@@ -104,13 +104,13 @@ const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result =>
 
 export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
   const stringMnemonic = convertArrayToString(phrase);
-  console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
+  // console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
 
   const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
-  console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
+  // console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
 
   const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
-  console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
+  // console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
 
   return seed;
 };
