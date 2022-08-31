@@ -63,17 +63,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getBaseTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
 var stargate_1 = require("@cosmjs/stargate");
 var tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
-var accounts_1 = require("../accounts");
+// import { getAccountsData } from '../accounts';
 var hdVault_1 = require("../config/hdVault");
 var tokens_1 = require("../config/tokens");
-var Sdk_1 = __importDefault(require("../Sdk"));
 var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var validators_1 = require("../validators");
@@ -161,32 +157,25 @@ var getStandardAmount = function (amounts) {
 };
 exports.getStandardAmount = getStandardAmount;
 // @depricated ?
-var getBaseTx = function (keyPairAddress, memo, numberOfMessages) {
-    if (memo === void 0) { memo = ''; }
-    if (numberOfMessages === void 0) { numberOfMessages = 1; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var accountsData, oldSequence, newSequence, chainId, myTx;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, accounts_1.getAccountsData)(keyPairAddress)];
-                case 1:
-                    accountsData = _a.sent();
-                    oldSequence = String(accountsData.account.sequence);
-                    newSequence = parseInt(oldSequence);
-                    chainId = Sdk_1.default.environment.chainId;
-                    myTx = {
-                        chain_id: chainId,
-                        fee: (0, exports.getStandardFee)(numberOfMessages),
-                        memo: memo,
-                        account_number: String(accountsData.account.account_number),
-                        sequence: "" + newSequence,
-                    };
-                    return [2 /*return*/, myTx];
-            }
-        });
-    });
-};
-exports.getBaseTx = getBaseTx;
+// export const getBaseTx = async (
+//   keyPairAddress: string,
+//   memo = '',
+//   numberOfMessages = 1,
+// ): Promise<Types.BaseTransaction> => {
+//   console.log('get base tx 1');
+//   const accountsData = await getAccountsData(keyPairAddress);
+//   const oldSequence = String(accountsData.account.sequence);
+//   const newSequence = parseInt(oldSequence);
+//   const { chainId } = Sdk.environment;
+//   const myTx = {
+//     chain_id: chainId,
+//     fee: getStandardFee(numberOfMessages),
+//     memo,
+//     account_number: String(accountsData.account.account_number),
+//     sequence: `${newSequence}`,
+//   };
+//   return myTx;
+// };
 var getSendTx = function (keyPairAddress, sendPayload) { return __awaiter(void 0, void 0, void 0, function () {
     var payloadToProcess, iteratedData, messagesList, _a, amount, toAddress, message;
     return __generator(this, function (_b) {

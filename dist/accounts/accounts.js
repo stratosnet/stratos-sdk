@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = exports.getAccountsData = void 0;
+exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
 var get_1 = __importDefault(require("lodash/get"));
 var hdVault_1 = require("../config/hdVault");
 var tokens_1 = require("../config/tokens");
@@ -66,32 +66,24 @@ var bigNumber_1 = require("../services/bigNumber");
 var network_1 = require("../services/network");
 var transactions_1 = require("../services/transformers/transactions");
 var TxTypes = __importStar(require("../transactions/types"));
-var getAccountsData = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
-    var accountsData, response, error, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, network_1.getAccountsData)(keyPairAddress)];
-            case 1:
-                accountsData = _a.sent();
-                response = accountsData.response, error = accountsData.error;
-                if (error) {
-                    throw new Error("Could not get account data. Details: " + error.message);
-                }
-                if (!response) {
-                    throw new Error('Could not get account data. Response is empty');
-                }
-                return [2 /*return*/, response];
-            case 2:
-                err_1 = _a.sent();
-                console.log('Could not get accounts', err_1.message);
-                throw err_1;
-            case 3: return [2 /*return*/];
-        }
-    });
-}); };
-exports.getAccountsData = getAccountsData;
+// @depricated?
+// export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
+//   try {
+//     const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
+//     console.log('🚀 ~ file: accounts.ts ~ line 38 ~ getAccountsData ~ accountsData', accountsData);
+//     const { response, error } = accountsData;
+//     if (error) {
+//       throw new Error(`1 Could not get account data. Details: ${error.message}`);
+//     }
+//     if (!response) {
+//       throw new Error('Could not get account data. Response is empty');
+//     }
+//     return response;
+//   } catch (err) {
+//     console.log('2 Could not get accounts', (err as Error).message);
+//     throw err;
+//   }
+// };
 var increaseBalance = function (walletAddress, faucetUrl) { return __awaiter(void 0, void 0, void 0, function () {
     var result, faucetError, error_1;
     return __generator(this, function (_a) {
@@ -243,13 +235,15 @@ exports.getBalanceCardMetrics = getBalanceCardMetrics;
 var getMaxAvailableBalance = function (keyPairAddress, requestedDenom, decimals) {
     if (decimals === void 0) { decimals = 4; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var accountsData, coins, coin, currentBalance, feeAmount, balanceInWei, balance_1, balance;
+        var accountBalanceData, coins, coin, currentBalance, feeAmount, balanceInWei, balance_1, balance;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, exports.getAccountsData)(keyPairAddress)];
+                case 0:
+                    console.log('from max av balance');
+                    return [4 /*yield*/, (0, network_1.getAccountBalance)(keyPairAddress)];
                 case 1:
-                    accountsData = _a.sent();
-                    coins = (0, get_1.default)(accountsData, 'result.value.coins', []);
+                    accountBalanceData = _a.sent();
+                    coins = (0, get_1.default)(accountBalanceData, 'response.balances', []);
                     coin = coins.find(function (item) { return item.denom === requestedDenom; });
                     currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
                     feeAmount = (0, bigNumber_1.create)(tokens_1.standardFeeAmount);

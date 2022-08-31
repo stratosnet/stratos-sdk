@@ -1,5 +1,4 @@
 import * as TxTypes from '../transactions/types';
-import * as Types from './types';
 export interface BalanceCardMetrics {
     available: string;
     delegated: string;
@@ -7,7 +6,6 @@ export interface BalanceCardMetrics {
     reward: string;
     detailedBalance?: any;
 }
-export declare const getAccountsData: (keyPairAddress: string) => Promise<Types.CosmosAccountData>;
 export declare const increaseBalance: (walletAddress: string, faucetUrl: string) => Promise<{
     result: boolean;
     errorMessage: string;
