@@ -231,21 +231,22 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
   }
 
-  try {
-    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+  // temporary disabling that
+  // try {
+  //   const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
 
-    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+  //   const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
 
-    if (!ozoneBalanceError) {
-      const amount = ozoneBalanceRespone?.result.ozone;
+  //   if (!ozoneBalanceError) {
+  //     const amount = ozoneBalanceRespone?.result.ozone;
 
-      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+  //     cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
 
-      detailedBalance.ozone = amount;
-    }
-  } catch (error) {
-    console.log('could not get ozone balance , error', error);
-  }
+  //     detailedBalance.ozone = amount;
+  //   }
+  // } catch (error) {
+  //   console.log('could not get ozone balance , error', error);
+  // }
 
   cardMetricsResult.detailedBalance = detailedBalance;
 

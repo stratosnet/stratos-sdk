@@ -173,7 +173,7 @@ var getOzoneMetricValue = function (denom, amount) {
 };
 exports.getOzoneMetricValue = getOzoneMetricValue;
 var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
-    var cardMetricsResult, detailedBalance, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, entries, amountInWei, myDelegated, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, entries, amount, denom, ozoneBalanceResult, ozoneBalanceRespone, ozoneBalanceError, amount, error_2;
+    var cardMetricsResult, detailedBalance, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, entries, amountInWei, myDelegated, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, entries, amount, denom;
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     return __generator(this, function (_p) {
         switch (_p.label) {
@@ -244,24 +244,18 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                     }, 0);
                     cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
                 }
-                _p.label = 5;
-            case 5:
-                _p.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }])];
-            case 6:
-                ozoneBalanceResult = _p.sent();
-                ozoneBalanceRespone = ozoneBalanceResult.response, ozoneBalanceError = ozoneBalanceResult.error;
-                if (!ozoneBalanceError) {
-                    amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
-                    cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
-                    detailedBalance.ozone = amount;
-                }
-                return [3 /*break*/, 8];
-            case 7:
-                error_2 = _p.sent();
-                console.log('could not get ozone balance , error', error_2);
-                return [3 /*break*/, 8];
-            case 8:
+                // temporary disabling that
+                // try {
+                //   const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+                //   const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+                //   if (!ozoneBalanceError) {
+                //     const amount = ozoneBalanceRespone?.result.ozone;
+                //     cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+                //     detailedBalance.ozone = amount;
+                //   }
+                // } catch (error) {
+                //   console.log('could not get ozone balance , error', error);
+                // }
                 cardMetricsResult.detailedBalance = detailedBalance;
                 return [2 /*return*/, cardMetricsResult];
         }
