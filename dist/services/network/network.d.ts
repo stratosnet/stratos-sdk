@@ -34,6 +34,8 @@ export declare const getRpcPayload: <T>(msgId: number, method: string, extraPara
     method: string;
     params: T | undefined;
 };
-export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestUploadResult>;
-export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserUploadDataResult>;
+export declare const sendUserRequestList: (extraParams: Types.FileUserRequestListParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>>;
+export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>>;
+export declare const sendUserRequestGetOzone: (extraParams: Types.FileUserRequestGetOzoneParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>>;
+export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>>;
 export declare const getChainId: () => Promise<string | undefined>;

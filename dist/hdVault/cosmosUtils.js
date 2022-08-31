@@ -43,20 +43,6 @@ var proto_signing_1 = require("@cosmjs/proto-signing");
 var utils_1 = require("@cosmjs/utils");
 var cosmosWallet_1 = require("./cosmosWallet");
 // const serializationTypeV1 = 'directsecp256k1hdwallet-v1';
-/**
- * This interface describes a JSON object holding the encrypted wallet and the meta data.
- * All fields in here must be JSON types.
- */
-// export interface DirectSecp256k1HdWalletSerialization {
-//   /** A format+version identifier for this serialization format */
-//   readonly type: string;
-//   /** Information about the key derivation function (i.e. password to encryption key) */
-//   readonly kdf: KdfConfiguration;
-//   /** Information about the symmetric encryption */
-//   readonly encryption: EncryptionConfiguration;
-//   /** An instance of Secp256k1HdWalletData, which is stringified, encrypted and base64 encoded. */
-//   readonly data: string;
-// }
 var serializeWithEncryptionKey = function (password, wallet) { return __awaiter(void 0, void 0, void 0, function () {
     var walletAccounts, dataToEncrypt, dataToEncryptRaw, encryptedData, out;
     return __generator(this, function (_a) {

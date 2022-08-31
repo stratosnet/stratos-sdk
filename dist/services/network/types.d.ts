@@ -352,6 +352,25 @@ export interface EthProtocolRpcResponse extends MainRpcResponse {
 export interface EthProtocolRpcResult extends NetworkAxiosDataResult {
     response?: EthProtocolRpcResponse;
 }
+export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
+    response?: T;
+}
+export interface FileUserRequestListParams {
+    walletaddr: string;
+    page: number;
+}
+export interface FileInfoItem {
+    filehash: string;
+    filesize: number;
+    filename: string;
+    createtime: number;
+}
+export interface FileUserRequestListResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        fileinfo: FileInfoItem[];
+    };
+}
 export interface FileUserRequestUploadParams {
     filename: string;
     filesize: number;
@@ -366,9 +385,6 @@ export interface FileUserRequestUploadResponse extends MainRpcResponse {
         offsetend?: string;
     };
 }
-export interface FileUserRequestUploadResult extends NetworkAxiosDataResult {
-    response?: FileUserRequestUploadResponse;
-}
 export interface FileUserUploadDataParams {
     filehash: string;
     data: string;
@@ -380,6 +396,12 @@ export interface FileUserUploadDataResponse extends MainRpcResponse {
         offsetend?: string;
     };
 }
-export interface FileUserUploadDataResult extends NetworkAxiosDataResult {
-    response?: FileUserUploadDataResponse;
+export interface FileUserRequestGetOzoneParams {
+    walletaddr: string;
+}
+export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        ozone?: string;
+    };
 }

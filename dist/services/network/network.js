@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestUpload = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
+exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var Sdk_1 = __importDefault(require("../../Sdk"));
@@ -72,6 +72,10 @@ var getRestRoute = function () {
 var getRpcRoute = function () {
     var rpcUrl = Sdk_1.default.environment.rpcUrl;
     return rpcUrl;
+};
+var getPpNodeRoute = function () {
+    var _a = Sdk_1.default.environment, ppNodeUrl = _a.ppNodeUrl, ppNodePort = _a.ppNodePort;
+    return ppNodeUrl + ":" + ppNodePort;
 };
 var getExplorerRoute = function () {
     var explorerUrl = Sdk_1.default.environment.explorerUrl;
@@ -161,24 +165,32 @@ exports.apiGet = apiGet;
 var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, void 0, void 0, function () {
     var defaultPayload, url, payload, dataResult;
     return __generator(this, function (_a) {
-        defaultPayload = {
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'eth_protocolVersion',
-            params: [],
-        };
-        console.log('h', config);
-        url = getRpcRoute() + "/status";
-        payload = __assign(__assign({}, defaultPayload), givenPayload);
-        console.log('call', payload);
-        dataResult = {
-            response: {
-                jsonrpc: '2.0',
-                id: 1,
-                result: { return: '1', offsetstart: 0, offsetend: 1234 },
-            },
-        };
-        return [2 /*return*/, dataResult];
+        switch (_a.label) {
+            case 0:
+                defaultPayload = {
+                    id: 1,
+                    jsonrpc: '2.0',
+                    method: 'eth_protocolVersion',
+                    params: [],
+                };
+                url = "" + getPpNodeRoute();
+                // const url = `http://52.14.150.146`;
+                console.log('🚀 ~ file: network.ts ~ line 116 ~ url', url);
+                payload = __assign(__assign({}, defaultPayload), givenPayload);
+                console.log('call', payload);
+                return [4 /*yield*/, (0, exports.apiPost)(url, payload, __assign({}, config))];
+            case 1:
+                dataResult = _a.sent();
+                // console.log(dataResult);
+                // const dataResult = {
+                //   response: {
+                //     jsonrpc: '2.0',
+                //     id: 1,
+                //     result: { return: '1', offsetstart: 0, offsetend: 1234 },
+                //   },
+                // };
+                return [2 /*return*/, dataResult];
+        }
     });
 }); };
 exports.sendRpcCall = sendRpcCall;
@@ -457,7 +469,6 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
         switch (_a.label) {
             case 0:
                 url = getRpcRoute() + "/status";
-                console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -490,6 +501,22 @@ var getRpcPayload = function (msgId, method, extraParams) {
     return payload;
 };
 exports.getRpcPayload = getRpcPayload;
+var sendUserRequestList = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_requestList';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserRequestList = sendUserRequestList;
 var sendUserRequestUpload = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
     var msgId, method, payload, dataResult;
     return __generator(this, function (_a) {
@@ -506,6 +533,22 @@ var sendUserRequestUpload = function (extraParams, config) { return __awaiter(vo
     });
 }); };
 exports.sendUserRequestUpload = sendUserRequestUpload;
+var sendUserRequestGetOzone = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_requestGetOzone';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
 var sendUserUploadData = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
     var msgId, method, payload, dataResult;
     return __generator(this, function (_a) {

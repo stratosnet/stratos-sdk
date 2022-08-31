@@ -5,13 +5,14 @@ import {
   Hmac,
   ripemd160,
   Secp256k1,
+  Secp256k1Signature,
   sha256,
   Sha512,
   Slip10Curve,
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toAscii, toBase64, toBech32 } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
@@ -103,10 +104,13 @@ const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result =>
 
 export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
   const stringMnemonic = convertArrayToString(phrase);
+  console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
 
   const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
+  console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
 
   const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
+  console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
 
   return seed;
 };
@@ -159,12 +163,18 @@ export const getEncryptionKey = async (password: string) => {
   return encryptionKey;
 };
 
-const encodeStratosPubkey = (pubkey: PubKey) => {
+const getTendermintPrefixBytes = () => {
   const pubkeyAminoPrefixSecp256k1 = fromHex('eb5ae987' + '21');
   const pubkeyAminoPrefixSecp256k1Converted = Array.from(pubkeyAminoPrefixSecp256k1);
 
+  return pubkeyAminoPrefixSecp256k1Converted;
+};
+
+const encodeStratosPubkey = (pubkey: PubKey, appendAminoPreffix = false) => {
   const ecodedPubkey = fromBase64(pubkey.value);
   const ecodedPubkeyConverted = Array.from(ecodedPubkey);
+
+  const pubkeyAminoPrefixSecp256k1Converted: number[] = appendAminoPreffix ? getTendermintPrefixBytes() : [];
 
   const encodedFullPubKey = new Uint8Array([
     ...pubkeyAminoPrefixSecp256k1Converted,
@@ -174,7 +184,6 @@ const encodeStratosPubkey = (pubkey: PubKey) => {
   return encodedFullPubKey;
 };
 
-// amino pubkeyToAddress - dep 1 - solved
 export const getAminoPublicKey = async (pubkey: PubKey): Promise<Uint8Array> => {
   const encodedAminoPub = encodeStratosPubkey(pubkey);
 
@@ -195,8 +204,6 @@ function pubkeyToRawAddress(pubkey: PubKey) {
 
 // amino pubkeyToAddress - dep 2 - solved
 export const getAddressFromPubKey = (pubkey: PubKey): string => {
-  // const address = pubkeyToAddress(pubkey, stratosAddressPrefix); // obsolete - { pubkeyToAddress } from '@cosmjs/amino';
-
   const prefix = stratosAddressPrefix;
   const address = toBech32(prefix, pubkeyToRawAddress(pubkey));
 
@@ -307,97 +314,16 @@ export function makePathBuilder(pattern: string): PathBuilder {
 export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password: string) => {
   log('Beginning serializing..');
 
-  // const encryptedWalletInfo = await wallet.serialize(password);
-  // log('1. Serialization is done. ', encryptedWalletInfo);
-
-  // log('2. Executing kdf (preparing encription key (Uint8)');
-  // const encryptionKeyN = await executeKdf(password, kdfConfiguration);
-  // log('2. Encription using "executeKdf" is done. Uint8 key is ready', encryptionKeyN);
-
-  // log('2. Now serializing with prepared by executeKdf  Uint8 encription key');
-  // const encryptedWalletInfoTwo = await wallet.serializeWithEncryptionKey(encryptionKeyN, kdfConfiguration);
-  // log('2. Serialization with prepared by executeKdf Uint8 is done. ', encryptedWalletInfoTwo);
-
-  // const argonHash = await argon2.hash(password, { raw: true });
-  // log('4. 🚀 ~ file: keyUtils.ts ~ line 293 ~ serializeWal ~ argonHash', argonHash);
-  // const argonData = new Uint8Array(argonHash);
-  // log('4. 🚀 ~ file: keyUtils.ts ~ line 322 ~ serializeWal ~ argonData', argonData);
-
-  // log('4. Now serializing with prepared argon Uint8 encription key');
-  // const encryptedWalletInfoThree = await wallet.serializeWithEncryptionKey(argonData, kdfConfiguration);
-  // log('4. Serialization with prepared argon Uint8 is done. ', encryptedWalletInfoThree);
-
-  // const cryptoJsKey = CryptoJS.PBKDF2(password, salt, {
-  //   keySize: keylen / 4,
-  //   iterations: iterations,
-  //   hasher: CryptoJS.algo.SHA256,
-  // });
-  // const cryptoJsKeyEncoded = cryptoJsKey.toString(CryptoJS.enc.Base64);
-
-  // log('5. Utils.ts ~ line 303 ~ cryptoJsKey', cryptoJsKey);
-  // log('5. Utils.ts ~ line 303 ~ cryptoJsKeyEncoded key', cryptoJsKeyEncoded);
-
-  // const buffWrite = Buffer.from(cryptoJsKeyEncoded, 'base64'); // ok 3
-  // console.log('🚀 5. ~ file: keyUtils.ts ~ line 317 ~ serializeWal ~ buffWrite', buffWrite);
-  // const data = new Uint8Array(buffWrite);
-  // let encryptionKey;
-
-  // try {
-  //   encryptionKey = await getEncryptionKey(password);
-  //   console.log('🚀  generated encryption key', encryptionKey);
-  // } catch (error) {
-  //   throw new Error(`Could not generate an encryption key. Error - ${(error as Error).message}`);
-  // }
-
-  // if (!encryptionKey) throw new Error(`Could not generate an encryption key. The key is empty`);
-
   let encryptedWalletInfoFour;
 
   try {
-    // encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
     encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
     log('Serialization with prepared cryptoJs data Uint8 is done. ');
   } catch (error) {
-    // const ss = await import('serialize-error');
-    // const convertedError = ss.serializeError(error as Error);
     throw new Error(
       `Could not serialize a wallet with the encryption key. Error4 - ${(error as Error).message}`,
-      // `Could not serialize a wallet with the encryption key. Error - ${(error as Error).message}`,
     );
   }
-
-  // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-  //   encryptedWalletInfoTwo,
-  //   encrypTIONKeyN,
-  // );
-  // log(
-  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
-  //   deserializedWalletTwo,
-  // );
-  // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
-  // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
-
-  // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-  //   encryptedWalletInfoThree,
-  //   argonData,
-  // );
-  // log(
-  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
-  //   deserializedWalletThree,
-  // );
-  // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
-  // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
-
-  // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-  //   encryptedWalletInfoFour,
-  //   encryptionKey,
-  // );
-  // log(
-  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
-  //   deserializedWalletFour,
-  // );
-  // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
-  // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
 
   // return encryptedWalletInfo;
   return encryptedWalletInfoFour;
@@ -419,9 +345,6 @@ export async function createWalletAtPath(
 
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
 
-  // const accounts = await wallet.getAccounts();
-  // console.log('🚀 ~ file: keyUtils.ts ~ line 279 ~ hdPathIndex', hdPathIndex);
-  // console.log('🚀 ~ file: keyUtils.ts ~ line 288 ~ accounts createWalletAtPath ', accounts);
   // works - way 2
   // const pathBuilder = makePathBuilder(keyPathPattern);
   // const path = pathBuilder(hdPathIndex);
@@ -471,35 +394,43 @@ export async function generateWallets(
   return wallets;
 }
 
-// export const sign = async (message: string, privateKey: string): Promise<string> => {
-//   try {
-//     const decodedMessage = fromBase64(message);
-//     const decodedPrivateKey = fromBase64(privateKey);
+export const encodeSignatureMessage = (message: string) => {
+  const messageHash = CryptoJS.SHA256(message).toString();
+  const signHashBuf = Buffer.from(messageHash, `hex`);
+  const encodedMessage = Uint8Array.from(signHashBuf);
+  return encodedMessage;
+};
 
-//     const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
-//     const ecodedSignature = toBase64(signature);
+export const signWithPrivateKey = async (signMessageString: string, privateKey: string): Promise<string> => {
+  const defaultPrivkey = fromHex(privateKey);
 
-//     return ecodedSignature;
-//   } catch (error) {
-//     return Promise.reject(false);
-//   }
-// };
+  const encodedMessage = encodeSignatureMessage(signMessageString);
 
-// export const verifySignature = async (
-//   message: string,
-//   signature: string,
-//   publicKey: string,
-// ): Promise<boolean> => {
-//   try {
-//     const convertedMessage = fromBase64(message);
-//     const formattedMessage = Uint8Array.from(convertedMessage);
+  const signature = await Secp256k1.createSignature(encodedMessage, defaultPrivkey);
 
-//     const convertedSignature = fromBase64(signature);
-//     const convertedPubKey = fromBase64(publicKey);
+  const signatureBytes = signature.toFixedLength().slice(0, -1);
 
-//     const verifyResult = nacl.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
-//     return verifyResult;
-//   } catch (err) {
-//     return Promise.reject(false);
-//   }
-// };
+  const sigString = toHex(signatureBytes);
+
+  return sigString;
+};
+
+export const verifySignature = async (
+  signatureMessage: string,
+  signature: string,
+  publicKey: string,
+): Promise<boolean> => {
+  try {
+    const compressedPubkey = fromBase64(publicKey);
+
+    const encodedMessage = encodeSignatureMessage(signatureMessage);
+    const signatureData = fromHex(signature);
+
+    const restoredSignature = Secp256k1Signature.fromFixedLength(signatureData);
+
+    const verifyResult = await Secp256k1.verifySignature(restoredSignature, encodedMessage, compressedPubkey);
+    return verifyResult;
+  } catch (err) {
+    return Promise.reject(false);
+  }
+};

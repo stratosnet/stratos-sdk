@@ -16,6 +16,8 @@ var SdkDefaultEnvironment = {
     rpcUrl: 'https://rpc-test.thestratos.org',
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
+    ppNodeUrl: 'http://52.14.150.146',
+    ppNodePort: '8153',
 };
 var Sdk = /** @class */ (function () {
     function Sdk() {
