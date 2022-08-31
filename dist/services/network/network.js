@@ -174,10 +174,8 @@ var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, voi
                     params: [],
                 };
                 url = "" + getPpNodeRoute();
-                // const url = `http://52.14.150.146`;
-                console.log('🚀 ~ file: network.ts ~ line 116 ~ url', url);
                 payload = __assign(__assign({}, defaultPayload), givenPayload);
-                console.log('call', payload);
+                console.log('calling rpc', payload);
                 return [4 /*yield*/, (0, exports.apiPost)(url, payload, __assign({}, config))];
             case 1:
                 dataResult = _a.sent();

@@ -11,6 +11,9 @@ export const stratosPubkeyPrefix = 'stpub';
 export const stratosDenom = 'ustos';
 export const stratosTopDenom = 'stos';
 
+export const stratosUozDenom = 'uoz';
+export const stratosOzDenom = 'oz';
+
 export const keyPath = `${masterkey}${bip44purpose}${stratosCoinType}`;
 
 export const keyPathPattern = `${keyPath}a`;

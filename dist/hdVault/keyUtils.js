@@ -111,13 +111,11 @@ var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0,
         switch (_a.label) {
             case 0:
                 stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
-                console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
                 mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
-                console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
                 return [4 /*yield*/, crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
             case 1:
                 seed = _a.sent();
-                console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
+                // console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
                 return [2 /*return*/, seed];
         }
     });

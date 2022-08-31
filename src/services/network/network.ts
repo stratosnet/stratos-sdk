@@ -119,11 +119,10 @@ export const sendRpcCall = async <N>(
   // console.log('h', config);
   const url = `${getPpNodeRoute()}`;
   // const url = `http://52.14.150.146`;
-  console.log('🚀 ~ file: network.ts ~ line 116 ~ url', url);
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  console.log('call', payload);
+  console.log('calling rpc', payload);
   const dataResult = await apiPost(url, payload, { ...config });
   // console.log(dataResult);
 
