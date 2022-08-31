@@ -1,7 +1,7 @@
 import { defaultRegistryTypes } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
-import { getAccountsData } from '../accounts';
+// import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
 import Sdk from '../Sdk';
@@ -105,28 +105,29 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
 };
 
 // @depricated ?
-export const getBaseTx = async (
-  keyPairAddress: string,
-  memo = '',
-  numberOfMessages = 1,
-): Promise<Types.BaseTransaction> => {
-  const accountsData = await getAccountsData(keyPairAddress);
+// export const getBaseTx = async (
+//   keyPairAddress: string,
+//   memo = '',
+//   numberOfMessages = 1,
+// ): Promise<Types.BaseTransaction> => {
+//   console.log('get base tx 1');
+//   const accountsData = await getAccountsData(keyPairAddress);
 
-  const oldSequence = String(accountsData.account.sequence);
-  const newSequence = parseInt(oldSequence);
+//   const oldSequence = String(accountsData.account.sequence);
+//   const newSequence = parseInt(oldSequence);
 
-  const { chainId } = Sdk.environment;
+//   const { chainId } = Sdk.environment;
 
-  const myTx = {
-    chain_id: chainId,
-    fee: getStandardFee(numberOfMessages),
-    memo,
-    account_number: String(accountsData.account.account_number),
-    sequence: `${newSequence}`,
-  };
+//   const myTx = {
+//     chain_id: chainId,
+//     fee: getStandardFee(numberOfMessages),
+//     memo,
+//     account_number: String(accountsData.account.account_number),
+//     sequence: `${newSequence}`,
+//   };
 
-  return myTx;
-};
+//   return myTx;
+// };
 
 export const getSendTx = async (
   keyPairAddress: string,
