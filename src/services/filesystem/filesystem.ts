@@ -2,7 +2,7 @@ import CID from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
 import multihashing from 'multihashing-async';
-import * as Types from './types';
+// import * as Types from './types';
 
 async function wait(fn: any, ms: number) {
   while (!fn()) {
@@ -38,11 +38,48 @@ export const calculateFileHash = async (filePath: string): Promise<string> => {
 
 const processFileChunk = async () => {};
 
+export interface OpenedFileInfo {
+  size: number;
+  filehash: string;
+}
+
+export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => {
+  let openedFileInfo: OpenedFileInfo = { size: 0, filehash: '' };
+
+  try {
+    const fileStream = fs.createReadStream(filePath);
+    const stats = fs.statSync(filePath);
+
+    const _filehash = await calculateFileHash(filePath);
+
+    openedFileInfo = await new Promise((resolve, reject) => {
+      const result = {
+        size: 0,
+        filehash: _filehash,
+      };
+
+      fileStream.on('readable', function () {
+        result.size = stats.size;
+        resolve(result);
+      });
+
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  return openedFileInfo;
+};
+
 export const getFileChunks = async (filePath: string, chunkSize = 10000): Promise<Buffer[]> => {
   let chunksList: Buffer[] = [];
   try {
     const fileStream = fs.createReadStream(filePath);
     const stats = fs.statSync(filePath);
+    // console.log('🚀 ~ file: filesystem.ts ~ line 46 ~ getFileChunks ~ stats', stats);
 
     chunksList = await new Promise((resolve, reject) => {
       let bytesRead = 0;

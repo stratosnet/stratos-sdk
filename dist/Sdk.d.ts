@@ -3,6 +3,8 @@ export interface SdkEnvironmentConfig {
     rpcUrl: string;
     chainId: string;
     explorerUrl: string;
+    ppNodeUrl?: string;
+    ppNodePort?: string;
 }
 export default class Sdk {
     static environment: {
@@ -10,6 +12,8 @@ export default class Sdk {
         rpcUrl: string;
         chainId: string;
         explorerUrl: string;
+        ppNodeUrl: string;
+        ppNodePort: string;
     };
     static init(sdkEnv: SdkEnvironmentConfig): void;
     static reset(): void;

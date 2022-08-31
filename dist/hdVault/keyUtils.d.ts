@@ -34,3 +34,6 @@ export declare const serializeWallet: (wallet: DirectSecp256k1HdWallet, password
 export declare function createWalletAtPath(hdPathIndex: number, mnemonic: string): Promise<DirectSecp256k1HdWallet>;
 export declare function createWallets(mnemonic: string, pathBuilder: PathBuilder, addressPrefix: string, numberOfDistributors: number): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;
 export declare function generateWallets(quantity: number, mnemonic: string): Promise<ReadonlyArray<readonly [string, OfflineSigner]>>;
+export declare const encodeSignatureMessage: (message: string) => Uint8Array;
+export declare const signWithPrivateKey: (signMessageString: string, privateKey: string) => Promise<string>;
+export declare const verifySignature: (signatureMessage: string, signature: string, publicKey: string) => Promise<boolean>;

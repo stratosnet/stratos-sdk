@@ -39,11 +39,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFile = exports.writeFileToPath = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunks = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFile = exports.writeFileToPath = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
 var cids_1 = __importDefault(require("cids"));
 var crypto_1 = __importDefault(require("crypto"));
 var fs_1 = __importDefault(require("fs"));
 var multihashing_async_1 = __importDefault(require("multihashing-async"));
+// import * as Types from './types';
 function wait(fn, ms) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -97,10 +98,49 @@ exports.calculateFileHash = calculateFileHash;
 var processFileChunk = function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
     return [2 /*return*/];
 }); }); };
+var getFileInfo = function (filePath) { return __awaiter(void 0, void 0, void 0, function () {
+    var openedFileInfo, fileStream_1, stats_1, _filehash_1, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                openedFileInfo = { size: 0, filehash: '' };
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 4, , 5]);
+                fileStream_1 = fs_1.default.createReadStream(filePath);
+                stats_1 = fs_1.default.statSync(filePath);
+                return [4 /*yield*/, (0, exports.calculateFileHash)(filePath)];
+            case 2:
+                _filehash_1 = _a.sent();
+                return [4 /*yield*/, new Promise(function (resolve, reject) {
+                        var result = {
+                            size: 0,
+                            filehash: _filehash_1,
+                        };
+                        fileStream_1.on('readable', function () {
+                            result.size = stats_1.size;
+                            resolve(result);
+                        });
+                        fileStream_1.on('error', function (error) {
+                            reject(error);
+                        });
+                    })];
+            case 3:
+                openedFileInfo = _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
+                error_1 = _a.sent();
+                console.log(error_1);
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/, openedFileInfo];
+        }
+    });
+}); };
+exports.getFileInfo = getFileInfo;
 var getFileChunks = function (filePath, chunkSize) {
     if (chunkSize === void 0) { chunkSize = 10000; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var chunksList, fileStream_1, stats_1, error_1;
+        var chunksList, fileStream_2, stats_2, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -108,36 +148,37 @@ var getFileChunks = function (filePath, chunkSize) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    fileStream_1 = fs_1.default.createReadStream(filePath);
-                    stats_1 = fs_1.default.statSync(filePath);
+                    fileStream_2 = fs_1.default.createReadStream(filePath);
+                    stats_2 = fs_1.default.statSync(filePath);
                     return [4 /*yield*/, new Promise(function (resolve, reject) {
                             var bytesRead = 0;
                             var result = [];
-                            fileStream_1.on('readable', function () {
+                            fileStream_2.on('readable', function () {
                                 /* eslint-disable-next-line no-constant-condition */
                                 while (true) {
                                     // no-constant-condition
-                                    var chunk = fileStream_1.read(chunkSize);
+                                    var chunk = fileStream_2.read(chunkSize);
                                     if (!chunk || !chunk.length) {
                                         break;
                                     }
                                     bytesRead += chunk.length;
                                     result.push(chunk);
                                 }
-                                if (bytesRead >= stats_1.size) {
+                                if (bytesRead >= stats_2.size) {
                                     resolve(result);
                                 }
                             });
-                            fileStream_1.on('error', function (error) {
+                            fileStream_2.on('error', function (error) {
                                 reject(error);
                             });
                         })];
                 case 2:
+                    // console.log('🚀 ~ file: filesystem.ts ~ line 46 ~ getFileChunks ~ stats', stats);
                     chunksList = _a.sent();
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _a.sent();
-                    console.log(error_1);
+                    error_2 = _a.sent();
+                    console.log(error_2);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, chunksList];
             }

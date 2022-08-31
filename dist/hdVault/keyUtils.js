@@ -48,7 +48,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateWallets = exports.createWallets = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
+exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.generateWallets = exports.createWallets = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getMasterKeySeedPublicKey = exports.getEncodedPublicKey = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.getPublicKeyFromPrivKey = exports.getMasterKeySeedPriveKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 var crypto_1 = require("@cosmjs/crypto");
 var encoding_1 = require("@cosmjs/encoding");
 var proto_signing_1 = require("@cosmjs/proto-signing");
@@ -111,10 +111,13 @@ var generateMasterKeySeed = function (phrase) { return __awaiter(void 0, void 0,
         switch (_a.label) {
             case 0:
                 stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
+                console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
                 mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
+                console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
                 return [4 /*yield*/, crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password)];
             case 1:
                 seed = _a.sent();
+                console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
                 return [2 /*return*/, seed];
         }
     });
@@ -169,15 +172,19 @@ var getEncryptionKey = function (password) { return __awaiter(void 0, void 0, vo
     });
 }); };
 exports.getEncryptionKey = getEncryptionKey;
-var encodeStratosPubkey = function (pubkey) {
+var getTendermintPrefixBytes = function () {
     var pubkeyAminoPrefixSecp256k1 = (0, encoding_1.fromHex)('eb5ae987' + '21');
     var pubkeyAminoPrefixSecp256k1Converted = Array.from(pubkeyAminoPrefixSecp256k1);
+    return pubkeyAminoPrefixSecp256k1Converted;
+};
+var encodeStratosPubkey = function (pubkey, appendAminoPreffix) {
+    if (appendAminoPreffix === void 0) { appendAminoPreffix = false; }
     var ecodedPubkey = (0, encoding_1.fromBase64)(pubkey.value);
     var ecodedPubkeyConverted = Array.from(ecodedPubkey);
+    var pubkeyAminoPrefixSecp256k1Converted = appendAminoPreffix ? getTendermintPrefixBytes() : [];
     var encodedFullPubKey = new Uint8Array(__spreadArray(__spreadArray([], pubkeyAminoPrefixSecp256k1Converted, true), ecodedPubkeyConverted, true));
     return encodedFullPubKey;
 };
-// amino pubkeyToAddress - dep 1 - solved
 var getAminoPublicKey = function (pubkey) { return __awaiter(void 0, void 0, void 0, function () {
     var encodedAminoPub;
     return __generator(this, function (_a) {
@@ -198,7 +205,6 @@ function pubkeyToRawAddress(pubkey) {
 }
 // amino pubkeyToAddress - dep 2 - solved
 var getAddressFromPubKey = function (pubkey) {
-    // const address = pubkeyToAddress(pubkey, stratosAddressPrefix); // obsolete - { pubkeyToAddress } from '@cosmjs/amino';
     var prefix = hdVault_1.stratosAddressPrefix;
     var address = (0, encoding_1.toBech32)(prefix, pubkeyToRawAddress(pubkey));
     return address;
@@ -328,46 +334,13 @@ var serializeWallet = function (wallet, password) { return __awaiter(void 0, voi
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, (0, cosmosUtils_1.serializeWithEncryptionKey)(password, wallet)];
             case 2:
-                // encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
                 encryptedWalletInfoFour = _a.sent();
                 (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
                 return [3 /*break*/, 4];
             case 3:
                 error_1 = _a.sent();
-                // const ss = await import('serialize-error');
-                // const convertedError = ss.serializeError(error as Error);
                 throw new Error("Could not serialize a wallet with the encryption key. Error4 - " + error_1.message);
             case 4: 
-            // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-            //   encryptedWalletInfoTwo,
-            //   encrypTIONKeyN,
-            // );
-            // log(
-            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
-            //   deserializedWalletTwo,
-            // );
-            // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
-            // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
-            // const deserializedWalletThree = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-            //   encryptedWalletInfoThree,
-            //   argonData,
-            // );
-            // log(
-            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletThree (argon)',
-            //   deserializedWalletThree,
-            // );
-            // const [firstAccountDesThree] = await deserializedWalletThree.getAccounts();
-            // log('🚀 ~ file: keyUtils.ts firstAccount des three', firstAccountDesThree);
-            // const deserializedWalletFour = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-            //   encryptedWalletInfoFour,
-            //   encryptionKey,
-            // );
-            // log(
-            //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletFour (cryptoJs)',
-            //   deserializedWalletFour,
-            // );
-            // const [firstAccountDesFour] = await deserializedWalletFour.getAccounts();
-            // log('🚀 ~ file: keyUtils.ts firstAccount des four', firstAccountDesFour);
             // return encryptedWalletInfo;
             return [2 /*return*/, encryptedWalletInfoFour];
         }
@@ -390,9 +363,6 @@ function createWalletAtPath(hdPathIndex, mnemonic) {
                     return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options)];
                 case 1:
                     wallet = _a.sent();
-                    // const accounts = await wallet.getAccounts();
-                    // console.log('🚀 ~ file: keyUtils.ts ~ line 279 ~ hdPathIndex', hdPathIndex);
-                    // console.log('🚀 ~ file: keyUtils.ts ~ line 288 ~ accounts createWalletAtPath ', accounts);
                     // works - way 2
                     // const pathBuilder = makePathBuilder(keyPathPattern);
                     // const path = pathBuilder(hdPathIndex);
@@ -456,31 +426,50 @@ function generateWallets(quantity, mnemonic) {
     });
 }
 exports.generateWallets = generateWallets;
-// export const sign = async (message: string, privateKey: string): Promise<string> => {
-//   try {
-//     const decodedMessage = fromBase64(message);
-//     const decodedPrivateKey = fromBase64(privateKey);
-//     const signature = nacl.sign.detached(Uint8Array.from(decodedMessage), decodedPrivateKey);
-//     const ecodedSignature = toBase64(signature);
-//     return ecodedSignature;
-//   } catch (error) {
-//     return Promise.reject(false);
-//   }
-// };
-// export const verifySignature = async (
-//   message: string,
-//   signature: string,
-//   publicKey: string,
-// ): Promise<boolean> => {
-//   try {
-//     const convertedMessage = fromBase64(message);
-//     const formattedMessage = Uint8Array.from(convertedMessage);
-//     const convertedSignature = fromBase64(signature);
-//     const convertedPubKey = fromBase64(publicKey);
-//     const verifyResult = nacl.sign.detached.verify(formattedMessage, convertedSignature, convertedPubKey);
-//     return verifyResult;
-//   } catch (err) {
-//     return Promise.reject(false);
-//   }
-// };
+var encodeSignatureMessage = function (message) {
+    var messageHash = crypto_js_1.default.SHA256(message).toString();
+    var signHashBuf = Buffer.from(messageHash, "hex");
+    var encodedMessage = Uint8Array.from(signHashBuf);
+    return encodedMessage;
+};
+exports.encodeSignatureMessage = encodeSignatureMessage;
+var signWithPrivateKey = function (signMessageString, privateKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var defaultPrivkey, encodedMessage, signature, signatureBytes, sigString;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                defaultPrivkey = (0, encoding_1.fromHex)(privateKey);
+                encodedMessage = (0, exports.encodeSignatureMessage)(signMessageString);
+                return [4 /*yield*/, crypto_1.Secp256k1.createSignature(encodedMessage, defaultPrivkey)];
+            case 1:
+                signature = _a.sent();
+                signatureBytes = signature.toFixedLength().slice(0, -1);
+                sigString = (0, encoding_1.toHex)(signatureBytes);
+                return [2 /*return*/, sigString];
+        }
+    });
+}); };
+exports.signWithPrivateKey = signWithPrivateKey;
+var verifySignature = function (signatureMessage, signature, publicKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var compressedPubkey, encodedMessage, signatureData, restoredSignature, verifyResult, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                compressedPubkey = (0, encoding_1.fromBase64)(publicKey);
+                encodedMessage = (0, exports.encodeSignatureMessage)(signatureMessage);
+                signatureData = (0, encoding_1.fromHex)(signature);
+                restoredSignature = crypto_1.Secp256k1Signature.fromFixedLength(signatureData);
+                return [4 /*yield*/, crypto_1.Secp256k1.verifySignature(restoredSignature, encodedMessage, compressedPubkey)];
+            case 1:
+                verifyResult = _a.sent();
+                return [2 /*return*/, verifyResult];
+            case 2:
+                err_1 = _a.sent();
+                return [2 /*return*/, Promise.reject(false)];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.verifySignature = verifySignature;
 //# sourceMappingURL=keyUtils.js.map
