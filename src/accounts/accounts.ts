@@ -32,26 +32,28 @@ export interface BalanceCardMetrics {
   detailedBalance?: any;
 }
 
-export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
-  try {
-    const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
+// @depricated?
+// export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
+//   try {
+//     const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
+//     console.log('🚀 ~ file: accounts.ts ~ line 38 ~ getAccountsData ~ accountsData', accountsData);
 
-    const { response, error } = accountsData;
+//     const { response, error } = accountsData;
 
-    if (error) {
-      throw new Error(`Could not get account data. Details: ${error.message}`);
-    }
+//     if (error) {
+//       throw new Error(`1 Could not get account data. Details: ${error.message}`);
+//     }
 
-    if (!response) {
-      throw new Error('Could not get account data. Response is empty');
-    }
+//     if (!response) {
+//       throw new Error('Could not get account data. Response is empty');
+//     }
 
-    return response;
-  } catch (err) {
-    console.log('Could not get accounts', (err as Error).message);
-    throw err;
-  }
-};
+//     return response;
+//   } catch (err) {
+//     console.log('2 Could not get accounts', (err as Error).message);
+//     throw err;
+//   }
+// };
 
 export const increaseBalance = async (walletAddress: string, faucetUrl: string) => {
   try {
@@ -79,10 +81,8 @@ export const getBalance = async (
   requestedDenom: string,
   decimals = decimalShortPrecision,
 ): Promise<string> => {
-  // const accountsData = await getAccountsData(keyPairAddress);
   const accountBalanceData = await getBalancesDataFromNetwork(keyPairAddress);
 
-  // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
   const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
@@ -217,9 +217,12 @@ export const getMaxAvailableBalance = async (
   requestedDenom: string,
   decimals = 4,
 ): Promise<string> => {
-  const accountsData = await getAccountsData(keyPairAddress);
+  console.log('from max av balance');
+  // const accountsData = await getAccountsData(keyPairAddress);
 
-  const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  const accountBalanceData = await getBalancesDataFromNetwork(keyPairAddress);
+  // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 
