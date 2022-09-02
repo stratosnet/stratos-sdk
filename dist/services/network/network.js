@@ -53,6 +53,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
+var config_1 = require("../../config");
 var Sdk_1 = __importDefault(require("../../Sdk"));
 var _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
@@ -448,12 +449,16 @@ var getRewardBalance = function (delegatorAddr, config) { return __awaiter(void 
 }); };
 exports.getRewardBalance = getRewardBalance;
 var requestBalanceIncrease = function (walletAddress, faucetUrl, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var url, dataResult;
+    var url, payload, dataResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = faucetUrl + "/" + walletAddress;
-                return [4 /*yield*/, (0, exports.apiPost)(url, {}, config)];
+                url = "" + faucetUrl;
+                payload = {
+                    denom: config_1.hdVault.stratosDenom,
+                    address: walletAddress.trim(),
+                };
+                return [4 /*yield*/, (0, exports.apiPost)(url, payload, config)];
             case 1:
                 dataResult = _a.sent();
                 return [2 /*return*/, dataResult];

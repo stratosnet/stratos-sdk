@@ -1,5 +1,6 @@
 import axios from 'axios';
 import JSONbig from 'json-bigint';
+import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
 import * as Types from './types';
 
@@ -371,8 +372,13 @@ export const requestBalanceIncrease = async (
   faucetUrl: string,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.SubmitTransactionDataResult> => {
-  const url = `${faucetUrl}/${walletAddress}`;
-  const dataResult = await apiPost(url, {}, config);
+  const url = `${faucetUrl}`;
+
+  const payload = {
+    denom: hdVault.stratosDenom,
+    address: walletAddress.trim(),
+  };
+  const dataResult = await apiPost(url, payload, config);
 
   return dataResult;
 };
