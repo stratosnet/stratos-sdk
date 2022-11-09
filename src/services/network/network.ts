@@ -117,23 +117,14 @@ export const sendRpcCall = async <N>(
     method: 'eth_protocolVersion',
     params: [],
   };
-  // console.log('h', config);
   const url = `${getPpNodeRoute()}`;
-  // const url = `http://52.14.150.146`;
+
+  console.log('🚀 ~ file: network.ts ~ line 122 ~ rpc call url', url);
 
   const payload = { ...defaultPayload, ...givenPayload };
 
   console.log('calling rpc', payload);
   const dataResult = await apiPost(url, payload, { ...config });
-  // console.log(dataResult);
-
-  // const dataResult = {
-  //   response: {
-  //     jsonrpc: '2.0',
-  //     id: 1,
-  //     result: { return: '1', offsetstart: 0, offsetend: 1234 },
-  //   },
-  // };
 
   return dataResult;
 };
@@ -330,6 +321,7 @@ export const getAvailableBalance = async (
   const url = `${getRestRoute()}/bank/balances/${address}`;
 
   const dataResult = await apiGet(url, config);
+  console.log('🚀 ~ file: network.ts ~ line 356 ~ dataResult', JSON.stringify(dataResult));
 
   return dataResult;
 };
@@ -370,12 +362,13 @@ export const getRewardBalance = async (
 export const requestBalanceIncrease = async (
   walletAddress: string,
   faucetUrl: string,
+  denom = hdVault.stratosDenom, // ustos and now wei
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.SubmitTransactionDataResult> => {
   const url = `${faucetUrl}`;
 
   const payload = {
-    denom: hdVault.stratosDenom,
+    denom,
     address: walletAddress.trim(),
   };
   const dataResult = await apiPost(url, payload, config);
@@ -449,18 +442,19 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
+  console.log('🚀 ~ file: network.ts ~ line 476 ~ dataResult', dataResult);
 
   return dataResult;
 };
 
 export const sendUserUploadData = async (
-  extraParams: Types.FileUserUploadDataParams,
+  extraParams: Types.FileUserUploadDataParams[],
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>> => {
   const msgId = 1;
   const method = 'user_uploadData';
 
-  const payload = getRpcPayload<Types.FileUserUploadDataParams>(msgId, method, extraParams);
+  const payload = getRpcPayload<Types.FileUserUploadDataParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 

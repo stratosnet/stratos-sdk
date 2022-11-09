@@ -115,6 +115,7 @@ var validators = __importStar(require("./validators"));
 //   stringToPath,
 // } from '@cosmjs/crypto';
 var encoding_1 = require("@cosmjs/encoding");
+var config_1 = require("./config");
 // import md5 from 'blueimp-md5';
 // import crypto from 'crypto';
 // import multihash from 'multihashes';
@@ -129,10 +130,13 @@ var sdkEnvDev = {
     explorerUrl: 'https://explorer-dev.thestratos.org',
 };
 var sdkEnvTest = {
-    restUrl: 'https://rest-test.thestratos.org',
-    rpcUrl: 'https://rpc-test.thestratos.org',
-    chainId: 'test-chain-1',
-    explorerUrl: 'https://explorer-test.thestratos.org',
+    key: 'testnet',
+    name: 'Tropos-4',
+    restUrl: 'https://rest-tropos.thestratos.org',
+    rpcUrl: 'https://rpc-tropos.thestratos.org',
+    chainId: 'stratos-testnet-2',
+    explorerUrl: 'https://big-dipper-tropos.thestratos.org',
+    faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 // export type PathBuilder = (account_index: number) => HdPath;
 // creates an account and derives 2 keypairs
@@ -405,13 +409,13 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
             case 1:
                 masterKeySeed = _a.sent();
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 300 }])];
+                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 30 }])];
             case 3:
                 sendTxMessages = _a.sent();
                 return [4 /*yield*/, transactions.sign(keyPairZero.address, sendTxMessages)];
@@ -658,7 +662,7 @@ var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 
             case 1:
                 masterKeySeed = _a.sent();
                 encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
                 if (!keyPairZero) {
@@ -686,8 +690,8 @@ var runFaucet = function () { return __awaiter(void 0, void 0, void 0, function 
         switch (_a.label) {
             case 0:
                 walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                faucetUrl = 'https://faucet-test.thestratos.org/faucet';
-                return [4 /*yield*/, accounts.increaseBalance(walletAddress, faucetUrl)];
+                faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+                return [4 /*yield*/, accounts.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom)];
             case 1:
                 result = _a.sent();
                 console.log('faucet result', result);
@@ -829,13 +833,13 @@ var testFileHash = function () { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var PROJECT_ROOT, SRC_ROOT, imageFileName, fileReadPath, fileInfo, phrase, masterKeySeedInfo, keyPairZeroA, callResultB, address, publicKey, messageToSign, signature, extraParams, callResult, response;
+    var PROJECT_ROOT, SRC_ROOT, imageFileName, fileReadPath, fileInfo, phrase, masterKeySeedInfo, keyPairZeroA, address, publicKey, messageToSign, signature, extraParams, callResult, response, connectedUrl;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
                 SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                imageFileName = 'stratos_landing_page.png';
+                imageFileName = 'file1';
                 fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
                 return [4 /*yield*/, FilesystemService.getFileInfo(fileReadPath)];
             case 1:
@@ -847,18 +851,14 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
                 return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString())];
             case 3:
                 keyPairZeroA = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 617 ~ testUploadRequest ~ keyPairZeroA', keyPairZeroA);
+                // console.log('🚀 ~ file: run.ts ~ line 617 ~ testUploadRequest ~ keyPairZeroA', keyPairZeroA);
                 if (!keyPairZeroA) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, Network.sendUserRequestGetOzone([{ walletaddr: keyPairZeroA.address }])];
-            case 4:
-                callResultB = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 624 ~ testUploadRequest ~ callResultB', callResultB);
                 address = keyPairZeroA.address, publicKey = keyPairZeroA.publicKey;
                 messageToSign = "" + fileInfo.filehash + address;
                 return [4 /*yield*/, keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey)];
-            case 5:
+            case 4:
                 signature = _a.sent();
                 extraParams = [
                     {
@@ -867,17 +867,23 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
                         filehash: fileInfo.filehash,
                         walletaddr: address,
                         walletpubkey: publicKey,
-                        // walletpubkey: 'stsdspub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ux8qm4',
                         signature: signature,
                     },
                 ];
                 return [4 /*yield*/, Network.sendUserRequestUpload(extraParams)];
-            case 6:
+            case 5:
                 callResult = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 639 ~ testUploadRequest ~ callResult', callResult);
                 response = callResult.response;
-                console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
-                return [2 /*return*/];
+                // console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+                // now upload itself
+                if (!response) {
+                    return [2 /*return*/];
+                }
+                connectedUrl = Sdk_1.default.environment.ppNodeUrl + ":" + Sdk_1.default.environment.ppNodePort;
+                return [2 /*return*/, {
+                        data: "response from " + connectedUrl,
+                        response: response,
+                    }];
         }
     });
 }); };
@@ -931,26 +937,21 @@ var testIt = function () { return __awaiter(void 0, void 0, void 0, function () 
             case 7:
                 callResult = _a.sent();
                 response = callResult.response;
-                console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', response);
                 return [2 /*return*/];
         }
     });
 }); };
-var testBigInt = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var a1, a2, b, myConverted, formatted;
-    return __generator(this, function (_a) {
-        a1 = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-        a2 = '0x6c44198c4a475817';
-        b = a1;
-        myConverted = BigInt(b);
-        formatted = b.substring(2);
-        // const anotherConverted = bigInteger.default(formatted, 16).toString();
-        console.log('🚀 ~ file: run.ts ~ line 730 ~ testBigInt ~ native  ', myConverted);
-        return [2 /*return*/];
-    });
-}); };
+// const testA = async () => {
+//   const extraParams: Network.networkTypes.MonitorSubscribeParams = [
+//     'subscription',
+//     // '19618fc6b51f0b076fa38db10bbb6bb5b1d9edeaf3271a62d88f0c68c3a5d40d',
+//     '442fe1b54cbbee74375ce1d057a31fdf046b95eaa909a90bb664d9b21469be83',
+//   ];
+//   const callResult = await Network.sendMonitorSubscirbe(extraParams);
+//   console.log('🚀 ~ file: run.ts ~ line 794 ~ testA ~ callResult', callResult);
+// };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, error_6, portPP_0, portPP_4, portPP_8, portPP_12, phrase, masterKeySeedInfo, serialized, _cosmosClient;
+    var resolvedChainID, sdkEnv, resolvedChainIDToTest, error_6, phrase, masterKeySeedInfo, serialized, _cosmosClient;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -963,22 +964,21 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 _a.trys.push([2, 4, , 5]);
                 return [4 /*yield*/, Network.getChainId()];
             case 3:
-                resolvedChainID = _a.sent();
+                resolvedChainIDToTest = _a.sent();
+                if (!resolvedChainIDToTest) {
+                    throw new Error('Chain id is empty. Exiting');
+                }
+                resolvedChainID = resolvedChainIDToTest;
                 return [3 /*break*/, 5];
             case 4:
                 error_6 = _a.sent();
                 console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_6);
                 throw new Error('Could not resolve chain id');
-            case 5:
-                if (!resolvedChainID) {
-                    throw new Error('Chain id is empty. Exiting');
-                }
-                portPP_0 = '8153';
-                portPP_4 = '8139';
-                portPP_8 = '8143';
-                portPP_12 = '8147';
-                return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, ppNodePort: portPP_4 }))];
+            case 5: 
+            // 2
+            return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, ppNodeUrl: 'http://13.115.18.9', ppNodePort: '8145' }))];
             case 6:
+                // 2
                 _a.sent();
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
@@ -988,12 +988,18 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 8:
                 _cosmosClient = _a.sent();
+                // await getOzoneBalance();
+                // await mainSdsPrepay();
+                // testUploadRequest();
                 // cosmosWalletCreateTest();
                 // testFile();
                 // testFileHash();
                 // await mainSdsPrepay();
                 return [4 /*yield*/, getBalanceCardMetrics()];
             case 9:
+                // await getOzoneBalance();
+                // await mainSdsPrepay();
+                // testUploadRequest();
                 // cosmosWalletCreateTest();
                 // testFile();
                 // testFileHash();
@@ -1004,4 +1010,5 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     });
 }); };
 main();
+// 19,518.6212
 //# sourceMappingURL=run.js.map

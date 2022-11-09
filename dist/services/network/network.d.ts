@@ -26,7 +26,7 @@ export declare const getAvailableBalance: (address: string, config?: Types.Netwo
 export declare const getDelegatedBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.DelegatedBalanceDataResult>;
 export declare const getUnboundingBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.UnboundingBalanceDataResult>;
 export declare const getRewardBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RewardBalanceDataResult>;
-export declare const requestBalanceIncrease: (walletAddress: string, faucetUrl: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.SubmitTransactionDataResult>;
+export declare const requestBalanceIncrease: (walletAddress: string, faucetUrl: string, denom?: string, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.SubmitTransactionDataResult>;
 export declare const getRpcStatus: (config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RpcStatusDataResult>;
 export declare const uploadFile: (config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.RpcStatusDataResult>;
 export declare const getRpcPayload: <T>(msgId: number, method: string, extraParams?: T | undefined) => {
@@ -37,5 +37,5 @@ export declare const getRpcPayload: <T>(msgId: number, method: string, extraPara
 export declare const sendUserRequestList: (extraParams: Types.FileUserRequestListParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>>;
 export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>>;
 export declare const sendUserRequestGetOzone: (extraParams: Types.FileUserRequestGetOzoneParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>>;
-export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams, config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>>;
+export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams[], config?: Types.NetworkAxiosConfig | undefined) => Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>>;
 export declare const getChainId: () => Promise<string | undefined>;

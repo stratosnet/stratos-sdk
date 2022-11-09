@@ -1,3 +1,4 @@
+export { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 export interface KeyPairInfo {
     keyIndex: number;
     address: string;

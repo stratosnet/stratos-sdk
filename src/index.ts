@@ -4,6 +4,7 @@ export * as hdVault from './hdVault';
 export * as Sdk from './Sdk';
 export * as cosmosService from './services/cosmos';
 export * as networkService from './services/network/network';
+export * as networkTypes from './services/network/types';
 export * as Transformers from './services/transformers';
 export * as walletService from './services/walletService';
 export * as transactions from './transactions';

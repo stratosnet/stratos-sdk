@@ -1,7 +1,13 @@
 "use strict";
+// 1 STOS = 10^18 wei = 10^9Gwei for new denom of stchain
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.baseGasAmount = exports.perMsgGasAmount = exports.standardFeeAmount = exports.decimalShortPrecision = exports.decimalPrecision = void 0;
-exports.decimalPrecision = 9;
+// WEI and GWEI
+exports.decimalPrecision = 18;
+// export const decimalPrecisionShort = 9;
+// USTOS
+// export const decimalPrecision = 9;
+// ui
 exports.decimalShortPrecision = 4;
 exports.standardFeeAmount = 200000; // in ustos
 exports.perMsgGasAmount = 100000; // just a number

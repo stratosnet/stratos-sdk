@@ -175,19 +175,12 @@ var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, voi
                     params: [],
                 };
                 url = "" + getPpNodeRoute();
+                console.log('🚀 ~ file: network.ts ~ line 122 ~ rpc call url', url);
                 payload = __assign(__assign({}, defaultPayload), givenPayload);
                 console.log('calling rpc', payload);
                 return [4 /*yield*/, (0, exports.apiPost)(url, payload, __assign({}, config))];
             case 1:
                 dataResult = _a.sent();
-                // console.log(dataResult);
-                // const dataResult = {
-                //   response: {
-                //     jsonrpc: '2.0',
-                //     id: 1,
-                //     result: { return: '1', offsetstart: 0, offsetend: 1234 },
-                //   },
-                // };
                 return [2 /*return*/, dataResult];
         }
     });
@@ -401,6 +394,7 @@ var getAvailableBalance = function (address, config) { return __awaiter(void 0, 
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
+                console.log('🚀 ~ file: network.ts ~ line 356 ~ dataResult', JSON.stringify(dataResult));
                 return [2 /*return*/, dataResult];
         }
     });
@@ -448,23 +442,27 @@ var getRewardBalance = function (delegatorAddr, config) { return __awaiter(void 
     });
 }); };
 exports.getRewardBalance = getRewardBalance;
-var requestBalanceIncrease = function (walletAddress, faucetUrl, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var url, payload, dataResult;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                url = "" + faucetUrl;
-                payload = {
-                    denom: config_1.hdVault.stratosDenom,
-                    address: walletAddress.trim(),
-                };
-                return [4 /*yield*/, (0, exports.apiPost)(url, payload, config)];
-            case 1:
-                dataResult = _a.sent();
-                return [2 /*return*/, dataResult];
-        }
+var requestBalanceIncrease = function (walletAddress, faucetUrl, denom, // ustos and now wei
+config) {
+    if (denom === void 0) { denom = config_1.hdVault.stratosDenom; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, payload, dataResult;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = "" + faucetUrl;
+                    payload = {
+                        denom: denom,
+                        address: walletAddress.trim(),
+                    };
+                    return [4 /*yield*/, (0, exports.apiPost)(url, payload, config)];
+                case 1:
+                    dataResult = _a.sent();
+                    return [2 /*return*/, dataResult];
+            }
+        });
     });
-}); };
+};
 exports.requestBalanceIncrease = requestBalanceIncrease;
 var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, function () {
     var url, dataResult;
@@ -547,6 +545,7 @@ var sendUserRequestGetOzone = function (extraParams, config) { return __awaiter(
                 return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
             case 1:
                 dataResult = _a.sent();
+                console.log('🚀 ~ file: network.ts ~ line 476 ~ dataResult', dataResult);
                 return [2 /*return*/, dataResult];
         }
     });

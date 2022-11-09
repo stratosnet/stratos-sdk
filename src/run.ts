@@ -45,6 +45,7 @@ import * as validators from './validators';
 //   stringToPath,
 // } from '@cosmjs/crypto';
 import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+import { hdVault } from './config';
 
 // import md5 from 'blueimp-md5';
 
@@ -67,10 +68,13 @@ const sdkEnvDev = {
 };
 
 const sdkEnvTest = {
-  restUrl: 'https://rest-test.thestratos.org',
-  rpcUrl: 'https://rpc-test.thestratos.org',
-  chainId: 'test-chain-1',
-  explorerUrl: 'https://explorer-test.thestratos.org',
+  key: 'testnet',
+  name: 'Tropos-4',
+  restUrl: 'https://rest-tropos.thestratos.org',
+  rpcUrl: 'https://rpc-tropos.thestratos.org',
+  chainId: 'stratos-testnet-2',
+  explorerUrl: 'https://big-dipper-tropos.thestratos.org',
+  faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 
 // export type PathBuilder = (account_index: number) => HdPath;
@@ -284,13 +288,13 @@ const mainSdsPrepay = async () => {
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
   }
 
-  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 300 }]);
+  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 30 }]);
 
   const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
 
@@ -456,7 +460,7 @@ const getBalanceCardMetrics = async () => {
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
@@ -479,9 +483,12 @@ const formatBalanceFromWei = () => {
 
 const runFaucet = async () => {
   const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-  const faucetUrl = 'https://faucet-test.thestratos.org/faucet';
 
-  const result = await accounts.increaseBalance(walletAddress, faucetUrl);
+  // const faucetUrl = 'https://faucet-tropos.thestratos.org/credit';
+  // const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosDenom);
+
+  const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+  const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosTopDenom);
   console.log('faucet result', result);
 };
 
@@ -622,7 +629,9 @@ const testUploadRequest = async () => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
-  const imageFileName = 'stratos_landing_page.png';
+  // const imageFileName = 'stratos_landing_page.png';
+  // const imageFileName = 'img7.png';
+  const imageFileName = 'file1';
   const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
@@ -631,13 +640,11 @@ const testUploadRequest = async () => {
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
 
   const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
-  console.log('🚀 ~ file: run.ts ~ line 617 ~ testUploadRequest ~ keyPairZeroA', keyPairZeroA);
+  // console.log('🚀 ~ file: run.ts ~ line 617 ~ testUploadRequest ~ keyPairZeroA', keyPairZeroA);
 
   if (!keyPairZeroA) {
     return;
   }
-  const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZeroA.address }]);
-  console.log('🚀 ~ file: run.ts ~ line 624 ~ testUploadRequest ~ callResultB', callResultB);
 
   const { address, publicKey } = keyPairZeroA;
 
@@ -651,17 +658,64 @@ const testUploadRequest = async () => {
       filehash: fileInfo.filehash,
       walletaddr: address,
       walletpubkey: publicKey,
-      // walletpubkey: 'stsdspub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ux8qm4',
       signature,
     },
   ];
 
+  // only requesting the upload
   const callResult = await Network.sendUserRequestUpload(extraParams);
-  console.log('🚀 ~ file: run.ts ~ line 639 ~ testUploadRequest ~ callResult', callResult);
-  // const callResult = await Network.sendUserRequestList(extraParamsFilelist);
 
   const { response } = callResult;
-  console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+  // console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+
+  // now upload itself
+  if (!response) {
+    return;
+  }
+
+  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+
+  return {
+    data: `response from ${connectedUrl}`,
+    response,
+  };
+
+  // const {
+  //   result: { offsetend, offsetstart, return: isContinue },
+  // } = response;
+
+  // const chunkSize = offsetstart!;
+  // console.log('🚀 ~ file: run.ts ~ line 676 ~ testUploadRequest ~ chunkSize', chunkSize);
+
+  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, parseInt(chunkSize));
+  // console.log(
+  //   '🚀 ~ file: run.ts ~ line 679 ~ testUploadRequest ~ encodedFileChunks',
+  //   encodedFileChunks.length,
+  // );
+
+  // const pCalls = encodedFileChunks.map(async currentChunk => {
+  //   const extraParamsUpload = [
+  //     {
+  //       filehash: fileInfo.filehash,
+  //       data: currentChunk,
+  //     },
+  //   ];
+
+  //   const chunkUploadResult = await Network.sendUserUploadData(extraParamsUpload);
+  //   const { error: chunkUploadError, response: chunkUploadRespons } = chunkUploadResult;
+  //   console.log(
+  //     '🚀 ~ file: run.ts ~ line 691 ~ pCalls ~ chunkUploadRespons',
+  //     JSON.stringify(chunkUploadRespons, null, 2),
+  //   );
+
+  //   // console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', chunkUploadResult);
+  //   if (chunkUploadError) return 'err';
+  //   if (chunkUploadRespons) return chunkUploadRespons;
+  //   return 'what?';
+  // });
+
+  // const res = await Promise.all(pCalls);
+  // console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
 };
 
 const testIt = async () => {
@@ -709,7 +763,6 @@ const testIt = async () => {
   // const callResult = await Network.sendUserRequestList(extraParamsFilelist);
 
   const { response } = callResult;
-  console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', response);
 
   // if (!response) {
   //   return;
@@ -738,54 +791,44 @@ const testIt = async () => {
   // console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
 };
 
-const testBigInt = async () => {
-  const a1 = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-  const a2 = '0x6c44198c4a475817';
-  const b = a1;
+// const testA = async () => {
+//   const extraParams: Network.networkTypes.MonitorSubscribeParams = [
+//     'subscription',
+//     // '19618fc6b51f0b076fa38db10bbb6bb5b1d9edeaf3271a62d88f0c68c3a5d40d',
+//     '442fe1b54cbbee74375ce1d057a31fdf046b95eaa909a90bb664d9b21469be83',
+//   ];
 
-  const myConverted = BigInt(b);
-  const formatted = b.substring(2);
-
-  // const anotherConverted = bigInteger.default(formatted, 16).toString();
-  console.log('🚀 ~ file: run.ts ~ line 730 ~ testBigInt ~ native  ', myConverted);
-
-  // console.log('🚀 ~ file: run.ts ~ line 732 ~ testBigInt ~ another ', anotherConverted);
-
-  // const rW = '7801388544844847000n';
-  // console.log('🚀 ~ file: run.ts ~ line 733 ~ testBigInt ~ polyfil', rW);
-
-  // const bbb = BigInt(Math.pow(2, 32) - 1);
-  // console.log('🚀 ~ file: run.ts ~ line 743 ~ testBigInt ~ bbb', bbb);
-
-  // const bb = BigIntegerM.BigInteger.BigInt(b);
-  // console.log('🚀 ~ file: run.ts ~ line 747 ~ testBigInt ~ bb', bb);
-};
+//   const callResult = await Network.sendMonitorSubscirbe(extraParams);
+//   console.log('🚀 ~ file: run.ts ~ line 794 ~ testA ~ callResult', callResult);
+// };
 
 const main = async () => {
-  let resolvedChainID;
+  let resolvedChainID: string;
 
-  // // const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvTest;
   const sdkEnv = sdkEnvDev;
 
   await Sdk.init({ ...sdkEnv });
 
   try {
-    resolvedChainID = await Network.getChainId();
+    const resolvedChainIDToTest = await Network.getChainId();
+
+    if (!resolvedChainIDToTest) {
+      throw new Error('Chain id is empty. Exiting');
+    }
+    resolvedChainID = resolvedChainIDToTest;
   } catch (error) {
     console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
     throw new Error('Could not resolve chain id');
   }
 
-  if (!resolvedChainID) {
-    throw new Error('Chain id is empty. Exiting');
-  }
-
-  const portPP_0 = '8153';
-  const portPP_4 = '8139';
-  const portPP_8 = '8143';
-  const portPP_12 = '8147';
-
-  await Sdk.init({ ...sdkEnv, chainId: resolvedChainID, ppNodePort: portPP_4 });
+  // 2
+  await Sdk.init({
+    ...sdkEnv,
+    chainId: resolvedChainID,
+    ppNodeUrl: 'http://13.115.18.9',
+    ppNodePort: '8145',
+  });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
@@ -793,18 +836,22 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
+  // await getOzoneBalance();
+  // await mainSdsPrepay();
+
+  // testUploadRequest();
+
   // cosmosWalletCreateTest();
   // testFile();
   // testFileHash();
   // await mainSdsPrepay();
 
   await getBalanceCardMetrics();
-
-  // await getOzoneBalance();
-  // await mainSdsPrepay();
+  // await runFaucet();
   // uploadRequest();
-  // testUploadRequest();
+
   // testBigInt();
 };
 
 main();
+// 19,518.6212

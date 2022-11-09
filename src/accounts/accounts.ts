@@ -1,4 +1,5 @@
 import _get from 'lodash/get';
+import { hdVault } from '../config';
 import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
 import {
@@ -34,32 +35,9 @@ export interface BalanceCardMetrics {
   detailedBalance?: any;
 }
 
-// @depricated?
-// export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
-//   try {
-//     const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
-//     console.log('🚀 ~ file: accounts.ts ~ line 38 ~ getAccountsData ~ accountsData', accountsData);
-
-//     const { response, error } = accountsData;
-
-//     if (error) {
-//       throw new Error(`1 Could not get account data. Details: ${error.message}`);
-//     }
-
-//     if (!response) {
-//       throw new Error('Could not get account data. Response is empty');
-//     }
-
-//     return response;
-//   } catch (err) {
-//     console.log('2 Could not get accounts', (err as Error).message);
-//     throw err;
-//   }
-// };
-
-export const increaseBalance = async (walletAddress: string, faucetUrl: string) => {
+export const increaseBalance = async (walletAddress: string, faucetUrl: string, denom?: string) => {
   try {
-    const result = await requestBalanceIncrease(walletAddress, faucetUrl);
+    const result = await requestBalanceIncrease(walletAddress, faucetUrl, denom);
 
     const { error: faucetError } = result;
 
@@ -190,7 +168,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    const myDelegated = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
+    const myDelegated = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
 
     cardMetricsResult.delegated = myDelegated;
   }
@@ -208,7 +186,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    cardMetricsResult.unbounding = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
+    cardMetricsResult.unbounding = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);
@@ -232,21 +210,21 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   }
 
   // temporary disabling that
-  // try {
-  //   const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+  try {
+    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
 
-  //   const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
 
-  //   if (!ozoneBalanceError) {
-  //     const amount = ozoneBalanceRespone?.result.ozone;
+    if (!ozoneBalanceError) {
+      const amount = ozoneBalanceRespone?.result.ozone;
 
-  //     cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
 
-  //     detailedBalance.ozone = amount;
-  //   }
-  // } catch (error) {
-  //   console.log('could not get ozone balance , error', error);
-  // }
+      detailedBalance.ozone = amount;
+    }
+  } catch (error) {
+    console.log('could not get ozone balance , error', error);
+  }
 
   cardMetricsResult.detailedBalance = detailedBalance;
 

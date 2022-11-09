@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/extend-expect';
 import BigNumber from 'bignumber.js';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
 import * as network from './network';
 
@@ -543,7 +544,7 @@ describe('network (unit test)', () => {
         }),
       );
 
-      await network.requestBalanceIncrease(walletAddress, faucetUrl, testConfig);
+      await network.requestBalanceIncrease(walletAddress, faucetUrl, hdVault.stratosTopDenom, testConfig);
 
       expect(spyApiPost).toHaveBeenCalledWith(url, {}, testConfig);
       spyApiPost.mockRestore();

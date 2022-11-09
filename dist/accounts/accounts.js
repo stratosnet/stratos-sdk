@@ -60,37 +60,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOzoneMetricValue = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
 var get_1 = __importDefault(require("lodash/get"));
+var config_1 = require("../config");
 var hdVault_1 = require("../config/hdVault");
 var tokens_1 = require("../config/tokens");
 var bigNumber_1 = require("../services/bigNumber");
 var network_1 = require("../services/network");
 var transactions_1 = require("../services/transformers/transactions");
 var TxTypes = __importStar(require("../transactions/types"));
-// @depricated?
-// export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
-//   try {
-//     const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
-//     console.log('🚀 ~ file: accounts.ts ~ line 38 ~ getAccountsData ~ accountsData', accountsData);
-//     const { response, error } = accountsData;
-//     if (error) {
-//       throw new Error(`1 Could not get account data. Details: ${error.message}`);
-//     }
-//     if (!response) {
-//       throw new Error('Could not get account data. Response is empty');
-//     }
-//     return response;
-//   } catch (err) {
-//     console.log('2 Could not get accounts', (err as Error).message);
-//     throw err;
-//   }
-// };
-var increaseBalance = function (walletAddress, faucetUrl) { return __awaiter(void 0, void 0, void 0, function () {
+var increaseBalance = function (walletAddress, faucetUrl, denom) { return __awaiter(void 0, void 0, void 0, function () {
     var result, faucetError, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, network_1.requestBalanceIncrease)(walletAddress, faucetUrl)];
+                return [4 /*yield*/, (0, network_1.requestBalanceIncrease)(walletAddress, faucetUrl, denom)];
             case 1:
                 result = _a.sent();
                 faucetError = result.error;
@@ -173,7 +156,7 @@ var getOzoneMetricValue = function (denom, amount) {
 };
 exports.getOzoneMetricValue = getOzoneMetricValue;
 var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0, void 0, void 0, function () {
-    var cardMetricsResult, detailedBalance, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, entries, amountInWei, myDelegated, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, entries, amount, denom;
+    var cardMetricsResult, detailedBalance, availableBalanceResult, availableBalanceResponse, availableBalanceError, amount, denom, delegatedBalanceResult, delegatedBalanceResponse, delegatedBalanceError, entries, amountInWei, myDelegated, unboundingBalanceResult, unboundingBalanceResponse, unboundingBalanceError, entries, amountInWei, rewardBalanceResult, rewardBalanceResponse, rewardBalanceError, entries, amount, denom, ozoneBalanceResult, ozoneBalanceRespone, ozoneBalanceError, amount, error_2;
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     return __generator(this, function (_p) {
         switch (_p.label) {
@@ -213,7 +196,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                         detailedBalance.delegated[validatorAddress] = validatorBalance;
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
                     }, 0);
-                    myDelegated = (0, exports.getBalanceCardMetricValue)('ustos', "" + (amountInWei || ''));
+                    myDelegated = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "" + (amountInWei || ''));
                     cardMetricsResult.delegated = myDelegated;
                 }
                 return [4 /*yield*/, (0, network_1.getUnboundingBalance)(keyPairAddress)];
@@ -226,7 +209,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                         var balanceInWei = (0, bigNumber_1.create)(entry.balance);
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
                     }, 0);
-                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)('ustos', "" + (amountInWei || ''));
+                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "" + (amountInWei || ''));
                 }
                 return [4 /*yield*/, (0, network_1.getRewardBalance)(keyPairAddress)];
             case 4:
@@ -244,18 +227,24 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                     }, 0);
                     cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
                 }
-                // temporary disabling that
-                // try {
-                //   const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
-                //   const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
-                //   if (!ozoneBalanceError) {
-                //     const amount = ozoneBalanceRespone?.result.ozone;
-                //     cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
-                //     detailedBalance.ozone = amount;
-                //   }
-                // } catch (error) {
-                //   console.log('could not get ozone balance , error', error);
-                // }
+                _p.label = 5;
+            case 5:
+                _p.trys.push([5, 7, , 8]);
+                return [4 /*yield*/, (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }])];
+            case 6:
+                ozoneBalanceResult = _p.sent();
+                ozoneBalanceRespone = ozoneBalanceResult.response, ozoneBalanceError = ozoneBalanceResult.error;
+                if (!ozoneBalanceError) {
+                    amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
+                    cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
+                    detailedBalance.ozone = amount;
+                }
+                return [3 /*break*/, 8];
+            case 7:
+                error_2 = _p.sent();
+                console.log('could not get ozone balance , error', error_2);
+                return [3 /*break*/, 8];
+            case 8:
                 cardMetricsResult.detailedBalance = detailedBalance;
                 return [2 /*return*/, cardMetricsResult];
         }
