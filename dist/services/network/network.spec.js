@@ -73,6 +73,7 @@ require("@testing-library/jest-dom/extend-expect");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var msw_1 = require("msw");
 var node_1 = require("msw/node");
+var config_1 = require("../../config");
 var Sdk_1 = __importDefault(require("../../Sdk"));
 var network = __importStar(require("./network"));
 var myDefaultResult = [
@@ -630,7 +631,7 @@ describe('network (unit test)', function () {
                         server.use(msw_1.rest.post(url, function (_req, res, ctx) {
                             return res(ctx.json({}));
                         }));
-                        return [4 /*yield*/, network.requestBalanceIncrease(walletAddress, faucetUrl, testConfig)];
+                        return [4 /*yield*/, network.requestBalanceIncrease(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom, testConfig)];
                     case 1:
                         _a.sent();
                         expect(spyApiPost).toHaveBeenCalledWith(url, {}, testConfig);

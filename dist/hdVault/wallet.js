@@ -55,11 +55,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deserializeEncryptedWallet = exports.deriveKeyPair = void 0;
+exports.deserializeEncryptedWallet = exports.deriveKeyPair = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosOzDenom = exports.stratosDenom = void 0;
 var hdVault_1 = require("../config/hdVault");
 var cosmosUtils_1 = require("./cosmosUtils");
 var deriveManager_1 = require("./deriveManager");
 var keyUtils = __importStar(require("./keyUtils"));
+var hdVault_2 = require("../config/hdVault");
+Object.defineProperty(exports, "stratosDenom", { enumerable: true, get: function () { return hdVault_2.stratosDenom; } });
+Object.defineProperty(exports, "stratosOzDenom", { enumerable: true, get: function () { return hdVault_2.stratosOzDenom; } });
+Object.defineProperty(exports, "stratosTopDenom", { enumerable: true, get: function () { return hdVault_2.stratosTopDenom; } });
+Object.defineProperty(exports, "stratosUozDenom", { enumerable: true, get: function () { return hdVault_2.stratosUozDenom; } });
 var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
     var masterKeySeed, er_1, path, privateKeySeed, derivedKeyPair, address, encodedPublicKey, privateKey, res;
     return __generator(this, function (_a) {

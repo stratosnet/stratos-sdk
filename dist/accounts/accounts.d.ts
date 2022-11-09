@@ -7,7 +7,7 @@ export interface BalanceCardMetrics {
     ozone: string;
     detailedBalance?: any;
 }
-export declare const increaseBalance: (walletAddress: string, faucetUrl: string) => Promise<{
+export declare const increaseBalance: (walletAddress: string, faucetUrl: string, denom?: string | undefined) => Promise<{
     result: boolean;
     errorMessage: string;
 } | {
