@@ -289,6 +289,7 @@ const mainSdsPrepay = async () => {
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
     return;
@@ -461,6 +462,7 @@ const getBalanceCardMetrics = async () => {
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
     return;
@@ -631,10 +633,11 @@ const testUploadRequest = async () => {
 
   // const imageFileName = 'stratos_landing_page.png';
   // const imageFileName = 'img7.png';
-  const imageFileName = 'file1';
+  const imageFileName = 'file100M1';
   const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+  console.log('file info', fileInfo);
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
@@ -666,7 +669,7 @@ const testUploadRequest = async () => {
   const callResult = await Network.sendUserRequestUpload(extraParams);
 
   const { response } = callResult;
-  // console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+  console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
 
   // now upload itself
   if (!response) {
@@ -679,76 +682,74 @@ const testUploadRequest = async () => {
     data: `response from ${connectedUrl}`,
     response,
   };
-
-  // const {
-  //   result: { offsetend, offsetstart, return: isContinue },
-  // } = response;
-
-  // const chunkSize = offsetstart!;
-  // console.log('🚀 ~ file: run.ts ~ line 676 ~ testUploadRequest ~ chunkSize', chunkSize);
-
-  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, parseInt(chunkSize));
-  // console.log(
-  //   '🚀 ~ file: run.ts ~ line 679 ~ testUploadRequest ~ encodedFileChunks',
-  //   encodedFileChunks.length,
-  // );
-
-  // const pCalls = encodedFileChunks.map(async currentChunk => {
-  //   const extraParamsUpload = [
-  //     {
-  //       filehash: fileInfo.filehash,
-  //       data: currentChunk,
-  //     },
-  //   ];
-
-  //   const chunkUploadResult = await Network.sendUserUploadData(extraParamsUpload);
-  //   const { error: chunkUploadError, response: chunkUploadRespons } = chunkUploadResult;
-  //   console.log(
-  //     '🚀 ~ file: run.ts ~ line 691 ~ pCalls ~ chunkUploadRespons',
-  //     JSON.stringify(chunkUploadRespons, null, 2),
-  //   );
-
-  //   // console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', chunkUploadResult);
-  //   if (chunkUploadError) return 'err';
-  //   if (chunkUploadRespons) return chunkUploadRespons;
-  //   return 'what?';
-  // });
-
-  // const res = await Promise.all(pCalls);
-  // console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
 };
 
-const testIt = async () => {
+const testRequestData = async () => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+
+  if (!keyPairZeroA) {
+    return;
+  }
+
+  const { address } = keyPairZeroA;
+
+  const extraParams = [
+    {
+      walletaddr: address,
+      // walletpubkey: publicKey,
+      page: 0,
+    },
+  ];
+
+  // only requesting the upload
+  const callResult = await Network.sendUserRequestList(extraParams);
+
+  const { response } = callResult;
+
+  console.log('file list request result', JSON.stringify(callResult));
+
+  // now upload itself
+  if (!response) {
+    return;
+  }
+
+  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+
+  return {
+    data: `response from ${connectedUrl}`,
+    response,
+  };
+};
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const testUpload = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
-  const imageFileName = 'stratos_landing_page.png';
+  const imageFileName = filename;
   const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
-
-  const fileWritePath = path.resolve(SRC_ROOT, 'my_image_new2.png');
-
-  const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
-  console.log('encoded file chunks', encodedFileChunks);
-  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-  const encodedFile = await FilesystemService.encodeFile(decodedFile);
-  FilesystemService.writeFileToPath(fileWritePath, encodedFile);
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-  // console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
 
   const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
-  // console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
 
   if (!keyPairZeroA) {
     return;
   }
 
   const { address, publicKey } = keyPairZeroA;
+  const messageToSign = `${fileInfo.filehash}${address}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
   const extraParams = [
     {
       filename: imageFileName,
@@ -756,51 +757,225 @@ const testIt = async () => {
       filehash: fileInfo.filehash,
       walletaddr: address,
       walletpubkey: publicKey,
+      signature,
     },
   ];
 
-  const callResult = await Network.sendUserRequestUpload(extraParams);
-  // const callResult = await Network.sendUserRequestList(extraParamsFilelist);
-
-  const { response } = callResult;
-
+  // const callResult = await Network.sendUserRequestUpload(extraParams);
+  //
+  // const { response } = callResult;
+  //
+  // console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResult);
+  //
   // if (!response) {
+  //   console.log('we dont have response. it might be an error', callResult);
+  //
+  //   return;
+  // }
+  //
+  // const {
+  //   result: { offsetend = '3500000', offsetstart, return: isContinue },
+  // } = response;
+
+  // if (offsetend === undefined) {
+  //   console.log('we dont have an offest. could be an error. response is', response);
   //   return;
   // }
 
-  // const {
-  //   result: { offsetend, offsetstart, return: isContinue },
-  // } = response;
+  // const chunkSize = parseInt(offsetend);
 
-  // const chunkSize = offsetstart!;
+  const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, chunkSize);
 
-  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath);
+  let readSize = 0;
 
-  // const pCalls = encodedFileChunks.map(async currentChunk => {
-  //   const extraParamsUpload = {
-  //     filehash: 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg',
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+
+  console.log('stats', stats);
+
+  const step = 5000000;
+  let offsetStart = 0;
+  let offsetEnd = step;
+  // let itIdx = 0;
+
+  // const step = 65536;
+  // const maxStep = 10000;
+  const maxStep = 65536;
+
+  const readChunkSize = offsetEnd - offsetStart;
+
+  const encodedFileChunks = [];
+
+  let completedProgress = 0;
+
+  while (readSize < fileSize) {
+    // const a = fileStream.readable;
+    // console.log('readable', a);
+
+    let fileChunk;
+
+    if (readChunkSize < maxStep) {
+      fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+    } else {
+      let remained = readChunkSize;
+      const subChunks = [];
+      while (remained > 0) {
+        const currentStep = remained > maxStep ? maxStep : remained;
+        // console.log('currentStep', currentStep);
+        subChunks.push(currentStep);
+
+        remained = remained - currentStep;
+        // console.log('remained', remained);
+      }
+      // console.log('list of sub chnks ', subChunks);
+      const myList = [];
+
+      for (const chunkLength of subChunks) {
+        const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+
+        await delay(100);
+        myList.push(chunkMini);
+      }
+      // console.log('myList', myList);
+      const filteredList = myList.filter(Boolean);
+
+      // console.log('filteredList', filteredList);
+      const aggregatedBuf = Buffer.concat(filteredList);
+      // console.log('aggregatedBuf', aggregatedBuf);
+      fileChunk = aggregatedBuf;
+    }
+
+    // console.log('fileChunk ', fileChunk);
+    if (!fileChunk) {
+      break;
+    }
+
+    if (fileChunk) {
+      // console.log('!!!!! fileChunk length', fileChunk.length);
+      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+      // console.log('encoded length', encodedFileChunk.length);
+      // const fileWritePath = path.resolve(SRC_ROOT, `it_written_${itIdx}_${filename}`);
+      // console.log('path', fileWritePath);
+
+      // await FilesystemService.writeFileToPath(fileWritePath, encodedFileChunk);
+
+      readSize = readSize + fileChunk.length;
+      // console.log('read size', readSize);
+
+      completedProgress = (100 * readSize) / fileSize;
+
+      console.log(
+        `completed ${readSize} from ${fileSize} bytes, or ${(
+          Math.round(completedProgress * 100) / 100
+        ).toFixed(2)}%`,
+      );
+      offsetStart = offsetEnd;
+      offsetEnd = offsetEnd + step;
+      // itIdx += 1;
+      encodedFileChunks.push(encodedFileChunk);
+    }
+  }
+
+  const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
+  const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+
+  console.log('fileWritePath ', fileWritePath);
+  // const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  // it is good up to here
+  console.log('encoded file chunks length', encodedFileChunks.length);
+
+  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+  console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+
+  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+  console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+
+  FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+  console.log('we should have an entire file written');
+
+  const encodedFile = await FilesystemService.encodeFile(decodedFile);
+  console.log('this is not be shown as the string is way too long');
+  FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+
+  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, 100000);
+
+  // const pCalls = encodedFileChunks.map(async (currentChunk: string, idx) => {
+  // const extraParamsUpload = [
+  //   {
+  //     filehash: fileInfo.filehash,
   //     data: currentChunk,
-  //   };
+  //   },
+  // ];
 
-  //   const callTwoResult = await Network.sendUserUploadData(extraParamsUpload);
+  // const fileWritePath = path.resolve(SRC_ROOT, `written_${idx}_${filename}`);
+  // console.log('path', fileWritePath);
 
-  //   console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', callTwoResult);
+  // await FilesystemService.writeFileToPath(fileWritePath, currentChunk);
+  //
+  //   // const callTwoResult = await Network.sendUserUploadData(extraParamsUpload);
+  //   // console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', callTwoResult);
   // });
-
+  //
   // const res = await Promise.all(pCalls);
   // console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
 };
 
-// const testA = async () => {
-//   const extraParams: Network.networkTypes.MonitorSubscribeParams = [
-//     'subscription',
-//     // '19618fc6b51f0b076fa38db10bbb6bb5b1d9edeaf3271a62d88f0c68c3a5d40d',
-//     '442fe1b54cbbee74375ce1d057a31fdf046b95eaa909a90bb664d9b21469be83',
-//   ];
+const testIt = async (filename: string) => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
-//   const callResult = await Network.sendMonitorSubscirbe(extraParams);
-//   console.log('🚀 ~ file: run.ts ~ line 794 ~ testA ~ callResult', callResult);
-// };
+  const imageFileName = filename;
+  const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
+
+  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+
+  if (!keyPairZeroA) {
+    return;
+  }
+
+  const { address, publicKey } = keyPairZeroA;
+  const messageToSign = `${fileInfo.filehash}${address}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+  const extraParams = [
+    {
+      filename: imageFileName,
+      filesize: fileInfo.size,
+      filehash: fileInfo.filehash,
+      walletaddr: address,
+      walletpubkey: publicKey,
+      signature,
+    },
+  ];
+
+  const callResult = await Network.sendUserRequestUpload(extraParams);
+
+  const { response } = callResult;
+
+  console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResult);
+
+  if (!response) {
+    console.log('we dont have response. it might be an error', callResult);
+
+    return;
+  }
+
+  const { result } = response;
+  console.log('result');
+
+  const { offsetend = '3500000', offsetstart, return: isContinue } = result;
+  if (offsetend === undefined) {
+    console.log('we dont have an offest. could be an error. response is', response);
+    return;
+  }
+};
 
 const main = async () => {
   let resolvedChainID: string;
@@ -808,7 +983,7 @@ const main = async () => {
   // const sdkEnv = sdkEnvTest;
   const sdkEnv = sdkEnvDev;
 
-  await Sdk.init({ ...sdkEnv });
+  Sdk.init({ ...sdkEnv });
 
   try {
     const resolvedChainIDToTest = await Network.getChainId();
@@ -816,6 +991,8 @@ const main = async () => {
     if (!resolvedChainIDToTest) {
       throw new Error('Chain id is empty. Exiting');
     }
+
+    console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
     resolvedChainID = resolvedChainIDToTest;
   } catch (error) {
     console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
@@ -823,7 +1000,7 @@ const main = async () => {
   }
 
   // 2
-  await Sdk.init({
+  Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
     ppNodeUrl: 'http://13.115.18.9',
@@ -836,22 +1013,24 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  // await getOzoneBalance();
+  // const filename = 'file1.mp4';
+  const filename = 'file1_10M_23_11_2022';
+  // await getBalanceCardMetrics();
   // await mainSdsPrepay();
+  // await testUploadRequest();
+  // await testIt(filename);
 
-  // testUploadRequest();
-
+  // 100000000 100 M
+  //   3500000 3.5 M
+  // await testRequestData();
   // cosmosWalletCreateTest();
   // testFile();
   // testFileHash();
-  // await mainSdsPrepay();
 
-  await getBalanceCardMetrics();
-  // await runFaucet();
+  await runFaucet();
   // uploadRequest();
 
   // testBigInt();
 };
 
 main();
-// 19,518.6212

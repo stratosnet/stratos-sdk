@@ -36,7 +36,7 @@ export const calculateFileHash = async (filePath: string): Promise<string> => {
   return realFileHash;
 };
 
-const processFileChunk = async () => {};
+// const processFileChunk = async () => {};
 
 export interface OpenedFileInfo {
   size: number;
@@ -91,10 +91,13 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
           // no-constant-condition
           const chunk = fileStream.read(chunkSize);
 
+          console.log('ch size', chunkSize);
+
           if (!chunk || !chunk.length) {
             break;
           }
 
+          console.log('chunked chunk length', chunk.length);
           bytesRead += chunk.length;
 
           result.push(chunk);
@@ -114,8 +117,33 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
   return chunksList;
 };
 
+export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: number): Promise<Buffer> => {
+  let chunksList: Buffer;
+
+  // console.log(`getting file chunk of ${readChunkSize} bytes`);
+  // console.log('requesting readChunkSize', readChunkSize);
+
+  try {
+    chunksList = await new Promise(resolve => {
+      // console.log('ch a requested size', readChunkSize);
+      const chunk = fileStream.read(readChunkSize);
+
+      if (chunk) {
+        // console.log('chunk a read size', chunk.length);
+      }
+
+      resolve(chunk);
+    });
+  } catch (error) {
+    console.log(error);
+    throw 'could not read file chunk';
+  }
+  return chunksList;
+};
+
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
-  await delay(2000);
+  await delay(200);
+  // await delay(2000);
   const base64data = chunk.toString('base64');
   return base64data;
 }
@@ -153,11 +181,43 @@ export const decodeFileChunks = async (encodedChunksList: string[]): Promise<Buf
   return decodedChunksList;
 };
 
-export const getEncodedFileChunks = async (filePath: string, chunksSize = 10000): Promise<string[]> => {
-  const fileChunksList = await getFileChunks(filePath, chunksSize);
+export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000): Promise<string[]> => {
+  const fileChunksList = await getFileChunks(filePath, chunkSize);
   const encodedFileChunksList = await encodeFileChunks(fileChunksList);
-
   return encodedFileChunksList;
+};
+
+// export const getEncodedFileChunk = async (
+//   fileStream: fs.ReadStream,
+//   offsetStart: number,
+//   offsetEnd: number,
+// ): Promise<string> => {
+//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
+//
+//   const encodedChunk = await encodeBuffer(fileChunk);
+//   return encodedChunk;
+// };
+
+export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
+  try {
+    const fileStream = fs.createReadStream(filePath);
+
+    const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
+      fileStream.on('readable', function () {
+        resolve(fileStream);
+      });
+
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+
+    return myStream;
+  } catch (error) {
+    const errorMessage = `could not create file stream at path ${filePath}`;
+    console.log(errorMessage, error);
+    throw new Error(errorMessage);
+  }
 };
 
 export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
