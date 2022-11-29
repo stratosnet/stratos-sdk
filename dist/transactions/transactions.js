@@ -316,6 +316,7 @@ var getSdsPrepayTx = function (senderAddress, prepayPayload) { return __awaiter(
                     coins: (0, exports.getStandardAmount)([amount]),
                 },
             };
+            console.log('message to be signed', JSON.stringify(message));
             messagesList.push(message);
             iteratedData = payloadToProcess.next();
         }

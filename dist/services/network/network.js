@@ -110,20 +110,27 @@ var apiPostLegacy = function (url, data, config) { return __awaiter(void 0, void
 }); };
 exports.apiPostLegacy = apiPostLegacy;
 var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var axiosResponse, err_2, e, myResponse, e;
+    var myConfig, axiosResponse, err_2, e, myResponse, e;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, _axios.post(url, data, config)];
+                myConfig = {
+                // maxContentLength: Infinity,
+                // maxBodyLength: Infinity,
+                // timeout: 10000,
+                };
+                _a.label = 1;
             case 1:
-                axiosResponse = _a.sent();
-                return [3 /*break*/, 3];
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, _axios.post(url, data, __assign(__assign({}, config), myConfig))];
             case 2:
+                axiosResponse = _a.sent();
+                return [3 /*break*/, 4];
+            case 3:
                 err_2 = _a.sent();
                 e = err_2;
                 return [2 /*return*/, { error: { message: e.message } }];
-            case 3:
+            case 4:
                 try {
                     myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];

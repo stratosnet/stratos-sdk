@@ -412,10 +412,11 @@ var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, funct
                 return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 30 }])];
+                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }])];
             case 3:
                 sendTxMessages = _a.sent();
                 return [4 /*yield*/, transactions.sign(keyPairZero.address, sendTxMessages)];
@@ -665,6 +666,7 @@ var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 
                 return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
             case 2:
                 keyPairZero = _a.sent();
+                console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
                 if (!keyPairZero) {
                     return [2 /*return*/];
                 }
@@ -839,11 +841,12 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
             case 0:
                 PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
                 SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                imageFileName = 'file1';
+                imageFileName = 'file100M1';
                 fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
                 return [4 /*yield*/, FilesystemService.getFileInfo(fileReadPath)];
             case 1:
                 fileInfo = _a.sent();
+                console.log('file info', fileInfo);
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 2:
@@ -874,7 +877,7 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
             case 5:
                 callResult = _a.sent();
                 response = callResult.response;
-                // console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+                console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
                 // now upload itself
                 if (!response) {
                     return [2 /*return*/];
@@ -887,43 +890,76 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
         }
     });
 }); };
-var testIt = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var PROJECT_ROOT, SRC_ROOT, imageFileName, fileReadPath, fileWritePath, encodedFileChunks, fileInfo, decodedChunksList, decodedFile, encodedFile, phrase, masterKeySeedInfo, keyPairZeroA, address, publicKey, extraParams, callResult, response;
+var testRequestUsetFileList = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, keyPairZeroA, address, extraParams, callResult, response, connectedUrl;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
+            case 1:
+                masterKeySeedInfo = _a.sent();
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString())];
+            case 2:
+                keyPairZeroA = _a.sent();
+                if (!keyPairZeroA) {
+                    return [2 /*return*/];
+                }
+                address = keyPairZeroA.address;
+                extraParams = [
+                    {
+                        walletaddr: address,
+                        // walletpubkey: publicKey,
+                        page: 0,
+                    },
+                ];
+                return [4 /*yield*/, Network.sendUserRequestList(extraParams)];
+            case 3:
+                callResult = _a.sent();
+                response = callResult.response;
+                console.log('file list request result', JSON.stringify(callResult));
+                // now upload itself
+                if (!response) {
+                    return [2 /*return*/];
+                }
+                connectedUrl = Sdk_1.default.environment.ppNodeUrl + ":" + Sdk_1.default.environment.ppNodePort;
+                return [2 /*return*/, {
+                        data: "response from " + connectedUrl,
+                        response: response,
+                    }];
+        }
+    });
+}); };
+function delay(ms) {
+    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+}
+var testReadAndWriteLocal = function (filename) { return __awaiter(void 0, void 0, void 0, function () {
+    var PROJECT_ROOT, SRC_ROOT, imageFileName, fileReadPath, fileInfo, phrase, masterKeySeedInfo, keyPairZeroA, address, publicKey, messageToSign, signature, extraParams, fileStream, readSize, stats, fileSize, step, offsetStart, offsetEnd, maxStep, readChunkSize, encodedFileChunks, completedProgress, fileChunk, remained, subChunks, currentStep, myList, _i, subChunks_1, chunkLength, chunkMini, filteredList, aggregatedBuf, encodedFileChunk, fileWritePath, fileWritePathFromBuff, decodedChunksList, decodedFile, encodedFile;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
                 SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                imageFileName = 'stratos_landing_page.png';
+                imageFileName = filename;
                 fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
-                fileWritePath = path_1.default.resolve(SRC_ROOT, 'my_image_new2.png');
-                return [4 /*yield*/, FilesystemService.getEncodedFileChunks(fileReadPath)];
-            case 1:
-                encodedFileChunks = _a.sent();
                 return [4 /*yield*/, FilesystemService.getFileInfo(fileReadPath)];
-            case 2:
+            case 1:
                 fileInfo = _a.sent();
-                console.log('encoded file chunks', encodedFileChunks);
-                return [4 /*yield*/, FilesystemService.decodeFileChunks(encodedFileChunks)];
-            case 3:
-                decodedChunksList = _a.sent();
-                decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-                return [4 /*yield*/, FilesystemService.encodeFile(decodedFile)];
-            case 4:
-                encodedFile = _a.sent();
-                FilesystemService.writeFileToPath(fileWritePath, encodedFile);
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 5:
+            case 2:
                 masterKeySeedInfo = _a.sent();
                 return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString())];
-            case 6:
+            case 3:
                 keyPairZeroA = _a.sent();
-                // console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
                 if (!keyPairZeroA) {
                     return [2 /*return*/];
                 }
                 address = keyPairZeroA.address, publicKey = keyPairZeroA.publicKey;
+                messageToSign = "" + fileInfo.filehash + address;
+                return [4 /*yield*/, keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey)];
+            case 4:
+                signature = _a.sent();
                 extraParams = [
                     {
                         filename: imageFileName,
@@ -931,84 +967,324 @@ var testIt = function () { return __awaiter(void 0, void 0, void 0, function () 
                         filehash: fileInfo.filehash,
                         walletaddr: address,
                         walletpubkey: publicKey,
+                        signature: signature,
                     },
                 ];
-                return [4 /*yield*/, Network.sendUserRequestUpload(extraParams)];
+                return [4 /*yield*/, FilesystemService.getUploadFileStream(fileReadPath)];
+            case 5:
+                fileStream = _a.sent();
+                readSize = 0;
+                stats = fs_1.default.statSync(fileReadPath);
+                fileSize = stats.size;
+                console.log('stats', stats);
+                step = 5000000;
+                offsetStart = 0;
+                offsetEnd = step;
+                maxStep = 65536;
+                readChunkSize = offsetEnd - offsetStart;
+                encodedFileChunks = [];
+                completedProgress = 0;
+                _a.label = 6;
+            case 6:
+                if (!(readSize < fileSize)) return [3 /*break*/, 17];
+                fileChunk = void 0;
+                if (!(readChunkSize < maxStep)) return [3 /*break*/, 8];
+                return [4 /*yield*/, FilesystemService.getFileChunk(fileStream, readChunkSize)];
             case 7:
-                callResult = _a.sent();
-                response = callResult.response;
+                fileChunk = _a.sent();
+                return [3 /*break*/, 14];
+            case 8:
+                remained = readChunkSize;
+                subChunks = [];
+                while (remained > 0) {
+                    currentStep = remained > maxStep ? maxStep : remained;
+                    // console.log('currentStep', currentStep);
+                    subChunks.push(currentStep);
+                    remained = remained - currentStep;
+                    // console.log('remained', remained);
+                }
+                myList = [];
+                _i = 0, subChunks_1 = subChunks;
+                _a.label = 9;
+            case 9:
+                if (!(_i < subChunks_1.length)) return [3 /*break*/, 13];
+                chunkLength = subChunks_1[_i];
+                return [4 /*yield*/, FilesystemService.getFileChunk(fileStream, chunkLength)];
+            case 10:
+                chunkMini = _a.sent();
+                return [4 /*yield*/, delay(100)];
+            case 11:
+                _a.sent();
+                myList.push(chunkMini);
+                _a.label = 12;
+            case 12:
+                _i++;
+                return [3 /*break*/, 9];
+            case 13:
+                filteredList = myList.filter(Boolean);
+                aggregatedBuf = Buffer.concat(filteredList);
+                // console.log('aggregatedBuf', aggregatedBuf);
+                fileChunk = aggregatedBuf;
+                _a.label = 14;
+            case 14:
+                // console.log('fileChunk ', fileChunk);
+                if (!fileChunk) {
+                    return [3 /*break*/, 17];
+                }
+                if (!fileChunk) return [3 /*break*/, 16];
+                return [4 /*yield*/, FilesystemService.encodeBuffer(fileChunk)];
+            case 15:
+                encodedFileChunk = _a.sent();
+                // console.log('encoded length', encodedFileChunk.length);
+                // const fileWritePath = path.resolve(SRC_ROOT, `it_written_${itIdx}_${filename}`);
+                // console.log('path', fileWritePath);
+                // await FilesystemService.writeFileToPath(fileWritePath, encodedFileChunk);
+                readSize = readSize + fileChunk.length;
+                // console.log('read size', readSize);
+                completedProgress = (100 * readSize) / fileSize;
+                console.log("completed " + readSize + " from " + fileSize + " bytes, or " + (Math.round(completedProgress * 100) / 100).toFixed(2) + "%");
+                offsetStart = offsetEnd;
+                offsetEnd = offsetEnd + step;
+                // itIdx += 1;
+                encodedFileChunks.push(encodedFileChunk);
+                _a.label = 16;
+            case 16: return [3 /*break*/, 6];
+            case 17:
+                fileWritePath = path_1.default.resolve(SRC_ROOT, "my_new_" + filename);
+                fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, "my_new_from_buff_" + filename);
+                console.log('fileWritePath ', fileWritePath);
+                // const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+                // it is good up to here
+                console.log('encoded file chunks length', encodedFileChunks.length);
+                return [4 /*yield*/, FilesystemService.decodeFileChunks(encodedFileChunks)];
+            case 18:
+                decodedChunksList = _a.sent();
+                console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+                decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+                console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+                FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+                console.log('we should have an entire file written');
+                return [4 /*yield*/, FilesystemService.encodeFile(decodedFile)];
+            case 19:
+                encodedFile = _a.sent();
+                console.log('this is not be shown as the string is way too long');
+                FilesystemService.writeFileToPath(fileWritePath, encodedFile);
                 return [2 /*return*/];
         }
     });
 }); };
-// const testA = async () => {
-//   const extraParams: Network.networkTypes.MonitorSubscribeParams = [
-//     'subscription',
-//     // '19618fc6b51f0b076fa38db10bbb6bb5b1d9edeaf3271a62d88f0c68c3a5d40d',
-//     '442fe1b54cbbee74375ce1d057a31fdf046b95eaa909a90bb664d9b21469be83',
-//   ];
-//   const callResult = await Network.sendMonitorSubscirbe(extraParams);
-//   console.log('🚀 ~ file: run.ts ~ line 794 ~ testA ~ callResult', callResult);
-// };
+var testIt = function (filename) { return __awaiter(void 0, void 0, void 0, function () {
+    var PROJECT_ROOT, SRC_ROOT, imageFileName, fileReadPath, fileInfo, phrase, masterKeySeedInfo, keyPairZeroA, address, publicKey, messageToSign, signature, extraParams, callResultInit, responseInit, resultWithOffesets, offsetStartGlobal, offsetEndGlobal, isContinueGlobal, offsetendInit, offsetstartInit, isContinueInit, fileStream, readSize, stats, fileSize, maxStep, completedProgress, readChunkSize, fileChunk, remained, subChunks, currentStep, myList, _i, subChunks_2, chunkLength, chunkMini, filteredList, aggregatedBuf, encodedFileChunk, extraParamsForUpload, callResultUpload, responseUpload, _a, offsetendUpload, offsetstartUpload, isContinueUpload;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+                SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+                imageFileName = filename;
+                fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+                return [4 /*yield*/, FilesystemService.getFileInfo(fileReadPath)];
+            case 1:
+                fileInfo = _b.sent();
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
+            case 2:
+                masterKeySeedInfo = _b.sent();
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString())];
+            case 3:
+                keyPairZeroA = _b.sent();
+                if (!keyPairZeroA) {
+                    return [2 /*return*/];
+                }
+                address = keyPairZeroA.address, publicKey = keyPairZeroA.publicKey;
+                messageToSign = "" + fileInfo.filehash + address;
+                return [4 /*yield*/, keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey)];
+            case 4:
+                signature = _b.sent();
+                extraParams = [
+                    {
+                        filename: imageFileName,
+                        filesize: fileInfo.size,
+                        filehash: fileInfo.filehash,
+                        walletaddr: address,
+                        walletpubkey: publicKey,
+                        signature: signature,
+                    },
+                ];
+                return [4 /*yield*/, Network.sendUserRequestUpload(extraParams)];
+            case 5:
+                callResultInit = _b.sent();
+                responseInit = callResultInit.response;
+                console.log('call result init', JSON.stringify(callResultInit));
+                if (!responseInit) {
+                    console.log('we dont have response. it might be an error', callResultInit);
+                    return [2 /*return*/];
+                }
+                resultWithOffesets = responseInit.result;
+                console.log('result with offesets', resultWithOffesets);
+                offsetStartGlobal = 0;
+                offsetEndGlobal = 0;
+                isContinueGlobal = 0;
+                offsetendInit = resultWithOffesets.offsetend, offsetstartInit = resultWithOffesets.offsetstart, isContinueInit = resultWithOffesets.return;
+                if (offsetendInit === undefined) {
+                    console.log('a we dont have an offest. could be an error. response is', responseInit);
+                    return [2 /*return*/];
+                }
+                if (offsetstartInit === undefined) {
+                    console.log('b we dont have an offest. could be an error. response is', responseInit);
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, FilesystemService.getUploadFileStream(fileReadPath)];
+            case 6:
+                fileStream = _b.sent();
+                readSize = 0;
+                stats = fs_1.default.statSync(fileReadPath);
+                fileSize = stats.size;
+                console.log('stats', stats);
+                maxStep = 65536;
+                completedProgress = 0;
+                isContinueGlobal = +isContinueInit;
+                offsetStartGlobal = +offsetstartInit;
+                offsetEndGlobal = +offsetendInit;
+                _b.label = 7;
+            case 7:
+                if (!(isContinueGlobal === 1)) return [3 /*break*/, 19];
+                readChunkSize = offsetEndGlobal - offsetStartGlobal;
+                fileChunk = void 0;
+                if (!(readChunkSize < maxStep)) return [3 /*break*/, 9];
+                return [4 /*yield*/, FilesystemService.getFileChunk(fileStream, readChunkSize)];
+            case 8:
+                fileChunk = _b.sent();
+                return [3 /*break*/, 15];
+            case 9:
+                remained = readChunkSize;
+                subChunks = [];
+                while (remained > 0) {
+                    currentStep = remained > maxStep ? maxStep : remained;
+                    subChunks.push(currentStep);
+                    remained = remained - currentStep;
+                    // console.log('remained', remained);
+                }
+                myList = [];
+                _i = 0, subChunks_2 = subChunks;
+                _b.label = 10;
+            case 10:
+                if (!(_i < subChunks_2.length)) return [3 /*break*/, 14];
+                chunkLength = subChunks_2[_i];
+                return [4 /*yield*/, FilesystemService.getFileChunk(fileStream, chunkLength)];
+            case 11:
+                chunkMini = _b.sent();
+                return [4 /*yield*/, delay(100)];
+            case 12:
+                _b.sent();
+                myList.push(chunkMini);
+                _b.label = 13;
+            case 13:
+                _i++;
+                return [3 /*break*/, 10];
+            case 14:
+                filteredList = myList.filter(Boolean);
+                aggregatedBuf = Buffer.concat(filteredList);
+                console.log('aggregatedBuf', aggregatedBuf);
+                fileChunk = aggregatedBuf;
+                _b.label = 15;
+            case 15:
+                if (!fileChunk) {
+                    console.log('fileChunk is missing, Exiting ', fileChunk);
+                    return [3 /*break*/, 19];
+                }
+                if (!fileChunk) return [3 /*break*/, 18];
+                return [4 /*yield*/, FilesystemService.encodeBuffer(fileChunk)];
+            case 16:
+                encodedFileChunk = _b.sent();
+                readSize = readSize + fileChunk.length;
+                completedProgress = (100 * readSize) / fileSize;
+                console.log("completed " + readSize + " from " + fileSize + " bytes, or " + (Math.round(completedProgress * 100) / 100).toFixed(2) + "%");
+                extraParamsForUpload = [
+                    {
+                        filehash: fileInfo.filehash,
+                        data: encodedFileChunk,
+                        // walletpubkey: publicKey,
+                        // signature,
+                    },
+                ];
+                // isContinueGlobal = 0;
+                console.log('params for upload', extraParamsForUpload);
+                return [4 /*yield*/, Network.sendUserUploadData(extraParamsForUpload)];
+            case 17:
+                callResultUpload = _b.sent();
+                console.log('call result upload', JSON.stringify(callResultUpload));
+                responseUpload = callResultUpload.response;
+                console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+                if (!responseUpload) {
+                    console.log('we dont have response. it might be an error', callResultUpload);
+                    return [2 /*return*/];
+                }
+                _a = responseUpload.result, offsetendUpload = _a.offsetend, offsetstartUpload = _a.offsetstart, isContinueUpload = _a.return;
+                if (offsetendUpload === undefined) {
+                    console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+                    return [2 /*return*/];
+                }
+                if (offsetstartUpload === undefined) {
+                    console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+                    return [2 /*return*/];
+                }
+                isContinueGlobal = +isContinueUpload;
+                offsetStartGlobal = +offsetstartUpload;
+                offsetEndGlobal = +offsetendUpload;
+                _b.label = 18;
+            case 18: return [3 /*break*/, 7];
+            case 19: return [2 /*return*/];
+        }
+    });
+}); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, resolvedChainIDToTest, error_6, phrase, masterKeySeedInfo, serialized, _cosmosClient;
+    var resolvedChainID, sdkEnv, resolvedChainIDToTest, error_6, phrase, masterKeySeedInfo, serialized, _cosmosClient, filename;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 sdkEnv = sdkEnvDev;
-                return [4 /*yield*/, Sdk_1.default.init(__assign({}, sdkEnv))];
+                Sdk_1.default.init(__assign({}, sdkEnv));
+                _a.label = 1;
             case 1:
-                _a.sent();
-                _a.label = 2;
-            case 2:
-                _a.trys.push([2, 4, , 5]);
+                _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, Network.getChainId()];
-            case 3:
+            case 2:
                 resolvedChainIDToTest = _a.sent();
                 if (!resolvedChainIDToTest) {
                     throw new Error('Chain id is empty. Exiting');
                 }
+                console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
                 resolvedChainID = resolvedChainIDToTest;
-                return [3 /*break*/, 5];
-            case 4:
+                return [3 /*break*/, 4];
+            case 3:
                 error_6 = _a.sent();
                 console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_6);
                 throw new Error('Could not resolve chain id');
-            case 5: 
-            // 2
-            return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, ppNodeUrl: 'http://13.115.18.9', ppNodePort: '8145' }))];
-            case 6:
+            case 4:
                 // 2
-                _a.sent();
+                Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, 
+                    // ppNodeUrl: 'http://13.115.18.4',
+                    // ppNodePort: '8137',
+                    ppNodeUrl: 'http://localhost', ppNodePort: '8080' }));
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 7:
+            case 5:
                 masterKeySeedInfo = _a.sent();
                 serialized = masterKeySeedInfo.encryptedWalletInfo;
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
-            case 8:
+            case 6:
                 _cosmosClient = _a.sent();
-                // await getOzoneBalance();
-                // await mainSdsPrepay();
-                // testUploadRequest();
-                // cosmosWalletCreateTest();
-                // testFile();
-                // testFileHash();
-                // await mainSdsPrepay();
-                return [4 /*yield*/, getBalanceCardMetrics()];
-            case 9:
-                // await getOzoneBalance();
-                // await mainSdsPrepay();
-                // testUploadRequest();
-                // cosmosWalletCreateTest();
-                // testFile();
-                // testFileHash();
-                // await mainSdsPrepay();
+                filename = 'file_200M_29_11_2022_12_47';
+                // const filename =
+                // 'Надія в єдності - Hope In Unity - 013 - Надія в єдності - Hope In Unity- Marlon Hoffstadt aka DJ Daddy Trance - The Sun Will Rise.mp3';
+                return [4 /*yield*/, testIt(filename)];
+            case 7:
+                // const filename =
+                // 'Надія в єдності - Hope In Unity - 013 - Надія в єдності - Hope In Unity- Marlon Hoffstadt aka DJ Daddy Trance - The Sun Will Rise.mp3';
                 _a.sent();
                 return [2 /*return*/];
         }
     });
 }); };
 main();
-// 19,518.6212
 //# sourceMappingURL=run.js.map

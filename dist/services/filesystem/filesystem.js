@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFile = exports.writeFileToPath = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFile = exports.writeFileToPath = exports.getUploadFileStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
 var cids_1 = __importDefault(require("cids"));
 var crypto_1 = __importDefault(require("crypto"));
 var fs_1 = __importDefault(require("fs"));
@@ -95,9 +95,6 @@ var calculateFileHash = function (filePath) { return __awaiter(void 0, void 0, v
     });
 }); };
 exports.calculateFileHash = calculateFileHash;
-var processFileChunk = function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
-    return [2 /*return*/];
-}); }); };
 var getFileInfo = function (filePath) { return __awaiter(void 0, void 0, void 0, function () {
     var openedFileInfo, fileStream_1, stats_1, _filehash_1, error_1;
     return __generator(this, function (_a) {
@@ -158,9 +155,11 @@ var getFileChunks = function (filePath, chunkSize) {
                                 while (true) {
                                     // no-constant-condition
                                     var chunk = fileStream_2.read(chunkSize);
+                                    console.log('ch size', chunkSize);
                                     if (!chunk || !chunk.length) {
                                         break;
                                     }
+                                    console.log('chunked chunk length', chunk.length);
                                     bytesRead += chunk.length;
                                     result.push(chunk);
                                 }
@@ -186,12 +185,38 @@ var getFileChunks = function (filePath, chunkSize) {
     });
 };
 exports.getFileChunks = getFileChunks;
+var getFileChunk = function (fileStream, readChunkSize) { return __awaiter(void 0, void 0, void 0, function () {
+    var chunksList, error_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, new Promise(function (resolve) {
+                        // console.log('ch a requested size', readChunkSize);
+                        var chunk = fileStream.read(readChunkSize);
+                        if (chunk) {
+                            // console.log('chunk a read size', chunk.length);
+                        }
+                        resolve(chunk);
+                    })];
+            case 1:
+                chunksList = _a.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                error_3 = _a.sent();
+                console.log(error_3);
+                throw 'could not read file chunk';
+            case 3: return [2 /*return*/, chunksList];
+        }
+    });
+}); };
+exports.getFileChunk = getFileChunk;
 function encodeBuffer(chunk) {
     return __awaiter(this, void 0, void 0, function () {
         var base64data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, delay(2000)];
+                case 0: return [4 /*yield*/, delay(200)];
                 case 1:
                     _a.sent();
                     base64data = chunk.toString('base64');
@@ -266,13 +291,13 @@ var decodeFileChunks = function (encodedChunksList) { return __awaiter(void 0, v
     });
 }); };
 exports.decodeFileChunks = decodeFileChunks;
-var getEncodedFileChunks = function (filePath, chunksSize) {
-    if (chunksSize === void 0) { chunksSize = 10000; }
+var getEncodedFileChunks = function (filePath, chunkSize) {
+    if (chunkSize === void 0) { chunkSize = 10000; }
     return __awaiter(void 0, void 0, void 0, function () {
         var fileChunksList, encodedFileChunksList;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, exports.getFileChunks)(filePath, chunksSize)];
+                case 0: return [4 /*yield*/, (0, exports.getFileChunks)(filePath, chunkSize)];
                 case 1:
                     fileChunksList = _a.sent();
                     return [4 /*yield*/, (0, exports.encodeFileChunks)(fileChunksList)];
@@ -284,6 +309,44 @@ var getEncodedFileChunks = function (filePath, chunksSize) {
     });
 };
 exports.getEncodedFileChunks = getEncodedFileChunks;
+// export const getEncodedFileChunk = async (
+//   fileStream: fs.ReadStream,
+//   offsetStart: number,
+//   offsetEnd: number,
+// ): Promise<string> => {
+//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
+//
+//   const encodedChunk = await encodeBuffer(fileChunk);
+//   return encodedChunk;
+// };
+var getUploadFileStream = function (filePath) { return __awaiter(void 0, void 0, void 0, function () {
+    var fileStream_3, myStream, error_4, errorMessage;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                fileStream_3 = fs_1.default.createReadStream(filePath);
+                return [4 /*yield*/, new Promise(function (resolve, reject) {
+                        fileStream_3.on('readable', function () {
+                            resolve(fileStream_3);
+                        });
+                        fileStream_3.on('error', function (error) {
+                            reject(error);
+                        });
+                    })];
+            case 1:
+                myStream = _a.sent();
+                return [2 /*return*/, myStream];
+            case 2:
+                error_4 = _a.sent();
+                errorMessage = "could not create file stream at path " + filePath;
+                console.log(errorMessage, error_4);
+                throw new Error(errorMessage);
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getUploadFileStream = getUploadFileStream;
 var writeFileToPath = function (filePath, econdedFileContent) { return __awaiter(void 0, void 0, void 0, function () {
     var decodedFileBuffer;
     return __generator(this, function (_a) {

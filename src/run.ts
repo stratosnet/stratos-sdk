@@ -295,7 +295,7 @@ const mainSdsPrepay = async () => {
     return;
   }
 
-  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 30 }]);
+  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
 
   const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
 
@@ -684,7 +684,7 @@ const testUploadRequest = async () => {
   };
 };
 
-const testRequestData = async () => {
+const testRequestUsetFileList = async () => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
 
@@ -728,7 +728,7 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const testUpload = async (filename: string) => {
+const testReadAndWriteLocal = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
@@ -898,28 +898,6 @@ const testUpload = async (filename: string) => {
   const encodedFile = await FilesystemService.encodeFile(decodedFile);
   console.log('this is not be shown as the string is way too long');
   FilesystemService.writeFileToPath(fileWritePath, encodedFile);
-
-  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, 100000);
-
-  // const pCalls = encodedFileChunks.map(async (currentChunk: string, idx) => {
-  // const extraParamsUpload = [
-  //   {
-  //     filehash: fileInfo.filehash,
-  //     data: currentChunk,
-  //   },
-  // ];
-
-  // const fileWritePath = path.resolve(SRC_ROOT, `written_${idx}_${filename}`);
-  // console.log('path', fileWritePath);
-
-  // await FilesystemService.writeFileToPath(fileWritePath, currentChunk);
-  //
-  //   // const callTwoResult = await Network.sendUserUploadData(extraParamsUpload);
-  //   // console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', callTwoResult);
-  // });
-  //
-  // const res = await Promise.all(pCalls);
-  // console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
 };
 
 const testIt = async (filename: string) => {
@@ -955,25 +933,152 @@ const testIt = async (filename: string) => {
     },
   ];
 
-  const callResult = await Network.sendUserRequestUpload(extraParams);
+  const callResultInit = await Network.sendUserRequestUpload(extraParams);
 
-  const { response } = callResult;
+  const { response: responseInit } = callResultInit;
 
-  console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResult);
+  console.log('call result init', JSON.stringify(callResultInit));
 
-  if (!response) {
-    console.log('we dont have response. it might be an error', callResult);
-
+  if (!responseInit) {
+    console.log('we dont have response. it might be an error', callResultInit);
     return;
   }
 
-  const { result } = response;
-  console.log('result');
+  const { result: resultWithOffesets } = responseInit;
+  console.log('result with offesets', resultWithOffesets);
 
-  const { offsetend = '3500000', offsetstart, return: isContinue } = result;
-  if (offsetend === undefined) {
-    console.log('we dont have an offest. could be an error. response is', response);
+  let offsetStartGlobal = 0;
+  let offsetEndGlobal = 0;
+  let isContinueGlobal = 0;
+
+  const {
+    offsetend: offsetendInit,
+    offsetstart: offsetstartInit,
+    return: isContinueInit,
+  } = resultWithOffesets;
+
+  if (offsetendInit === undefined) {
+    console.log('a we dont have an offest. could be an error. response is', responseInit);
     return;
+  }
+  if (offsetstartInit === undefined) {
+    console.log('b we dont have an offest. could be an error. response is', responseInit);
+    return;
+  }
+
+  const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+
+  let readSize = 0;
+
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+
+  console.log('stats', stats);
+  const maxStep = 65536;
+
+  let completedProgress = 0;
+
+  isContinueGlobal = +isContinueInit;
+  offsetStartGlobal = +offsetstartInit;
+  offsetEndGlobal = +offsetendInit;
+
+  while (isContinueGlobal === 1) {
+    const readChunkSize = offsetEndGlobal - offsetStartGlobal;
+
+    let fileChunk;
+
+    if (readChunkSize < maxStep) {
+      fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+    } else {
+      let remained = readChunkSize;
+      const subChunks = [];
+      while (remained > 0) {
+        const currentStep = remained > maxStep ? maxStep : remained;
+        subChunks.push(currentStep);
+
+        remained = remained - currentStep;
+        // console.log('remained', remained);
+      }
+      // console.log('list of sub chnks ', subChunks);
+      const myList = [];
+
+      for (const chunkLength of subChunks) {
+        const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+
+        await delay(100);
+        myList.push(chunkMini);
+      }
+      // console.log('myList', myList);
+      const filteredList = myList.filter(Boolean);
+
+      // console.log('filteredList', filteredList);
+      const aggregatedBuf = Buffer.concat(filteredList);
+      console.log('aggregatedBuf', aggregatedBuf);
+      fileChunk = aggregatedBuf;
+    }
+
+    if (!fileChunk) {
+      console.log('fileChunk is missing, Exiting ', fileChunk);
+      break;
+    }
+
+    if (fileChunk) {
+      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+      readSize = readSize + fileChunk.length;
+
+      completedProgress = (100 * readSize) / fileSize;
+
+      console.log(
+        `completed ${readSize} from ${fileSize} bytes, or ${(
+          Math.round(completedProgress * 100) / 100
+        ).toFixed(2)}%`,
+      );
+
+      // upload
+      const extraParamsForUpload = [
+        {
+          filehash: fileInfo.filehash,
+          data: encodedFileChunk,
+          // walletpubkey: publicKey,
+          // signature,
+        },
+      ];
+
+      // isContinueGlobal = 0;
+      console.log('params for upload', extraParamsForUpload);
+
+      const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
+
+      console.log('call result upload', JSON.stringify(callResultUpload));
+
+      const { response: responseUpload } = callResultUpload;
+
+      console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+
+      if (!responseUpload) {
+        console.log('we dont have response. it might be an error', callResultUpload);
+
+        return;
+      }
+
+      const {
+        result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload },
+      } = responseUpload;
+
+      if (offsetendUpload === undefined) {
+        console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+        return;
+      }
+
+      if (offsetstartUpload === undefined) {
+        console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+        return;
+      }
+
+      isContinueGlobal = +isContinueUpload;
+      offsetStartGlobal = +offsetstartUpload;
+      offsetEndGlobal = +offsetendUpload;
+    }
   }
 };
 
@@ -1003,8 +1108,10 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    ppNodeUrl: 'http://13.115.18.9',
-    ppNodePort: '8145',
+    // ppNodeUrl: 'http://13.115.18.4',
+    // ppNodePort: '8137',
+    ppNodeUrl: 'http://localhost',
+    ppNodePort: '8080',
   });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1013,13 +1120,17 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  // const filename = 'file1.mp4';
-  const filename = 'file1_10M_23_11_2022';
+  // const filename = 'file_10M_29_11_2022_9_58';
+  const filename = 'file_200M_29_11_2022_12_47';
+  // const filename =
+  // 'Надія в єдності - Hope In Unity - 013 - Надія в єдності - Hope In Unity- Marlon Hoffstadt aka DJ Daddy Trance - The Sun Will Rise.mp3';
+  await testIt(filename);
   // await getBalanceCardMetrics();
   // await mainSdsPrepay();
   // await testUploadRequest();
-  // await testIt(filename);
 
+  // await testRequestUsetFileList();
+  //
   // 100000000 100 M
   //   3500000 3.5 M
   // await testRequestData();
@@ -1027,7 +1138,7 @@ const main = async () => {
   // testFile();
   // testFileHash();
 
-  await runFaucet();
+  // await runFaucet();
   // uploadRequest();
 
   // testBigInt();

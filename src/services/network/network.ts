@@ -68,15 +68,20 @@ export const apiPost = async (
   data?: Types.ParsedTransactionData,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.NetworkAxiosDataResult> => {
+  const myConfig = {
+    // maxContentLength: Infinity,
+    // maxBodyLength: Infinity,
+    // timeout: 10000,
+  };
+
   let axiosResponse;
 
   try {
-    axiosResponse = await _axios.post(url, data, config);
+    axiosResponse = await _axios.post(url, data, { ...config, ...myConfig });
   } catch (err) {
     const e: Error = err as Error;
     return { error: { message: e.message } };
   }
-
   try {
     const myResponse = axiosResponse.data;
     return { response: myResponse };

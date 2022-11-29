@@ -309,6 +309,8 @@ export const getSdsPrepayTx = async (
       },
     };
 
+    console.log('message to be signed', JSON.stringify(message));
+
     messagesList.push(message);
 
     iteratedData = payloadToProcess.next();
