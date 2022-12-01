@@ -4,6 +4,8 @@ import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
 import * as Types from './types';
 
+import { log } from '../../services/helpers';
+
 const _axios = axios.create({});
 
 _axios.defaults.transformResponse = [
@@ -69,9 +71,9 @@ export const apiPost = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.NetworkAxiosDataResult> => {
   const myConfig = {
-    // maxContentLength: Infinity,
-    // maxBodyLength: Infinity,
-    // timeout: 10000,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    timeout: 10000,
   };
 
   let axiosResponse;
@@ -124,13 +126,14 @@ export const sendRpcCall = async <N>(
   };
   const url = `${getPpNodeRoute()}`;
 
-  console.log('🚀 ~ file: network.ts ~ line 122 ~ rpc call url', url);
+  log('from network ~ rpc call url', url);
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  console.log('calling rpc', payload);
+  log('from network - calling rpc', payload);
   const dataResult = await apiPost(url, payload, { ...config });
 
+  log('from network - rpc post result', payload);
   return dataResult;
 };
 

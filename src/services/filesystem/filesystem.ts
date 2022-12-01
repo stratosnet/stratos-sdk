@@ -120,17 +120,13 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
 export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: number): Promise<Buffer> => {
   let chunksList: Buffer;
 
-  // console.log(`getting file chunk of ${readChunkSize} bytes`);
-  // console.log('requesting readChunkSize', readChunkSize);
-
   try {
     chunksList = await new Promise(resolve => {
-      // console.log('ch a requested size', readChunkSize);
       const chunk = fileStream.read(readChunkSize);
 
-      if (chunk) {
-        // console.log('chunk a read size', chunk.length);
-      }
+      // if (chunk) {
+      // console.log('chunk a read size', chunk.length);
+      // }
 
       resolve(chunk);
     });
@@ -142,7 +138,7 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
 };
 
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
-  await delay(200);
+  await delay(100);
   // await delay(2000);
   const base64data = chunk.toString('base64');
   return base64data;
