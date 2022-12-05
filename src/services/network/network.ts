@@ -73,7 +73,7 @@ export const apiPost = async (
   const myConfig = {
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
-    timeout: 10000,
+    timeout: 13000,
   };
 
   let axiosResponse;

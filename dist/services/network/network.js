@@ -118,7 +118,7 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
                 myConfig = {
                     maxContentLength: Infinity,
                     maxBodyLength: Infinity,
-                    timeout: 10000,
+                    timeout: 13000,
                 };
                 _a.label = 1;
             case 1:
