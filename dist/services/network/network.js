@@ -55,6 +55,7 @@ var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var config_1 = require("../../config");
 var Sdk_1 = __importDefault(require("../../Sdk"));
+var helpers_1 = require("../../services/helpers");
 var _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
     function (data) {
@@ -115,9 +116,9 @@ var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, vo
         switch (_a.label) {
             case 0:
                 myConfig = {
-                // maxContentLength: Infinity,
-                // maxBodyLength: Infinity,
-                // timeout: 10000,
+                    maxContentLength: Infinity,
+                    maxBodyLength: Infinity,
+                    timeout: 10000,
                 };
                 _a.label = 1;
             case 1:
@@ -182,12 +183,13 @@ var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, voi
                     params: [],
                 };
                 url = "" + getPpNodeRoute();
-                console.log('🚀 ~ file: network.ts ~ line 122 ~ rpc call url', url);
+                (0, helpers_1.log)('from network ~ rpc call url', url);
                 payload = __assign(__assign({}, defaultPayload), givenPayload);
-                console.log('calling rpc', payload);
+                (0, helpers_1.log)('from network - calling rpc', payload);
                 return [4 /*yield*/, (0, exports.apiPost)(url, payload, __assign({}, config))];
             case 1:
                 dataResult = _a.sent();
+                (0, helpers_1.log)('from network - rpc post result', payload);
                 return [2 /*return*/, dataResult];
         }
     });

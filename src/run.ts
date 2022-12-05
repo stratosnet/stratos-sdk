@@ -47,6 +47,7 @@ import * as validators from './validators';
 import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import { hdVault } from './config';
 
+import { log } from './services/helpers';
 // import md5 from 'blueimp-md5';
 
 // import crypto from 'crypto';
@@ -737,55 +738,9 @@ const testReadAndWriteLocal = async (filename: string) => {
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  console.log('fileInfo', fileInfo);
 
-  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
-
-  if (!keyPairZeroA) {
-    return;
-  }
-
-  const { address, publicKey } = keyPairZeroA;
-  const messageToSign = `${fileInfo.filehash}${address}`;
-
-  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
-  const extraParams = [
-    {
-      filename: imageFileName,
-      filesize: fileInfo.size,
-      filehash: fileInfo.filehash,
-      walletaddr: address,
-      walletpubkey: publicKey,
-      signature,
-    },
-  ];
-
-  // const callResult = await Network.sendUserRequestUpload(extraParams);
-  //
-  // const { response } = callResult;
-  //
-  // console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResult);
-  //
-  // if (!response) {
-  //   console.log('we dont have response. it might be an error', callResult);
-  //
-  //   return;
-  // }
-  //
-  // const {
-  //   result: { offsetend = '3500000', offsetstart, return: isContinue },
-  // } = response;
-
-  // if (offsetend === undefined) {
-  //   console.log('we dont have an offest. could be an error. response is', response);
-  //   return;
-  // }
-
-  // const chunkSize = parseInt(offsetend);
-
-  const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
-  // const encodedFileChunks = await FilesystemService.getEncodedFileChunks(fileReadPath, chunkSize);
+  // const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
 
   let readSize = 0;
 
@@ -797,93 +752,74 @@ const testReadAndWriteLocal = async (filename: string) => {
   const step = 5000000;
   let offsetStart = 0;
   let offsetEnd = step;
-  // let itIdx = 0;
 
-  // const step = 65536;
-  // const maxStep = 10000;
-  const maxStep = 65536;
+  // const maxStep = 65536;
 
-  const readChunkSize = offsetEnd - offsetStart;
+  // const readChunkSize = offsetEnd - offsetStart;
 
   const encodedFileChunks = [];
 
   let completedProgress = 0;
 
+  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+
   while (readSize < fileSize) {
-    // const a = fileStream.readable;
-    // console.log('readable', a);
+    // let fileChunk;
 
-    let fileChunk;
+    // if (readChunkSize < maxStep) {
+    // fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+    const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
+    // }
+    // else {
+    //   let remained = readChunkSize;
+    //   const subChunks = [];
+    //   while (remained > 0) {
+    //     const currentStep = remained > maxStep ? maxStep : remained;
+    //     subChunks.push(currentStep);
+    //
+    //     remained = remained - currentStep;
+    //   }
+    //   const myList = [];
+    //
+    //   for (const chunkLength of subChunks) {
+    //     const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+    //
+    //     await delay(100);
+    //     myList.push(chunkMini);
+    //   }
+    //
+    //   const filteredList = myList.filter(Boolean);
+    //
+    //   const aggregatedBuf = Buffer.concat(filteredList);
+    //   fileChunk = aggregatedBuf;
+    // }
 
-    if (readChunkSize < maxStep) {
-      fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
-    } else {
-      let remained = readChunkSize;
-      const subChunks = [];
-      while (remained > 0) {
-        const currentStep = remained > maxStep ? maxStep : remained;
-        // console.log('currentStep', currentStep);
-        subChunks.push(currentStep);
-
-        remained = remained - currentStep;
-        // console.log('remained', remained);
-      }
-      // console.log('list of sub chnks ', subChunks);
-      const myList = [];
-
-      for (const chunkLength of subChunks) {
-        const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
-
-        await delay(100);
-        myList.push(chunkMini);
-      }
-      // console.log('myList', myList);
-      const filteredList = myList.filter(Boolean);
-
-      // console.log('filteredList', filteredList);
-      const aggregatedBuf = Buffer.concat(filteredList);
-      // console.log('aggregatedBuf', aggregatedBuf);
-      fileChunk = aggregatedBuf;
-    }
-
-    // console.log('fileChunk ', fileChunk);
     if (!fileChunk) {
       break;
     }
 
-    if (fileChunk) {
-      // console.log('!!!!! fileChunk length', fileChunk.length);
-      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-      // console.log('encoded length', encodedFileChunk.length);
-      // const fileWritePath = path.resolve(SRC_ROOT, `it_written_${itIdx}_${filename}`);
-      // console.log('path', fileWritePath);
+    // if (fileChunk) {
+    const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+    readSize = readSize + fileChunk.length;
 
-      // await FilesystemService.writeFileToPath(fileWritePath, encodedFileChunk);
+    completedProgress = (100 * readSize) / fileSize;
 
-      readSize = readSize + fileChunk.length;
-      // console.log('read size', readSize);
-
-      completedProgress = (100 * readSize) / fileSize;
-
-      console.log(
-        `completed ${readSize} from ${fileSize} bytes, or ${(
-          Math.round(completedProgress * 100) / 100
-        ).toFixed(2)}%`,
-      );
-      offsetStart = offsetEnd;
-      offsetEnd = offsetEnd + step;
-      // itIdx += 1;
-      encodedFileChunks.push(encodedFileChunk);
-    }
+    console.log(
+      `completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(
+        2,
+      )}%`,
+    );
+    offsetStart = offsetEnd;
+    offsetEnd = offsetEnd + step;
+    encodedFileChunks.push(encodedFileChunk);
+    // }
   }
 
   const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
   const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
 
   console.log('fileWritePath ', fileWritePath);
-  // const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
-  // it is good up to here
   console.log('encoded file chunks length', encodedFileChunks.length);
 
   const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
@@ -897,9 +833,113 @@ const testReadAndWriteLocal = async (filename: string) => {
 
   const encodedFile = await FilesystemService.encodeFile(decodedFile);
   console.log('this is not be shown as the string is way too long');
-  FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+  await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
 };
 
+const testReadAndWriteLocalWorking = async (filename: string) => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const imageFileName = filename;
+  const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
+
+  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  console.log('fileInfo', fileInfo);
+
+  const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+
+  let readSize = 0;
+
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+
+  console.log('stats', stats);
+
+  const step = 5000000;
+  let offsetStart = 0;
+  let offsetEnd = step;
+
+  const maxStep = 65536;
+
+  const readChunkSize = offsetEnd - offsetStart;
+
+  const encodedFileChunks = [];
+
+  let completedProgress = 0;
+
+  while (readSize < fileSize) {
+    let fileChunk;
+
+    if (readChunkSize < maxStep) {
+      fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+    } else {
+      let remained = readChunkSize;
+      const subChunks = [];
+      while (remained > 0) {
+        const currentStep = remained > maxStep ? maxStep : remained;
+        subChunks.push(currentStep);
+
+        remained = remained - currentStep;
+      }
+      const myList = [];
+
+      for (const chunkLength of subChunks) {
+        const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+
+        await delay(100);
+        myList.push(chunkMini);
+      }
+
+      const filteredList = myList.filter(Boolean);
+
+      const aggregatedBuf = Buffer.concat(filteredList);
+      fileChunk = aggregatedBuf;
+    }
+
+    if (!fileChunk) {
+      break;
+    }
+
+    if (fileChunk) {
+      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+      readSize = readSize + fileChunk.length;
+
+      completedProgress = (100 * readSize) / fileSize;
+
+      console.log(
+        `completed ${readSize} from ${fileSize} bytes, or ${(
+          Math.round(completedProgress * 100) / 100
+        ).toFixed(2)}%`,
+      );
+      offsetStart = offsetEnd;
+      offsetEnd = offsetEnd + step;
+      encodedFileChunks.push(encodedFileChunk);
+    }
+  }
+
+  const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
+  const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+
+  console.log('fileWritePath ', fileWritePath);
+
+  console.log('encoded file chunks length', encodedFileChunks.length);
+
+  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+  console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+
+  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+  console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+
+  FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+  console.log('we should have an entire file written');
+
+  const encodedFile = await FilesystemService.encodeFile(decodedFile);
+  console.log('this is not be shown as the string is way too long');
+  await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+};
+
+// request upload and upload
 const testIt = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -920,6 +960,192 @@ const testIt = async (filename: string) => {
 
   const { address, publicKey } = keyPairZeroA;
   const messageToSign = `${fileInfo.filehash}${address}`;
+
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+  console.log('stats', stats);
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+  const extraParams = [
+    {
+      filename: imageFileName,
+      filesize: fileInfo.size,
+      filehash: fileInfo.filehash,
+      walletaddr: address,
+      walletpubkey: publicKey,
+      signature,
+    },
+  ];
+
+  const callResultInit = await Network.sendUserRequestUpload(extraParams);
+
+  const { response: responseInit } = callResultInit;
+
+  console.log('call result init', JSON.stringify(callResultInit));
+
+  if (!responseInit) {
+    console.log('we dont have response. it might be an error', callResultInit);
+    return;
+  }
+
+  const { result: resultWithOffesets } = responseInit;
+  console.log('result with offesets', resultWithOffesets);
+
+  let offsetStartGlobal = 0;
+  let offsetEndGlobal = 0;
+  let isContinueGlobal = 0;
+
+  const {
+    offsetend: offsetendInit,
+    offsetstart: offsetstartInit,
+    return: isContinueInit,
+  } = resultWithOffesets;
+
+  if (offsetendInit === undefined) {
+    console.log('a we dont have an offest. could be an error. response is', responseInit);
+    return;
+  }
+  if (offsetstartInit === undefined) {
+    console.log('b we dont have an offest. could be an error. response is', responseInit);
+    return;
+  }
+
+  // const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+
+  let readSize = 0;
+
+  // const maxStep = 65536;
+
+  let completedProgress = 0;
+
+  isContinueGlobal = +isContinueInit;
+  offsetStartGlobal = +offsetstartInit;
+  offsetEndGlobal = +offsetendInit;
+
+  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+
+  while (isContinueGlobal === 1) {
+    // const readChunkSize = offsetEndGlobal - offsetStartGlobal;
+
+    // let fileChunk;
+
+    // if (readChunkSize < maxStep) {
+    const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
+    // fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+    // } else {
+    //   let remained = readChunkSize;
+    //   const subChunks = [];
+    //   while (remained > 0) {
+    //     const currentStep = remained > maxStep ? maxStep : remained;
+    //     subChunks.push(currentStep);
+    //
+    //     remained = remained - currentStep;
+    //   }
+    //   const myList = [];
+    //
+    //   for (const chunkLength of subChunks) {
+    //     const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+    //
+    //     await delay(10);
+    //     myList.push(chunkMini);
+    //   }
+    //   const filteredList = myList.filter(Boolean);
+    //
+    //   const aggregatedBuf = Buffer.concat(filteredList);
+    //   // console.log('aggregatedBuf', aggregatedBuf);
+    //   fileChunk = aggregatedBuf;
+    // }
+
+    if (!fileChunk) {
+      console.log('fileChunk is missing, Exiting ', fileChunk);
+      break;
+    }
+
+    log('from run.ts - completed before encoding a chunk to base64', completedProgress);
+
+    if (fileChunk) {
+      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+      readSize = readSize + fileChunk.length;
+
+      completedProgress = (100 * readSize) / fileSize;
+
+      log(
+        `from run.ts - completed ${readSize} from ${fileSize} bytes, or ${(
+          Math.round(completedProgress * 100) / 100
+        ).toFixed(2)}%`,
+      );
+
+      // upload
+      const extraParamsForUpload = [
+        {
+          filehash: fileInfo.filehash,
+          data: encodedFileChunk,
+        },
+      ];
+
+      // isContinueGlobal = 0;
+      // log('from run.ts - completed', completedProgress);
+      log('from run.ts - will call upload', offsetStartGlobal, offsetEndGlobal);
+
+      const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
+
+      log('call result upload', JSON.stringify(callResultUpload));
+
+      const { response: responseUpload } = callResultUpload;
+
+      log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+
+      if (!responseUpload) {
+        console.log('we dont have response. it might be an error', callResultUpload);
+
+        return;
+      }
+
+      const {
+        result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload },
+      } = responseUpload;
+
+      if (offsetendUpload === undefined) {
+        console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+        return;
+      }
+
+      if (offsetstartUpload === undefined) {
+        console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+        return;
+      }
+
+      isContinueGlobal = +isContinueUpload;
+      offsetStartGlobal = +offsetstartUpload;
+      offsetEndGlobal = +offsetendUpload;
+    }
+  }
+};
+
+const testItWorking = async (filename: string) => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const imageFileName = filename;
+  const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
+
+  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+
+  if (!keyPairZeroA) {
+    return;
+  }
+
+  const { address, publicKey } = keyPairZeroA;
+  const messageToSign = `${fileInfo.filehash}${address}`;
+
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+  console.log('stats', stats);
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
   const extraParams = [
@@ -970,10 +1196,10 @@ const testIt = async (filename: string) => {
 
   let readSize = 0;
 
-  const stats = fs.statSync(fileReadPath);
-  const fileSize = stats.size;
+  // const stats = fs.statSync(fileReadPath);
+  // const fileSize = stats.size;
+  // console.log('stats', stats);
 
-  console.log('stats', stats);
   const maxStep = 65536;
 
   let completedProgress = 0;
@@ -997,23 +1223,19 @@ const testIt = async (filename: string) => {
         subChunks.push(currentStep);
 
         remained = remained - currentStep;
-        // console.log('remained', remained);
       }
-      // console.log('list of sub chnks ', subChunks);
       const myList = [];
 
       for (const chunkLength of subChunks) {
         const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
 
-        await delay(100);
+        await delay(10);
         myList.push(chunkMini);
       }
-      // console.log('myList', myList);
       const filteredList = myList.filter(Boolean);
 
-      // console.log('filteredList', filteredList);
       const aggregatedBuf = Buffer.concat(filteredList);
-      console.log('aggregatedBuf', aggregatedBuf);
+      // console.log('aggregatedBuf', aggregatedBuf);
       fileChunk = aggregatedBuf;
     }
 
@@ -1039,13 +1261,11 @@ const testIt = async (filename: string) => {
         {
           filehash: fileInfo.filehash,
           data: encodedFileChunk,
-          // walletpubkey: publicKey,
-          // signature,
         },
       ];
 
       // isContinueGlobal = 0;
-      console.log('params for upload', extraParamsForUpload);
+      log('from run.ts params for upload', extraParamsForUpload);
 
       const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
 
@@ -1108,10 +1328,11 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    // ppNodeUrl: 'http://13.115.18.4',
+    ppNodeUrl: 'http://54.185.84.33',
     // ppNodePort: '8137',
-    ppNodeUrl: 'http://localhost',
-    ppNodePort: '8080',
+    ppNodePort: '8148',
+    // ppNodeUrl: 'http://localhost',
+    // ppNodePort: '8080',
   });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1120,11 +1341,11 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  // const filename = 'file_10M_29_11_2022_9_58';
-  const filename = 'file_200M_29_11_2022_12_47';
-  // const filename =
-  // 'Надія в єдності - Hope In Unity - 013 - Надія в єдності - Hope In Unity- Marlon Hoffstadt aka DJ Daddy Trance - The Sun Will Rise.mp3';
+  const filename = 'rahman.mp4';
+
   await testIt(filename);
+
+  // await testReadAndWriteLocal(filename);
   // await getBalanceCardMetrics();
   // await mainSdsPrepay();
   // await testUploadRequest();

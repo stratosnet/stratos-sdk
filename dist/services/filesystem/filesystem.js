@@ -192,11 +192,10 @@ var getFileChunk = function (fileStream, readChunkSize) { return __awaiter(void 
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, new Promise(function (resolve) {
-                        // console.log('ch a requested size', readChunkSize);
                         var chunk = fileStream.read(readChunkSize);
-                        if (chunk) {
-                            // console.log('chunk a read size', chunk.length);
-                        }
+                        // if (chunk) {
+                        // console.log('chunk a read size', chunk.length);
+                        // }
                         resolve(chunk);
                     })];
             case 1:
@@ -216,7 +215,7 @@ function encodeBuffer(chunk) {
         var base64data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, delay(200)];
+                case 0: return [4 /*yield*/, delay(100)];
                 case 1:
                     _a.sent();
                     base64data = chunk.toString('base64');
