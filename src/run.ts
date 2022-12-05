@@ -1328,9 +1328,11 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    ppNodeUrl: 'http://54.185.84.33',
-    // ppNodePort: '8137',
-    ppNodePort: '8148',
+    ppNodeUrl: 'http://13.115.18.9',
+    ppNodePort: '8137',
+
+    // ppNodeUrl: 'http://54.185.84.33',
+    // ppNodePort: '8148',
     // ppNodeUrl: 'http://localhost',
     // ppNodePort: '8080',
   });
@@ -1343,10 +1345,10 @@ const main = async () => {
 
   const filename = 'rahman.mp4';
 
-  await testIt(filename);
+  // await testIt(filename);
 
   // await testReadAndWriteLocal(filename);
-  // await getBalanceCardMetrics();
+  await getBalanceCardMetrics();
   // await mainSdsPrepay();
   // await testUploadRequest();
 
