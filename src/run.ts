@@ -1328,11 +1328,14 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    ppNodeUrl: 'http://13.115.18.9',
-    ppNodePort: '8137',
+    // pp a
+    // ppNodeUrl: 'http://13.115.18.9',
+    // ppNodePort: '8137',
 
-    // ppNodeUrl: 'http://54.185.84.33',
-    // ppNodePort: '8148',
+    // pp b
+    ppNodeUrl: 'http://54.185.84.33',
+    ppNodePort: '8148',
+
     // ppNodeUrl: 'http://localhost',
     // ppNodePort: '8080',
   });
@@ -1343,12 +1346,12 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  const filename = 'rahman.mp4';
+  const filename = 'file1_30M_dec_6';
 
-  // await testIt(filename);
+  await testIt(filename);
 
   // await testReadAndWriteLocal(filename);
-  await getBalanceCardMetrics();
+  // await getBalanceCardMetrics();
   // await mainSdsPrepay();
   // await testUploadRequest();
 

@@ -1465,7 +1465,12 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 throw new Error('Could not resolve chain id');
             case 4:
                 // 2
-                Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, ppNodeUrl: 'http://13.115.18.9', ppNodePort: '8137' }));
+                Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID, 
+                    // pp a
+                    // ppNodeUrl: 'http://13.115.18.9',
+                    // ppNodePort: '8137',
+                    // pp b
+                    ppNodeUrl: 'http://54.185.84.33', ppNodePort: '8148' }));
                 phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
                 return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
             case 5:
@@ -1474,13 +1479,9 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 6:
                 _cosmosClient = _a.sent();
-                filename = 'rahman.mp4';
-                // await testIt(filename);
-                // await testReadAndWriteLocal(filename);
-                return [4 /*yield*/, getBalanceCardMetrics()];
+                filename = 'file1_30M_dec_6';
+                return [4 /*yield*/, testIt(filename)];
             case 7:
-                // await testIt(filename);
-                // await testReadAndWriteLocal(filename);
                 _a.sent();
                 return [2 /*return*/];
         }
