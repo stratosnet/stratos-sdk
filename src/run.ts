@@ -1,14 +1,9 @@
-// import { SigningStargateClient } from '@cosmjs/stargate';
+import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import dotenv from 'dotenv';
 import fs from 'fs';
-// import keccak256 from 'keccak256';
-// import md5File from 'md5-file';
-// import multihashing from 'multihashing-async';
 import path from 'path';
-// import { Keccak } from 'sha3';
-// import * as bigInteger from 'big-integer';
-// import * as BigIntegerM from 'js-big-integer';
 import * as accounts from './accounts';
+import { hdVault } from './config';
 import { mnemonic } from './hdVault';
 import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
@@ -17,43 +12,11 @@ import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
 import { getCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
+import { log, delay } from './services/helpers';
 import * as Network from './services/network';
 import * as transactions from './transactions';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
-// import {
-//   DirectSecp256k1HdWallet,
-//   DirectSecp256k1Wallet,
-//   makeAuthInfoBytes,
-//   makeSignDoc,
-//   OfflineSigner,
-//   Registry,
-//   TxBodyEncodeObject,
-// } from '@cosmjs/proto-signing';
-
-// import {
-//   Bip39,
-//   EnglishMnemonic,
-//   HdPath,
-//   Hmac,
-//   ripemd160,
-//   Secp256k1,
-//   sha256,
-//   Sha512,
-//   Slip10Curve,
-//   Slip10RawIndex,
-//   stringToPath,
-// } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
-import { hdVault } from './config';
-
-import { log } from './services/helpers';
-// import md5 from 'blueimp-md5';
-
-// import crypto from 'crypto';
-// import multihash from 'multihashes';
-
-// import CID from 'cids';
 
 dotenv.config();
 
@@ -685,50 +648,56 @@ const testUploadRequest = async () => {
   };
 };
 
-const testRequestUsetFileList = async () => {
+const testRequestUserFileList = async () => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
 
   const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
 
   if (!keyPairZeroA) {
+    console.log('Error. We dont have a keypair');
     return;
   }
 
   const { address } = keyPairZeroA;
 
-  const extraParams = [
-    {
-      walletaddr: address,
-      // walletpubkey: publicKey,
-      page: 0,
-    },
-  ];
+  const page = 4;
+  const userFileList = await FilesystemService.getUserUploadedFileList(address, page);
 
-  // only requesting the upload
-  const callResult = await Network.sendUserRequestList(extraParams);
+  console.log('retrieved user file list', userFileList);
 
-  const { response } = callResult;
-
-  console.log('file list request result', JSON.stringify(callResult));
-
-  // now upload itself
-  if (!response) {
-    return;
-  }
-
-  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
-
-  return {
-    data: `response from ${connectedUrl}`,
-    response,
-  };
+  //   const extraParams = [
+  //     {
+  //       walletaddr: address,
+  //       page: 0,
+  //     },
+  //   ];
+  //
+  //   const callResult = await Network.sendUserRequestList(extraParams);
+  //
+  //   const { response } = callResult;
+  //
+  //   console.log('file list request result', JSON.stringify(callResult));
+  //
+  //   // now upload itself
+  //   if (!response) {
+  //     return;
+  //   }
+  //
+  //   const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+  //
+  //   return {
+  //     data: `response from ${connectedUrl}`,
+  //     response,
+  //   };
 };
 
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// move to utils
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
+// read local file and write a new one
 const testReadAndWriteLocal = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -836,6 +805,7 @@ const testReadAndWriteLocal = async (filename: string) => {
   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
 };
 
+// read local file and write a new one (multiple IO)
 const testReadAndWriteLocalWorking = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -1122,6 +1092,7 @@ const testIt = async (filename: string) => {
   }
 };
 
+// request upload and upload (multiple IO)
 const testItWorking = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -1331,7 +1302,7 @@ const main = async () => {
     // pp a
     // ppNodeUrl: 'http://13.115.18.9',
     // ppNodePort: '8137',
-
+    //
     // pp b
     ppNodeUrl: 'http://54.185.84.33',
     ppNodePort: '8148',
@@ -1348,11 +1319,17 @@ const main = async () => {
 
   const filename = 'file1_30M_dec_6';
 
-  await testIt(filename);
+  // request and upload
+  // await testIt(filename);
+
+  await testRequestUserFileList();
 
   // await testReadAndWriteLocal(filename);
+
   // await getBalanceCardMetrics();
+
   // await mainSdsPrepay();
+
   // await testUploadRequest();
 
   // await testRequestUsetFileList();
