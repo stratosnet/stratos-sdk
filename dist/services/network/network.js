@@ -25,7 +25,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -55,6 +55,7 @@ var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var config_1 = require("../../config");
 var Sdk_1 = __importDefault(require("../../Sdk"));
+var helpers_1 = require("../../services/helpers");
 var _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
     function (data) {
@@ -76,11 +77,11 @@ var getRpcRoute = function () {
 };
 var getPpNodeRoute = function () {
     var _a = Sdk_1.default.environment, ppNodeUrl = _a.ppNodeUrl, ppNodePort = _a.ppNodePort;
-    return ppNodeUrl + ":" + ppNodePort;
+    return "".concat(ppNodeUrl, ":").concat(ppNodePort);
 };
 var getExplorerRoute = function () {
     var explorerUrl = Sdk_1.default.environment.explorerUrl;
-    var url = "" + explorerUrl;
+    var url = "".concat(explorerUrl);
     return url;
 };
 var apiPostLegacy = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
@@ -110,20 +111,27 @@ var apiPostLegacy = function (url, data, config) { return __awaiter(void 0, void
 }); };
 exports.apiPostLegacy = apiPostLegacy;
 var apiPost = function (url, data, config) { return __awaiter(void 0, void 0, void 0, function () {
-    var axiosResponse, err_2, e, myResponse, e;
+    var myConfig, axiosResponse, err_2, e, myResponse, e;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, _axios.post(url, data, config)];
+                myConfig = {
+                    maxContentLength: Infinity,
+                    maxBodyLength: Infinity,
+                    timeout: 13000,
+                };
+                _a.label = 1;
             case 1:
-                axiosResponse = _a.sent();
-                return [3 /*break*/, 3];
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, _axios.post(url, data, __assign(__assign({}, config), myConfig))];
             case 2:
+                axiosResponse = _a.sent();
+                return [3 /*break*/, 4];
+            case 3:
                 err_2 = _a.sent();
                 e = err_2;
                 return [2 /*return*/, { error: { message: e.message } }];
-            case 3:
+            case 4:
                 try {
                     myResponse = axiosResponse.data;
                     return [2 /*return*/, { response: myResponse }];
@@ -174,13 +182,14 @@ var sendRpcCall = function (givenPayload, config) { return __awaiter(void 0, voi
                     method: 'eth_protocolVersion',
                     params: [],
                 };
-                url = "" + getPpNodeRoute();
-                console.log('🚀 ~ file: network.ts ~ line 122 ~ rpc call url', url);
+                url = "".concat(getPpNodeRoute());
+                (0, helpers_1.log)('from network ~ rpc call url', url);
                 payload = __assign(__assign({}, defaultPayload), givenPayload);
-                console.log('calling rpc', payload);
+                (0, helpers_1.log)('from network - calling rpc', payload);
                 return [4 /*yield*/, (0, exports.apiPost)(url, payload, __assign({}, config))];
             case 1:
                 dataResult = _a.sent();
+                (0, helpers_1.log)('from network - rpc post result', payload);
                 return [2 /*return*/, dataResult];
         }
     });
@@ -191,7 +200,7 @@ var getAccountsData = function (address, config) { return __awaiter(void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/cosmos/auth/v1beta1/accounts/" + address;
+                url = "".concat(getRestRoute(), "/cosmos/auth/v1beta1/accounts/").concat(address);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -205,7 +214,7 @@ var getAccountBalance = function (address, config) { return __awaiter(void 0, vo
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/cosmos/bank/v1beta1/balances/" + address;
+                url = "".concat(getRestRoute(), "/cosmos/bank/v1beta1/balances/").concat(address);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -219,7 +228,7 @@ var getStakingValidators = function (address, config) { return __awaiter(void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/auth/acconts/" + address;
+                url = "".concat(getRestRoute(), "/auth/acconts/").concat(address);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -239,7 +248,7 @@ var getSubmitTransactionData = function (data) {
     }
     catch (err) {
         return {
-            error: { message: "Can't submit transaction. Can't parse transaction data. " + err.message },
+            error: { message: "Can't submit transaction. Can't parse transaction data. ".concat(err.message) },
         };
     }
 };
@@ -249,7 +258,7 @@ var submitTransaction = function (delegatorAddr, data, config) { return __awaite
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                url = getRestRoute() + "/staking/delegators/" + delegatorAddr + "/delegations";
+                url = "".concat(getRestRoute(), "/staking/delegators/").concat(delegatorAddr, "/delegations");
                 _a = (0, exports.getSubmitTransactionData)(data), txData = _a.response, error = _a.error;
                 if (error) {
                     return [2 /*return*/, { error: error }];
@@ -269,7 +278,7 @@ var getTxListBlockchain = function (address, type, page, config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = getRestRoute() + "/txs";
+                    url = "".concat(getRestRoute(), "/txs");
                     params = {
                         page: page,
                         limit: 3,
@@ -302,7 +311,7 @@ var getTxList = function (address, type, page, config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = getExplorerRoute() + "/api/getAccountHistory";
+                    url = "".concat(getExplorerRoute(), "/api/getAccountHistory");
                     params = {
                         page: page,
                         account: address,
@@ -330,7 +339,7 @@ var getValidatorsList = function (status, page, config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = getRestRoute() + "/cosmos/staking/v1beta1/validators";
+                    url = "".concat(getRestRoute(), "/cosmos/staking/v1beta1/validators");
                     return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { page: page, status: status } }))];
                 case 1:
                     dataResult = _a.sent();
@@ -346,7 +355,7 @@ var getValidatorsBondedToDelegatorList = function (status, delegatorAddress, con
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/cosmos/staking/v1beta1/delegators/" + delegatorAddress + "/validators";
+                url = "".concat(getRestRoute(), "/cosmos/staking/v1beta1/delegators/").concat(delegatorAddress, "/validators");
                 return [4 /*yield*/, (0, exports.apiGet)(url, __assign(__assign({}, config), { params: { status: status } }))];
             case 1:
                 dataResult = _a.sent();
@@ -361,7 +370,7 @@ var getValidator = function (address, config) { return __awaiter(void 0, void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/cosmos/staking/v1beta1/validators/" + address;
+                url = "".concat(getRestRoute(), "/cosmos/staking/v1beta1/validators/").concat(address);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -376,7 +385,7 @@ var getStakingPool = function (config) { return __awaiter(void 0, void 0, void 0
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/cosmos/staking/v1beta1/pool";
+                url = "".concat(getRestRoute(), "/cosmos/staking/v1beta1/pool");
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -390,7 +399,7 @@ var getAvailableBalance = function (address, config) { return __awaiter(void 0, 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/bank/balances/" + address;
+                url = "".concat(getRestRoute(), "/bank/balances/").concat(address);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -405,7 +414,7 @@ var getDelegatedBalance = function (delegatorAddr, config) { return __awaiter(vo
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/delegators/" + delegatorAddr + "/delegations";
+                url = "".concat(getRestRoute(), "/staking/delegators/").concat(delegatorAddr, "/delegations");
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -419,7 +428,7 @@ var getUnboundingBalance = function (delegatorAddr, config) { return __awaiter(v
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/staking/delegators/" + delegatorAddr + "/unbonding_delegations";
+                url = "".concat(getRestRoute(), "/staking/delegators/").concat(delegatorAddr, "/unbonding_delegations");
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -433,7 +442,7 @@ var getRewardBalance = function (delegatorAddr, config) { return __awaiter(void 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRestRoute() + "/distribution/delegators/" + delegatorAddr + "/rewards";
+                url = "".concat(getRestRoute(), "/distribution/delegators/").concat(delegatorAddr, "/rewards");
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -450,7 +459,7 @@ config) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "" + faucetUrl;
+                    url = "".concat(faucetUrl);
                     payload = {
                         denom: denom,
                         address: walletAddress.trim(),
@@ -469,7 +478,7 @@ var getRpcStatus = function (config) { return __awaiter(void 0, void 0, void 0, 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRpcRoute() + "/status";
+                url = "".concat(getRpcRoute(), "/status");
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:
                 dataResult = _a.sent();
@@ -483,7 +492,7 @@ var uploadFile = function (config) { return __awaiter(void 0, void 0, void 0, fu
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                url = getRpcRoute() + "/status";
+                url = "".concat(getRpcRoute(), "/status");
                 console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
                 return [4 /*yield*/, (0, exports.apiGet)(url, config)];
             case 1:

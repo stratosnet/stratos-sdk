@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -161,7 +161,7 @@ var getEncryptionKey = function (password) { return __awaiter(void 0, void 0, vo
             });
         }
         catch (error) {
-            throw new Error("Could not call PBKDF2. Error - " + error.message);
+            throw new Error("Could not call PBKDF2. Error - ".concat(error.message));
         }
         cryptoJsKeyEncoded = cryptoJsKey.toString(crypto_js_1.default.enc.Base64);
         keyBuffer = Buffer.from(cryptoJsKeyEncoded, 'base64');
@@ -193,7 +193,7 @@ var getAminoPublicKey = function (pubkey) { return __awaiter(void 0, void 0, voi
 exports.getAminoPublicKey = getAminoPublicKey;
 function rawSecp256k1PubkeyToRawAddress(pubkeyData) {
     if (pubkeyData.length !== 33) {
-        throw new Error("Invalid Secp256k1 pubkey length (compressed): " + pubkeyData.length);
+        throw new Error("Invalid Secp256k1 pubkey length (compressed): ".concat(pubkeyData.length));
     }
     return (0, crypto_1.ripemd160)((0, crypto_1.sha256)(pubkeyData));
 }
@@ -337,7 +337,7 @@ var serializeWallet = function (wallet, password) { return __awaiter(void 0, voi
                 return [3 /*break*/, 4];
             case 3:
                 error_1 = _a.sent();
-                throw new Error("Could not serialize a wallet with the encryption key. Error4 - " + error_1.message);
+                throw new Error("Could not serialize a wallet with the encryption key. Error4 - ".concat(error_1.message));
             case 4: 
             // return encryptedWalletInfo;
             return [2 /*return*/, encryptedWalletInfoFour];

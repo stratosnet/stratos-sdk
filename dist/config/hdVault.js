@@ -12,8 +12,8 @@ exports.stratosDenom = 'wei';
 exports.stratosTopDenom = 'stos';
 exports.stratosUozDenom = 'uoz';
 exports.stratosOzDenom = 'oz';
-exports.keyPath = "" + exports.masterkey + exports.bip44purpose + exports.stratosCoinType;
-exports.keyPathPattern = exports.keyPath + "a";
+exports.keyPath = "".concat(exports.masterkey).concat(exports.bip44purpose).concat(exports.stratosCoinType);
+exports.keyPathPattern = "".concat(exports.keyPath, "a");
 exports.kdfConfiguration = {
     algorithm: 'argon2id',
     params: {

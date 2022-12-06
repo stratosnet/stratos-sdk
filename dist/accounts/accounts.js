@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -33,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -78,7 +82,7 @@ var increaseBalance = function (walletAddress, faucetUrl, denom) { return __awai
                 result = _a.sent();
                 faucetError = result.error;
                 if (faucetError) {
-                    return [2 /*return*/, { result: false, errorMessage: "Could not increase balance: Error: \"" + faucetError.message + "\"" }];
+                    return [2 /*return*/, { result: false, errorMessage: "Could not increase balance: Error: \"".concat(faucetError.message, "\"") }];
                 }
                 console.log('🚀 ~ file: accounts.ts ~ line 45 ~ increaseBalance ~ result', result);
                 return [3 /*break*/, 3];
@@ -87,7 +91,7 @@ var increaseBalance = function (walletAddress, faucetUrl, denom) { return __awai
                 console.log('Error: Faucet returns:', error_1.message);
                 return [2 /*return*/, {
                         result: false,
-                        errorMessage: "Could not increase balance: Error: \"" + error_1.message + "\"",
+                        errorMessage: "Could not increase balance: Error: \"".concat(error_1.message, "\""),
                     }];
             case 3: return [2 /*return*/, { result: true }];
         }
@@ -121,7 +125,7 @@ var formatBalanceFromWei = function (amount, requiredPrecision, appendDenom) {
     if (!appendDenom) {
         return balance;
     }
-    var fullBalance = balance + " " + hdVault_1.stratosTopDenom.toUpperCase();
+    var fullBalance = "".concat(balance, " ").concat(hdVault_1.stratosTopDenom.toUpperCase());
     return fullBalance;
 };
 exports.formatBalanceFromWei = formatBalanceFromWei;
@@ -135,7 +139,7 @@ var getBalanceCardMetricValue = function (denom, amount) {
     }
     var balanceInWei = (0, bigNumber_1.create)(amount);
     var balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
-    var balanceToReturn = balance + " " + hdVault_1.stratosTopDenom.toUpperCase();
+    var balanceToReturn = "".concat(balance, " ").concat(hdVault_1.stratosTopDenom.toUpperCase());
     return balanceToReturn;
 };
 exports.getBalanceCardMetricValue = getBalanceCardMetricValue;
@@ -144,14 +148,14 @@ var getOzoneMetricValue = function (denom, amount) {
     var isStratosDenom = denom === hdVault_1.stratosUozDenom;
     var printableDenome = hdVault_1.stratosOzDenom.toUpperCase();
     if (!isStratosDenom) {
-        return "0.0000 " + printableDenome;
+        return "0.0000 ".concat(printableDenome);
     }
     if (!amount) {
-        return "0.0000 " + printableDenome;
+        return "0.0000 ".concat(printableDenome);
     }
     var balanceInWei = (0, bigNumber_1.create)(amount);
     var balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
-    var balanceToReturn = balance + " " + printableDenome;
+    var balanceToReturn = "".concat(balance, " ").concat(printableDenome);
     return balanceToReturn;
 };
 exports.getOzoneMetricValue = getOzoneMetricValue;
@@ -162,11 +166,11 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
         switch (_p.label) {
             case 0:
                 cardMetricsResult = {
-                    available: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
-                    delegated: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
-                    unbounding: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
-                    reward: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
-                    ozone: "0.0000 " + hdVault_1.stratosTopDenom.toUpperCase(),
+                    available: "0.0000 ".concat(hdVault_1.stratosTopDenom.toUpperCase()),
+                    delegated: "0.0000 ".concat(hdVault_1.stratosTopDenom.toUpperCase()),
+                    unbounding: "0.0000 ".concat(hdVault_1.stratosTopDenom.toUpperCase()),
+                    reward: "0.0000 ".concat(hdVault_1.stratosTopDenom.toUpperCase()),
+                    ozone: "0.0000 ".concat(hdVault_1.stratosTopDenom.toUpperCase()),
                     detailedBalance: {},
                 };
                 detailedBalance = {
@@ -196,7 +200,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                         detailedBalance.delegated[validatorAddress] = validatorBalance;
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
                     }, 0);
-                    myDelegated = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "" + (amountInWei || ''));
+                    myDelegated = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "".concat(amountInWei || ''));
                     cardMetricsResult.delegated = myDelegated;
                 }
                 return [4 /*yield*/, (0, network_1.getUnboundingBalance)(keyPairAddress)];
@@ -209,7 +213,7 @@ var getBalanceCardMetrics = function (keyPairAddress) { return __awaiter(void 0,
                         var balanceInWei = (0, bigNumber_1.create)(entry.balance);
                         return (0, bigNumber_1.plus)(acc, balanceInWei);
                     }, 0);
-                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "" + (amountInWei || ''));
+                    cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, "".concat(amountInWei || ''));
                 }
                 return [4 /*yield*/, (0, network_1.getRewardBalance)(keyPairAddress)];
             case 4:
@@ -291,7 +295,7 @@ var getAccountTrasactions = function (address, type, page) {
                     txListResult = _b.sent();
                     response = txListResult.response, error = txListResult.error;
                     if (error) {
-                        throw new Error("Could not fetch tx history. Details: \"" + error.message + "\"");
+                        throw new Error("Could not fetch tx history. Details: \"".concat(error.message, "\""));
                     }
                     if (!response) {
                         throw new Error('Could not fetch tx history');
@@ -305,7 +309,7 @@ var getAccountTrasactions = function (address, type, page) {
                             parsedData.push(parsed);
                         }
                         catch (err) {
-                            console.log("Parsing error: " + err.message);
+                            console.log("Parsing error: ".concat(err.message));
                         }
                     });
                     result = { data: parsedData, total: total, page: page || 1 };

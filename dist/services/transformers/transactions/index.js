@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -57,8 +61,8 @@ var transformTx = function (txItem) {
         transformedTransaction = transactionTransformer(txItem);
     }
     catch (err) {
-        console.log("Could not parse txItem with hash \"" + txItem.txhash + "\"", err.message);
-        throw new Error("Could not parse txItem with hash \"" + txItem.txhash + "\"");
+        console.log("Could not parse txItem with hash \"".concat(txItem.txhash, "\""), err.message);
+        throw new Error("Could not parse txItem with hash \"".concat(txItem.txhash, "\""));
     }
     return transformedTransaction;
 };

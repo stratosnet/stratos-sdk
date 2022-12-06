@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-export declare type BigNumberValue = BigNumber.Value;
+export type BigNumberValue = BigNumber.Value;
 export declare const ROUND_UP: 0;
 export declare const ROUND_DOWN: 1;
 export declare const toWei: (value: BigNumberValue, precision?: number) => BigNumber;

@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -33,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -66,6 +70,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
 var stargate_1 = require("@cosmjs/stargate");
+var stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 var tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 // import { getAccountsData } from '../accounts';
 var hdVault_1 = require("../config/hdVault");
@@ -74,7 +79,6 @@ var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var validators_1 = require("../validators");
 var Types = __importStar(require("./types"));
-var stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 function payloadGenerator(dataList) {
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -316,6 +320,7 @@ var getSdsPrepayTx = function (senderAddress, prepayPayload) { return __awaiter(
                     coins: (0, exports.getStandardAmount)([amount]),
                 },
             };
+            console.log('message to be signed', JSON.stringify(message));
             messagesList.push(message);
             iteratedData = payloadToProcess.next();
         }

@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -67,7 +67,7 @@ var StratosCosmos = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         error_1 = _a.sent();
-                        throw new Error("Can not deserialize encrypted wallet (cosmos). " + error_1.message);
+                        throw new Error("Can not deserialize encrypted wallet (cosmos). ".concat(error_1.message));
                     case 4:
                         _a.trys.push([4, 6, , 7]);
                         return [4 /*yield*/, getCosmosClient(rpcEndpoint, deserializedWallet)];
@@ -77,7 +77,7 @@ var StratosCosmos = /** @class */ (function () {
                         return [3 /*break*/, 7];
                     case 6:
                         error_2 = _a.sent();
-                        throw new Error("Can not get cosmos client (cosmos). " + error_2.message);
+                        throw new Error("Can not get cosmos client (cosmos). ".concat(error_2.message));
                     case 7: return [2 /*return*/];
                 }
             });
@@ -111,7 +111,7 @@ var getCosmos = function (serialized, password) {
                     return [3 /*break*/, 4];
                 case 3:
                     error_3 = _a.sent();
-                    throw new Error("Can not initialize cosmos (cosmos). " + error_3.message);
+                    throw new Error("Can not initialize cosmos (cosmos). ".concat(error_3.message));
                 case 4: return [2 /*return*/, StratosCosmos.cosmosInstance];
             }
         });
@@ -137,7 +137,7 @@ var getCosmosClient = function (rpcEndpoint, deserializedWallet) { return __awai
                 return [2 /*return*/, client];
             case 3:
                 error_4 = _a.sent();
-                throw new Error("Can not connect with a signer (cosmos). " + error_4.message);
+                throw new Error("Can not connect with a signer (cosmos). ".concat(error_4.message));
             case 4: return [2 /*return*/];
         }
     });

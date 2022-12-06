@@ -28,7 +28,7 @@ export declare const encryptMasterKeySeed: (password: string, masterKeySeed: Uin
 export declare const decryptMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array | false>;
 export declare const unlockMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<boolean>;
 export declare const getMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array>;
-export declare type PathBuilder = (account_index: number) => HdPath;
+export type PathBuilder = (account_index: number) => HdPath;
 export declare function makePathBuilder(pattern: string): PathBuilder;
 export declare const serializeWallet: (wallet: DirectSecp256k1HdWallet, password: string) => Promise<string>;
 export declare function createWalletAtPath(hdPathIndex: number, mnemonic: string): Promise<DirectSecp256k1HdWallet>;
