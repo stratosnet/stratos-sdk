@@ -2,17 +2,22 @@ import CID from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
 import multihashing from 'multihashing-async';
+import Sdk from '../../Sdk';
+import { delay } from '../helpers';
+import { networkTypes, sendUserRequestList } from '../network';
+import { FileInfoItem } from '../network/types';
+
 // import * as Types from './types';
 
-async function wait(fn: any, ms: number) {
-  while (!fn()) {
-    await delay(ms);
-  }
-}
-
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// async function wait(fn: any, ms: number) {
+//   while (!fn()) {
+//     await delay(ms);
+//   }
+// }
+//
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
 export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   try {
@@ -227,4 +232,42 @@ export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   } catch (err) {
     console.log(`Could not write file to ${filePath}: Details: ${(err as Error).message}`);
   }
+};
+
+type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
+
+interface UserFileListResponse {
+  files: FileInfoItem[];
+  originalResponse: RequestUserFilesResponse;
+}
+
+export const getUserUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
+  const extraParams = [
+    {
+      walletaddr: address,
+      page,
+    },
+  ];
+
+  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+
+  const message = `connecting to ${connectedUrl}`;
+
+  console.log(message);
+  const callResult = await sendUserRequestList(extraParams);
+
+  const { response } = callResult;
+
+  // console.log('file list request result', JSON.stringify(callResult));
+
+  if (!response) {
+    throw 'Could not fetch a list of files. No response in the call result';
+  }
+
+  const userFiles = response.result.fileinfo;
+
+  return {
+    originalResponse: response,
+    files: userFiles,
+  };
 };
