@@ -12,7 +12,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -44,7 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -246,7 +250,7 @@ describe('network (unit test)', function () {
     });
     describe('submitTransaction', function () {
         var delegatorAddr = '123';
-        var url = hostUrl + "/staking/delegators/" + delegatorAddr + "/delegations";
+        var url = "".concat(hostUrl, "/staking/delegators/").concat(delegatorAddr, "/delegations");
         it('returns properly formatted response', function () { return __awaiter(void 0, void 0, void 0, function () {
             var myResponse, myData, spy, spyPost, myNewData, dataResult;
             return __generator(this, function (_a) {
@@ -333,7 +337,7 @@ describe('network (unit test)', function () {
     });
     describe('getAccountsData', function () {
         var address = '123';
-        var url = hostUrl + "/auth/acconts/" + address;
+        var url = "".concat(hostUrl, "/auth/acconts/").concat(address);
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -356,7 +360,7 @@ describe('network (unit test)', function () {
     });
     describe('getStakingValidators', function () {
         var address = '123';
-        var url = hostUrl + "/auth/acconts/" + address;
+        var url = "".concat(hostUrl, "/auth/acconts/").concat(address);
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -381,7 +385,7 @@ describe('network (unit test)', function () {
         var address = '123';
         var txType = 'from';
         var page = 1;
-        var url = hostUrl + "/txs";
+        var url = "".concat(hostUrl, "/txs");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var params, spyApiGet;
             return __generator(this, function (_a) {
@@ -435,7 +439,7 @@ describe('network (unit test)', function () {
     describe('getValidatorsList', function () {
         var status = 'foo';
         var page = 1;
-        var url = hostUrl + "/staking/validators";
+        var url = "".concat(hostUrl, "/staking/validators");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -459,7 +463,7 @@ describe('network (unit test)', function () {
     describe('getValidatorsBondedToDelegatorList', function () {
         var delegatorAddress = '123';
         var status = 'foo';
-        var url = hostUrl + "/staking/delegators/" + delegatorAddress + "/validators";
+        var url = "".concat(hostUrl, "/staking/delegators/").concat(delegatorAddress, "/validators");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -482,7 +486,7 @@ describe('network (unit test)', function () {
     });
     describe('getValidator', function () {
         var address = '123';
-        var url = hostUrl + "/staking/validators/" + address;
+        var url = "".concat(hostUrl, "/staking/validators/").concat(address);
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -504,7 +508,7 @@ describe('network (unit test)', function () {
         }); });
     });
     describe('getStakingPool', function () {
-        var url = hostUrl + "/staking/pool";
+        var url = "".concat(hostUrl, "/staking/pool");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -527,7 +531,7 @@ describe('network (unit test)', function () {
     });
     describe('getAvailableBalance', function () {
         var address = '123';
-        var url = hostUrl + "/bank/balances/" + address;
+        var url = "".concat(hostUrl, "/bank/balances/").concat(address);
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -550,7 +554,7 @@ describe('network (unit test)', function () {
     });
     describe('getDelegatedBalance', function () {
         var delegatorAddr = '123';
-        var url = hostUrl + "/staking/delegators/" + delegatorAddr + "/delegations";
+        var url = "".concat(hostUrl, "/staking/delegators/").concat(delegatorAddr, "/delegations");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -573,7 +577,7 @@ describe('network (unit test)', function () {
     });
     describe('getUnboundingBalance', function () {
         var delegatorAddr = '123';
-        var url = hostUrl + "/staking/delegators/" + delegatorAddr + "/unbonding_delegations";
+        var url = "".concat(hostUrl, "/staking/delegators/").concat(delegatorAddr, "/unbonding_delegations");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -596,7 +600,7 @@ describe('network (unit test)', function () {
     });
     describe('getRewardBalance', function () {
         var delegatorAddr = '123';
-        var url = hostUrl + "/distribution/delegators/" + delegatorAddr + "/rewards";
+        var url = "".concat(hostUrl, "/distribution/delegators/").concat(delegatorAddr, "/rewards");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -619,8 +623,8 @@ describe('network (unit test)', function () {
     });
     describe('requestBalanceIncrease', function () {
         var walletAddress = '123';
-        var faucetUrl = hostUrl + "/345";
-        var url = faucetUrl + "/" + walletAddress;
+        var faucetUrl = "".concat(hostUrl, "/345");
+        var url = "".concat(faucetUrl, "/").concat(walletAddress);
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiPost;
             return __generator(this, function (_a) {
@@ -642,7 +646,7 @@ describe('network (unit test)', function () {
         }); });
     });
     describe('getRpcStatus', function () {
-        var url = hostUrl + "/status";
+        var url = "".concat(hostUrl, "/status");
         it('calls api with a proper url', function () { return __awaiter(void 0, void 0, void 0, function () {
             var spyApiGet;
             return __generator(this, function (_a) {
@@ -664,7 +668,7 @@ describe('network (unit test)', function () {
         }); });
     });
     describe('getChainId', function () {
-        var url = hostUrl + "/status";
+        var url = "".concat(hostUrl, "/status");
         it('returns proper chainId', function () { return __awaiter(void 0, void 0, void 0, function () {
             var response, spyApiGet, chainId;
             return __generator(this, function (_a) {

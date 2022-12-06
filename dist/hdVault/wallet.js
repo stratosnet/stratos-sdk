@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -33,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -79,7 +83,7 @@ var deriveKeyPair = function (keyIndex, password, encryptedMasterKeySeed) { retu
                 er_1 = _a.sent();
                 return [2 /*return*/, Promise.reject(false)];
             case 3:
-                path = "" + hdVault_1.keyPath + keyIndex;
+                path = "".concat(hdVault_1.keyPath).concat(keyIndex);
                 privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, path);
                 return [4 /*yield*/, (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed)];
             case 4:
@@ -109,8 +113,8 @@ var deserializeEncryptedWallet = function (serializedWallet, password) { return 
                 return [3 /*break*/, 3];
             case 2:
                 error_1 = _a.sent();
-                msg = "\"" + error_1.message + "\", w \"" + serializedWallet + "\"";
-                errorMsg = "could not deserialize / decode wallet " + msg;
+                msg = "\"".concat(error_1.message, "\", w \"").concat(serializedWallet, "\"");
+                errorMsg = "could not deserialize / decode wallet ".concat(msg);
                 console.log(errorMsg);
                 throw new Error(errorMsg);
             case 3:

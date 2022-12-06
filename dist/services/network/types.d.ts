@@ -107,7 +107,7 @@ export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
         result: UnboundingBalanceResult[];
     };
 }
-export declare type TransactionData = string;
+export type TransactionData = string;
 export interface ParsedTransactionData {
 }
 export interface SubmitTransactionDataResult extends NetworkAxiosDataResult {
@@ -125,7 +125,7 @@ export interface TxFee {
     amount: TxAmount[];
     gas: string;
 }
-export declare type TxDataDataAmount = TxAmount[] | TxAmount;
+export type TxDataDataAmount = TxAmount[] | TxAmount;
 export interface TxData {
     sender: string;
     nonce?: number | null;

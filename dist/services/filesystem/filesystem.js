@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -39,30 +39,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFile = exports.writeFileToPath = exports.getUploadFileStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.getUserUploadedFileList = exports.writeFile = exports.writeFileToPath = exports.getUploadFileStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
 var cids_1 = __importDefault(require("cids"));
 var crypto_1 = __importDefault(require("crypto"));
 var fs_1 = __importDefault(require("fs"));
 var multihashing_async_1 = __importDefault(require("multihashing-async"));
+var Sdk_1 = __importDefault(require("../../Sdk"));
+var helpers_1 = require("../helpers");
+var network_1 = require("../network");
 // import * as Types from './types';
-function wait(fn, ms) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!!fn()) return [3 /*break*/, 2];
-                    return [4 /*yield*/, delay(ms)];
-                case 1:
-                    _a.sent();
-                    return [3 /*break*/, 0];
-                case 2: return [2 /*return*/];
-            }
-        });
-    });
-}
-function delay(ms) {
-    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
-}
+// async function wait(fn: any, ms: number) {
+//   while (!fn()) {
+//     await delay(ms);
+//   }
+// }
+//
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 var getFileBuffer = function (filePath) { return __awaiter(void 0, void 0, void 0, function () {
     var fileBuffer;
     return __generator(this, function (_a) {
@@ -71,7 +65,7 @@ var getFileBuffer = function (filePath) { return __awaiter(void 0, void 0, void 
             return [2 /*return*/, fileBuffer];
         }
         catch (err) {
-            throw new Error("Could not read a file from " + filePath + ": Details: " + err.message);
+            throw new Error("Could not read a file from ".concat(filePath, ": Details: ").concat(err.message));
         }
         return [2 /*return*/];
     });
@@ -215,7 +209,7 @@ function encodeBuffer(chunk) {
         var base64data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, delay(100)];
+                case 0: return [4 /*yield*/, (0, helpers_1.delay)(100)];
                 case 1:
                     _a.sent();
                     base64data = chunk.toString('base64');
@@ -338,7 +332,7 @@ var getUploadFileStream = function (filePath) { return __awaiter(void 0, void 0,
                 return [2 /*return*/, myStream];
             case 2:
                 error_4 = _a.sent();
-                errorMessage = "could not create file stream at path " + filePath;
+                errorMessage = "could not create file stream at path ".concat(filePath);
                 console.log(errorMessage, error_4);
                 throw new Error(errorMessage);
             case 3: return [2 /*return*/];
@@ -359,8 +353,42 @@ var writeFile = function (filePath, fileBuffer) {
         fs_1.default.writeFileSync(filePath, fileBuffer);
     }
     catch (err) {
-        console.log("Could not write file to " + filePath + ": Details: " + err.message);
+        console.log("Could not write file to ".concat(filePath, ": Details: ").concat(err.message));
     }
 };
 exports.writeFile = writeFile;
+var getUserUploadedFileList = function (address, page) {
+    if (page === void 0) { page = 0; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var extraParams, connectedUrl, message, callResult, response, userFiles;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    extraParams = [
+                        {
+                            walletaddr: address,
+                            page: page,
+                        },
+                    ];
+                    connectedUrl = "".concat(Sdk_1.default.environment.ppNodeUrl, ":").concat(Sdk_1.default.environment.ppNodePort);
+                    message = "connecting to ".concat(connectedUrl);
+                    console.log(message);
+                    return [4 /*yield*/, (0, network_1.sendUserRequestList)(extraParams)];
+                case 1:
+                    callResult = _a.sent();
+                    response = callResult.response;
+                    // console.log('file list request result', JSON.stringify(callResult));
+                    if (!response) {
+                        throw 'Could not fetch a list of files. No response in the call result';
+                    }
+                    userFiles = response.result.fileinfo;
+                    return [2 /*return*/, {
+                            originalResponse: response,
+                            files: userFiles,
+                        }];
+            }
+        });
+    });
+};
+exports.getUserUploadedFileList = getUserUploadedFileList;
 //# sourceMappingURL=filesystem.js.map

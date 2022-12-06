@@ -1,5 +1,7 @@
 /// <reference types="node" />
 import fs from 'fs';
+import { networkTypes } from '../network';
+import { FileInfoItem } from '../network/types';
 export declare const getFileBuffer: (filePath: string) => Promise<Buffer>;
 export declare const calculateFileHash: (filePath: string) => Promise<string>;
 export interface OpenedFileInfo {
@@ -19,3 +21,10 @@ export declare const getEncodedFileChunks: (filePath: string, chunkSize?: number
 export declare const getUploadFileStream: (filePath: string) => Promise<fs.ReadStream>;
 export declare const writeFileToPath: (filePath: string, econdedFileContent: string) => Promise<void>;
 export declare const writeFile: (filePath: string, fileBuffer: Buffer) => void;
+type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
+interface UserFileListResponse {
+    files: FileInfoItem[];
+    originalResponse: RequestUserFilesResponse;
+}
+export declare const getUserUploadedFileList: (address: string, page?: number) => Promise<UserFileListResponse>;
+export {};

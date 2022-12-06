@@ -93,7 +93,7 @@ export interface SdsPrepayValue extends TransactionValue {
     sender: string;
     coins: AmountType[];
 }
-declare type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
+type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
 export interface TransactionMessage {
     typeUrl: TxMsgTypes;
     value: TransactionValueType;
@@ -140,7 +140,7 @@ export interface SdsPrepayTxMessage {
         coins: AmountType[];
     };
 }
-export declare type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
+export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
 export interface SendTxPayload {
     amount: number;
     toAddress: string;
@@ -157,5 +157,5 @@ export interface WithdrawalRewardTxPayload {
 export interface SdsPrepayTxPayload {
     amount: number;
 }
-export declare type TxPayload = SendTxPayload | DelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload | SdsPrepayTxPayload;
+export type TxPayload = SendTxPayload | DelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload | SdsPrepayTxPayload;
 export {};

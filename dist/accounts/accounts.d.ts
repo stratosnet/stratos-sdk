@@ -7,7 +7,7 @@ export interface BalanceCardMetrics {
     ozone: string;
     detailedBalance?: any;
 }
-export declare const increaseBalance: (walletAddress: string, faucetUrl: string, denom?: string | undefined) => Promise<{
+export declare const increaseBalance: (walletAddress: string, faucetUrl: string, denom?: string) => Promise<{
     result: boolean;
     errorMessage: string;
 } | {
@@ -20,4 +20,4 @@ export declare const getBalanceCardMetricValue: (denom?: string | undefined, amo
 export declare const getOzoneMetricValue: (denom?: string | undefined, amount?: string | undefined) => string;
 export declare const getBalanceCardMetrics: (keyPairAddress: string) => Promise<BalanceCardMetrics>;
 export declare const getMaxAvailableBalance: (keyPairAddress: string, requestedDenom: string, decimals?: number) => Promise<string>;
-export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number | undefined) => Promise<TxTypes.ParsedTxData>;
+export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number) => Promise<TxTypes.ParsedTxData>;
