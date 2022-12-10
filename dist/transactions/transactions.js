@@ -70,7 +70,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
 var stargate_1 = require("@cosmjs/stargate");
-var stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 var tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 // import { getAccountsData } from '../accounts';
 var hdVault_1 = require("../config/hdVault");
@@ -79,6 +78,7 @@ var bigNumber_1 = require("../services/bigNumber");
 var cosmos_1 = require("../services/cosmos");
 var validators_1 = require("../validators");
 var Types = __importStar(require("./types"));
+var stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 function payloadGenerator(dataList) {
     return __generator(this, function (_a) {
         switch (_a.label) {

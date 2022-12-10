@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
+exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 var axios_1 = __importDefault(require("axios"));
 var json_bigint_1 = __importDefault(require("json-bigint"));
 var config_1 = require("../../config");
@@ -508,6 +508,8 @@ var getRpcPayload = function (msgId, method, extraParams) {
         method: method,
         params: extraParams,
     };
+    console.log('network, rpc payload to be sent');
+    console.log(payload);
     return payload;
 };
 exports.getRpcPayload = getRpcPayload;
@@ -543,6 +545,54 @@ var sendUserRequestUpload = function (extraParams, config) { return __awaiter(vo
     });
 }); };
 exports.sendUserRequestUpload = sendUserRequestUpload;
+var sendUserRequestDownload = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_requestDownload';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserRequestDownload = sendUserRequestDownload;
+var sendUserDownloadData = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_downloadData';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserDownloadData = sendUserDownloadData;
+var sendUserDownloadedFileInfo = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
+    var msgId, method, payload, dataResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msgId = 1;
+                method = 'user_downloadedFileInfo';
+                payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+                return [4 /*yield*/, (0, exports.sendRpcCall)(payload, config)];
+            case 1:
+                dataResult = _a.sent();
+                return [2 /*return*/, dataResult];
+        }
+    });
+}); };
+exports.sendUserDownloadedFileInfo = sendUserDownloadedFileInfo;
 var sendUserRequestGetOzone = function (extraParams, config) { return __awaiter(void 0, void 0, void 0, function () {
     var msgId, method, payload, dataResult;
     return __generator(this, function (_a) {

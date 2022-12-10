@@ -447,6 +447,47 @@ export interface FileUserRequestUploadParams {
   walletpubkey: string;
 }
 
+export interface FileUserRequestDownloadParams {
+  filehash: string;
+  walletaddr: string;
+}
+
+export interface FileUserRequestDownloadResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2';
+    reqid: string;
+    offsetstart: string;
+    offsetend: string;
+    filedata: string;
+  };
+}
+
+export interface FileUserDownloadDataParams {
+  filehash: string;
+  reqid: string;
+}
+
+export interface FileUserDownloadDataResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2' | '3';
+    offsetstart?: string;
+    offsetend?: string;
+    filedata?: string;
+  };
+}
+
+export interface FileUserDownloadedFileInfoParams {
+  filehash: string;
+  reqid: string;
+  filesize: number;
+}
+
+export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2' | '3';
+  };
+}
+
 export interface FileUserRequestUploadResponse extends MainRpcResponse {
   result: {
     return: '0' | '1';

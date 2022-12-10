@@ -61,8 +61,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("@testing-library/jest-dom/extend-expect");
 var KeyManager = __importStar(require("./keyManager"));
-var KeyUtils = __importStar(require("./keyUtils"));
 var Mnemonic = __importStar(require("./mnemonic"));
+var KeyUtils = __importStar(require("./keyUtils"));
 describe('keyManager', function () {
     describe('createMasterKeySeed', function () {
         it('creates master key seed', function () { return __awaiter(void 0, void 0, void 0, function () {

@@ -62,12 +62,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("@testing-library/jest-dom/extend-expect");
+var sjcl_1 = __importDefault(require("sjcl"));
 // import nacl from 'tweetnacl';
 var CosmosAmino = __importStar(require("@cosmjs/amino"));
 var CosmosCrypto = __importStar(require("@cosmjs/crypto"));
 var encoding_1 = require("@cosmjs/encoding");
-require("@testing-library/jest-dom/extend-expect");
-var sjcl_1 = __importDefault(require("sjcl"));
 var KeyUtils = __importStar(require("./keyUtils"));
 describe('keyUtils', function () {
     describe('getPublicKeyFromPrivKey', function () {

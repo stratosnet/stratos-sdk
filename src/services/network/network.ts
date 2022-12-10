@@ -2,9 +2,8 @@ import axios from 'axios';
 import JSONbig from 'json-bigint';
 import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
-import * as Types from './types';
-
 import { log } from '../../services/helpers';
+import * as Types from './types';
 
 const _axios = axios.create({});
 
@@ -409,6 +408,9 @@ export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T)
     params: extraParams,
   };
 
+  console.log('network, rpc payload to be sent');
+  console.log(payload);
+
   return payload;
 };
 
@@ -434,6 +436,48 @@ export const sendUserRequestUpload = async (
   const method = 'user_requestUpload';
 
   const payload = getRpcPayload<Types.FileUserRequestUploadParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestDownload = async (
+  extraParams: Types.FileUserRequestDownloadParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestDownload';
+
+  const payload = getRpcPayload<Types.FileUserRequestDownloadParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserDownloadData = async (
+  extraParams: Types.FileUserDownloadDataParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>> => {
+  const msgId = 1;
+  const method = 'user_downloadData';
+
+  const payload = getRpcPayload<Types.FileUserDownloadDataParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserDownloadedFileInfo = async (
+  extraParams: Types.FileUserDownloadedFileInfoParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>> => {
+  const msgId = 1;
+  const method = 'user_downloadedFileInfo';
+
+  const payload = getRpcPayload<Types.FileUserDownloadedFileInfoParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 

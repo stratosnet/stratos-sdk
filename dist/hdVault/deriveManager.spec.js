@@ -59,12 +59,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var CosmosCrypto = __importStar(require("@cosmjs/crypto"));
-var encoding_1 = require("@cosmjs/encoding");
 require("@testing-library/jest-dom/extend-expect");
+var encoding_1 = require("@cosmjs/encoding");
 var DeriveManager = __importStar(require("./deriveManager"));
 var KeyUtils = __importStar(require("./keyUtils"));
 var Mnemonic = __importStar(require("./mnemonic"));
+var CosmosCrypto = __importStar(require("@cosmjs/crypto"));
 describe('deriveManager', function () {
     describe('deriveAddressFromPhrase', function () {
         it('derives address from given mnemonic phrase', function () { return __awaiter(void 0, void 0, void 0, function () {

@@ -862,8 +862,8 @@ var testUploadRequest = function () { return __awaiter(void 0, void 0, void 0, f
         }
     });
 }); };
-var testRequestUserFileList = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, keyPairZeroA, address, page, userFileList;
+var testRequestUserFileList = function (page) { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, keyPairZeroA, address, userFileList;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -879,7 +879,6 @@ var testRequestUserFileList = function () { return __awaiter(void 0, void 0, voi
                     return [2 /*return*/];
                 }
                 address = keyPairZeroA.address;
-                page = 4;
                 return [4 /*yield*/, FilesystemService.getUserUploadedFileList(address, page)];
             case 3:
                 userFileList = _a.sent();
@@ -1086,6 +1085,51 @@ var testReadAndWriteLocalWorking = function (filename) { return __awaiter(void 0
                 return [4 /*yield*/, FilesystemService.writeFileToPath(fileWritePath, encodedFile)];
             case 17:
                 _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+var testDl = function (filename) { return __awaiter(void 0, void 0, void 0, function () {
+    var phrase, masterKeySeedInfo, keyPairZeroA, address, filehash, extraParams, callResultRequestDl, responseRequestDl, resultWithOffesets;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                /**
+                 filehash: 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8',                                                                                                                                                                                                                            │
+              2    12│      filesize: 10000000,                                                                                                                                                                                                                                                              │
+              2    13│      filename: 'file2_10M_dec_6',                                                                                                                                                                                                                                                     │
+              2    14│      createtime: 1670619959
+                 */
+                console.log("downloading file ".concat(filename));
+                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
+            case 1:
+                masterKeySeedInfo = _a.sent();
+                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString())];
+            case 2:
+                keyPairZeroA = _a.sent();
+                if (!keyPairZeroA) {
+                    return [2 /*return*/];
+                }
+                address = keyPairZeroA.address;
+                filehash = 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8';
+                extraParams = [
+                    {
+                        filehash: filehash,
+                        walletaddr: address,
+                    },
+                ];
+                return [4 /*yield*/, Network.sendUserRequestDownload(extraParams)];
+            case 3:
+                callResultRequestDl = _a.sent();
+                responseRequestDl = callResultRequestDl.response;
+                console.log('call result request dl', JSON.stringify(callResultRequestDl));
+                if (!responseRequestDl) {
+                    console.log('we dont have response for dl request. it might be an error', callResultRequestDl);
+                    return [2 /*return*/];
+                }
+                resultWithOffesets = responseRequestDl.result;
+                console.log('result with offesets', resultWithOffesets);
                 return [2 /*return*/];
         }
     });
@@ -1441,13 +1485,17 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, (0, cosmos_1.getCosmos)(serialized, password)];
             case 6:
                 _cosmosClient = _a.sent();
-                filename = 'file1_30M_dec_6';
+                filename = 'file2_10M_dec_6';
                 // request and upload
                 // await testIt(filename);
-                return [4 /*yield*/, testRequestUserFileList()];
+                // download the file
+                // await testDl(filename);
+                return [4 /*yield*/, testRequestUserFileList(0)];
             case 7:
                 // request and upload
                 // await testIt(filename);
+                // download the file
+                // await testDl(filename);
                 _a.sent();
                 return [2 /*return*/];
         }

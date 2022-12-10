@@ -648,7 +648,7 @@ const testUploadRequest = async () => {
   };
 };
 
-const testRequestUserFileList = async () => {
+const testRequestUserFileList = async (page: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
 
@@ -661,7 +661,7 @@ const testRequestUserFileList = async () => {
 
   const { address } = keyPairZeroA;
 
-  const page = 4;
+  // const page = 4;
   const userFileList = await FilesystemService.getUserUploadedFileList(address, page);
 
   console.log('retrieved user file list', userFileList);
@@ -907,6 +907,51 @@ const testReadAndWriteLocalWorking = async (filename: string) => {
   const encodedFile = await FilesystemService.encodeFile(decodedFile);
   console.log('this is not be shown as the string is way too long');
   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+};
+
+const testDl = async (filename: string) => {
+  /**
+   filehash: 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8',                                                                                                                                                                                                                            │
+2    12│      filesize: 10000000,                                                                                                                                                                                                                                                              │
+2    13│      filename: 'file2_10M_dec_6',                                                                                                                                                                                                                                                     │
+2    14│      createtime: 1670619959                              
+   */
+
+  console.log(`downloading file ${filename}`);
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+
+  if (!keyPairZeroA) {
+    return;
+  }
+
+  const { address } = keyPairZeroA;
+
+  const filehash = 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8';
+
+  const extraParams = [
+    {
+      filehash,
+      walletaddr: address,
+    },
+  ];
+
+  const callResultRequestDl = await Network.sendUserRequestDownload(extraParams);
+
+  const { response: responseRequestDl } = callResultRequestDl;
+
+  console.log('call result request dl', JSON.stringify(callResultRequestDl));
+
+  if (!responseRequestDl) {
+    console.log('we dont have response for dl request. it might be an error', callResultRequestDl);
+    return;
+  }
+
+  const { result: resultWithOffesets } = responseRequestDl;
+  console.log('result with offesets', resultWithOffesets);
 };
 
 // request upload and upload
@@ -1317,12 +1362,15 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  const filename = 'file1_30M_dec_6';
+  const filename = 'file2_10M_dec_6';
 
   // request and upload
   // await testIt(filename);
 
-  await testRequestUserFileList();
+  // download the file
+  // await testDl(filename);
+
+  await testRequestUserFileList(0);
 
   // await testReadAndWriteLocal(filename);
 
@@ -1332,8 +1380,6 @@ const main = async () => {
 
   // await testUploadRequest();
 
-  // await testRequestUsetFileList();
-  //
   // 100000000 100 M
   //   3500000 3.5 M
   // await testRequestData();

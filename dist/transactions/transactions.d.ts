@@ -1,7 +1,7 @@
-import { GeneratedType } from '@cosmjs/proto-signing';
-import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import * as Types from './types';
+import { GeneratedType } from '@cosmjs/proto-signing';
+import { DeliverTxResponse } from '@cosmjs/stargate';
 export declare const getStratosTransactionRegistryTypes: () => readonly [string, GeneratedType][];
 declare global {
     interface Window {
