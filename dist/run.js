@@ -968,8 +968,8 @@ const main = async () => {
     // await testDl(filename);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    await getBalanceCardMetrics();
-    // await mainSdsPrepay();
+    // await getBalanceCardMetrics();
+    await mainSdsPrepay();
     // await mainSend();
     // await testUploadRequest();
     // 100000000 100 M

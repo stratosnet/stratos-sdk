@@ -144,12 +144,21 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
     async getMyAccountsWithPrivkeys() {
         return Promise.all(this.myAccounts.map(async ({ hdPath, prefix }) => {
             const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
+            console.log('fullPubkeyHex 1', pubkey);
             const { pubkey: fullPubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
-            // const address = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
+            const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
+            console.log('fullPubkeyHex 2', fullPubkeyHex);
+            const compressedPub = crypto_1.Secp256k1.compressPubkey(fullPubkey);
+            const compressedPubHex = Buffer.from(compressedPub).toString('hex');
+            console.log('pub compressedPub ', compressedPub);
+            console.log('pub compressedPub compressedPubHex ', compressedPubHex);
+            const addressOld = (0, encoding_1.toBech32)(prefix, (0, amino_1.rawSecp256k1PubkeyToRawAddress)(pubkey));
             const address = (0, encoding_1.toBech32)(prefix, pubkeyToRawAddressWithKeccak(fullPubkey));
+            console.log('old address ', addressOld);
+            console.log('new address ', address);
             return {
                 algo: 'secp256k1',
-                // algo: 'eth_secp256k1' as const,
+                // algo: 'ed25519' as const,
                 privkey: privkey,
                 pubkey: pubkey,
                 address: address,

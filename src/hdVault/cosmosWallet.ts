@@ -114,17 +114,25 @@ export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array 
 
 export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubKey> => {
   const { pubkey } = await Secp256k1.makeKeypair(privkey);
-  console.log(' get pub full pub ', pubkey);
+
+  const pubkeyHex = Buffer.from(pubkey).toString('hex');
+
+  console.log('get pub full pubkey ', pubkey);
+  console.log('get pub pubkeyHex ', pubkeyHex);
 
   const compressedPub = Secp256k1.compressPubkey(pubkey);
+  const compressedPubHex = Buffer.from(compressedPub).toString('hex');
 
-  console.log('get pub compressedPub pub ', pubkey);
+  console.log('get pub compressedPub ', compressedPub);
+  console.log('get pub compressedPub compressedPubHex ', compressedPubHex);
+
   const pubkeyMine = {
     // type: 'tendermint/PubKeySecp256k1',
-    type: 'stratos/PubKeySecp256k1',
+    type: 'stratos/PubKeyEthSecp256k1',
     // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
     value: toBase64(compressedPub),
   };
+
   console.log('get full pub pubkeyMine', pubkeyMine);
 
   return pubkeyMine;

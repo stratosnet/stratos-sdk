@@ -31,8 +31,9 @@ export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<s
   const address = getAddressFromPubKeyWithKeccak(pubkey);
 
   // old address
-  // const pubkey = await getMasterKeySeedPublicKey(masterKeySeed);
-  // const address = getAddressFromPubKey(pubkey);
+  const pubkeyOld = await getMasterKeySeedPublicKey(masterKeySeed);
+  const addressOld = getAddressFromPubKey(pubkeyOld);
+  console.log('old add 1', addressOld);
   return address;
 };
 
@@ -46,8 +47,9 @@ export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Prom
   const address = getAddressFromPubKeyWithKeccak(pubkey);
 
   // old address
-  // const address = getAddressFromPubKey(pubkeyMine);
+  const addressOld = getAddressFromPubKey(pubkeyMine);
 
+  console.log('old add 2', addressOld);
   const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
 
   return {

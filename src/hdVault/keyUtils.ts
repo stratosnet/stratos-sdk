@@ -238,16 +238,26 @@ function pubkeyToRawAddress(pubkey: PubKey): Uint8Array {
 export const getAddressFromPubKey = (pubkey: PubKey): string => {
   const prefix = stratosAddressPrefix;
 
+  const addressChunkOfBytes = pubkeyToRawAddress(pubkey);
   const address = toBech32(prefix, pubkeyToRawAddress(pubkey));
 
+  const hexAddress = toHex(addressChunkOfBytes);
+  console.log('old hex address', hexAddress);
+
+  console.log('old bench32 address', address);
   return address;
 };
 
 export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
   const prefix = stratosAddressPrefix;
 
-  const address = toBech32(prefix, pubkeyToRawAddressWithKeccak(pubkey));
+  const addressChunkOfBytes = pubkeyToRawAddressWithKeccak(pubkey);
 
+  const hexAddress = toHex(addressChunkOfBytes);
+  console.log('kk hex address', hexAddress);
+
+  const address = toBech32(prefix, addressChunkOfBytes);
+  console.log('kk bench32 address', address);
   return address;
 };
 
@@ -396,7 +406,7 @@ export async function createWalletAtPath(
   };
 
   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
-  console.log('direct wallet', JSON.stringify(wallet));
+  // console.log('direct wallet', JSON.stringify(wallet));
 
   // works - way 2
   // const pathBuilder = makePathBuilder(keyPathPattern);

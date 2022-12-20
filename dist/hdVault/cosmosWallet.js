@@ -83,12 +83,16 @@ const getMasterKeySeedPriveKey = (masterKeySeed) => {
 exports.getMasterKeySeedPriveKey = getMasterKeySeedPriveKey;
 const getPublicKeyFromPrivKey = async (privkey) => {
     const { pubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
-    console.log(' get pub full pub ', pubkey);
+    const pubkeyHex = Buffer.from(pubkey).toString('hex');
+    console.log('get pub full pubkey ', pubkey);
+    console.log('get pub pubkeyHex ', pubkeyHex);
     const compressedPub = crypto_1.Secp256k1.compressPubkey(pubkey);
-    console.log('get pub compressedPub pub ', pubkey);
+    const compressedPubHex = Buffer.from(compressedPub).toString('hex');
+    console.log('get pub compressedPub ', compressedPub);
+    console.log('get pub compressedPub compressedPubHex ', compressedPubHex);
     const pubkeyMine = {
         // type: 'tendermint/PubKeySecp256k1',
-        type: 'stratos/PubKeySecp256k1',
+        type: 'stratos/PubKeyEthSecp256k1',
         // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
         value: (0, encoding_1.toBase64)(compressedPub),
     };

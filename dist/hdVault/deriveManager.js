@@ -34,8 +34,9 @@ const deriveAddressFromPhrase = async (phrase) => {
     const pubkey = await (0, cosmosWallet_1.getMasterKeySeedPublicKeyWithKeccak)(masterKeySeed);
     const address = (0, keyUtils_1.getAddressFromPubKeyWithKeccak)(pubkey);
     // old address
-    // const pubkey = await getMasterKeySeedPublicKey(masterKeySeed);
-    // const address = getAddressFromPubKey(pubkey);
+    const pubkeyOld = await (0, cosmosWallet_1.getMasterKeySeedPublicKey)(masterKeySeed);
+    const addressOld = (0, keyUtils_1.getAddressFromPubKey)(pubkeyOld);
+    console.log('old add 1', addressOld);
     return address;
 };
 exports.deriveAddressFromPhrase = deriveAddressFromPhrase;
@@ -46,7 +47,8 @@ const deriveKeyPairFromPrivateKeySeed = async (privkey) => {
     const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);
     const address = (0, keyUtils_1.getAddressFromPubKeyWithKeccak)(pubkey);
     // old address
-    // const address = getAddressFromPubKey(pubkeyMine);
+    const addressOld = (0, keyUtils_1.getAddressFromPubKey)(pubkeyMine);
+    console.log('old add 2', addressOld);
     const encodedPublicKey = await (0, keyUtils_1.getEncodedPublicKey)(encodeAminoPub);
     return {
         address,
