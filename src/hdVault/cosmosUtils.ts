@@ -1,7 +1,8 @@
 import { HdPath, pathToString, stringToPath } from '@cosmjs/crypto';
 import { fromUtf8, toUtf8 } from '@cosmjs/encoding';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+// import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { assert, isNonNullObject } from '@cosmjs/utils';
+import StratosDirectSecp256k1HdWallet from '../hdVault/StratosDirectSecp256k1HdWallet';
 import { decrypt, encrypt } from './cosmosWallet';
 
 /**
@@ -31,11 +32,12 @@ interface Secp256k1Derivation {
 }
 // const serializationTypeV1 = 'directsecp256k1hdwallet-v1';
 
-export const serializeWithEncryptionKey = async (
+export const serializeWithEncryptionKey = (
   password: string,
-  wallet: DirectSecp256k1HdWallet,
-): Promise<string> => {
-  const walletAccounts = wallet['accounts'] as Secp256k1Derivation[];
+  wallet: StratosDirectSecp256k1HdWallet,
+): string => {
+  // const walletAccounts = wallet['accounts'] as Secp256k1Derivation[];
+  const walletAccounts = wallet['myAccounts'] as Secp256k1Derivation[];
 
   const dataToEncrypt: DirectSecp256k1HdWalletData = {
     mnemonic: wallet.mnemonic,
@@ -47,7 +49,8 @@ export const serializeWithEncryptionKey = async (
 
   const dataToEncryptRaw = toUtf8(JSON.stringify(dataToEncrypt));
 
-  const encryptedData = await encrypt(password, dataToEncryptRaw);
+  // const encryptedData = await encrypt(password, dataToEncryptRaw);
+  const encryptedData = encrypt(password, dataToEncryptRaw);
 
   const out = {
     data: encryptedData.toString(),
@@ -65,7 +68,7 @@ function isDerivationJson(thing: unknown): thing is DerivationInfoJson {
 export const deserializeWithEncryptionKey = async (
   password: string,
   serialization: string,
-): Promise<DirectSecp256k1HdWallet> => {
+): Promise<StratosDirectSecp256k1HdWallet> => {
   const root = JSON.parse(serialization);
   if (!isNonNullObject(root)) throw new Error('Root document is not an object.');
   const untypedRoot: any = root;
@@ -82,7 +85,7 @@ export const deserializeWithEncryptionKey = async (
     throw new Error('Accounts do not all have the same prefix');
   }
   const hdPaths = accounts.map(({ hdPath }) => stringToPath(hdPath));
-  return DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+  return StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: hdPaths,
     prefix: firstPrefix,
   });

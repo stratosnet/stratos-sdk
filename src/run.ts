@@ -6,6 +6,7 @@ import * as accounts from './accounts';
 import { hdVault } from './config';
 import { mnemonic } from './hdVault';
 import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
+import * as cosmosWallet from './hdVault/cosmosWallet';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
@@ -63,8 +64,6 @@ const mainFour = async () => {
 
 // cosmosjs send
 const mainSend = async () => {
-  // const firstAddress = 'st1p6xr32qthheenk3v94zkyudz7vmjaght0l4q7j';
-
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
@@ -287,7 +286,7 @@ const uploadRequest = async () => {
   const messageToSign = `${filehash}${walletaddr}`;
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZero.privateKey);
   console.log('🚀 ~ file: run.ts ~ line 342 ~ uploadRequest ~ signature', signature);
-  const pubkeyMine = await keyUtils.getPublicKeyFromPrivKey(fromHex(keyPairZero.privateKey));
+  const pubkeyMine = await cosmosWallet.getPublicKeyFromPrivKey(fromHex(keyPairZero.privateKey));
   const valid = await keyUtils.verifySignature(messageToSign, signature, pubkeyMine.value);
   console.log('🚀 ~ file: run.ts ~ line 349 ~ uploadRequest ~ valid', valid);
 };
@@ -722,10 +721,6 @@ const testReadAndWriteLocal = async (filename: string) => {
   let offsetStart = 0;
   let offsetEnd = step;
 
-  // const maxStep = 65536;
-
-  // const readChunkSize = offsetEnd - offsetStart;
-
   const encodedFileChunks = [];
 
   let completedProgress = 0;
@@ -733,35 +728,7 @@ const testReadAndWriteLocal = async (filename: string) => {
   const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
 
   while (readSize < fileSize) {
-    // let fileChunk;
-
-    // if (readChunkSize < maxStep) {
-    // fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
     const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
-    // }
-    // else {
-    //   let remained = readChunkSize;
-    //   const subChunks = [];
-    //   while (remained > 0) {
-    //     const currentStep = remained > maxStep ? maxStep : remained;
-    //     subChunks.push(currentStep);
-    //
-    //     remained = remained - currentStep;
-    //   }
-    //   const myList = [];
-    //
-    //   for (const chunkLength of subChunks) {
-    //     const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
-    //
-    //     await delay(100);
-    //     myList.push(chunkMini);
-    //   }
-    //
-    //   const filteredList = myList.filter(Boolean);
-    //
-    //   const aggregatedBuf = Buffer.concat(filteredList);
-    //   fileChunk = aggregatedBuf;
-    // }
 
     if (!fileChunk) {
       break;
@@ -1040,36 +1007,7 @@ const testIt = async (filename: string) => {
   const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
 
   while (isContinueGlobal === 1) {
-    // const readChunkSize = offsetEndGlobal - offsetStartGlobal;
-
-    // let fileChunk;
-
-    // if (readChunkSize < maxStep) {
     const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-    // fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
-    // } else {
-    //   let remained = readChunkSize;
-    //   const subChunks = [];
-    //   while (remained > 0) {
-    //     const currentStep = remained > maxStep ? maxStep : remained;
-    //     subChunks.push(currentStep);
-    //
-    //     remained = remained - currentStep;
-    //   }
-    //   const myList = [];
-    //
-    //   for (const chunkLength of subChunks) {
-    //     const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
-    //
-    //     await delay(10);
-    //     myList.push(chunkMini);
-    //   }
-    //   const filteredList = myList.filter(Boolean);
-    //
-    //   const aggregatedBuf = Buffer.concat(filteredList);
-    //   // console.log('aggregatedBuf', aggregatedBuf);
-    //   fileChunk = aggregatedBuf;
-    // }
 
     if (!fileChunk) {
       console.log('fileChunk is missing, Exiting ', fileChunk);
@@ -1347,10 +1285,13 @@ const main = async () => {
     // pp a
     // ppNodeUrl: 'http://13.115.18.9',
     // ppNodePort: '8137',
+
+    ppNodeUrl: 'http://34.85.35.181',
+    ppNodePort: '8141',
     //
     // pp b
-    ppNodeUrl: 'http://54.185.84.33',
-    ppNodePort: '8148',
+    // ppNodeUrl: 'http://54.185.84.33',
+    // ppNodePort: '8148',
 
     // ppNodeUrl: 'http://localhost',
     // ppNodePort: '8080',
@@ -1358,6 +1299,8 @@ const main = async () => {
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  console.log('masterKeySeedInfo', masterKeySeedInfo);
+
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
   const _cosmosClient = await getCosmos(serialized, password);
@@ -1370,14 +1313,15 @@ const main = async () => {
   // download the file
   // await testDl(filename);
 
-  await testRequestUserFileList(0);
+  // await testRequestUserFileList(0);
 
   // await testReadAndWriteLocal(filename);
 
   // await getBalanceCardMetrics();
 
-  // await mainSdsPrepay();
+  await mainSdsPrepay();
 
+  // await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M

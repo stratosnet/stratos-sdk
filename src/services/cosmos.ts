@@ -1,10 +1,12 @@
-import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
+// import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
+import { Registry } from '@cosmjs/proto-signing';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { AccountsData } from '../accounts/types';
+// import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
+import StratosDirectSecp256k1HdWallet from '../hdVault/StratosDirectSecp256k1HdWallet';
 import { deserializeEncryptedWallet } from '../hdVault/wallet';
 import Sdk from '../Sdk';
 import { getStratosTransactionRegistryTypes } from '../transactions/transactions';
-// import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
 
 // @todo clean up this interface
 export interface CosmosInstance {
@@ -17,6 +19,26 @@ export interface CosmosInstance {
   // sign(txMessage: TransactionMessage, pkey: Buffer): SignedTransaction;
   getAccounts(address: string): Promise<AccountsData>;
 }
+
+const getCosmosClient = async (
+  rpcEndpoint: string,
+  deserializedWallet: StratosDirectSecp256k1HdWallet,
+): Promise<SigningStargateClient> => {
+  const clientRegistryTypes = getStratosTransactionRegistryTypes();
+
+  const clientRegistry = new Registry(clientRegistryTypes);
+
+  const options = {
+    registry: clientRegistry,
+  };
+
+  try {
+    const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
+    return client;
+  } catch (error) {
+    throw new Error(`Can not connect with a signer (cosmos). ${(error as Error).message}`);
+  }
+};
 
 export class StratosCosmos {
   public static cosmosInstance: SigningStargateClient | null;
@@ -44,7 +66,7 @@ export class StratosCosmos {
     }
   }
 
-  public static reset() {
+  public static reset(): void {
     StratosCosmos.cosmosInstance = null;
   }
 }
@@ -63,21 +85,4 @@ export const getCosmos = async (serialized = '', password = ''): Promise<Signing
   }
 
   return StratosCosmos.cosmosInstance!;
-};
-
-const getCosmosClient = async (rpcEndpoint: string, deserializedWallet: DirectSecp256k1HdWallet) => {
-  const clientRegistryTypes = getStratosTransactionRegistryTypes();
-
-  const clientRegistry = new Registry(clientRegistryTypes);
-
-  const options = {
-    registry: clientRegistry,
-  };
-
-  try {
-    const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
-    return client;
-  } catch (error) {
-    throw new Error(`Can not connect with a signer (cosmos). ${(error as Error).message}`);
-  }
 };

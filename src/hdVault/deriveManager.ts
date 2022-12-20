@@ -1,13 +1,16 @@
 import * as CosmosCrypto from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
-
 import {
-  generateMasterKeySeed,
-  getAddressFromPubKey,
-  getAminoPublicKey,
-  getEncodedPublicKey,
   getMasterKeySeedPublicKey,
   getPublicKeyFromPrivKey,
+  getMasterKeySeedPublicKeyWithKeccak,
+} from './cosmosWallet';
+import {
+  generateMasterKeySeed,
+  getEncodedPublicKey,
+  getAddressFromPubKey,
+  getAminoPublicKey,
+  getAddressFromPubKeyWithKeccak,
 } from './keyUtils';
 import { MnemonicPhrase } from './mnemonic';
 
@@ -22,8 +25,15 @@ export type KeyPairCurve = CosmosCrypto.Slip10Curve.Ed25519 | CosmosCrypto.Slip1
 
 export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<string> => {
   const masterKeySeed = await generateMasterKeySeed(phrase);
-  const pubkey = await getMasterKeySeedPublicKey(masterKeySeed);
-  return getAddressFromPubKey(pubkey);
+
+  // new, eth address
+  const pubkey = await getMasterKeySeedPublicKeyWithKeccak(masterKeySeed);
+  const address = getAddressFromPubKeyWithKeccak(pubkey);
+
+  // old address
+  // const pubkey = await getMasterKeySeedPublicKey(masterKeySeed);
+  // const address = getAddressFromPubKey(pubkey);
+  return address;
 };
 
 export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Promise<KeyPair> => {
@@ -31,7 +41,12 @@ export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Prom
 
   const encodeAminoPub = await getAminoPublicKey(pubkeyMine); // 1 amino dep - amino encodeAminoPubkey
 
-  const address = getAddressFromPubKey(pubkeyMine); // 2 amino dep - amino pubkeyToAddress
+  // new, eth address
+  const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);
+  const address = getAddressFromPubKeyWithKeccak(pubkey);
+
+  // old address
+  // const address = getAddressFromPubKey(pubkeyMine);
 
   const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
 

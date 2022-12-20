@@ -2,6 +2,7 @@ import { keyPath } from '../config/hdVault';
 import { deserializeWithEncryptionKey } from './cosmosUtils';
 import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
 import * as keyUtils from './keyUtils';
+
 export { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 export interface KeyPairInfo {
   keyIndex: number;
