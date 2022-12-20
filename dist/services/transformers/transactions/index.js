@@ -24,8 +24,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformTx = exports.getTransformer = exports.TxHistoryTypesMap = void 0;
-var TxTypes = __importStar(require("../../../transactions/types"));
-var Formatters = __importStar(require("./formatters"));
+const TxTypes = __importStar(require("../../../transactions/types"));
+const Formatters = __importStar(require("./formatters"));
 exports.TxHistoryTypesMap = new Map([
     [TxTypes.TxMsgTypes.SdsAll, Formatters.formatTxdDefault],
     [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault],
@@ -48,21 +48,21 @@ exports.TxHistoryTypesMap = new Map([
         Formatters.formatTxMsgIndexingNodeRegistrationVote,
     ],
 ]);
-var getTransformer = function (txType) {
+const getTransformer = (txType) => {
     return exports.TxHistoryTypesMap.get(txType) || Formatters.formatTxdDefault;
 };
 exports.getTransformer = getTransformer;
-var transformTx = function (txItem) {
+const transformTx = (txItem) => {
     var _a, _b, _c;
-    var transactionType = (_c = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0]) === null || _c === void 0 ? void 0 : _c.type;
-    var transactionTransformer = (0, exports.getTransformer)(transactionType);
-    var transformedTransaction;
+    const transactionType = (_c = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0]) === null || _c === void 0 ? void 0 : _c.type;
+    const transactionTransformer = (0, exports.getTransformer)(transactionType);
+    let transformedTransaction;
     try {
         transformedTransaction = transactionTransformer(txItem);
     }
     catch (err) {
-        console.log("Could not parse txItem with hash \"".concat(txItem.txhash, "\""), err.message);
-        throw new Error("Could not parse txItem with hash \"".concat(txItem.txhash, "\""));
+        console.log(`Could not parse txItem with hash "${txItem.txhash}"`, err.message);
+        throw new Error(`Could not parse txItem with hash "${txItem.txhash}"`);
     }
     return transformedTransaction;
 };
