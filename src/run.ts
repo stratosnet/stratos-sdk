@@ -1317,9 +1317,9 @@ const main = async () => {
 
   // await testReadAndWriteLocal(filename);
 
-  // await getBalanceCardMetrics();
+  await getBalanceCardMetrics();
 
-  await mainSdsPrepay();
+  // await mainSdsPrepay();
 
   // await mainSend();
   // await testUploadRequest();

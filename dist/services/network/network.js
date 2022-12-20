@@ -264,6 +264,7 @@ config) => {
 exports.requestBalanceIncrease = requestBalanceIncrease;
 const getRpcStatus = async (config) => {
     const url = `${getRpcRoute()}/status`;
+    console.log('uu', url);
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };

@@ -385,6 +385,7 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
+  console.log('uu', url);
 
   const dataResult = await apiGet(url, config);
 

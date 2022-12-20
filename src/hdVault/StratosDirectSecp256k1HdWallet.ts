@@ -148,7 +148,10 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     const hashedMessage = sha256(signBytes);
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
     // const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-    const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
+    const r32 = Array.from(signature.r(32));
+    const s32 = Array.from(signature.s(32));
+    const signatureBytes = new Uint8Array([...r32, ...s32]);
+    // const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
     const stdSignature = encodeSecp256k1Signature(pubkey, signatureBytes);
     return {
       signed: signDoc,

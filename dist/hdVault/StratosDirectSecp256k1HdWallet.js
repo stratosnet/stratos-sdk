@@ -10,7 +10,6 @@ const encoding_1 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const keccak_1 = __importDefault(require("keccak"));
 const hdVault_1 = require("../config/hdVault");
-const utils_1 = require("./utils");
 function pubkeyToRawAddressWithKeccak(pubkey) {
     const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
     const keccak256HashOfPubkeyBuffer = (0, keccak_1.default)('keccak256').update(pubkeyBuffer).digest();
@@ -88,7 +87,10 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         const hashedMessage = (0, crypto_1.sha256)(signBytes);
         const signature = await crypto_1.Secp256k1.createSignature(hashedMessage, privkey);
         // const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-        const signatureBytes = (0, utils_1.mergeUint8Arrays)(signature.r(32), signature.s(32));
+        const r32 = Array.from(signature.r(32));
+        const s32 = Array.from(signature.s(32));
+        const signatureBytes = new Uint8Array([...r32, ...s32]);
+        // const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
         const stdSignature = (0, amino_1.encodeSecp256k1Signature)(pubkey, signatureBytes);
         return {
             signed: signDoc,
