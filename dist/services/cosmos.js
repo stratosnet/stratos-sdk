@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCosmos = exports.resetCosmos = exports.StratosCosmos = void 0;
 // import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
 const proto_signing_1 = require("@cosmjs/proto-signing");
-const stargate_1 = require("@cosmjs/stargate");
+const StratosSigningStargateClient_1 = require("../hdVault/StratosSigningStargateClient");
 const wallet_1 = require("../hdVault/wallet");
 const Sdk_1 = __importDefault(require("../Sdk"));
 const transactions_1 = require("../transactions/transactions");
@@ -17,7 +17,7 @@ const getCosmosClient = async (rpcEndpoint, deserializedWallet) => {
         registry: clientRegistry,
     };
     try {
-        const client = await stargate_1.SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
+        const client = await StratosSigningStargateClient_1.StratosSigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
         return client;
     }
     catch (error) {

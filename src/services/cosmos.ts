@@ -1,9 +1,10 @@
 // import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
 import { Registry } from '@cosmjs/proto-signing';
-import { SigningStargateClient } from '@cosmjs/stargate';
+// import { SigningStargateClient } from '@cosmjs/stargate';
 import { AccountsData } from '../accounts/types';
 // import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
 import StratosDirectSecp256k1HdWallet from '../hdVault/StratosDirectSecp256k1HdWallet';
+import { StratosSigningStargateClient } from '../hdVault/StratosSigningStargateClient';
 import { deserializeEncryptedWallet } from '../hdVault/wallet';
 import Sdk from '../Sdk';
 import { getStratosTransactionRegistryTypes } from '../transactions/transactions';
@@ -23,7 +24,7 @@ export interface CosmosInstance {
 const getCosmosClient = async (
   rpcEndpoint: string,
   deserializedWallet: StratosDirectSecp256k1HdWallet,
-): Promise<SigningStargateClient> => {
+): Promise<StratosSigningStargateClient> => {
   const clientRegistryTypes = getStratosTransactionRegistryTypes();
 
   const clientRegistry = new Registry(clientRegistryTypes);
@@ -33,7 +34,11 @@ const getCosmosClient = async (
   };
 
   try {
-    const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);
+    const client = await StratosSigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      deserializedWallet,
+      options,
+    );
     return client;
   } catch (error) {
     throw new Error(`Can not connect with a signer (cosmos). ${(error as Error).message}`);
@@ -41,7 +46,7 @@ const getCosmosClient = async (
 };
 
 export class StratosCosmos {
-  public static cosmosInstance: SigningStargateClient | null;
+  public static cosmosInstance: StratosSigningStargateClient | null;
 
   public static async init(serialized: string, password: string): Promise<void> {
     if (!serialized) {
@@ -75,7 +80,7 @@ export const resetCosmos = () => {
   StratosCosmos.reset();
 };
 
-export const getCosmos = async (serialized = '', password = ''): Promise<SigningStargateClient> => {
+export const getCosmos = async (serialized = '', password = ''): Promise<StratosSigningStargateClient> => {
   if (!StratosCosmos.cosmosInstance) {
     try {
       await StratosCosmos.init(serialized, password);

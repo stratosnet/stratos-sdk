@@ -1,4 +1,8 @@
-import { encodeSecp256k1Signature, rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import {
+  encodeSecp256k1Pubkey,
+  encodeSecp256k1Signature,
+  rawSecp256k1PubkeyToRawAddress,
+} from '@cosmjs/amino';
 import {
   Bip39,
   EnglishMnemonic,
@@ -17,6 +21,7 @@ import {
   DirectSignResponse,
   KdfConfiguration,
   makeSignBytes,
+  encodePubkey,
   executeKdf,
 } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
@@ -128,6 +133,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   }
 
   public async getAccounts(): Promise<readonly AccountData[]> {
+    console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
     const accountsWithPrivkeys = await this.getMyAccountsWithPrivkeys();
     return accountsWithPrivkeys.map(({ algo, pubkey, address }) => ({
       algo: algo,
@@ -138,12 +144,17 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
   public async signDirect(signerAddress: string, signDoc: SignDoc): Promise<DirectSignResponse> {
     const accounts = await this.getMyAccountsWithPrivkeys();
-    console.log(' sign direct was called', signDoc);
+    console.log('stratos DirectSecp256k1HdWallet  sign direct was called', signDoc);
     const account = accounts.find(({ address }) => address === signerAddress);
     if (account === undefined) {
       throw new Error(`Address ${signerAddress} not found in wallet`);
     }
+
     const { privkey, pubkey } = account;
+
+    const pubkeyTest = encodePubkey(encodeSecp256k1Pubkey(pubkey));
+    console.log('pubkeyTest', pubkeyTest);
+
     const signBytes = makeSignBytes(signDoc);
     const hashedMessage = sha256(signBytes);
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
@@ -202,7 +213,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       privkey: privkey,
       pubkey: Secp256k1.compressPubkey(pubkey),
     };
-    console.log('myKeypair', myKeypair);
+    console.log('stratos DirectSecp256k1HdWallet myKeypair', myKeypair);
     return myKeypair;
   }
 
@@ -211,7 +222,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       this.myAccounts.map(async ({ hdPath, prefix }) => {
         const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
 
-        console.log('fullPubkeyHex 1', pubkey);
+        console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
         const { pubkey: fullPubkey } = await Secp256k1.makeKeypair(privkey);
 
         const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');

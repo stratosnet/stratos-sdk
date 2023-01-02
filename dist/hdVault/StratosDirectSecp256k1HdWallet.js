@@ -68,6 +68,7 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         return this.mySecret.toString();
     }
     async getAccounts() {
+        console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
         const accountsWithPrivkeys = await this.getMyAccountsWithPrivkeys();
         return accountsWithPrivkeys.map(({ algo, pubkey, address }) => ({
             algo: algo,
@@ -77,12 +78,14 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
     }
     async signDirect(signerAddress, signDoc) {
         const accounts = await this.getMyAccountsWithPrivkeys();
-        console.log(' sign direct was called', signDoc);
+        console.log('stratos DirectSecp256k1HdWallet  sign direct was called', signDoc);
         const account = accounts.find(({ address }) => address === signerAddress);
         if (account === undefined) {
             throw new Error(`Address ${signerAddress} not found in wallet`);
         }
         const { privkey, pubkey } = account;
+        const pubkeyTest = (0, proto_signing_1.encodePubkey)((0, amino_1.encodeSecp256k1Pubkey)(pubkey));
+        console.log('pubkeyTest', pubkeyTest);
         const signBytes = (0, proto_signing_1.makeSignBytes)(signDoc);
         const hashedMessage = (0, crypto_1.sha256)(signBytes);
         const signature = await crypto_1.Secp256k1.createSignature(hashedMessage, privkey);
@@ -138,13 +141,13 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
             privkey: privkey,
             pubkey: crypto_1.Secp256k1.compressPubkey(pubkey),
         };
-        console.log('myKeypair', myKeypair);
+        console.log('stratos DirectSecp256k1HdWallet myKeypair', myKeypair);
         return myKeypair;
     }
     async getMyAccountsWithPrivkeys() {
         return Promise.all(this.myAccounts.map(async ({ hdPath, prefix }) => {
             const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
-            console.log('fullPubkeyHex 1', pubkey);
+            console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
             const { pubkey: fullPubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
             const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
             console.log('fullPubkeyHex 2', fullPubkeyHex);
