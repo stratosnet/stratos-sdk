@@ -83,23 +83,38 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     if (!accountFromSigner) {
       throw new Error('Failed to retrieve account from signer');
     }
-    const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
+    const ppToCheck = encodeSecp256k1Pubkey(accountFromSigner.pubkey);
+    console.log('YES ppToCheck - tendermin', ppToCheck);
+    // const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
+    const pubkey = encodePubkey(ppToCheck);
 
+    console.log('YES pubkey from sign direct of stragate sign - encoded by cosmos ', pubkey);
+
+    const pubkeyMine = {
+      // type: 'tendermint/PubKeySecp256k1',
+      type: 'stratos/PubKeyEthSecp256k1',
+      // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
+      value: toBase64(accountFromSigner.pubkey),
+    };
+    console.log('YES pubkeyMine Stratos', pubkeyMine);
     console.log('YES pubkey from sign direct of stragate sign accountFromSigner ', accountFromSigner.pubkey);
-    console.log('YES pubkey from sign direct of stragate sign ', pubkey);
+
     // typeUrl: '/cosmos.crypto.secp256k1.PubKey',
     // pubkey.typeUrl = '/stratos.crypto.v1.ethsecp256k1.PubKey';
 
     const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 
     const pubkey2Value = toBase64(accountFromSigner.pubkey);
+    console.log('YES pubkey2Value', pubkey2Value);
 
-    const pubkeyProto = CosmosCryptoSecp256k1Pubkey.fromPartial({
+    // const pubkeyProto = CosmosCryptoSecp256k1Pubkey.fromPartial({
+    const pubkeyProto = StratosPubKey.fromObject({
       key: fromBase64(pubkey2Value),
     });
 
+    console.log('YES pubkeyProto', pubkeyProto);
+
     const encodedPubKey2 = Any.fromPartial({
-      // typeUrl: '/cosmos.crypto.secp256k1.PubKey',
       typeUrl: '/stratos.crypto.v1.ethsecp256k1.PubKey',
       value: Uint8Array.from(StratosPubKey.encode(pubkeyProto).finish()),
     });
@@ -121,8 +136,8 @@ export class StratosSigningStargateClient extends SigningStargateClient {
       [{ pubkey: encodedPubKey2, sequence }],
       fee.amount,
       gasLimit,
-      fee.granter,
-      fee.payer,
+      // fee.granter,
+      // fee.payer
     );
     const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, accountNumber);
     const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);

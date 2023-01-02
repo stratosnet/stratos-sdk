@@ -42,7 +42,6 @@ function* payloadGenerator(dataList) {
 }
 const getStratosTransactionRegistryTypes = () => {
     const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-    // const msgPrepayProto = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey.encode()
     // console.log('defaultRegistryTypes', defaultRegistryTypes);
     const stratosTxRegistryTypes = [
         ...stargate_1.defaultRegistryTypes,
