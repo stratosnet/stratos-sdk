@@ -15,6 +15,7 @@ import {
   Slip10RawIndex,
 } from '@cosmjs/crypto';
 import { toHex, toBech32 } from '@cosmjs/encoding';
+import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
@@ -24,7 +25,9 @@ import {
   encodePubkey,
   executeKdf,
 } from '@cosmjs/proto-signing';
+import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Any } from 'cosmjs-types/google/protobuf/any';
 import createKeccakHash from 'keccak';
 import { stratosAddressPrefix } from '../config/hdVault';
 import { mergeUint8Arrays } from './utils';
@@ -93,6 +96,19 @@ const defaultOptions: DirectSecp256k1HdWalletOptions = {
   hdPaths: [makeStratosHubPath(0)],
   prefix: 'cosmos',
 };
+
+export interface Pubkey {
+  // type is one of the strings defined in pubkeyType
+  // I don't use a string literal union here as that makes trouble with json test data:
+  // https://github.com/cosmos/cosmjs/pull/44#pullrequestreview-353280504
+  readonly type: string;
+  readonly value: any;
+}
+
+export interface StdSignature {
+  readonly pub_key: Pubkey;
+  readonly signature: string;
+}
 
 class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   /** Base secret */
@@ -167,7 +183,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     const s32 = Array.from(signature.s(32));
     const signatureBytes = new Uint8Array([...r32, ...s32]);
     // const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
-    const stdSignature = encodeSecp256k1Signature(pubkey, signatureBytes);
+    const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
     return {
       signed: signDoc,
       signature: stdSignature,
@@ -178,6 +194,35 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     const kdfConfiguration = basicPasswordHashingOptions;
     const encryptionKey = await executeKdf(password, kdfConfiguration);
     return this.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
+  }
+
+  protected encodeSecp256k1Signature(pubkey: Uint8Array, signature: Uint8Array): StdSignature {
+    if (signature.length !== 64) {
+      throw new Error(
+        'Signature must be 64 bytes long. Cosmos SDK uses a 2x32 byte fixed length encoding for the secp256k1 signature integers r and s.',
+      );
+    }
+
+    const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
+
+    const base64ofPubkey = toBase64(pubkey);
+
+    const pubkeyEncodedStratos = {
+      // type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
+      type: 'stratos/PubKeyEthSecp256k1',
+      value: base64ofPubkey,
+    };
+
+    console.log(
+      'from DirectSecp256k1HdWallet - pubkeyEncodedStratos (must have stratos type now)',
+      pubkeyEncodedStratos,
+    );
+
+    return {
+      // pub_key: encodeSecp256k1Pubkey(pubkey),
+      pub_key: pubkeyEncodedStratos,
+      signature: toBase64(signature),
+    };
   }
 
   // public async serializeWithEncryptionKey(

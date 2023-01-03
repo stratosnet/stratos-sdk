@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,7 +30,9 @@ exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
 const amino_1 = require("@cosmjs/amino");
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
+const encoding_2 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
+const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 const keccak_1 = __importDefault(require("keccak"));
 const hdVault_1 = require("../config/hdVault");
 function pubkeyToRawAddressWithKeccak(pubkey) {
@@ -95,7 +120,7 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         const s32 = Array.from(signature.s(32));
         const signatureBytes = new Uint8Array([...r32, ...s32]);
         // const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
-        const stdSignature = (0, amino_1.encodeSecp256k1Signature)(pubkey, signatureBytes);
+        const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
         return {
             signed: signDoc,
             signature: stdSignature,
@@ -105,6 +130,24 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         const kdfConfiguration = basicPasswordHashingOptions;
         const encryptionKey = await (0, proto_signing_1.executeKdf)(password, kdfConfiguration);
         return this.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
+    }
+    encodeSecp256k1Signature(pubkey, signature) {
+        if (signature.length !== 64) {
+            throw new Error('Signature must be 64 bytes long. Cosmos SDK uses a 2x32 byte fixed length encoding for the secp256k1 signature integers r and s.');
+        }
+        const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
+        const base64ofPubkey = (0, encoding_2.toBase64)(pubkey);
+        const pubkeyEncodedStratos = {
+            // type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
+            type: 'stratos/PubKeyEthSecp256k1',
+            value: base64ofPubkey,
+        };
+        console.log('from DirectSecp256k1HdWallet - pubkeyEncodedStratos (must have stratos type now)', pubkeyEncodedStratos);
+        return {
+            // pub_key: encodeSecp256k1Pubkey(pubkey),
+            pub_key: pubkeyEncodedStratos,
+            signature: (0, encoding_2.toBase64)(signature),
+        };
     }
     // public async serializeWithEncryptionKey(
     //   encryptionKey: Uint8Array,
