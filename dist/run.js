@@ -233,9 +233,11 @@ const mainSdsPrepay = async () => {
         return;
     }
     const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
+    console.log('from mainSdsPrepay - calling tx sign');
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
     if (signedTx) {
         try {
+            console.log('from mainSdsPrepay - calling tx broadcast');
             const result = await transactions.broadcast(signedTx);
             console.log('broadcast prepay result', result);
         }

@@ -74,8 +74,9 @@ exports.broadcast = broadcast;
 const sign = async (address, txMessages, memo = '', givenFee) => {
     const fee = givenFee ? givenFee : (0, exports.getStandardFee)();
     const client = await (0, cosmos_1.getCosmos)();
-    console.log('transaction sign (calling stragate client sign method right after)');
-    const signedTx = client.sign(address, txMessages, fee, memo);
+    console.log('Stratos transaction - calling transaction sign (calling stragate client sign method)');
+    const signedTx = await client.sign(address, txMessages, fee, memo);
+    console.log('Stratos transaction - signed tx', signedTx);
     return signedTx;
 };
 exports.sign = sign;
