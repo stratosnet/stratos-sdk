@@ -31,7 +31,7 @@ const proto_signing_1 = require("@cosmjs/proto-signing");
 const stargate_1 = require("@cosmjs/stargate");
 const tendermint_rpc_1 = require("@cosmjs/tendermint-rpc");
 const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
-// import { PubKey as CosmosCryptoEd25519Pubkey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
+const keys_1 = require("cosmjs-types/cosmos/crypto/secp256k1/keys");
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const any_1 = require("cosmjs-types/google/protobuf/any");
 class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
@@ -41,13 +41,7 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
     }
     constructor(tmClient, signer, options) {
         super(tmClient, signer, options);
-        // const { registry = createDefaultRegistry(), aminoTypes = new AminoTypes(createDefaultTypes()) } = options;
-        // this.registry = registry;
-        // this.aminoTypes = aminoTypes;
         this.mySigner = signer;
-        // this.broadcastTimeoutMs = options.broadcastTimeoutMs;
-        // this.broadcastPollIntervalMs = options.broadcastPollIntervalMs;
-        // this.gasPrice = options.gasPrice;
     }
     async sign(signerAddress, messages, fee, memo, explicitSignerData) {
         let signerData;
@@ -63,43 +57,44 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
                 chainId: chainId,
             };
         }
-        console.log('YES sign from signing stargate client (next will be sign direct)');
+        console.log('0. YES sign from signing stargate client (next will be sign direct)');
         return this.signDirectStratos(signerAddress, messages, fee, memo, signerData);
     }
     async signDirectStratos(signerAddress, messages, fee, memo, { accountNumber, sequence, chainId }) {
         // assert(isOfflineDirectSigner(this.signer));
+        const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
         const accountFromSigner = (await this.mySigner.getAccounts()).find(account => account.address === signerAddress);
         if (!accountFromSigner) {
             throw new Error('Failed to retrieve account from signer');
         }
-        const ppToCheck = (0, amino_1.encodeSecp256k1Pubkey)(accountFromSigner.pubkey);
-        console.log('YES ppToCheck - tendermin', ppToCheck);
+        console.log('1. YES - sign direct of stragate sign - accountFromSigner pubkey', accountFromSigner.pubkey);
+        const base64ofPubkey = (0, encoding_1.toBase64)(accountFromSigner.pubkey);
+        console.log('2. YES - sign direct of stragate sign - base64ofPubkey (to be used to create ethSecp256k1Pubkey and secp256k1Pubkey)', base64ofPubkey);
+        const secp256k1PubkeyLegacy = (0, amino_1.encodeSecp256k1Pubkey)(accountFromSigner.pubkey);
+        console.log('3. YES - sign direct of stragate sign - secp256k1PubkeyLegacy (with tendermint type)', secp256k1PubkeyLegacy);
         // const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
-        const pubkey = (0, proto_signing_1.encodePubkey)(ppToCheck);
-        console.log('YES pubkey from sign direct of stragate sign - encoded by cosmos ', pubkey);
-        const pubkeyMine = {
+        const pubkeyProtoLegacy = keys_1.PubKey.fromPartial({
+            key: (0, encoding_1.fromBase64)(base64ofPubkey),
+        });
+        console.log('4. YES - sign direct of stragate sign - pubkeyProtoLegacy', pubkeyProtoLegacy);
+        const pubkeyEncodedLegacy = (0, proto_signing_1.encodePubkey)(secp256k1PubkeyLegacy);
+        console.log('5. YES - sign direct of stragate sign - pubkeyEncodedLegacy - encoded by cosmos (was used and passed to the backend before) ', pubkeyEncodedLegacy);
+        const ethSecp256k1Pubkey = {
             // type: 'tendermint/PubKeySecp256k1',
             type: 'stratos/PubKeyEthSecp256k1',
             // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
             value: (0, encoding_1.toBase64)(accountFromSigner.pubkey),
         };
-        console.log('YES pubkeyMine Stratos', pubkeyMine);
-        console.log('YES pubkey from sign direct of stragate sign accountFromSigner ', accountFromSigner.pubkey);
-        // typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-        // pubkey.typeUrl = '/stratos.crypto.v1.ethsecp256k1.PubKey';
-        const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
-        const pubkey2Value = (0, encoding_1.toBase64)(accountFromSigner.pubkey);
-        console.log('YES pubkey2Value', pubkey2Value);
-        // const pubkeyProto = CosmosCryptoSecp256k1Pubkey.fromPartial({
+        console.log('6. YES - sign direct of stragate sign - ethSecp256k1Pubkey Stratos (value will match with secp256k1Pubkey value)', ethSecp256k1Pubkey);
         const pubkeyProto = StratosPubKey.fromObject({
-            key: (0, encoding_1.fromBase64)(pubkey2Value),
+            key: (0, encoding_1.fromBase64)(base64ofPubkey),
         });
-        console.log('YES pubkeyProto', pubkeyProto);
-        const encodedPubKey2 = any_1.Any.fromPartial({
+        console.log('7. YES - sign direct of stragate sign - pubkeyProto (to be used in stratos key and must match to pubkeyProtoLegacy)', pubkeyProto);
+        const pubkeyEncodedStratos = any_1.Any.fromPartial({
             typeUrl: '/stratos.crypto.v1.ethsecp256k1.PubKey',
             value: Uint8Array.from(StratosPubKey.encode(pubkeyProto).finish()),
         });
-        console.log('YES pubkey2 from sign direct of stragate sign ', encodedPubKey2);
+        console.log('8. YES - sign direct of stragate sign - pubkeyEncodedStratos (must have the same key but different type as pubkeyProtoLegacy and it is passed to the backend now)', pubkeyEncodedStratos);
         const txBodyEncodeObject = {
             typeUrl: '/cosmos.tx.v1beta1.TxBody',
             value: {
@@ -107,11 +102,12 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
                 memo: memo,
             },
         };
+        // we can flip between an old and new pubkey here
+        // const pubkeyEncodedToUse = pubkeyProtoLegacy
+        const pubkeyEncodedToUse = pubkeyEncodedStratos;
         const txBodyBytes = this.registry.encode(txBodyEncodeObject);
         const gasLimit = math_1.Int53.fromString(fee.gas).toNumber();
-        const authInfoBytes = (0, proto_signing_1.makeAuthInfoBytes)(
-        // [{ pubkey, sequence }],
-        [{ pubkey: encodedPubKey2, sequence }], fee.amount, gasLimit);
+        const authInfoBytes = (0, proto_signing_1.makeAuthInfoBytes)([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
         const signDoc = (0, proto_signing_1.makeSignDoc)(txBodyBytes, authInfoBytes, chainId, accountNumber);
         const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
         return tx_1.TxRaw.fromPartial({

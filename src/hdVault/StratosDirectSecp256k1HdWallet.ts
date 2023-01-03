@@ -151,9 +151,13 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     }
 
     const { privkey, pubkey } = account;
+    console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ');
 
     const pubkeyTest = encodePubkey(encodeSecp256k1Pubkey(pubkey));
-    console.log('pubkeyTest', pubkeyTest);
+    console.log(
+      'from DirectSecp256k1HdWallet - pubkeyTest (must mathch wit a legacy encoded pubkey)',
+      pubkeyTest,
+    );
 
     const signBytes = makeSignBytes(signDoc);
     const hashedMessage = sha256(signBytes);
@@ -213,7 +217,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       privkey: privkey,
       pubkey: Secp256k1.compressPubkey(pubkey),
     };
-    console.log('stratos DirectSecp256k1HdWallet myKeypair', myKeypair);
+    // console.log('stratos DirectSecp256k1HdWallet myKeypair', myKeypair);
     return myKeypair;
   }
 
@@ -222,22 +226,22 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       this.myAccounts.map(async ({ hdPath, prefix }) => {
         const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
 
-        console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
+        // console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
         const { pubkey: fullPubkey } = await Secp256k1.makeKeypair(privkey);
 
         const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
-        console.log('fullPubkeyHex 2', fullPubkeyHex);
+        // console.log('fullPubkeyHex 2', fullPubkeyHex);
 
         const compressedPub = Secp256k1.compressPubkey(fullPubkey);
         const compressedPubHex = Buffer.from(compressedPub).toString('hex');
 
-        console.log('pub compressedPub ', compressedPub);
-        console.log('pub compressedPub compressedPubHex ', compressedPubHex);
+        console.log('from DirectSecp256k1HdWallet pub compressedPub ', compressedPub);
+        console.log('from DirectSecp256k1HdWallet pub compressedPub compressedPubHex ', compressedPubHex);
 
         const addressOld = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
         const address = toBech32(prefix, pubkeyToRawAddressWithKeccak(fullPubkey));
-        console.log('old address ', addressOld);
-        console.log('new address ', address);
+        console.log('from DirectSecp256k1HdWallet old address ', addressOld);
+        console.log('from DirectSecp256k1HdWallet new address ', address);
 
         return {
           algo: 'secp256k1' as const,
