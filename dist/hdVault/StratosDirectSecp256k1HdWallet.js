@@ -84,8 +84,9 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
             throw new Error(`Address ${signerAddress} not found in wallet`);
         }
         const { privkey, pubkey } = account;
+        console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
         const pubkeyTest = (0, proto_signing_1.encodePubkey)((0, amino_1.encodeSecp256k1Pubkey)(pubkey));
-        console.log('pubkeyTest', pubkeyTest);
+        console.log('from DirectSecp256k1HdWallet - pubkeyTest (must mathch wit a legacy encoded pubkey)', pubkeyTest);
         const signBytes = (0, proto_signing_1.makeSignBytes)(signDoc);
         const hashedMessage = (0, crypto_1.sha256)(signBytes);
         const signature = await crypto_1.Secp256k1.createSignature(hashedMessage, privkey);

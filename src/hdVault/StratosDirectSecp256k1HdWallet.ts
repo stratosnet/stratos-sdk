@@ -151,7 +151,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     }
 
     const { privkey, pubkey } = account;
-    console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ');
+    console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
 
     const pubkeyTest = encodePubkey(encodeSecp256k1Pubkey(pubkey));
     console.log(
