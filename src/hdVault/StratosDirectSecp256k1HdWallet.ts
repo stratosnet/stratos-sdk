@@ -214,8 +214,6 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       );
     }
 
-    const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
-
     const base64ofPubkey = toBase64(pubkey);
 
     console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
