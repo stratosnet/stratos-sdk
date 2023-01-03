@@ -13,7 +13,6 @@ import { SigningStargateClient, SignerData, SigningStargateClientOptions } from 
 import { HttpEndpoint, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { PubKey as CosmosCryptoSecp256k1Pubkey } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
-// import { PubKey as CosmosCryptoEd25519Pubkey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 
@@ -52,6 +51,7 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     explicitSignerData?: SignerData,
   ): Promise<TxRaw> {
     let signerData: SignerData;
+
     if (explicitSignerData) {
       signerData = explicitSignerData;
     } else {
