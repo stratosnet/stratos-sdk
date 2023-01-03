@@ -166,6 +166,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       throw new Error(`Address ${signerAddress} not found in wallet`);
     }
 
+    // const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
     const { privkey, pubkey } = account;
     console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
 
@@ -175,14 +176,24 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       pubkeyTest,
     );
 
+    // const base64ofPubkey = toBase64(pubkey);
+    // const pubkeyProto = StratosPubKey.fromObject({
+    //   key: fromBase64(base64ofPubkey),
+    // });
+    // const newPubkey = Uint8Array.from(StratosPubKey.encode(pubkeyProto).finish());
+    //
+    // console.log('from DirectSecp256k1HdWallet - account pubkey', pubkey);
+    // console.log('from DirectSecp256k1HdWallet - account newPubkey', newPubkey);
+
     const signBytes = makeSignBytes(signDoc);
     const hashedMessage = sha256(signBytes);
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
-    // const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-    const r32 = Array.from(signature.r(32));
-    const s32 = Array.from(signature.s(32));
-    const signatureBytes = new Uint8Array([...r32, ...s32]);
+    const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
+    // const r32 = Array.from(signature.r(32));
+    // const s32 = Array.from(signature.s(32));
+    // const signatureBytes = new Uint8Array([...r32, ...s32]);
     // const signatureBytes = mergeUint8Arrays(signature.r(32), signature.s(32));
+
     const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
     return {
       signed: signDoc,
@@ -207,6 +218,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
     const base64ofPubkey = toBase64(pubkey);
 
+    console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
     const pubkeyEncodedStratos = {
       // type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
       type: 'stratos/PubKeyEthSecp256k1',

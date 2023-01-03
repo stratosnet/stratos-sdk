@@ -93,7 +93,7 @@ export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
     amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], // 200_000
     gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
   };
-  // console.log('fee', fee);
+  console.log('fee', fee);
   return fee;
 };
 

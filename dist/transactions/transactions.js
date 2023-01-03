@@ -85,7 +85,7 @@ const getStandardFee = (numberOfMessages = 1) => {
         amount: [{ amount: String(tokens_1.standardFeeAmount), denom: hdVault_1.stratosDenom }],
         gas: String(tokens_1.baseGasAmount + tokens_1.perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
     };
-    // console.log('fee', fee);
+    console.log('fee', fee);
     return fee;
 };
 exports.getStandardFee = getStandardFee;

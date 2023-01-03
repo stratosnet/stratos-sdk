@@ -110,6 +110,8 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
         const authInfoBytes = (0, proto_signing_1.makeAuthInfoBytes)([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
         const signDoc = (0, proto_signing_1.makeSignDoc)(txBodyBytes, authInfoBytes, chainId, accountNumber);
         const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
+        const verificationResult = StratosPubKey.verify(signed);
+        console.log('9. YES - signature verify result ', verificationResult);
         return tx_1.TxRaw.fromPartial({
             bodyBytes: signed.bodyBytes,
             authInfoBytes: signed.authInfoBytes,
