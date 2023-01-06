@@ -1,6 +1,6 @@
 import {
-  encodeSecp256k1Pubkey,
-  encodeSecp256k1Signature,
+  // encodeSecp256k1Pubkey,
+  // encodeSecp256k1Signature,
   rawSecp256k1PubkeyToRawAddress,
 } from '@cosmjs/amino';
 import {
@@ -13,6 +13,7 @@ import {
   Slip10,
   Slip10Curve,
   Slip10RawIndex,
+  Secp256k1Signature,
 } from '@cosmjs/crypto';
 import { toHex, toBech32 } from '@cosmjs/encoding';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
@@ -21,23 +22,77 @@ import {
   DirectSecp256k1HdWalletOptions,
   DirectSignResponse,
   KdfConfiguration,
-  makeSignBytes,
-  encodePubkey,
+  makeSignBytes, // encodePubkey,
   executeKdf,
 } from '@cosmjs/proto-signing';
-import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
+// import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { Any } from 'cosmjs-types/google/protobuf/any';
+// import { Any } from 'cosmjs-types/google/protobuf/any';
 import createKeccakHash from 'keccak';
+import secp256k1 from 'secp256k1';
+import Web3 from 'web3';
+import { SignedTransaction } from 'web3-core';
 import { stratosAddressPrefix } from '../config/hdVault';
-import { mergeUint8Arrays } from './utils';
+
+// import * as keyUtils from './keyUtils';
+// import { mergeUint8Arrays } from './utils';
+
+const getWeb3 = (rpcUrl: string): Web3 => {
+  const provider = new Web3.providers.HttpProvider(rpcUrl);
+  const web3: Web3 = new Web3(provider);
+  return web3;
+};
+
+export interface IWebLinkedInfo {
+  privateStr: string;
+  rpcUrl: string;
+  chainId: number;
+  account: string;
+}
+
+export const signTxWithEth = async (
+  recipientAddress: string,
+  amount: string,
+  web3WalletInfo: IWebLinkedInfo,
+): Promise<SignedTransaction> => {
+  const web3 = getWeb3(web3WalletInfo.rpcUrl);
+
+  const nonce = await web3.eth.getTransactionCount(web3WalletInfo.account);
+  const gasPrice = await web3.eth.getGasPrice();
+
+  const myData = { foo: 'bar' };
+
+  const contractData = JSON.stringify(myData);
+
+  const estimategas = await web3.eth.estimateGas({
+    to: web3WalletInfo.account,
+    data: contractData,
+  });
+
+  const txParams = {
+    from: web3WalletInfo.account,
+    to: recipientAddress,
+    gasPrice: web3.utils.toHex(gasPrice),
+    gasLimit: web3.utils.toHex(amount),
+    gas: web3.utils.toHex(estimategas),
+    value: amount,
+    nonce: nonce,
+    data: contractData,
+    chainId: web3WalletInfo.chainId,
+  };
+
+  console.log('txParams', txParams);
+
+  const signed_txn = await web3.eth.accounts.signTransaction(txParams, web3WalletInfo.privateStr);
+
+  return signed_txn;
+};
 
 interface Secp256k1Derivation {
   readonly hdPath: HdPath;
   readonly prefix: string;
 }
 
-// export type Algo = 'secp256k1' | 'ed25519' | 'sr25519' | 'eth_secp256k1';
 export type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 
 export interface AccountData {
@@ -94,7 +149,16 @@ interface DirectSecp256k1HdWalletConstructorOptions extends Partial<DirectSecp25
 const defaultOptions: DirectSecp256k1HdWalletOptions = {
   bip39Password: '',
   hdPaths: [makeStratosHubPath(0)],
-  prefix: 'cosmos',
+  prefix: stratosAddressPrefix,
+};
+
+const isCanonicalSignature = (signature: Uint8Array) => {
+  return (
+    !(signature[0] & 0x80) &&
+    !(signature[0] === 0 && !(signature[1] & 0x80)) &&
+    !(signature[32] & 0x80) &&
+    !(signature[32] === 0 && !(signature[33] & 0x80))
+  );
 };
 
 export interface Pubkey {
@@ -169,34 +233,43 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     }
 
     const { privkey, pubkey } = account;
+
     console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
 
-    const pubkeyTest = encodePubkey(encodeSecp256k1Pubkey(pubkey));
-    console.log(
-      'from DirectSecp256k1HdWallet - pubkeyTest (must mathch wit a legacy encoded pubkey)',
-      pubkeyTest,
-    );
+    // console.log('yyyyy1 pkey ', privkey);
+    // console.log('xxxxx1 pkey ', toHex(privkey));
+    //
+    // const params = {
+    //   chainId: 12,
+    //   account: signerAddress,
+    //   rpcUrl: 'https://rpc-dev.thestratos.org',
+    //   privateStr: toHex(privkey),
+    // };
+    // const signedTest = await signTxWithEth(signerAddress, '124', params);
+    // console.log('signedTest', signedTest);
 
+    console.log('BBB signDoc', signDoc);
     const signBytes = makeSignBytes(signDoc);
+    console.log('BBB signBytes', Uint8Array.from(signBytes));
     const hashedMessage = sha256(signBytes);
+
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
-    const verifiedBySecp256k1 = await Secp256k1.verifySignature(signature, hashedMessage, pubkey);
-    console.log('from DirectSecp256k1HdWallet - verified signature by secp256k1', verifiedBySecp256k1);
+    console.log('BBBA cosmojs/crypto signature created by Secp256k1.createSignature(', signature);
+
+    const signatureToTest = secp256k1.ecdsaSign(hashedMessage, privkey);
+    console.log('BBBA signature by secp256k1.ecdsaSign ', signatureToTest);
 
     const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
+    console.log('BBBA signatureBytes from Secp256k1.createSignature ', signatureBytes);
 
     const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
+
+    console.log('BBBA stdSignature', stdSignature);
 
     return {
       signed: signDoc,
       signature: stdSignature,
     };
-  }
-
-  public async serialize(password: string): Promise<string> {
-    const kdfConfiguration = basicPasswordHashingOptions;
-    const encryptionKey = await executeKdf(password, kdfConfiguration);
-    return this.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
   }
 
   protected encodeSecp256k1Signature(pubkey: Uint8Array, signature: Uint8Array): StdSignature {
@@ -209,9 +282,10 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     const base64ofPubkey = toBase64(pubkey);
 
     console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
+    console.log('from DirectSecp256k1HdWallet - signature from encode', signature);
+
     const pubkeyEncodedStratos = {
-      // type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
-      type: 'stratos/PubKeyEthSecp256k1',
+      type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
       value: base64ofPubkey,
     };
 
@@ -221,41 +295,16 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     );
 
     return {
-      // pub_key: encodeSecp256k1Pubkey(pubkey),
       pub_key: pubkeyEncodedStratos,
       signature: toBase64(signature),
     };
   }
 
-  // public async serializeWithEncryptionKey(
-  //   encryptionKey: Uint8Array,
-  //   kdfConfiguration: KdfConfiguration,
-  // ): Promise<string> {
-  //   console.log('encryptionKey', encryptionKey);
-  //   console.log('kdfConfiguration', kdfConfiguration);
-  //   return '';
-  // const dataToEncrypt: DirectSecp256k1HdWalletData = {
-  //   mnemonic: this.mnemonic,
-  //   accounts: this.accounts.map(({ hdPath, prefix }) => ({
-  //     hdPath: pathToString(hdPath),
-  //     prefix: prefix,
-  //   })),
-  // };
-  // const dataToEncryptRaw = toUtf8(JSON.stringify(dataToEncrypt));
-  //
-  // const encryptionConfiguration: EncryptionConfiguration = {
-  //   algorithm: supportedAlgorithms.xchacha20poly1305Ietf,
-  // };
-  // const encryptedData = await encrypt(dataToEncryptRaw, encryptionKey, encryptionConfiguration);
-  //
-  // const out: DirectSecp256k1HdWalletSerialization = {
-  //   type: serializationTypeV1,
-  //   kdf: kdfConfiguration,
-  //   encryption: encryptionConfiguration,
-  //   data: toBase64(encryptedData),
-  // };
-  // return JSON.stringify(out);
-  // }
+  public async serialize(password: string): Promise<string> {
+    const kdfConfiguration = basicPasswordHashingOptions;
+    const encryptionKey = await executeKdf(password, kdfConfiguration);
+    return this.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
+  }
 
   protected async getMyKeyPair(hdPath: HdPath): Promise<Secp256k1Keypair> {
     const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, this.mySeed, hdPath);
@@ -264,7 +313,6 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       privkey: privkey,
       pubkey: Secp256k1.compressPubkey(pubkey),
     };
-    // console.log('stratos DirectSecp256k1HdWallet myKeypair', myKeypair);
     return myKeypair;
   }
 
@@ -276,8 +324,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
         // console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
         const { pubkey: fullPubkey } = await Secp256k1.makeKeypair(privkey);
 
-        const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
-        // console.log('fullPubkeyHex 2', fullPubkeyHex);
+        // const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
 
         const compressedPub = Secp256k1.compressPubkey(fullPubkey);
         const compressedPubHex = Buffer.from(compressedPub).toString('hex');
@@ -287,12 +334,12 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
         const addressOld = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
         const address = toBech32(prefix, pubkeyToRawAddressWithKeccak(fullPubkey));
+
         console.log('from DirectSecp256k1HdWallet old address ', addressOld);
         console.log('from DirectSecp256k1HdWallet new address ', address);
 
         return {
           algo: 'secp256k1' as const,
-          // algo: 'ed25519' as const,
           privkey: privkey,
           pubkey: pubkey,
           address: address,
@@ -303,4 +350,3 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 }
 
 export default StratosDirectSecp256k1HdWallet;
-// export default DirectSecp256k1HdWallet;

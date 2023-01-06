@@ -42,6 +42,8 @@ const deriveAddressFromPhrase = async (phrase) => {
 exports.deriveAddressFromPhrase = deriveAddressFromPhrase;
 const deriveKeyPairFromPrivateKeySeed = async (privkey) => {
     const pubkeyMine = await (0, cosmosWallet_1.getPublicKeyFromPrivKey)(privkey);
+    console.log('yyyyy pkey ', privkey);
+    console.log('xxxxx pkey ', (0, encoding_1.toHex)(privkey));
     const encodeAminoPub = await (0, keyUtils_1.getAminoPublicKey)(pubkeyMine); // 1 amino dep - amino encodeAminoPubkey
     // new, eth address
     const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);

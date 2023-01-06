@@ -87,7 +87,9 @@ export const sign = async (
   const client = await getCosmos();
   console.log('Stratos transaction - calling transaction sign (calling stragate client sign method)');
   const signedTx = await client.sign(address, txMessages, fee, memo);
-  console.log('Stratos transaction - signed tx', signedTx);
+  // console.log('Stratos transaction - signed tx', signedTx);
+  console.log('Stratos transaction - signed tx authInfoBytes', Uint8Array.from(signedTx.authInfoBytes));
+  console.log('Stratos transaction - signed tx bodyBytes', Uint8Array.from(signedTx.bodyBytes));
 
   return signedTx;
 };

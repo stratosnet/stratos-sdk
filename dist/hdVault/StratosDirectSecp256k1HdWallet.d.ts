@@ -1,6 +1,14 @@
 import { EnglishMnemonic, HdPath, Secp256k1Keypair } from '@cosmjs/crypto';
 import { DirectSecp256k1HdWallet, DirectSecp256k1HdWalletOptions, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { SignedTransaction } from 'web3-core';
+export interface IWebLinkedInfo {
+    privateStr: string;
+    rpcUrl: string;
+    chainId: number;
+    account: string;
+}
+export declare const signTxWithEth: (recipientAddress: string, amount: string, web3WalletInfo: IWebLinkedInfo) => Promise<SignedTransaction>;
 export type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 export interface AccountData {
     /** A printable address (typically bech32 encoded) */
@@ -36,8 +44,8 @@ declare class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     get mnemonic(): string;
     getAccounts(): Promise<readonly AccountData[]>;
     signDirect(signerAddress: string, signDoc: SignDoc): Promise<DirectSignResponse>;
-    serialize(password: string): Promise<string>;
     protected encodeSecp256k1Signature(pubkey: Uint8Array, signature: Uint8Array): StdSignature;
+    serialize(password: string): Promise<string>;
     protected getMyKeyPair(hdPath: HdPath): Promise<Secp256k1Keypair>;
     protected getMyAccountsWithPrivkeys(): Promise<readonly AccountDataWithPrivkey[]>;
 }

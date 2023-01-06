@@ -9,5 +9,7 @@ export declare class StratosSigningStargateClient extends SigningStargateClient 
     static connectWithSigner(endpoint: string | HttpEndpoint, signer: OfflineDirectSigner, options?: SigningStargateClientOptions): Promise<StratosSigningStargateClient>;
     protected constructor(tmClient: Tendermint34Client | undefined, signer: OfflineDirectSigner, options: SigningStargateClientOptions);
     sign(signerAddress: string, messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData): Promise<TxRaw>;
+    private getEthSecpStratosEncodedPubkey;
+    private getCosmosEncodedPubkey;
     private signDirectStratos;
 }
