@@ -85,6 +85,7 @@ export const deserializeWithEncryptionKey = async (
     throw new Error('Accounts do not all have the same prefix');
   }
   const hdPaths = accounts.map(({ hdPath }) => stringToPath(hdPath));
+
   return StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: hdPaths,
     prefix: firstPrefix,

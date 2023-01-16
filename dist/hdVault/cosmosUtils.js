@@ -58,6 +58,7 @@ const deserializeWithEncryptionKey = async (password, serialization) => {
         throw new Error('Accounts do not all have the same prefix');
     }
     const hdPaths = accounts.map(({ hdPath }) => (0, crypto_1.stringToPath)(hdPath));
+    // we would need to update options here as well if we need to use a custom parser
     return StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, {
         hdPaths: hdPaths,
         prefix: firstPrefix,

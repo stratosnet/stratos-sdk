@@ -5,6 +5,7 @@ import { AccountsData } from '../accounts/types';
 // import { BroadcastResult, SignedTransaction, Transaction, TransactionMessage } from '../transactions/types';
 import StratosDirectSecp256k1HdWallet from '../hdVault/StratosDirectSecp256k1HdWallet';
 import { StratosSigningStargateClient } from '../hdVault/StratosSigningStargateClient';
+import { accountFromAnyStratos } from '../hdVault/StratosStargateAccounts';
 import { deserializeEncryptedWallet } from '../hdVault/wallet';
 import Sdk from '../Sdk';
 import { getStratosTransactionRegistryTypes } from '../transactions/transactions';
@@ -31,6 +32,8 @@ const getCosmosClient = async (
 
   const options = {
     registry: clientRegistry,
+    // in order to be able to decode `ethSecp256k1` pubkey
+    accountParser: accountFromAnyStratos,
   };
 
   try {

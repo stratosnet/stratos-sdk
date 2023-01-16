@@ -29,7 +29,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
+// import BN from 'bn.js';
 const crypto_js_1 = __importDefault(require("crypto-js"));
+const keccak_1 = __importDefault(require("keccak"));
 const sjcl_1 = __importDefault(require("sjcl"));
 const hdVault_1 = require("../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/StratosDirectSecp256k1HdWallet"));
@@ -342,6 +344,7 @@ async function createWalletAtPath(hdPathIndex, mnemonic) {
         prefix: addressPrefix,
         hdPaths,
     };
+    console.log('keyUtils - options to use ', options);
     const wallet = await StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
     // console.log('direct wallet', JSON.stringify(wallet));
     // works - way 2
@@ -394,8 +397,14 @@ exports.createWalletAtPath = createWalletAtPath;
 //   return wallets;
 // }
 const encodeSignatureMessage = (message) => {
-    const messageHash = crypto_js_1.default.SHA256(message).toString();
-    const signHashBuf = Buffer.from(messageHash, `hex`);
+    const signBytesBuffer = Buffer.from(message);
+    const keccak256HashOfSigningBytes = (0, keccak_1.default)('keccak256').update(signBytesBuffer).digest();
+    const signHashBuf = keccak256HashOfSigningBytes;
+    // const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes)
+    // const messageHash = signBytesWithKeccak;
+    // const messageHash = CryptoJS.SHA256(message).toString();
+    // const messageHash2 = CryptoJS.SHA256(message).toString();
+    // const signHashBuf = Buffer.from(messageHash, `hex`);
     const encodedMessage = Uint8Array.from(signHashBuf);
     return encodedMessage;
 };

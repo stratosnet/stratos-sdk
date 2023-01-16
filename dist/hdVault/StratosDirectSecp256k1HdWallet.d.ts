@@ -11,7 +11,6 @@ export interface IWebLinkedInfo {
 export declare const signTxWithEth: (recipientAddress: string, amount: string, web3WalletInfo: IWebLinkedInfo) => Promise<SignedTransaction>;
 export type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 export interface AccountData {
-    /** A printable address (typically bech32 encoded) */
     readonly address: string;
     readonly algo: Algo;
     readonly pubkey: Uint8Array;

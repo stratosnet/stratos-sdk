@@ -1,35 +1,28 @@
-import {
-  // encodeSecp256k1Pubkey,
-  // encodeSecp256k1Signature,
-  rawSecp256k1PubkeyToRawAddress,
-} from '@cosmjs/amino';
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import {
   Bip39,
   EnglishMnemonic,
   HdPath,
   Secp256k1,
   Secp256k1Keypair,
-  sha256,
   Slip10,
   Slip10Curve,
   Slip10RawIndex,
-  Secp256k1Signature,
 } from '@cosmjs/crypto';
 import { toHex, toBech32 } from '@cosmjs/encoding';
-import { fromBase64, toBase64 } from '@cosmjs/encoding';
+import { toBase64 } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
   DirectSignResponse,
   KdfConfiguration,
-  makeSignBytes, // encodePubkey,
+  makeSignBytes,
   executeKdf,
 } from '@cosmjs/proto-signing';
-// import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-// import { Any } from 'cosmjs-types/google/protobuf/any';
 import createKeccakHash from 'keccak';
-import secp256k1 from 'secp256k1';
+// we probably do no need 2 following packages
+// import secp256k1 from 'secp256k1';
 import Web3 from 'web3';
 import { SignedTransaction } from 'web3-core';
 import { stratosAddressPrefix } from '../config/hdVault';
@@ -96,7 +89,6 @@ interface Secp256k1Derivation {
 export type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 
 export interface AccountData {
-  /** A printable address (typically bech32 encoded) */
   readonly address: string;
   readonly algo: Algo;
   readonly pubkey: Uint8Array;
@@ -224,7 +216,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
   public async signDirect(signerAddress: string, signDoc: SignDoc): Promise<DirectSignResponse> {
     const accounts = await this.getMyAccountsWithPrivkeys();
-    console.log('stratos DirectSecp256k1HdWallet  sign direct was called', signDoc);
+    // console.log('stratos DirectSecp256k1HdWallet  sign direct was called', signDoc);
 
     const account = accounts.find(({ address }) => address === signerAddress);
 
@@ -234,8 +226,8 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
     const { privkey, pubkey } = account;
 
-    console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
-
+    // console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
+    //
     // console.log('yyyyy1 pkey ', privkey);
     // console.log('xxxxx1 pkey ', toHex(privkey));
     //
@@ -248,23 +240,35 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     // const signedTest = await signTxWithEth(signerAddress, '124', params);
     // console.log('signedTest', signedTest);
 
-    console.log('BBB signDoc', signDoc);
+    // console.log('BBB signDoc', signDoc);
     const signBytes = makeSignBytes(signDoc);
-    console.log('BBB signBytes', Uint8Array.from(signBytes));
-    const hashedMessage = sha256(signBytes);
+    // console.log('BBB signBytes', Uint8Array.from(signBytes));
+    // console.dir(Uint8Array.from(signBytes), { maxArrayLength: null });
+
+    const signBytesBuffer = Buffer.from(signBytes);
+    const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
+
+    const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes);
+
+    // console.log('BBB signBytesWithKeccak', signBytesWithKeccak);
+
+    const hashedMessage = signBytesWithKeccak;
+    // const hashedMessage = sha256(signBytes);
+
+    // console.log('BBB hashedMessage', hashedMessage);
 
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
-    console.log('BBBA cosmojs/crypto signature created by Secp256k1.createSignature(', signature);
+    // console.log('BBBA cosmojs/crypto signature created by Secp256k1.createSignature(', signature);
 
-    const signatureToTest = secp256k1.ecdsaSign(hashedMessage, privkey);
-    console.log('BBBA signature by secp256k1.ecdsaSign ', signatureToTest);
+    // const signatureToTest = secp256k1.ecdsaSign(hashedMessage, privkey);
+    // console.log('BBBA signature by secp256k1.ecdsaSign ', signatureToTest);
 
     const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-    console.log('BBBA signatureBytes from Secp256k1.createSignature ', signatureBytes);
+    // console.log('BBBA signatureBytes from Secp256k1.createSignature ', signatureBytes);
 
     const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
 
-    console.log('BBBA stdSignature', stdSignature);
+    // console.log('BBBA stdSignature', stdSignature);
 
     return {
       signed: signDoc,
@@ -281,18 +285,18 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
     const base64ofPubkey = toBase64(pubkey);
 
-    console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
-    console.log('from DirectSecp256k1HdWallet - signature from encode', signature);
+    // console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
+    // console.log('from DirectSecp256k1HdWallet - signature from encode', signature);
 
     const pubkeyEncodedStratos = {
       type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
       value: base64ofPubkey,
     };
 
-    console.log(
-      'from DirectSecp256k1HdWallet - pubkeyEncodedStratos (must have stratos type now)',
-      pubkeyEncodedStratos,
-    );
+    // console.log(
+    //   'from DirectSecp256k1HdWallet - pubkeyEncodedStratos (must have stratos type now)',
+    //   pubkeyEncodedStratos,
+    // );
 
     return {
       pub_key: pubkeyEncodedStratos,
@@ -326,17 +330,17 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
         // const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
 
-        const compressedPub = Secp256k1.compressPubkey(fullPubkey);
-        const compressedPubHex = Buffer.from(compressedPub).toString('hex');
+        // const compressedPub = Secp256k1.compressPubkey(fullPubkey);
+        // const compressedPubHex = Buffer.from(compressedPub).toString('hex');
 
-        console.log('from DirectSecp256k1HdWallet pub compressedPub ', compressedPub);
-        console.log('from DirectSecp256k1HdWallet pub compressedPub compressedPubHex ', compressedPubHex);
+        // console.log('from DirectSecp256k1HdWallet pub compressedPub ', compressedPub);
+        // console.log('from DirectSecp256k1HdWallet pub compressedPub compressedPubHex ', compressedPubHex);
 
-        const addressOld = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
+        // const addressOld = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
         const address = toBech32(prefix, pubkeyToRawAddressWithKeccak(fullPubkey));
 
-        console.log('from DirectSecp256k1HdWallet old address ', addressOld);
-        console.log('from DirectSecp256k1HdWallet new address ', address);
+        // console.log('from DirectSecp256k1HdWallet old address ', addressOld);
+        // console.log('from DirectSecp256k1HdWallet new address ', address);
 
         return {
           algo: 'secp256k1' as const,

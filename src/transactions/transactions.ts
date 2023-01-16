@@ -80,16 +80,21 @@ export const sign = async (
 ): Promise<TxRaw> => {
   const fee = givenFee ? givenFee : getStandardFee();
 
-  console.log('Stratos transaction - fee ', fee);
+  // console.log('Stratos transaction - fee ', fee);
   console.log('Stratos transaction - address', address);
   console.log('Stratos transaction - txMessages', JSON.stringify(txMessages));
   console.log('Stratos transaction - memo', JSON.stringify(memo));
   const client = await getCosmos();
   console.log('Stratos transaction - calling transaction sign (calling stragate client sign method)');
+  console.log('Stratos transaction - calling getSequence');
+
+  // const sequence = await client.getSequence(address);
+  //
+  // console.log('Stratos transaction - sequence ', sequence);
+
   const signedTx = await client.sign(address, txMessages, fee, memo);
-  // console.log('Stratos transaction - signed tx', signedTx);
-  console.log('Stratos transaction - signed tx authInfoBytes', Uint8Array.from(signedTx.authInfoBytes));
-  console.log('Stratos transaction - signed tx bodyBytes', Uint8Array.from(signedTx.bodyBytes));
+  // console.log('Stratos transaction - signed tx authInfoBytes', Uint8Array.from(signedTx.authInfoBytes));
+  // console.log('Stratos transaction - signed tx bodyBytes', Uint8Array.from(signedTx.bodyBytes));
 
   return signedTx;
 };

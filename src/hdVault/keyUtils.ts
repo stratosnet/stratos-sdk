@@ -1,14 +1,12 @@
 import {
   Bip39,
   EnglishMnemonic,
-  HdPath,
-  Hmac,
+  HdPath, // Hmac,
   ripemd160,
   Secp256k1,
   Secp256k1Signature,
-  sha256,
-  Sha512,
-  Slip10Curve,
+  sha256, // Sha512,
+  // Slip10Curve,
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
@@ -17,7 +15,7 @@ import {
   // DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
 } from '@cosmjs/proto-signing';
-import BN from 'bn.js';
+// import BN from 'bn.js';
 import CryptoJS from 'crypto-js';
 import createKeccakHash from 'keccak';
 import sjcl from 'sjcl';
@@ -405,6 +403,8 @@ export async function createWalletAtPath(
     hdPaths,
   };
 
+  console.log('keyUtils - options to use ', options);
+
   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
   // console.log('direct wallet', JSON.stringify(wallet));
 
@@ -461,8 +461,14 @@ export async function createWalletAtPath(
 // }
 
 export const encodeSignatureMessage = (message: string) => {
-  const messageHash = CryptoJS.SHA256(message).toString();
-  const signHashBuf = Buffer.from(messageHash, `hex`);
+  const signBytesBuffer = Buffer.from(message);
+  const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
+  const signHashBuf = keccak256HashOfSigningBytes;
+  // const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes)
+  // const messageHash = signBytesWithKeccak;
+  // const messageHash = CryptoJS.SHA256(message).toString();
+  // const messageHash2 = CryptoJS.SHA256(message).toString();
+  // const signHashBuf = Buffer.from(messageHash, `hex`);
   const encodedMessage = Uint8Array.from(signHashBuf);
   return encodedMessage;
 };

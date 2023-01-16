@@ -233,6 +233,7 @@ const mainSdsPrepay = async () => {
         return;
     }
     const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
+    //
     console.log('from mainSdsPrepay - calling tx sign');
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
     if (signedTx) {
@@ -375,7 +376,8 @@ const formatBalanceFromWei = () => {
     console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
 const runFaucet = async () => {
-    const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    // const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const walletAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
     // const faucetUrl = 'https://faucet-tropos.thestratos.org/credit';
     // const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosDenom);
     const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
@@ -680,6 +682,23 @@ const testDl = async (filename) => {
   2    12│      filesize: 10000000,                                                                                                                                                                                                                                                              │
   2    13│      filename: 'file2_10M_dec_6',                                                                                                                                                                                                                                                     │
   2    14│      createtime: 1670619959
+  
+  /
+  
+  │     3│  files: [                                                                                                                                                                                                                                                          │
+  │     4│    [Object: null prototype] {                                                                                                                                                                                                                                      │
+  │     5│      filehash: 'v05ahm5055f7lf7i63p0ag2dpmdnqufgtn8a28ag',                                                                                                                                                                                                         │
+  │     6│      filesize: 10000000,                                                                                                                                                                                                                                           │
+  │     7│      filename: 'file1_10M_jan10',                                                                                                                                                                                                                                  │
+  │     8│      createtime: 1673404381                                                                                                                                                                                                                                        │
+  │     9│    },                                                                                                                                                                                                                                                              │
+  -    10│    [Object: null prototype] {                                                                                                                                                                                                                                      │
+  2    11│      filehash: 'v05ahm551ant5vceeajvn86cv4d72md2ubog6m48',                                                                                                                                                                                                         │
+  │    12│      filesize: 8388608,                                                                                                                                                                                                                                            │
+  │    13│      filename: 'test4m.bin',                                                                                                                                                                                                                                       │
+  │    14│      createtime: 1673394761                                                                                                                                                                                                                                        │
+  │    15│    }                                                                                                                                                                                                                                                               │
+  │    16│  ]                                                                                                                                                                                                                                                                 │
      */
     console.log(`downloading file ${filename}`);
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -689,7 +708,8 @@ const testDl = async (filename) => {
         return;
     }
     const { address } = keyPairZeroA;
-    const filehash = 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8';
+    // const filehash = 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8';
+    const filehash = 'v05ahm5055f7lf7i63p0ag2dpmdnqufgtn8a28ag';
     const extraParams = [
         {
             filehash,
@@ -963,7 +983,7 @@ const main = async () => {
     console.log('masterKeySeedInfo', masterKeySeedInfo);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
-    const filename = 'file2_10M_dec_6';
+    const filename = 'file1_10M_jan10';
     // request and upload
     // await testIt(filename);
     // download the file

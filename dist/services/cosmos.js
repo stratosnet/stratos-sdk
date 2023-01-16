@@ -7,6 +7,7 @@ exports.getCosmos = exports.resetCosmos = exports.StratosCosmos = void 0;
 // import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const StratosSigningStargateClient_1 = require("../hdVault/StratosSigningStargateClient");
+const StratosStargateAccounts_1 = require("../hdVault/StratosStargateAccounts");
 const wallet_1 = require("../hdVault/wallet");
 const Sdk_1 = __importDefault(require("../Sdk"));
 const transactions_1 = require("../transactions/transactions");
@@ -15,6 +16,8 @@ const getCosmosClient = async (rpcEndpoint, deserializedWallet) => {
     const clientRegistry = new proto_signing_1.Registry(clientRegistryTypes);
     const options = {
         registry: clientRegistry,
+        // in order to be able to decode `ethSecp256k1` pubkey
+        accountParser: StratosStargateAccounts_1.accountFromAnyStratos,
     };
     try {
         const client = await StratosSigningStargateClient_1.StratosSigningStargateClient.connectWithSigner(rpcEndpoint, deserializedWallet, options);

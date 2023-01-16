@@ -1,7 +1,8 @@
 import { StdFee } from '@cosmjs/amino';
 import { EncodeObject, // OfflineSigner,
 OfflineDirectSigner } from '@cosmjs/proto-signing';
-import { SigningStargateClient, SignerData, SigningStargateClientOptions } from '@cosmjs/stargate';
+import { SigningStargateClient, SignerData, // AccountParser,
+SigningStargateClientOptions } from '@cosmjs/stargate';
 import { HttpEndpoint, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 export declare class StratosSigningStargateClient extends SigningStargateClient {
