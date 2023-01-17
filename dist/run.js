@@ -991,7 +991,7 @@ const main = async () => {
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
     // await getBalanceCardMetrics();
-    await mainSdsPrepay();
+    // await mainSdsPrepay();
     // await mainSend();
     // await testUploadRequest();
     // 100000000 100 M
@@ -1000,7 +1000,7 @@ const main = async () => {
     // cosmosWalletCreateTest();
     // testFile();
     // testFileHash();
-    // await runFaucet();
+    await runFaucet();
     // uploadRequest();
     // testBigInt();
 };

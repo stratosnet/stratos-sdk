@@ -1,4 +1,3 @@
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import {
   Bip39,
   EnglishMnemonic,
@@ -9,7 +8,7 @@ import {
   Slip10Curve,
   Slip10RawIndex,
 } from '@cosmjs/crypto';
-import { toHex, toBech32 } from '@cosmjs/encoding';
+import { toBech32 } from '@cosmjs/encoding';
 import { toBase64 } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
@@ -21,65 +20,7 @@ import {
 } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import createKeccakHash from 'keccak';
-// we probably do no need 2 following packages
-// import secp256k1 from 'secp256k1';
-import Web3 from 'web3';
-import { SignedTransaction } from 'web3-core';
 import { stratosAddressPrefix } from '../config/hdVault';
-
-// import * as keyUtils from './keyUtils';
-// import { mergeUint8Arrays } from './utils';
-
-const getWeb3 = (rpcUrl: string): Web3 => {
-  const provider = new Web3.providers.HttpProvider(rpcUrl);
-  const web3: Web3 = new Web3(provider);
-  return web3;
-};
-
-export interface IWebLinkedInfo {
-  privateStr: string;
-  rpcUrl: string;
-  chainId: number;
-  account: string;
-}
-
-export const signTxWithEth = async (
-  recipientAddress: string,
-  amount: string,
-  web3WalletInfo: IWebLinkedInfo,
-): Promise<SignedTransaction> => {
-  const web3 = getWeb3(web3WalletInfo.rpcUrl);
-
-  const nonce = await web3.eth.getTransactionCount(web3WalletInfo.account);
-  const gasPrice = await web3.eth.getGasPrice();
-
-  const myData = { foo: 'bar' };
-
-  const contractData = JSON.stringify(myData);
-
-  const estimategas = await web3.eth.estimateGas({
-    to: web3WalletInfo.account,
-    data: contractData,
-  });
-
-  const txParams = {
-    from: web3WalletInfo.account,
-    to: recipientAddress,
-    gasPrice: web3.utils.toHex(gasPrice),
-    gasLimit: web3.utils.toHex(amount),
-    gas: web3.utils.toHex(estimategas),
-    value: amount,
-    nonce: nonce,
-    data: contractData,
-    chainId: web3WalletInfo.chainId,
-  };
-
-  console.log('txParams', txParams);
-
-  const signed_txn = await web3.eth.accounts.signTransaction(txParams, web3WalletInfo.privateStr);
-
-  return signed_txn;
-};
 
 interface Secp256k1Derivation {
   readonly hdPath: HdPath;
@@ -93,6 +34,7 @@ export interface AccountData {
   readonly algo: Algo;
   readonly pubkey: Uint8Array;
 }
+
 export function pubkeyToRawAddressWithKeccak(pubkey: Uint8Array): Uint8Array {
   const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
 
@@ -101,13 +43,13 @@ export function pubkeyToRawAddressWithKeccak(pubkey: Uint8Array): Uint8Array {
 
   const addressChunkOfBytes = fullRawAddress.slice(-20);
 
-  const hexAddress = toHex(addressChunkOfBytes);
-  console.log('hex address', hexAddress);
+  // const hexAddress = toHex(addressChunkOfBytes);
+  // console.log('hex address', hexAddress);
 
-  const prefix = stratosAddressPrefix;
-  const address = toBech32(prefix, addressChunkOfBytes);
+  // const prefix = stratosAddressPrefix;
+  // const address = toBech32(prefix, addressChunkOfBytes);
 
-  console.log('bench32 address', address);
+  // console.log('bench32 address', address);
 
   return addressChunkOfBytes;
 }
@@ -125,6 +67,7 @@ export function makeStratosHubPath(a: number): HdPath {
     Slip10RawIndex.normal(a),
   ];
 }
+
 const basicPasswordHashingOptions: KdfConfiguration = {
   algorithm: 'argon2id',
   params: {
@@ -144,19 +87,16 @@ const defaultOptions: DirectSecp256k1HdWalletOptions = {
   prefix: stratosAddressPrefix,
 };
 
-const isCanonicalSignature = (signature: Uint8Array) => {
-  return (
-    !(signature[0] & 0x80) &&
-    !(signature[0] === 0 && !(signature[1] & 0x80)) &&
-    !(signature[32] & 0x80) &&
-    !(signature[32] === 0 && !(signature[33] & 0x80))
-  );
-};
+// const isCanonicalSignature = (signature: Uint8Array) => {
+//   return (
+//     !(signature[0] & 0x80) &&
+//     !(signature[0] === 0 && !(signature[1] & 0x80)) &&
+//     !(signature[32] & 0x80) &&
+//     !(signature[32] === 0 && !(signature[33] & 0x80))
+//   );
+// };
 
 export interface Pubkey {
-  // type is one of the strings defined in pubkeyType
-  // I don't use a string literal union here as that makes trouble with json test data:
-  // https://github.com/cosmos/cosmjs/pull/44#pullrequestreview-353280504
   readonly type: string;
   readonly value: any;
 }
@@ -205,7 +145,7 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   }
 
   public async getAccounts(): Promise<readonly AccountData[]> {
-    console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
+    // console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
     const accountsWithPrivkeys = await this.getMyAccountsWithPrivkeys();
     return accountsWithPrivkeys.map(({ algo, pubkey, address }) => ({
       algo: algo,
@@ -226,49 +166,20 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
     const { privkey, pubkey } = account;
 
-    // console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
-    //
-    // console.log('yyyyy1 pkey ', privkey);
-    // console.log('xxxxx1 pkey ', toHex(privkey));
-    //
-    // const params = {
-    //   chainId: 12,
-    //   account: signerAddress,
-    //   rpcUrl: 'https://rpc-dev.thestratos.org',
-    //   privateStr: toHex(privkey),
-    // };
-    // const signedTest = await signTxWithEth(signerAddress, '124', params);
-    // console.log('signedTest', signedTest);
-
-    // console.log('BBB signDoc', signDoc);
     const signBytes = makeSignBytes(signDoc);
-    // console.log('BBB signBytes', Uint8Array.from(signBytes));
-    // console.dir(Uint8Array.from(signBytes), { maxArrayLength: null });
 
     const signBytesBuffer = Buffer.from(signBytes);
     const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
 
     const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes);
 
-    // console.log('BBB signBytesWithKeccak', signBytesWithKeccak);
-
     const hashedMessage = signBytesWithKeccak;
     // const hashedMessage = sha256(signBytes);
 
-    // console.log('BBB hashedMessage', hashedMessage);
-
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
-    // console.log('BBBA cosmojs/crypto signature created by Secp256k1.createSignature(', signature);
-
-    // const signatureToTest = secp256k1.ecdsaSign(hashedMessage, privkey);
-    // console.log('BBBA signature by secp256k1.ecdsaSign ', signatureToTest);
 
     const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-    // console.log('BBBA signatureBytes from Secp256k1.createSignature ', signatureBytes);
-
     const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
-
-    // console.log('BBBA stdSignature', stdSignature);
 
     return {
       signed: signDoc,
@@ -284,9 +195,6 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     }
 
     const base64ofPubkey = toBase64(pubkey);
-
-    // console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
-    // console.log('from DirectSecp256k1HdWallet - signature from encode', signature);
 
     const pubkeyEncodedStratos = {
       type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,

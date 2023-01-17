@@ -1,28 +1,23 @@
 import {
   Bip39,
   EnglishMnemonic,
-  HdPath, // Hmac,
+  HdPath,
   ripemd160,
   Secp256k1,
   Secp256k1Signature,
-  sha256, // Sha512,
-  // Slip10Curve,
+  sha256,
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
-import {
-  // DirectSecp256k1HdWallet,
-  DirectSecp256k1HdWalletOptions,
-} from '@cosmjs/proto-signing';
-// import BN from 'bn.js';
+import { fromBase64, fromHex, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 import CryptoJS from 'crypto-js';
 import createKeccakHash from 'keccak';
 import sjcl from 'sjcl';
 import {
   bip39Password,
   encryptionIterations,
-  encryptionKeyLength, // kdfConfiguration,
+  encryptionKeyLength,
   stratosAddressPrefix,
   stratosPubkeyPrefix,
 } from '../config/hdVault';
@@ -33,22 +28,6 @@ import { log } from '../services/helpers';
 import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
-
-// export interface KeyPair {
-//   publicKey: string;
-//   privateKey: string;
-// }
-
-// @todo - move it
-// interface Slip10Result {
-//   readonly chainCode: Uint8Array;
-//   readonly privkey: Uint8Array;
-// }
-
-// export interface PubKey {
-//   type: string;
-//   value: string;
-// }
 
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
@@ -65,81 +44,16 @@ export function makeStratosHubPath(a: number): HdPath {
   ];
 }
 
-// @todo - move it - used in getMasterKeyInfo
-// const isZero = (privkey: Uint8Array): boolean => {
-//   return privkey.every(byte => byte === 0);
-// };
-
-// @todo - move it =  used in isGteN
-// const n = (curve: Slip10Curve): BN => {
-//   switch (curve) {
-//     case Slip10Curve.Secp256k1:
-//       return new BN('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
-//     default:
-//       throw new Error('curve not supported');
-//   }
-// };
-
-// @todo - move it - used in getMasterKeyInfo
-// const isGteN = (curve: Slip10Curve, privkey: Uint8Array): boolean => {
-//   const keyAsNumber = new BN(privkey);
-//   return keyAsNumber.gte(n(curve));
-// };
-
-// @todo - move it - used in getMasterKeySeedPriveKey
-// const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result => {
-//   const i = new Hmac(Sha512, toAscii(curve)).update(seed).digest();
-//   const il = i.slice(0, 32);
-//   const ir = i.slice(32, 64);
-//
-//   if (curve !== Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
-//     return getMasterKeyInfo(curve, i);
-//   }
-//
-//   return {
-//     chainCode: ir,
-//     privkey: il,
-//   };
-// };
-//
-
 export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
   const stringMnemonic = convertArrayToString(phrase);
-  // console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
 
   const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
-  // console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
 
   const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
-  // console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
 
   return seed;
 };
 
-// export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array => {
-//   const masterKeyInfo = getMasterKeyInfo(Slip10Curve.Secp256k1, masterKeySeed);
-//
-//   const { privkey } = masterKeyInfo;
-//
-//   return privkey;
-// };
-
-// used in derriveManager - deriveKeyPairFromPrivateKeySeed
-// export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubKey> => {
-//   const { pubkey } = await Secp256k1.makeKeypair(privkey);
-//
-//   const compressedPub = Secp256k1.compressPubkey(pubkey);
-//
-//   const pubkeyMine = {
-//     type: 'tendermint/PubKeySecp256k1',
-//     // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
-//     value: toBase64(compressedPub),
-//   };
-//   console.log('pubkeyMine', pubkeyMine);
-//
-//   return pubkeyMine;
-// };
-//
 // used in wallet serialization and desirialization
 // meant to replace cosmos.js encryption key generation, which uses executeKdf
 // and that is using libsodium, (wasm) which is extremelly slow on mobile devices
@@ -208,41 +122,17 @@ function pubkeyToRawAddress(pubkey: PubKey): Uint8Array {
   return rawSecp256k1PubkeyToRawAddress(pubkeyData);
 }
 
-// export function pubkeyToRawAddressWithKeccak(pubkey: Uint8Array): Uint8Array {
-//   // const compressedPub = Secp256k1.compressPubkey(pubkey);
-//
-//   const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
-//   // const pubkeyBuffer = Buffer.from(compressedPub);
-//
-//   const keccak256HashOfPubkeyBuffer = createKeccakHash('keccak256').update(pubkeyBuffer).digest();
-//   const fullRawAddress = new Uint8Array(keccak256HashOfPubkeyBuffer);
-//   // console.log('fullRawAddress', fullRawAddress);
-//
-//   const addressChunkOfBytes = fullRawAddress.slice(-20);
-//   // console.log('addressChunkOfBytes', addressChunkOfBytes);
-//
-//   const hexAddress = toHex(addressChunkOfBytes);
-//   // console.log('hex address', hexAddress);
-//
-//   const prefix = stratosAddressPrefix;
-//   const address = toBech32(prefix, addressChunkOfBytes);
-//
-//   // console.log('bench32 address', address);
-//
-//   return addressChunkOfBytes;
-// }
-
 // @depricated
 export const getAddressFromPubKey = (pubkey: PubKey): string => {
   const prefix = stratosAddressPrefix;
 
-  const addressChunkOfBytes = pubkeyToRawAddress(pubkey);
+  // const addressChunkOfBytes = pubkeyToRawAddress(pubkey);
   const address = toBech32(prefix, pubkeyToRawAddress(pubkey));
 
-  const hexAddress = toHex(addressChunkOfBytes);
-  console.log('old hex address', hexAddress);
+  // const hexAddress = toHex(addressChunkOfBytes);
+  // console.log('old hex address', hexAddress);
 
-  console.log('old bench32 address', address);
+  // console.log('old bench32 address', address);
   return address;
 };
 
@@ -251,11 +141,11 @@ export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
 
   const addressChunkOfBytes = pubkeyToRawAddressWithKeccak(pubkey);
 
-  const hexAddress = toHex(addressChunkOfBytes);
-  console.log('kk hex address', hexAddress);
+  // const hexAddress = toHex(addressChunkOfBytes);
+  // console.log('kk hex address', hexAddress);
 
   const address = toBech32(prefix, addressChunkOfBytes);
-  console.log('kk bench32 address', address);
+  // console.log('kk bench32 address', address);
   return address;
 };
 
@@ -264,22 +154,6 @@ export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<
 
   return encodedPubKey;
 };
-
-// export const getMasterKeySeedPublicKey = async (masterKeySeed: Uint8Array): Promise<PubKey> => {
-//   const privkey = getMasterKeySeedPriveKey(masterKeySeed);
-//
-//   const pubkey = await getPublicKeyFromPrivKey(privkey);
-//
-//   return pubkey;
-// };
-
-// export const getMasterKeySeedPublicKeyWithKeccak = async (masterKeySeed: Uint8Array): Promise<Uint8Array> => {
-//   const privkey = getMasterKeySeedPriveKey(masterKeySeed);
-//
-//   const { pubkey } = await Secp256k1.makeKeypair(privkey);
-//
-//   return pubkey;
-// };
 
 // only used in keyManager
 export const encryptMasterKeySeed = (
@@ -464,6 +338,7 @@ export const encodeSignatureMessage = (message: string) => {
   const signBytesBuffer = Buffer.from(message);
   const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
   const signHashBuf = keccak256HashOfSigningBytes;
+  // keep this implementation as an example of the sha256 signing
   // const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes)
   // const messageHash = signBytesWithKeccak;
   // const messageHash = CryptoJS.SHA256(message).toString();

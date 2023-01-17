@@ -3,59 +3,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = exports.signTxWithEth = void 0;
+exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
+// import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const keccak_1 = __importDefault(require("keccak"));
-// we probably do no need 2 following packages
-// import secp256k1 from 'secp256k1';
-const web3_1 = __importDefault(require("web3"));
 const hdVault_1 = require("../config/hdVault");
-// import * as keyUtils from './keyUtils';
-// import { mergeUint8Arrays } from './utils';
-const getWeb3 = (rpcUrl) => {
-    const provider = new web3_1.default.providers.HttpProvider(rpcUrl);
-    const web3 = new web3_1.default(provider);
-    return web3;
-};
-const signTxWithEth = async (recipientAddress, amount, web3WalletInfo) => {
-    const web3 = getWeb3(web3WalletInfo.rpcUrl);
-    const nonce = await web3.eth.getTransactionCount(web3WalletInfo.account);
-    const gasPrice = await web3.eth.getGasPrice();
-    const myData = { foo: 'bar' };
-    const contractData = JSON.stringify(myData);
-    const estimategas = await web3.eth.estimateGas({
-        to: web3WalletInfo.account,
-        data: contractData,
-    });
-    const txParams = {
-        from: web3WalletInfo.account,
-        to: recipientAddress,
-        gasPrice: web3.utils.toHex(gasPrice),
-        gasLimit: web3.utils.toHex(amount),
-        gas: web3.utils.toHex(estimategas),
-        value: amount,
-        nonce: nonce,
-        data: contractData,
-        chainId: web3WalletInfo.chainId,
-    };
-    console.log('txParams', txParams);
-    const signed_txn = await web3.eth.accounts.signTransaction(txParams, web3WalletInfo.privateStr);
-    return signed_txn;
-};
-exports.signTxWithEth = signTxWithEth;
 function pubkeyToRawAddressWithKeccak(pubkey) {
     const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
     const keccak256HashOfPubkeyBuffer = (0, keccak_1.default)('keccak256').update(pubkeyBuffer).digest();
     const fullRawAddress = new Uint8Array(keccak256HashOfPubkeyBuffer);
     const addressChunkOfBytes = fullRawAddress.slice(-20);
-    const hexAddress = (0, encoding_1.toHex)(addressChunkOfBytes);
-    console.log('hex address', hexAddress);
-    const prefix = hdVault_1.stratosAddressPrefix;
-    const address = (0, encoding_1.toBech32)(prefix, addressChunkOfBytes);
-    console.log('bench32 address', address);
+    // const hexAddress = toHex(addressChunkOfBytes);
+    // console.log('hex address', hexAddress);
+    // const prefix = stratosAddressPrefix;
+    // const address = toBech32(prefix, addressChunkOfBytes);
+    // console.log('bench32 address', address);
     return addressChunkOfBytes;
 }
 exports.pubkeyToRawAddressWithKeccak = pubkeyToRawAddressWithKeccak;
@@ -81,12 +46,6 @@ const defaultOptions = {
     bip39Password: '',
     hdPaths: [makeStratosHubPath(0)],
     prefix: hdVault_1.stratosAddressPrefix,
-};
-const isCanonicalSignature = (signature) => {
-    return (!(signature[0] & 0x80) &&
-        !(signature[0] === 0 && !(signature[1] & 0x80)) &&
-        !(signature[32] & 0x80) &&
-        !(signature[32] === 0 && !(signature[33] & 0x80)));
 };
 class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWallet {
     static async fromMnemonic(mnemonic, options = {}) {

@@ -1,14 +1,6 @@
 import { EnglishMnemonic, HdPath, Secp256k1Keypair } from '@cosmjs/crypto';
 import { DirectSecp256k1HdWallet, DirectSecp256k1HdWalletOptions, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { SignedTransaction } from 'web3-core';
-export interface IWebLinkedInfo {
-    privateStr: string;
-    rpcUrl: string;
-    chainId: number;
-    account: string;
-}
-export declare const signTxWithEth: (recipientAddress: string, amount: string, web3WalletInfo: IWebLinkedInfo) => Promise<SignedTransaction>;
 export type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 export interface AccountData {
     readonly address: string;

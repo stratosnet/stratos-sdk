@@ -1,16 +1,13 @@
 import {
-  Bip39,
-  EnglishMnemonic,
-  HdPath,
-  Hmac,
-  ripemd160,
-  Secp256k1,
-  Secp256k1Signature,
-  sha256,
+  // Bip39,
+  // EnglishMnemonic,
+  // HdPath,
+  Hmac, // ripemd160,
+  Secp256k1, // Secp256k1Signature,
+  // sha256,
   Sha512,
-  Slip10Curve,
-  Slip10RawIndex,
-  stringToPath,
+  Slip10Curve, // Slip10RawIndex,
+  // stringToPath,
 } from '@cosmjs/crypto';
 import { fromBase64, toAscii, toBase64 } from '@cosmjs/encoding';
 import BN from 'bn.js';
@@ -32,14 +29,6 @@ export interface PubKey {
   type: string;
   value: string;
 }
-// export interface KdfConfiguration {
-//   /**
-//    * An algorithm identifier, such as "argon2id" or "scrypt".
-//    */
-//   readonly algorithm: string;
-//   /** A map of algorithm-specific parameters */
-//   readonly params: Record<string, unknown>;
-// }
 
 // @todo merge with keyUtils
 export const encryptMasterKeySeed = (password: string, plaintext: Uint8Array): sjcl.SjclCipherEncrypted => {
@@ -115,16 +104,7 @@ export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array 
 export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubKey> => {
   const { pubkey } = await Secp256k1.makeKeypair(privkey);
 
-  // const pubkeyHex = Buffer.from(pubkey).toString('hex');
-
-  // console.log('get pub full pubkey ', pubkey);
-  // console.log('get pub pubkeyHex ', pubkeyHex);
-
   const compressedPub = Secp256k1.compressPubkey(pubkey);
-  // const compressedPubHex = Buffer.from(compressedPub).toString('hex');
-
-  // console.log('get pub compressedPub ', compressedPub);
-  // console.log('get pub compressedPub compressedPubHex ', compressedPubHex);
 
   const pubkeyMine = {
     // type: 'tendermint/PubKeySecp256k1',
@@ -132,7 +112,7 @@ export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubK
     value: toBase64(compressedPub),
   };
 
-  console.log('get full pub pubkeyMine', pubkeyMine);
+  // console.log('get full pub pubkeyMine', pubkeyMine);
 
   return pubkeyMine;
 };
@@ -150,6 +130,5 @@ export const getMasterKeySeedPublicKeyWithKeccak = async (masterKeySeed: Uint8Ar
 
   const { pubkey } = await Secp256k1.makeKeypair(privkey);
 
-  // console.log(' get m pub full pub ', pubkey);
   return pubkey;
 };

@@ -39,7 +39,6 @@ const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
     static async connectWithSigner(endpoint, signer, options = {}) {
         const tmClient = await tendermint_rpc_1.Tendermint34Client.connect(endpoint);
-        console.log('stratos StratosSigningStargateClient - options', options);
         return new StratosSigningStargateClient(tmClient, signer, options);
     }
     constructor(tmClient, signer, options) {

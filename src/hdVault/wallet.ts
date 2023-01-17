@@ -4,6 +4,7 @@ import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveM
 import * as keyUtils from './keyUtils';
 
 export { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
+
 export interface KeyPairInfo {
   keyIndex: number;
   address: string;
@@ -32,28 +33,10 @@ export const deriveKeyPair = async (
   }
 
   const path = `${keyPath}${keyIndex}`;
-  // console.log('🚀 ~ file: wallet.ts ~ line 34 ~ path', path);
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
 
-  // const pathZero = `${keyPath}0`;
-  // console.log('🚀 ~ file: wallet.ts ~ line 40 ~ pathZero', pathZero);
-
-  // const privateKeySeedZero = derivePrivateKeySeed(masterKeySeed, pathZero);
-  // console.log('🚀 ~ file: wallet.ts ~ line 43 ~ privateKeySeedZero', privateKeySeedZero);
-
-  // const pathOne = `${keyPath}1`;
-  // console.log('🚀 ~ file: wallet.ts ~ line 46 ~ pathOne', pathOne);
-
-  // const privateKeySeedOne = derivePrivateKeySeed(masterKeySeed, pathOne);
-  // console.log('🚀 ~ file: wallet.ts ~ line 49 ~ privateKeySeedOne', privateKeySeedOne);
-
   const derivedKeyPair = await deriveKeyPairFromPrivateKeySeed(privateKeySeed);
-  // console.log('🚀 ~ file: wallet.ts ~ line 52 ~ derivedKeyPair', derivedKeyPair);
-  // const derivedKeyPairZero = await deriveKeyPairFromPrivateKeySeed(privateKeySeedZero);
-  // console.log('🚀 ~ file: wallet.ts ~ line 54 ~ derivedKeyPairZero', derivedKeyPairZero);
-  // const derivedKeyPairOne = await deriveKeyPairFromPrivateKeySeed(privateKeySeedOne);
-  // console.log('🚀 ~ file: wallet.ts ~ line 56 ~ derivedKeyPairOne', derivedKeyPairOne);
 
   const { address, encodedPublicKey, privateKey } = derivedKeyPair;
 
@@ -70,28 +53,13 @@ export const deriveKeyPair = async (
 export const deserializeEncryptedWallet = async (serializedWallet: string, password: string) => {
   let deserializedWallet;
 
-  // let encryptionKey;
-
-  // try {
-  //   encryptionKey = await keyUtils.getEncryptionKey(password);
-  // } catch (error) {
-  //   throw new Error(`Can not get encrypted key (wallet). ${(error as Error).message}`);
-  // }
-
   try {
-    // deserializedWallet = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-    deserializedWallet = await deserializeWithEncryptionKey(
-      password,
-      serializedWallet,
-      // encryptionKey,
-    );
+    deserializedWallet = await deserializeWithEncryptionKey(password, serializedWallet);
   } catch (error) {
     const msg = `"${(error as Error).message}", w "${serializedWallet}"`;
     const errorMsg = `could not deserialize / decode wallet ${msg}`;
     console.log(errorMsg);
     throw new Error(errorMsg);
-
-    // return Promise.reject(false);
   }
 
   if (!deserializedWallet) {

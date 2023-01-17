@@ -4,7 +4,6 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
-// import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
 // import Sdk from '../Sdk';
@@ -21,7 +20,6 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
 
 export const getStratosTransactionRegistryTypes = () => {
   const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-  // console.log('defaultRegistryTypes', defaultRegistryTypes);
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
     [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
@@ -72,6 +70,15 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   }
 };
 
+export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
+  const fee = {
+    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], // 200_000
+    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
+  };
+  console.log('fee', fee);
+  return fee;
+};
+
 export const sign = async (
   address: string,
   txMessages: Types.TxMessage[],
@@ -80,32 +87,11 @@ export const sign = async (
 ): Promise<TxRaw> => {
   const fee = givenFee ? givenFee : getStandardFee();
 
-  // console.log('Stratos transaction - fee ', fee);
-  console.log('Stratos transaction - address', address);
-  console.log('Stratos transaction - txMessages', JSON.stringify(txMessages));
-  console.log('Stratos transaction - memo', JSON.stringify(memo));
   const client = await getCosmos();
-  console.log('Stratos transaction - calling transaction sign (calling stragate client sign method)');
-  console.log('Stratos transaction - calling getSequence');
-
-  // const sequence = await client.getSequence(address);
-  //
-  // console.log('Stratos transaction - sequence ', sequence);
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
-  // console.log('Stratos transaction - signed tx authInfoBytes', Uint8Array.from(signedTx.authInfoBytes));
-  // console.log('Stratos transaction - signed tx bodyBytes', Uint8Array.from(signedTx.bodyBytes));
 
   return signedTx;
-};
-
-export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
-  const fee = {
-    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], // 200_000
-    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
-  };
-  console.log('fee', fee);
-  return fee;
 };
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
