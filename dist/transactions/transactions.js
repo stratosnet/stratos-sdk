@@ -23,11 +23,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.getStandardFee = exports.sign = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
 const stargate_1 = require("@cosmjs/stargate");
 const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
-// import { getAccountsData } from '../accounts';
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
 // import Sdk from '../Sdk';
@@ -42,7 +41,6 @@ function* payloadGenerator(dataList) {
 }
 const getStratosTransactionRegistryTypes = () => {
     const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-    // console.log('defaultRegistryTypes', defaultRegistryTypes);
     const stratosTxRegistryTypes = [
         ...stargate_1.defaultRegistryTypes,
         [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
@@ -71,24 +69,6 @@ const broadcast = async (signedTx) => {
     }
 };
 exports.broadcast = broadcast;
-const sign = async (address, txMessages, memo = '', givenFee) => {
-    const fee = givenFee ? givenFee : (0, exports.getStandardFee)();
-    // console.log('Stratos transaction - fee ', fee);
-    console.log('Stratos transaction - address', address);
-    console.log('Stratos transaction - txMessages', JSON.stringify(txMessages));
-    console.log('Stratos transaction - memo', JSON.stringify(memo));
-    const client = await (0, cosmos_1.getCosmos)();
-    console.log('Stratos transaction - calling transaction sign (calling stragate client sign method)');
-    console.log('Stratos transaction - calling getSequence');
-    // const sequence = await client.getSequence(address);
-    //
-    // console.log('Stratos transaction - sequence ', sequence);
-    const signedTx = await client.sign(address, txMessages, fee, memo);
-    // console.log('Stratos transaction - signed tx authInfoBytes', Uint8Array.from(signedTx.authInfoBytes));
-    // console.log('Stratos transaction - signed tx bodyBytes', Uint8Array.from(signedTx.bodyBytes));
-    return signedTx;
-};
-exports.sign = sign;
 const getStandardFee = (numberOfMessages = 1) => {
     const fee = {
         amount: [{ amount: String(tokens_1.standardFeeAmount), denom: hdVault_1.stratosDenom }],
@@ -98,6 +78,13 @@ const getStandardFee = (numberOfMessages = 1) => {
     return fee;
 };
 exports.getStandardFee = getStandardFee;
+const sign = async (address, txMessages, memo = '', givenFee) => {
+    const fee = givenFee ? givenFee : (0, exports.getStandardFee)();
+    const client = await (0, cosmos_1.getCosmos)();
+    const signedTx = await client.sign(address, txMessages, fee, memo);
+    return signedTx;
+};
+exports.sign = sign;
 const getStandardAmount = (amounts) => {
     const result = amounts.map(amount => ({
         amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),

@@ -277,7 +277,7 @@ export async function createWalletAtPath(
     hdPaths,
   };
 
-  console.log('keyUtils - options to use ', options);
+  // console.log('keyUtils - options to use ', options);
 
   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
   // console.log('direct wallet', JSON.stringify(wallet));

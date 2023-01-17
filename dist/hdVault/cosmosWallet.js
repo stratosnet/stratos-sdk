@@ -9,14 +9,6 @@ const encoding_1 = require("@cosmjs/encoding");
 const bn_js_1 = __importDefault(require("bn.js"));
 const sjcl_1 = __importDefault(require("sjcl"));
 exports.cosmjsSalt = (0, encoding_1.toAscii)('The CosmJS salt.');
-// export interface KdfConfiguration {
-//   /**
-//    * An algorithm identifier, such as "argon2id" or "scrypt".
-//    */
-//   readonly algorithm: string;
-//   /** A map of algorithm-specific parameters */
-//   readonly params: Record<string, unknown>;
-// }
 // @todo merge with keyUtils
 const encryptMasterKeySeed = (password, plaintext) => {
     const strMasterKey = (0, encoding_1.toBase64)(plaintext);
@@ -83,19 +75,13 @@ const getMasterKeySeedPriveKey = (masterKeySeed) => {
 exports.getMasterKeySeedPriveKey = getMasterKeySeedPriveKey;
 const getPublicKeyFromPrivKey = async (privkey) => {
     const { pubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
-    // const pubkeyHex = Buffer.from(pubkey).toString('hex');
-    // console.log('get pub full pubkey ', pubkey);
-    // console.log('get pub pubkeyHex ', pubkeyHex);
     const compressedPub = crypto_1.Secp256k1.compressPubkey(pubkey);
-    // const compressedPubHex = Buffer.from(compressedPub).toString('hex');
-    // console.log('get pub compressedPub ', compressedPub);
-    // console.log('get pub compressedPub compressedPubHex ', compressedPubHex);
     const pubkeyMine = {
         // type: 'tendermint/PubKeySecp256k1',
         type: 'stratos/PubKeyEthSecp256k1',
         value: (0, encoding_1.toBase64)(compressedPub),
     };
-    console.log('get full pub pubkeyMine', pubkeyMine);
+    // console.log('get full pub pubkeyMine', pubkeyMine);
     return pubkeyMine;
 };
 exports.getPublicKeyFromPrivKey = getPublicKeyFromPrivKey;
@@ -108,7 +94,6 @@ exports.getMasterKeySeedPublicKey = getMasterKeySeedPublicKey;
 const getMasterKeySeedPublicKeyWithKeccak = async (masterKeySeed) => {
     const privkey = (0, exports.getMasterKeySeedPriveKey)(masterKeySeed);
     const { pubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
-    // console.log(' get m pub full pub ', pubkey);
     return pubkey;
 };
 exports.getMasterKeySeedPublicKeyWithKeccak = getMasterKeySeedPublicKeyWithKeccak;

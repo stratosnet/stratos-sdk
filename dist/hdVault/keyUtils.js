@@ -29,7 +29,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
-// import BN from 'bn.js';
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const keccak_1 = __importDefault(require("keccak"));
 const sjcl_1 = __importDefault(require("sjcl"));
@@ -38,19 +37,6 @@ const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/Strato
 const helpers_1 = require("../services/helpers");
 const cosmosUtils_1 = require("./cosmosUtils");
 const mnemonic_1 = require("./mnemonic");
-// export interface KeyPair {
-//   publicKey: string;
-//   privateKey: string;
-// }
-// @todo - move it
-// interface Slip10Result {
-//   readonly chainCode: Uint8Array;
-//   readonly privkey: Uint8Array;
-// }
-// export interface PubKey {
-//   type: string;
-//   value: string;
-// }
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
@@ -66,73 +52,13 @@ function makeStratosHubPath(a) {
     ];
 }
 exports.makeStratosHubPath = makeStratosHubPath;
-// @todo - move it - used in getMasterKeyInfo
-// const isZero = (privkey: Uint8Array): boolean => {
-//   return privkey.every(byte => byte === 0);
-// };
-// @todo - move it =  used in isGteN
-// const n = (curve: Slip10Curve): BN => {
-//   switch (curve) {
-//     case Slip10Curve.Secp256k1:
-//       return new BN('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
-//     default:
-//       throw new Error('curve not supported');
-//   }
-// };
-// @todo - move it - used in getMasterKeyInfo
-// const isGteN = (curve: Slip10Curve, privkey: Uint8Array): boolean => {
-//   const keyAsNumber = new BN(privkey);
-//   return keyAsNumber.gte(n(curve));
-// };
-// @todo - move it - used in getMasterKeySeedPriveKey
-// const getMasterKeyInfo = (curve: Slip10Curve, seed: Uint8Array): Slip10Result => {
-//   const i = new Hmac(Sha512, toAscii(curve)).update(seed).digest();
-//   const il = i.slice(0, 32);
-//   const ir = i.slice(32, 64);
-//
-//   if (curve !== Slip10Curve.Ed25519 && (isZero(il) || isGteN(curve, il))) {
-//     return getMasterKeyInfo(curve, i);
-//   }
-//
-//   return {
-//     chainCode: ir,
-//     privkey: il,
-//   };
-// };
-//
 const generateMasterKeySeed = async (phrase) => {
     const stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
-    // console.log('🚀 ~ file: keyUtils.ts ~ line 107 ~ generateMasterKeySeed ~ stringMnemonic', stringMnemonic);
     const mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
-    // console.log('🚀 ~ file: keyUtils.ts ~ line 110 ~ generateMasterKeySeed ~ mnemonicChecked', mnemonicChecked);
     const seed = await crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password);
-    // console.log('🚀 ~ file: keyUtils.ts ~ line 113 ~ generateMasterKeySeed ~ seed', seed);
     return seed;
 };
 exports.generateMasterKeySeed = generateMasterKeySeed;
-// export const getMasterKeySeedPriveKey = (masterKeySeed: Uint8Array): Uint8Array => {
-//   const masterKeyInfo = getMasterKeyInfo(Slip10Curve.Secp256k1, masterKeySeed);
-//
-//   const { privkey } = masterKeyInfo;
-//
-//   return privkey;
-// };
-// used in derriveManager - deriveKeyPairFromPrivateKeySeed
-// export const getPublicKeyFromPrivKey = async (privkey: Uint8Array): Promise<PubKey> => {
-//   const { pubkey } = await Secp256k1.makeKeypair(privkey);
-//
-//   const compressedPub = Secp256k1.compressPubkey(pubkey);
-//
-//   const pubkeyMine = {
-//     type: 'tendermint/PubKeySecp256k1',
-//     // type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
-//     value: toBase64(compressedPub),
-//   };
-//   console.log('pubkeyMine', pubkeyMine);
-//
-//   return pubkeyMine;
-// };
-//
 // used in wallet serialization and desirialization
 // meant to replace cosmos.js encryption key generation, which uses executeKdf
 // and that is using libsodium, (wasm) which is extremelly slow on mobile devices
@@ -187,47 +113,24 @@ function pubkeyToRawAddress(pubkey) {
     const pubkeyData = (0, encoding_1.fromBase64)(pubkey.value);
     return rawSecp256k1PubkeyToRawAddress(pubkeyData);
 }
-// export function pubkeyToRawAddressWithKeccak(pubkey: Uint8Array): Uint8Array {
-//   // const compressedPub = Secp256k1.compressPubkey(pubkey);
-//
-//   const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
-//   // const pubkeyBuffer = Buffer.from(compressedPub);
-//
-//   const keccak256HashOfPubkeyBuffer = createKeccakHash('keccak256').update(pubkeyBuffer).digest();
-//   const fullRawAddress = new Uint8Array(keccak256HashOfPubkeyBuffer);
-//   // console.log('fullRawAddress', fullRawAddress);
-//
-//   const addressChunkOfBytes = fullRawAddress.slice(-20);
-//   // console.log('addressChunkOfBytes', addressChunkOfBytes);
-//
-//   const hexAddress = toHex(addressChunkOfBytes);
-//   // console.log('hex address', hexAddress);
-//
-//   const prefix = stratosAddressPrefix;
-//   const address = toBech32(prefix, addressChunkOfBytes);
-//
-//   // console.log('bench32 address', address);
-//
-//   return addressChunkOfBytes;
-// }
 // @depricated
 const getAddressFromPubKey = (pubkey) => {
     const prefix = hdVault_1.stratosAddressPrefix;
-    const addressChunkOfBytes = pubkeyToRawAddress(pubkey);
+    // const addressChunkOfBytes = pubkeyToRawAddress(pubkey);
     const address = (0, encoding_1.toBech32)(prefix, pubkeyToRawAddress(pubkey));
-    const hexAddress = (0, encoding_1.toHex)(addressChunkOfBytes);
-    console.log('old hex address', hexAddress);
-    console.log('old bench32 address', address);
+    // const hexAddress = toHex(addressChunkOfBytes);
+    // console.log('old hex address', hexAddress);
+    // console.log('old bench32 address', address);
     return address;
 };
 exports.getAddressFromPubKey = getAddressFromPubKey;
 const getAddressFromPubKeyWithKeccak = (pubkey) => {
     const prefix = hdVault_1.stratosAddressPrefix;
     const addressChunkOfBytes = (0, StratosDirectSecp256k1HdWallet_1.pubkeyToRawAddressWithKeccak)(pubkey);
-    const hexAddress = (0, encoding_1.toHex)(addressChunkOfBytes);
-    console.log('kk hex address', hexAddress);
+    // const hexAddress = toHex(addressChunkOfBytes);
+    // console.log('kk hex address', hexAddress);
     const address = (0, encoding_1.toBech32)(prefix, addressChunkOfBytes);
-    console.log('kk bench32 address', address);
+    // console.log('kk bench32 address', address);
     return address;
 };
 exports.getAddressFromPubKeyWithKeccak = getAddressFromPubKeyWithKeccak;
@@ -236,20 +139,6 @@ const getEncodedPublicKey = async (encodedAminoPub) => {
     return encodedPubKey;
 };
 exports.getEncodedPublicKey = getEncodedPublicKey;
-// export const getMasterKeySeedPublicKey = async (masterKeySeed: Uint8Array): Promise<PubKey> => {
-//   const privkey = getMasterKeySeedPriveKey(masterKeySeed);
-//
-//   const pubkey = await getPublicKeyFromPrivKey(privkey);
-//
-//   return pubkey;
-// };
-// export const getMasterKeySeedPublicKeyWithKeccak = async (masterKeySeed: Uint8Array): Promise<Uint8Array> => {
-//   const privkey = getMasterKeySeedPriveKey(masterKeySeed);
-//
-//   const { pubkey } = await Secp256k1.makeKeypair(privkey);
-//
-//   return pubkey;
-// };
 // only used in keyManager
 const encryptMasterKeySeed = (password, masterKeySeed) => {
     const strMasterKey = (0, encoding_1.toBase64)(masterKeySeed);
@@ -344,7 +233,7 @@ async function createWalletAtPath(hdPathIndex, mnemonic) {
         prefix: addressPrefix,
         hdPaths,
     };
-    console.log('keyUtils - options to use ', options);
+    // console.log('keyUtils - options to use ', options);
     const wallet = await StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
     // console.log('direct wallet', JSON.stringify(wallet));
     // works - way 2
@@ -400,6 +289,7 @@ const encodeSignatureMessage = (message) => {
     const signBytesBuffer = Buffer.from(message);
     const keccak256HashOfSigningBytes = (0, keccak_1.default)('keccak256').update(signBytesBuffer).digest();
     const signHashBuf = keccak256HashOfSigningBytes;
+    // keep this implementation as an example of the sha256 signing
     // const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes)
     // const messageHash = signBytesWithKeccak;
     // const messageHash = CryptoJS.SHA256(message).toString();

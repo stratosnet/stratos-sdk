@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCosmos = exports.resetCosmos = exports.StratosCosmos = void 0;
-// import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const StratosSigningStargateClient_1 = require("../hdVault/StratosSigningStargateClient");
 const StratosStargateAccounts_1 = require("../hdVault/StratosStargateAccounts");

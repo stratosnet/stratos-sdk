@@ -1339,7 +1339,7 @@ const main = async () => {
 
   // await getBalanceCardMetrics();
 
-  // await mainSdsPrepay();
+  await mainSdsPrepay();
 
   // await mainSend();
   // await testUploadRequest();
@@ -1351,7 +1351,7 @@ const main = async () => {
   // testFile();
   // testFileHash();
 
-  await runFaucet();
+  // await runFaucet();
   // uploadRequest();
 
   // testBigInt();

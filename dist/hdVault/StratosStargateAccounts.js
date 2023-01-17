@@ -24,7 +24,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.accountFromAnyStratos = exports.decodePubkey = exports.anyToStratosSinglePubkey = exports.encodeEthSecp256k1Pubkey = void 0;
-// import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 const amino_1 = require("@cosmjs/amino");
 const encoding_1 = require("@cosmjs/encoding");
 const math_1 = require("@cosmjs/math");
@@ -33,6 +32,7 @@ const stargate_1 = require("@cosmjs/stargate");
 const utils_1 = require("@cosmjs/utils");
 const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 const auth_1 = require("cosmjs-types/cosmos/auth/v1beta1/auth");
+// import { PubKey as CosmosCryptoEd25519Pubkey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
 const keys_1 = require("cosmjs-types/cosmos/crypto/secp256k1/keys");
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 function uint64FromProto(input) {
@@ -74,23 +74,7 @@ exports.anyToStratosSinglePubkey = anyToStratosSinglePubkey;
 // https://github.com/cosmos/cosmjs/blob/main/packages/proto-signing/src/pubkey.ts
 function decodePubkey(pubkey) {
     switch (pubkey.typeUrl) {
-        // case "/cosmos.crypto.secp256k1.PubKey":
-        // case "/cosmos.crypto.ed25519.PubKey": {
-        //   return anyToSinglePubkey(pubkey);
-        // }
-        // case "/cosmos.crypto.multisig.LegacyAminoPubKey": {
-        //   const { threshold, publicKeys } = LegacyAminoPubKey.decode(pubkey.value);
-        //   const out: MultisigThresholdPubkey = {
-        //     type: "tendermint/PubKeyMultisigThreshold",
-        //     value: {
-        //       threshold: threshold.toString(),
-        //       pubkeys: publicKeys.map(anyToSinglePubkey),
-        //     },
-        //   };
-        //   return out;
-        // }
         case '/stratos.crypto.v1.ethsecp256k1.PubKey': {
-            console.log('StratosStargateAccounts - decodePubkey !!', pubkey);
             return anyToStratosSinglePubkey(pubkey);
         }
         default:
@@ -116,56 +100,19 @@ function accountFromBaseAccount(input) {
  */
 function accountFromAnyStratos(input) {
     const { typeUrl, value } = input;
-    console.log('StratosStargateAccounts - accountFromAnyStratos was called ,input ', input);
+    // console.log('StratosStargateAccounts - accountFromAnyStratos was called ,input ', input);
     switch (typeUrl) {
         // stratos
-        // case '/stratos.crypto.v1.ethsecp256k1.PubKey': {
-        //   const stratosDecodedAccount = StratosPubKey.decode(value); // ?? do we need that?
-        //   console.log('stratosDecodedAccount', stratosDecodedAccount);
-        //   const baseAccount = ModuleAccount.decode(value).baseAccount;
-        //
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
         case '/cosmos.auth.v1beta1.BaseAccount': {
             const baseAccount = accountFromBaseAccount(auth_1.BaseAccount.decode(value));
-            console.log('StratosStargateAccounts - got baseAccount', baseAccount);
+            // console.log('StratosStargateAccounts - got baseAccount', baseAccount);
             (0, utils_1.assert)(baseAccount);
             return baseAccount;
         }
-        // auth
-        // case '/cosmos.auth.v1beta1.BaseAccount':
-        //   return accountFromBaseAccount(BaseAccount.decode(value));
-        // case '/cosmos.auth.v1beta1.ModuleAccount': {
-        //   const baseAccount = ModuleAccount.decode(value).baseAccount;
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
-        // vesting
-        // case '/cosmos.vesting.v1beta1.BaseVestingAccount': {
-        //   const baseAccount = BaseVestingAccount.decode(value)?.baseAccount;
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
-        // case '/cosmos.vesting.v1beta1.ContinuousVestingAccount': {
-        //   const baseAccount = ContinuousVestingAccount.decode(value)?.baseVestingAccount?.baseAccount;
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
-        // case '/cosmos.vesting.v1beta1.DelayedVestingAccount': {
-        //   const baseAccount = DelayedVestingAccount.decode(value)?.baseVestingAccount?.baseAccount;
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
-        // case '/cosmos.vesting.v1beta1.PeriodicVestingAccount': {
-        //   const baseAccount = PeriodicVestingAccount.decode(value)?.baseVestingAccount?.baseAccount;
-        //   assert(baseAccount);
-        //   return accountFromBaseAccount(baseAccount);
-        // }
         default: {
             const account = (0, stargate_1.accountFromAny)(input);
             if (!account) {
-                console.log(`Stratos Account was not parsed`, account);
+                // console.log(`Stratos Account was not parsed`, account);
                 throw new Error(`Unsupported type: '${typeUrl}'`);
             }
             return account;

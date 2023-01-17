@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
-// import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
@@ -69,7 +68,7 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         return this.mySecret.toString();
     }
     async getAccounts() {
-        console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
+        // console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
         const accountsWithPrivkeys = await this.getMyAccountsWithPrivkeys();
         return accountsWithPrivkeys.map(({ algo, pubkey, address }) => ({
             algo: algo,
@@ -85,38 +84,15 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
             throw new Error(`Address ${signerAddress} not found in wallet`);
         }
         const { privkey, pubkey } = account;
-        // console.log('from DirectSecp256k1HdWallet - pubkey encoded - will be used to sign the doc ', pubkey);
-        //
-        // console.log('yyyyy1 pkey ', privkey);
-        // console.log('xxxxx1 pkey ', toHex(privkey));
-        //
-        // const params = {
-        //   chainId: 12,
-        //   account: signerAddress,
-        //   rpcUrl: 'https://rpc-dev.thestratos.org',
-        //   privateStr: toHex(privkey),
-        // };
-        // const signedTest = await signTxWithEth(signerAddress, '124', params);
-        // console.log('signedTest', signedTest);
-        // console.log('BBB signDoc', signDoc);
         const signBytes = (0, proto_signing_1.makeSignBytes)(signDoc);
-        // console.log('BBB signBytes', Uint8Array.from(signBytes));
-        // console.dir(Uint8Array.from(signBytes), { maxArrayLength: null });
         const signBytesBuffer = Buffer.from(signBytes);
         const keccak256HashOfSigningBytes = (0, keccak_1.default)('keccak256').update(signBytesBuffer).digest();
         const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes);
-        // console.log('BBB signBytesWithKeccak', signBytesWithKeccak);
         const hashedMessage = signBytesWithKeccak;
         // const hashedMessage = sha256(signBytes);
-        // console.log('BBB hashedMessage', hashedMessage);
         const signature = await crypto_1.Secp256k1.createSignature(hashedMessage, privkey);
-        // console.log('BBBA cosmojs/crypto signature created by Secp256k1.createSignature(', signature);
-        // const signatureToTest = secp256k1.ecdsaSign(hashedMessage, privkey);
-        // console.log('BBBA signature by secp256k1.ecdsaSign ', signatureToTest);
         const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-        // console.log('BBBA signatureBytes from Secp256k1.createSignature ', signatureBytes);
         const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
-        // console.log('BBBA stdSignature', stdSignature);
         return {
             signed: signDoc,
             signature: stdSignature,
@@ -127,8 +103,6 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
             throw new Error('Signature must be 64 bytes long. Cosmos SDK uses a 2x32 byte fixed length encoding for the secp256k1 signature integers r and s.');
         }
         const base64ofPubkey = (0, encoding_2.toBase64)(pubkey);
-        // console.log('from DirectSecp256k1HdWallet - pubkey from encode', pubkey);
-        // console.log('from DirectSecp256k1HdWallet - signature from encode', signature);
         const pubkeyEncodedStratos = {
             type: '/stratos.crypto.v1.ethsecp256k1.PubKey',
             value: base64ofPubkey,
