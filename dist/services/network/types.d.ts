@@ -379,8 +379,10 @@ export interface FileUserRequestUploadParams {
     walletpubkey: string;
 }
 export interface FileUserRequestDownloadParams {
-    filehash: string;
+    filehandle: string;
     walletaddr: string;
+    walletpubkey: string;
+    signature: string;
 }
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     result: {

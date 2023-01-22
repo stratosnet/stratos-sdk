@@ -815,13 +815,16 @@ const testReadAndWriteLocalWorking = async (filename: string) => {
       fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
     } else {
       let remained = readChunkSize;
+
       const subChunks = [];
+
       while (remained > 0) {
         const currentStep = remained > maxStep ? maxStep : remained;
         subChunks.push(currentStep);
 
         remained = remained - currentStep;
       }
+
       const myList = [];
 
       for (const chunkLength of subChunks) {
@@ -881,28 +884,55 @@ const testReadAndWriteLocalWorking = async (filename: string) => {
 
 const testDl = async (filename: string) => {
   /**
-   filehash: 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8',                                                                                                                                                                                                                            │
-2    12│      filesize: 10000000,                                                                                                                                                                                                                                                              │
-2    13│      filename: 'file2_10M_dec_6',                                                                                                                                                                                                                                                     │
-2    14│      createtime: 1670619959                              
+* 
+  files: [
+    [Object: null prototype] {
+      filehash: 'v05ahm51buqelg70rjmcbqtn2qijc7um0ds1oedo',
+      filesize: 10000000,
+      filename: 'file2_10M_jan20',
+      createtime: 1674250085
+    },
+    [Object: null prototype] {
+      filehash: 'v05ahm52po4iteumn1v58o3marnruc7l75km9rv8',
+      filesize: 50000000,
+      filename: 'file3_50M_jan20',
+      createtime: 1674250338
+    },
+    [Object: null prototype] {
+      filehash: 'v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
+      filesize: 100000000,
+      filename: 'file1_100M_jan20',
+      createtime: 1674240637
+    }
+  ]
 
-/
 
-│     3│  files: [                                                                                                                                                                                                                                                          │
-│     4│    [Object: null prototype] {                                                                                                                                                                                                                                      │
-│     5│      filehash: 'v05ahm5055f7lf7i63p0ag2dpmdnqufgtn8a28ag',                                                                                                                                                                                                         │
-│     6│      filesize: 10000000,                                                                                                                                                                                                                                           │
-│     7│      filename: 'file1_10M_jan10',                                                                                                                                                                                                                                  │
-│     8│      createtime: 1673404381                                                                                                                                                                                                                                        │
-│     9│    },                                                                                                                                                                                                                                                              │
--    10│    [Object: null prototype] {                                                                                                                                                                                                                                      │
-2    11│      filehash: 'v05ahm551ant5vceeajvn86cv4d72md2ubog6m48',                                                                                                                                                                                                         │
-│    12│      filesize: 8388608,                                                                                                                                                                                                                                            │
-│    13│      filename: 'test4m.bin',                                                                                                                                                                                                                                       │
-│    14│      createtime: 1673394761                                                                                                                                                                                                                                        │
-│    15│    }                                                                                                                                                                                                                                                               │
-│    16│  ]                                                                                                                                                                                                                                                                 │
+2    │    [Object: null prototype] {                                                                                                                                                         │
+2    │      filehash: 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg',                                                                                                                            │
+2    │      filesize: 10000000,                                                                                                                                                              │
+2    │      filename: 'file4_10M_jan20',                                                                                                                                                     │
+2    │      createtime: 1674253605                                                                                                                                                           │
+2    │    }                                                                                                                                                                                  │
+
+  "filehandle": "sdm://st102kdyrxhpwgl06vkmqzlkl2veq06njcfc6g807/v05ahm51svho2cs9mbn0v180177t9l360hrmf6b8",
+  "walletaddr":"st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u",
+  "walletpubkey":"stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms",
+  "signature":"7b114cdfb27d2dea83f0df5f0949c6b6a9bb9411ed1a0bb19bffaf9a9f2ea31b32174397259553d1ced1fe2aa6742fbb562d9429c992e6437e6ce768f3305bd800"
+
+
+      filehandle: 'sdm://st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u/v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
+      walletaddr: 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u',
+      walletpubkey: 'stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms',
+      signature: 'eb0cfc36806edf856dd9794aca143942080909020add1be0fe0e12d97bba720d57558ca3a13fb3c5a3e374473a2fe4fe65eb817ba1eeac680dde56a7aadb97af'
    */
+
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const fileReadPath = path.resolve(SRC_ROOT, filename);
+  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  log('fileInfo to download', fileInfo);
 
   console.log(`downloading file ${filename}`);
 
@@ -915,15 +945,27 @@ const testDl = async (filename: string) => {
     return;
   }
 
-  const { address } = keyPairZeroA;
+  log('keyPairZeroA', keyPairZeroA);
 
-  // const filehash = 'v05ahm52h0hf2cnrbs1l818apf351oevlrj1m0q8';
-  const filehash = 'v05ahm5055f7lf7i63p0ag2dpmdnqufgtn8a28ag';
+  const { address, publicKey } = keyPairZeroA;
 
+  // const sdmAddress = 'st102kdyrxhpwgl06vkmqzlkl2veq06njcfc6g807';
+
+  // const sdmAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  const sdmAddress = address;
+  // const filehash = 'v05ahm52po4iteumn1v58o3marnruc7l75km9rv8';
+  const filehash = fileInfo.filehash;
+  const filehandle = `sdm://${sdmAddress}/${filehash}`;
+
+  const messageToSign = `${fileInfo.filehash}${address}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
   const extraParams = [
     {
-      filehash,
+      filehandle,
       walletaddr: address,
+      walletpubkey: publicKey,
+      signature,
     },
   ];
 
@@ -931,7 +973,7 @@ const testDl = async (filename: string) => {
 
   const { response: responseRequestDl } = callResultRequestDl;
 
-  console.log('call result request dl', JSON.stringify(callResultRequestDl));
+  // log('run - call result request dl', JSON.stringify(callResultRequestDl));
 
   if (!responseRequestDl) {
     console.log('we dont have response for dl request. it might be an error', callResultRequestDl);
@@ -940,6 +982,147 @@ const testDl = async (filename: string) => {
 
   const { result: resultWithOffesets } = responseRequestDl;
   console.log('result with offesets', resultWithOffesets);
+
+  ///
+  //
+
+  let offsetStartGlobal = 0;
+  let offsetEndGlobal = 0;
+  let isContinueGlobal = 0;
+
+  const fileInfoChunks = [];
+
+  const {
+    return: isContinueInit,
+    reqid,
+    offsetstart: offsetstartInit,
+    offsetend: offsetendInit,
+    filedata,
+  } = resultWithOffesets;
+
+  if (offsetendInit === undefined) {
+    console.log('a we dont have an offest. could be an error. response is', responseRequestDl);
+    return;
+  }
+
+  if (offsetstartInit === undefined) {
+    console.log('b we dont have an offest. could be an error. response is', responseRequestDl);
+    return;
+  }
+
+  // const fileChunk = { offsetstart: offsetstartInit, offsetend: offsetendInit, filedata };
+  // fileInfoChunks.push(fileChunk);
+
+  isContinueGlobal = +isContinueInit;
+  offsetStartGlobal = +offsetstartInit;
+  offsetEndGlobal = +offsetendInit;
+
+  const fileChunk = { offsetstart: offsetEndGlobal, offsetend: offsetEndGlobal, filedata };
+
+  fileInfoChunks.push(fileChunk);
+
+  while (isContinueGlobal === 2) {
+    log('from run.ts - will call download', offsetStartGlobal, offsetEndGlobal);
+
+    const extraParamsForDownload = [
+      {
+        filehash: fileInfo.filehash,
+        reqid,
+      },
+    ];
+    const callResultDownload = await Network.sendUserDownloadData(extraParamsForDownload);
+
+    log('call result download', JSON.stringify(callResultDownload));
+
+    const { response: responseDownload } = callResultDownload;
+
+    log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultDownload);
+
+    if (!responseDownload) {
+      console.log('we dont have response. it might be an error', callResultDownload);
+
+      return;
+    }
+
+    const {
+      result: {
+        offsetend: offsetendDownload,
+        offsetstart: offsetstartDownload,
+        return: isContinueDownload,
+        filedata: downloadedFileData,
+      },
+    } = responseDownload;
+
+    isContinueGlobal = +isContinueDownload;
+    // offsetStartGlobal = +offsetstartDownload;
+    // offsetEndGlobal = +offsetendDownload;
+
+    if (offsetstartDownload && offsetendDownload) {
+      offsetStartGlobal = +offsetstartDownload;
+      offsetEndGlobal = +offsetendDownload;
+
+      const fileChunkDl = {
+        offsetstart: offsetStartGlobal,
+        offsetend: offsetEndGlobal,
+        filedata: downloadedFileData,
+      };
+
+      fileInfoChunks.push({ ...fileChunkDl });
+    }
+    // if (offsetendDownload === undefined) {
+    // console.log('1 we dont have an offest. could be an error. response is', responseDownload);
+    // return;
+    // }
+
+    // if (offsetstartDownload === undefined) {
+    //   console.log('2 we dont have an offest. could be an error. response is', responseDownload);
+    //
+    //   return;
+    // }
+  }
+
+  if (isContinueGlobal === 3 && offsetEndGlobal === fileInfo.size) {
+    const extraParamsForDownload = [
+      {
+        filehash: fileInfo.filehash,
+        filesize: offsetEndGlobal,
+        reqid,
+      },
+    ];
+    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
+
+    log('call result download', JSON.stringify(callResultDownloadFileInfo));
+
+    const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
+
+    log('🚀 ~ file: run.ts ~ line 1097 ~ testIt ~ responseDownloadFileInfo', responseDownloadFileInfo);
+  }
+
+  log('fileInfoChunks', fileInfoChunks);
+
+  const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
+    const res = a.offsetstart - b.offsetstart;
+    return res;
+  });
+
+  log('sortedFileInfoChunks', sortedFileInfoChunks);
+
+  const encodedFileChunks = sortedFileInfoChunks
+    .map(fileInfoChunk => fileInfoChunk.filedata || '')
+    .filter(Boolean);
+
+  log('encodedFileChunks', encodedFileChunks);
+
+  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+
+  log('decodedChunksList', decodedChunksList);
+
+  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+
+  const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+  log('fileWritePathFromBuff', fileWritePathFromBuff);
+
+  FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
 };
 
 // request upload and upload
@@ -984,7 +1167,7 @@ const testIt = async (filename: string) => {
 
   const { response: responseInit } = callResultInit;
 
-  console.log('call result init', JSON.stringify(callResultInit));
+  log('call result init', JSON.stringify(callResultInit));
 
   if (!responseInit) {
     console.log('we dont have response. it might be an error', callResultInit);
@@ -992,7 +1175,7 @@ const testIt = async (filename: string) => {
   }
 
   const { result: resultWithOffesets } = responseInit;
-  console.log('result with offesets', resultWithOffesets);
+  log('result with offesets', resultWithOffesets);
 
   let offsetStartGlobal = 0;
   let offsetEndGlobal = 0;
@@ -1012,8 +1195,6 @@ const testIt = async (filename: string) => {
     console.log('b we dont have an offest. could be an error. response is', responseInit);
     return;
   }
-
-  // const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
 
   let readSize = 0;
 
@@ -1067,7 +1248,7 @@ const testIt = async (filename: string) => {
 
       const { response: responseUpload } = callResultUpload;
 
-      log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+      // log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
 
       if (!responseUpload) {
         console.log('we dont have response. it might be an error', callResultUpload);
@@ -1326,20 +1507,20 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  const filename = 'file1_10M_jan10';
+  const filename = 'file4_10M_jan20';
 
   // request and upload
   // await testIt(filename);
 
   // download the file
-  // await testDl(filename);
+  await testDl(filename);
 
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
   // await getBalanceCardMetrics();
 
-  await mainSdsPrepay();
+  // await mainSdsPrepay();
 
   // await mainSend();
   // await testUploadRequest();

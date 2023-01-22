@@ -72,7 +72,7 @@ export const apiPost = async (
   const myConfig = {
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
-    timeout: 13000,
+    timeout: 30000,
   };
 
   let axiosResponse;
@@ -129,10 +129,10 @@ export const sendRpcCall = async <N>(
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  log('from network - calling rpc', payload);
+  // log('from network - calling rpc', payload);
   const dataResult = await apiPost(url, payload, { ...config });
 
-  log('from network - rpc post result', payload);
+  // log('from network - rpc post result', payload);
   return dataResult;
 };
 
@@ -257,7 +257,6 @@ export const getTxList = async (
     account: address,
     limit: 5,
   };
-  // console.log('🚀 ~ file: network.ts ~ line 129 ~ params', params);
 
   if (type) {
     params.operation = type;
@@ -328,7 +327,10 @@ export const getAvailableBalance = async (
   const url = `${getRestRoute()}/bank/balances/${address}`;
 
   const dataResult = await apiGet(url, config);
-  console.log('🚀 ~ file: network.ts ~ line 356 ~ dataResult', JSON.stringify(dataResult));
+  console.log(
+    '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+    JSON.stringify(dataResult),
+  );
 
   return dataResult;
 };
@@ -385,7 +387,7 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  console.log('uu', url);
+  // console.log('uu', url);
 
   const dataResult = await apiGet(url, config);
 
@@ -410,7 +412,19 @@ export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T)
   };
 
   console.log('network, rpc payload to be sent');
+  const { id } = payload;
+  const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
+  const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
+  console.log(myData);
   console.log(payload);
+  /*
+* 
+  id: 1,
+  method: 'user_uploadData',
+  params: [
+    {
+      filehash: 'v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
+* */
 
   return payload;
 };
@@ -495,7 +509,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  console.log('🚀 ~ file: network.ts ~ line 476 ~ dataResult', dataResult);
+  console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };
