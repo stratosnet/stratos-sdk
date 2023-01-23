@@ -882,57 +882,9 @@ const testReadAndWriteLocalWorking = async (filename: string) => {
   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
 };
 
-const testDl = async (filename: string) => {
-  /**
-* 
-  files: [
-    [Object: null prototype] {
-      filehash: 'v05ahm51buqelg70rjmcbqtn2qijc7um0ds1oedo',
-      filesize: 10000000,
-      filename: 'file2_10M_jan20',
-      createtime: 1674250085
-    },
-    [Object: null prototype] {
-      filehash: 'v05ahm52po4iteumn1v58o3marnruc7l75km9rv8',
-      filesize: 50000000,
-      filename: 'file3_50M_jan20',
-      createtime: 1674250338
-    },
-    [Object: null prototype] {
-      filehash: 'v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
-      filesize: 100000000,
-      filename: 'file1_100M_jan20',
-      createtime: 1674240637
-    }
-  ]
-
-
-2    │    [Object: null prototype] {                                                                                                                                                         │
-2    │      filehash: 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg',                                                                                                                            │
-2    │      filesize: 10000000,                                                                                                                                                              │
-2    │      filename: 'file4_10M_jan20',                                                                                                                                                     │
-2    │      createtime: 1674253605                                                                                                                                                           │
-2    │    }                                                                                                                                                                                  │
-
-  "filehandle": "sdm://st102kdyrxhpwgl06vkmqzlkl2veq06njcfc6g807/v05ahm51svho2cs9mbn0v180177t9l360hrmf6b8",
-  "walletaddr":"st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u",
-  "walletpubkey":"stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms",
-  "signature":"7b114cdfb27d2dea83f0df5f0949c6b6a9bb9411ed1a0bb19bffaf9a9f2ea31b32174397259553d1ced1fe2aa6742fbb562d9429c992e6437e6ce768f3305bd800"
-
-
-      filehandle: 'sdm://st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u/v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
-      walletaddr: 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u',
-      walletpubkey: 'stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms',
-      signature: 'eb0cfc36806edf856dd9794aca143942080909020add1be0fe0e12d97bba720d57558ca3a13fb3c5a3e374473a2fe4fe65eb817ba1eeac680dde56a7aadb97af'
-   */
-
+const testDl = async (filename: string, filehashA: string, filesizeA: number) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
-
-  const fileReadPath = path.resolve(SRC_ROOT, filename);
-  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
-
-  log('fileInfo to download', fileInfo);
 
   console.log(`downloading file ${filename}`);
 
@@ -945,21 +897,21 @@ const testDl = async (filename: string) => {
     return;
   }
 
-  log('keyPairZeroA', keyPairZeroA);
-
   const { address, publicKey } = keyPairZeroA;
 
-  // const sdmAddress = 'st102kdyrxhpwgl06vkmqzlkl2veq06njcfc6g807';
+  // const filehash = fileInfo.filehash;
+  const filehash = filehashA;
 
-  // const sdmAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  // const filesize = fileInfo.size;
+  const filesize = filesizeA;
+
   const sdmAddress = address;
-  // const filehash = 'v05ahm52po4iteumn1v58o3marnruc7l75km9rv8';
-  const filehash = fileInfo.filehash;
   const filehandle = `sdm://${sdmAddress}/${filehash}`;
 
-  const messageToSign = `${fileInfo.filehash}${address}`;
+  const messageToSign = `${filehash}${address}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+
   const extraParams = [
     {
       filehandle,
@@ -973,18 +925,12 @@ const testDl = async (filename: string) => {
 
   const { response: responseRequestDl } = callResultRequestDl;
 
-  // log('run - call result request dl', JSON.stringify(callResultRequestDl));
-
   if (!responseRequestDl) {
     console.log('we dont have response for dl request. it might be an error', callResultRequestDl);
     return;
   }
 
   const { result: resultWithOffesets } = responseRequestDl;
-  console.log('result with offesets', resultWithOffesets);
-
-  ///
-  //
 
   let offsetStartGlobal = 0;
   let offsetEndGlobal = 0;
@@ -1000,6 +946,10 @@ const testDl = async (filename: string) => {
     filedata,
   } = resultWithOffesets;
 
+  const responseDownloadInitFormatted = { isContinueInit, offsetstartInit, offsetendInit };
+
+  console.log('responseDownloadInitFormatted', responseDownloadInitFormatted);
+
   if (offsetendInit === undefined) {
     console.log('a we dont have an offest. could be an error. response is', responseRequestDl);
     return;
@@ -1010,9 +960,6 @@ const testDl = async (filename: string) => {
     return;
   }
 
-  // const fileChunk = { offsetstart: offsetstartInit, offsetend: offsetendInit, filedata };
-  // fileInfoChunks.push(fileChunk);
-
   isContinueGlobal = +isContinueInit;
   offsetStartGlobal = +offsetstartInit;
   offsetEndGlobal = +offsetendInit;
@@ -1022,27 +969,27 @@ const testDl = async (filename: string) => {
   fileInfoChunks.push(fileChunk);
 
   while (isContinueGlobal === 2) {
-    log('from run.ts - will call download', offsetStartGlobal, offsetEndGlobal);
+    log('from run.ts - will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
 
     const extraParamsForDownload = [
       {
-        filehash: fileInfo.filehash,
+        filehash,
         reqid,
       },
     ];
     const callResultDownload = await Network.sendUserDownloadData(extraParamsForDownload);
 
-    log('call result download', JSON.stringify(callResultDownload));
-
     const { response: responseDownload } = callResultDownload;
-
-    log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultDownload);
 
     if (!responseDownload) {
       console.log('we dont have response. it might be an error', callResultDownload);
 
       return;
     }
+
+    const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
+    const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
+    console.log('responseDownloadFormatted', responseDownloadFormatted);
 
     const {
       result: {
@@ -1054,10 +1001,9 @@ const testDl = async (filename: string) => {
     } = responseDownload;
 
     isContinueGlobal = +isContinueDownload;
-    // offsetStartGlobal = +offsetstartDownload;
-    // offsetEndGlobal = +offsetendDownload;
 
-    if (offsetstartDownload && offsetendDownload) {
+    // if (offsetstartDownload && offsetendDownload) {
+    if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
       offsetStartGlobal = +offsetstartDownload;
       offsetEndGlobal = +offsetendDownload;
 
@@ -1069,58 +1015,57 @@ const testDl = async (filename: string) => {
 
       fileInfoChunks.push({ ...fileChunkDl });
     }
-    // if (offsetendDownload === undefined) {
-    // console.log('1 we dont have an offest. could be an error. response is', responseDownload);
-    // return;
-    // }
-
-    // if (offsetstartDownload === undefined) {
-    //   console.log('2 we dont have an offest. could be an error. response is', responseDownload);
-    //
-    //   return;
-    // }
   }
 
-  if (isContinueGlobal === 3 && offsetEndGlobal === fileInfo.size) {
+  let downloadConfirmed = '-1';
+
+  if (isContinueGlobal === 3) {
     const extraParamsForDownload = [
       {
-        filehash: fileInfo.filehash,
-        filesize: offsetEndGlobal,
+        filehash,
+        filesize,
         reqid,
       },
     ];
+
     const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
 
     log('call result download', JSON.stringify(callResultDownloadFileInfo));
 
     const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
 
+    downloadConfirmed = responseDownloadFileInfo?.result?.return || '-1';
+
     log('🚀 ~ file: run.ts ~ line 1097 ~ testIt ~ responseDownloadFileInfo', responseDownloadFileInfo);
   }
 
-  log('fileInfoChunks', fileInfoChunks);
+  if (+downloadConfirmed !== 0) {
+    throw Error('could not get download confirmation');
+  }
 
   const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
     const res = a.offsetstart - b.offsetstart;
     return res;
   });
 
-  log('sortedFileInfoChunks', sortedFileInfoChunks);
+  // log('sortedFileInfoChunks, ', sortedFileInfoChunks);
+  log('sortedFileInfoChunks.length ', sortedFileInfoChunks.length);
 
   const encodedFileChunks = sortedFileInfoChunks
-    .map(fileInfoChunk => fileInfoChunk.filedata || '')
+    .map(fileInfoChunk => {
+      log('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
+      return fileInfoChunk.filedata || '';
+    })
     .filter(Boolean);
 
-  log('encodedFileChunks', encodedFileChunks);
+  log('encodedFileChunks', encodedFileChunks.length);
 
   const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-
-  log('decodedChunksList', decodedChunksList);
 
   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
 
   const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
-  log('fileWritePathFromBuff', fileWritePathFromBuff);
+  log(`file is saved into ${fileWritePathFromBuff}`, fileWritePathFromBuff);
 
   FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
 };
@@ -1485,18 +1430,11 @@ const main = async () => {
     ...sdkEnv,
     chainId: resolvedChainID,
     // pp a
-    // ppNodeUrl: 'http://13.115.18.9',
-    // ppNodePort: '8137',
-
     ppNodeUrl: 'http://34.85.35.181',
     ppNodePort: '8141',
-    //
     // pp b
-    // ppNodeUrl: 'http://54.185.84.33',
-    // ppNodePort: '8148',
-
-    // ppNodeUrl: 'http://localhost',
-    // ppNodePort: '8080',
+    // ppNodeUrl: 'http://52.14.150.146',
+    // ppNodePort: '8159',
   });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1507,13 +1445,23 @@ const main = async () => {
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  const filename = 'file4_10M_jan20';
+  // const filename = 'file4_10M_jan20';
+  // const filename = 'file1_200M_jan22';
 
   // request and upload
   // await testIt(filename);
 
   // download the file
-  await testDl(filename);
+
+  const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
+  const filesize = 200000000;
+  const filename = 'file1_200M_jan22';
+
+  // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
+  // const filesize = 10000000;
+  // const filename = 'file4_10M_jan20';
+
+  await testDl(filename, filehash, filesize);
 
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);

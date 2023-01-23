@@ -411,20 +411,12 @@ export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T)
     params: extraParams,
   };
 
-  console.log('network, rpc payload to be sent');
-  const { id } = payload;
-  const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
-  const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
-  console.log(myData);
-  console.log(payload);
-  /*
-* 
-  id: 1,
-  method: 'user_uploadData',
-  params: [
-    {
-      filehash: 'v05ahm53ec2f5c9lh92cqapp0mvtfcdphj1deb00',
-* */
+  // console.log('network, rpc payload to be sent');
+  // const { id } = payload;
+  // const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
+  // const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
+  // console.log(myData);
+  // console.log(payload);
 
   return payload;
 };
