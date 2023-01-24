@@ -281,7 +281,7 @@ const getRpcPayload = (msgId, method, extraParams) => {
         method,
         params: extraParams,
     };
-    console.log('network, rpc payload to be sent');
+    // console.log('network, rpc payload to be sent');
     // const { id } = payload;
     // const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
     // const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
