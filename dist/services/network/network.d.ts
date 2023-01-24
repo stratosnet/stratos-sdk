@@ -36,6 +36,9 @@ export declare const getRpcPayload: <T>(msgId: number, method: string, extraPara
 };
 export declare const sendUserRequestList: (extraParams: Types.FileUserRequestListParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>>;
 export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>>;
+export declare const sendUserRequestDownload: (extraParams: Types.FileUserRequestDownloadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>>;
+export declare const sendUserDownloadData: (extraParams: Types.FileUserDownloadDataParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>>;
+export declare const sendUserDownloadedFileInfo: (extraParams: Types.FileUserDownloadedFileInfoParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>>;
 export declare const sendUserRequestGetOzone: (extraParams: Types.FileUserRequestGetOzoneParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>>;
 export declare const sendUserUploadData: (extraParams: Types.FileUserUploadDataParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>>;
 export declare const getChainId: () => Promise<string | undefined>;

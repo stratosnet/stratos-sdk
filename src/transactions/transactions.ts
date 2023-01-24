@@ -1,19 +1,16 @@
+import { GeneratedType } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes } from '@cosmjs/stargate';
+import { DeliverTxResponse } from '@cosmjs/stargate';
+import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
-// import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
-import Sdk from '../Sdk';
+// import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
-
-import { GeneratedType } from '@cosmjs/proto-signing';
-import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
-
-import { DeliverTxResponse } from '@cosmjs/stargate';
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
@@ -73,6 +70,15 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   }
 };
 
+export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
+  const fee = {
+    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], // 200_000
+    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
+  };
+  console.log('fee', fee);
+  return fee;
+};
+
 export const sign = async (
   address: string,
   txMessages: Types.TxMessage[],
@@ -82,17 +88,10 @@ export const sign = async (
   const fee = givenFee ? givenFee : getStandardFee();
 
   const client = await getCosmos();
-  const signedTx = client.sign(address, txMessages, fee, memo);
+
+  const signedTx = await client.sign(address, txMessages, fee, memo);
 
   return signedTx;
-};
-
-export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
-  const fee = {
-    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }],
-    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages),
-  };
-  return fee;
 };
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {

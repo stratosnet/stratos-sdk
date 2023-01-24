@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getWalletService = void 0;
-var WalletService = /** @class */ (function () {
-    function WalletService(givenAppId, givenAppKey, givenFileOrigin, givenWindow) {
+class WalletService {
+    constructor(givenAppId, givenAppKey, givenFileOrigin, givenWindow) {
         this.appId = givenAppId || '';
         this.appKey = givenAppKey || '';
         this.fileOrigin = givenFileOrigin || '';
@@ -10,43 +10,42 @@ var WalletService = /** @class */ (function () {
         this.isWalletHandshakeDone = false;
         this.parentWindow = givenWindow;
     }
-    WalletService.prototype.init = function () {
+    init() {
         this.parentWindow.addEventListener('message', this.receiveWalletMsg.bind(this));
-    };
-    WalletService.prototype.startHandshake = function () {
+    }
+    startHandshake() {
         return this.callWalletMethod('handshake', {
             handshakePl: { foo: 'bar' },
         });
-    };
-    WalletService.prototype.callWalletMethod = function (methodName, params) {
+    }
+    callWalletMethod(methodName, params) {
         // console.log('1 callWalletMethod calling wallet method with params:', methodName, params);
-        var _this = this;
         // Get unique id for this call to ensure that incoming responses are unique for each call
-        var msgUniqueKey = this.getMsgUniqueKey();
-        var target = this.fileOrigin;
-        var msg = {
+        const msgUniqueKey = this.getMsgUniqueKey();
+        const target = this.fileOrigin;
+        const msg = {
             appId: this.appId,
             appKey: this.appKey,
-            msgUniqueKey: msgUniqueKey,
+            msgUniqueKey,
             message: methodName,
             payload: params,
         };
-        var result = new Promise(function (resolve, reject) {
+        const result = new Promise((resolve, reject) => {
             var _a, _b;
-            _this.msgIdPromiseHandlersMap[msgUniqueKey] = {
-                resolve: resolve,
-                reject: reject,
+            this.msgIdPromiseHandlersMap[msgUniqueKey] = {
+                resolve,
+                reject,
             };
-            (_b = (_a = _this.parentWindow) === null || _a === void 0 ? void 0 : _a.top) === null || _b === void 0 ? void 0 : _b.postMessage(msg, target);
+            (_b = (_a = this.parentWindow) === null || _a === void 0 ? void 0 : _a.top) === null || _b === void 0 ? void 0 : _b.postMessage(msg, target);
         });
         return result;
-    };
-    WalletService.prototype.receiveWalletMsg = function (e) {
-        var origin = e.origin, data = e.data;
+    }
+    receiveWalletMsg(e) {
+        const { origin, data } = e;
         // console.log('19 🚀 ~ file: walletService.js ~ line 80 ~ walletService ~ receiveWalletMsg ~ e', e);
-        var senderAppKey = data.appKey, senderAppId = data.appId;
-        var isValidCreds = senderAppKey === this.appKey && senderAppId === this.appId;
-        var isOriginValid = origin === this.fileOrigin;
+        const { appKey: senderAppKey, appId: senderAppId } = data;
+        const isValidCreds = senderAppKey === this.appKey && senderAppId === this.appId;
+        const isOriginValid = origin === this.fileOrigin;
         // const isOriginValid =
         //   origin === allowedTargetOrigin ||
         //   (isRunningFromElectronApp && origin === fileOrigin);
@@ -73,19 +72,18 @@ var WalletService = /** @class */ (function () {
             console.log('22 ERROR 🚀 ~ file: walletService.js ~ line 113 ~ walletService ~ receiveWalletMsg ~ isValidCreds', isValidCreds);
             this.msgIdPromiseHandlersMap[data.msgUniqueKey].reject(data);
         }
-    };
-    WalletService.prototype.getMsgUniqueKey = function () {
-        var uniqueKey = Math.random();
+    }
+    getMsgUniqueKey() {
+        let uniqueKey = Math.random();
         while (this.msgIdPromiseHandlersMap[uniqueKey]) {
             uniqueKey = Math.random();
         }
         return uniqueKey;
-    };
-    return WalletService;
-}());
-var walletService;
+    }
+}
+let walletService;
 function getWalletService(appId, appKey, fileOrigin, givenWindow) {
-    var instance = walletService;
+    let instance = walletService;
     if (!walletService) {
         instance = new WalletService(appId, appKey, fileOrigin, givenWindow);
         instance.init();
