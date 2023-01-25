@@ -89,11 +89,11 @@ const mainSend = async () => {
 
   const fromAddress = keyPairZero.address;
 
-  const sendAmount = 4.2;
+  const sendAmount = 1.2;
 
   const sendTxMessages = await transactions.getSendTx(fromAddress, [
     { amount: sendAmount, toAddress: keyPairOne.address },
-    { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+    // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
 
   // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
@@ -1461,7 +1461,7 @@ const main = async () => {
   // const filesize = 10000000;
   // const filename = 'file4_10M_jan20';
 
-  await testDl(filename, filehash, filesize);
+  // await testDl(filename, filehash, filesize);
 
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
@@ -1470,7 +1470,7 @@ const main = async () => {
 
   // await mainSdsPrepay();
 
-  // await mainSend();
+  await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M
