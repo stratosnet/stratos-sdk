@@ -9,8 +9,8 @@ exports.decimalPrecision = 18;
 // export const decimalPrecision = 9;
 // ui
 exports.decimalShortPrecision = 4;
-// export const standardFeeAmount = 200000; // in ustos (wei)
-exports.standardFeeAmount = 20000000000000; // in ustos (wei)
-exports.perMsgGasAmount = 100000; // just a number
-exports.baseGasAmount = 500000; // this number would give gives gas price of 50_000 / 400_000 = 0.125 USTOS per unit
+// export const standardFeeAmount = 20_000_000_000_000; // in ustos (wei) // devnet
+exports.standardFeeAmount = 20000000000000000; // in ustos (wei) // tropos
+exports.perMsgGasAmount = 100000;
+exports.baseGasAmount = 500000;
 //# sourceMappingURL=tokens.js.map
