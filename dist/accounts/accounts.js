@@ -189,7 +189,7 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     const coins = (0, get_1.default)(accountBalanceData, 'response.balances', []);
     const coin = coins.find(item => item.denom === requestedDenom);
     const currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
-    const feeAmount = (0, bigNumber_1.create)(tokens_1.standardFeeAmount);
+    const feeAmount = (0, bigNumber_1.create)((0, tokens_1.standardFeeAmount)());
     const balanceInWei = (0, bigNumber_1.create)(currentBalance);
     if (balanceInWei.gt(0)) {
         const balance = (0, bigNumber_1.fromWei)(balanceInWei.minus(feeAmount), tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);

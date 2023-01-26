@@ -96,10 +96,10 @@ const mainSend = async () => {
         return;
     }
     const fromAddress = keyPairZero.address;
-    const sendAmount = 1.2;
+    const sendAmount = 0.2;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
         { amount: sendAmount, toAddress: keyPairOne.address },
-        // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
     // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
@@ -1029,8 +1029,8 @@ const testItWorking = async (filename) => {
 };
 const main = async () => {
     let resolvedChainID;
-    // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
@@ -1067,7 +1067,7 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    // await getBalanceCardMetrics();
+    await getBalanceCardMetrics();
     // await mainSdsPrepay();
     await mainSend();
     // await testUploadRequest();

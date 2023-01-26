@@ -24,7 +24,8 @@ import {
 import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
-import * as Types from './types';
+
+// import * as Types from './types';
 
 export interface BalanceCardMetrics {
   available: string;
@@ -247,7 +248,7 @@ export const getMaxAvailableBalance = async (
 
   const currentBalance = coin?.amount || '0';
 
-  const feeAmount = createBigNumber(standardFeeAmount);
+  const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = createBigNumber(currentBalance);
 
   if (balanceInWei.gt(0)) {
