@@ -19,6 +19,7 @@ import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 
 export class StratosSigningStargateClient extends SigningStargateClient {
@@ -73,7 +74,7 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     return this.signDirectStratos(signerAddress, messages, fee, memo, signerData);
   }
 
-  private async getEthSecpStratosEncodedPubkey(signerAddress: string) {
+  public async getEthSecpStratosEncodedPubkey(signerAddress: string): Promise<Any> {
     const accountFromSigner = (await this.mySigner.getAccounts()).find(
       account => account.address === signerAddress,
     );
@@ -96,7 +97,7 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     return pubkeyEncodedStratos;
   }
 
-  private async getCosmosEncodedPubkey(signerAddress: string) {
+  public async getCosmosEncodedPubkey(signerAddress: string): Promise<Any> {
     const accountFromSigner = (await this.mySigner.getAccounts()).find(
       account => account.address === signerAddress,
     );
@@ -112,13 +113,14 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     return pubkeyEncodedLegacy;
   }
 
-  private async signDirectStratos(
+  public async signDirectStratos(
     signerAddress: string,
     messages: readonly EncodeObject[],
     fee: StdFee,
     memo: string,
     { accountNumber, sequence, chainId }: SignerData,
   ): Promise<TxRaw> {
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
     const pubkeyEncodedToUse = pubkeyEncodedStratos;
 

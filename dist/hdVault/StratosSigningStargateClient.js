@@ -33,6 +33,7 @@ const tendermint_rpc_1 = require("@cosmjs/tendermint-rpc");
 const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const any_1 = require("cosmjs-types/google/protobuf/any");
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
     static async connectWithSigner(endpoint, signer, options = {}) {
@@ -88,6 +89,7 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
         return pubkeyEncodedLegacy;
     }
     async signDirectStratos(signerAddress, messages, fee, memo, { accountNumber, sequence, chainId }) {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
         const pubkeyEncodedToUse = pubkeyEncodedStratos;
         const txBodyEncodeObject = {
