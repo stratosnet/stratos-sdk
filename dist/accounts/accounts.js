@@ -99,7 +99,8 @@ const getOzoneMetricValue = (denom, amount) => {
         return `0.0000 ${printableDenome}`;
     }
     const balanceInWei = (0, bigNumber_1.create)(amount);
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, 9).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
+    console.log('balance', balance);
     const balanceToReturn = `${balance} ${printableDenome}`;
     return balanceToReturn;
 };
@@ -131,8 +132,9 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     if (!delegatedBalanceError) {
         const entries = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.result;
         const amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
+            var _a;
             const balanceInWei = (0, bigNumber_1.create)(entry.balance.amount);
-            const validatorAddress = entry.validator_address;
+            const validatorAddress = (_a = entry.delegation) === null || _a === void 0 ? void 0 : _a.validator_address;
             const validatorBalance = (0, exports.getBalanceCardMetricValue)(entry.balance.denom, entry.balance.amount);
             detailedBalance.delegated[validatorAddress] = validatorBalance;
             return (0, bigNumber_1.plus)(acc, balanceInWei);
@@ -164,7 +166,6 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
         }, 0);
         cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
     }
-    // temporary disabling that
     try {
         const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
         const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;

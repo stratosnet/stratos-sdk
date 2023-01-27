@@ -335,7 +335,7 @@ const sendUserRequestGetOzone = async (extraParams, config) => {
     const method = 'user_requestGetOzone';
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
-    console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+    // console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
     return dataResult;
 };
 exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
