@@ -45,7 +45,7 @@ const mnemonic_1 = require("./mnemonic");
 function makeStratosHubPath(a) {
     return [
         crypto_1.Slip10RawIndex.hardened(44),
-        crypto_1.Slip10RawIndex.hardened(606),
+        crypto_1.Slip10RawIndex.hardened(60),
         crypto_1.Slip10RawIndex.hardened(0),
         crypto_1.Slip10RawIndex.normal(0),
         crypto_1.Slip10RawIndex.normal(a),
