@@ -33,7 +33,7 @@ Object.defineProperty(exports, "stratosDenom", { enumerable: true, get: function
 Object.defineProperty(exports, "stratosOzDenom", { enumerable: true, get: function () { return hdVault_2.stratosOzDenom; } });
 Object.defineProperty(exports, "stratosTopDenom", { enumerable: true, get: function () { return hdVault_2.stratosTopDenom; } });
 Object.defineProperty(exports, "stratosUozDenom", { enumerable: true, get: function () { return hdVault_2.stratosUozDenom; } });
-const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
+const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed, derivationPath) => {
     let masterKeySeed;
     try {
         masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
@@ -41,7 +41,7 @@ const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
     catch (er) {
         return Promise.reject(false);
     }
-    const path = `${hdVault_1.keyPath}${keyIndex}`;
+    const path = derivationPath ? `${derivationPath}${keyIndex}` : `${hdVault_1.keyPath}${keyIndex}`;
     const privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, path);
     const derivedKeyPair = await (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed);
     const { address, encodedPublicKey, privateKey } = derivedKeyPair;

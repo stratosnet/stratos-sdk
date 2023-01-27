@@ -441,8 +441,8 @@ const testFile = async () => {
     const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
     const fileWritePath = path_1.default.resolve(SRC_ROOT, `new_${imageFileName}`);
     console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
-    let buff = fs_1.default.readFileSync(fileReadPath);
-    let base64dataOriginal = buff.toString('base64');
+    const buff = fs_1.default.readFileSync(fileReadPath);
+    const base64dataOriginal = buff.toString('base64');
     const chunksOfBuffers = await FilesystemService.getFileChunks(fileReadPath);
     const fullBuf = Buffer.concat(chunksOfBuffers);
     const base64dataFullBuf = fullBuf.toString('base64');
@@ -1081,5 +1081,5 @@ const main = async () => {
     // uploadRequest();
     // testBigInt();
 };
-main();
+// main();
 //# sourceMappingURL=run.js.map

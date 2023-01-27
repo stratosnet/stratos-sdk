@@ -11,5 +11,5 @@ export interface TransactionMessage {
     encryptedMasterKeySeed: string;
     signingKeyPath: string;
 }
-export declare const deriveKeyPair: (keyIndex: number, password: string, encryptedMasterKeySeed: string) => Promise<KeyPairInfo | false>;
+export declare const deriveKeyPair: (keyIndex: number, password: string, encryptedMasterKeySeed: string, derivationPath?: string) => Promise<KeyPairInfo | false>;
 export declare const deserializeEncryptedWallet: (serializedWallet: string, password: string) => Promise<import("./StratosDirectSecp256k1HdWallet").default>;
