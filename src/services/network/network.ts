@@ -501,7 +501,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+  // console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };
