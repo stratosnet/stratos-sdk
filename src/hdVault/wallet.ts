@@ -23,6 +23,7 @@ export const deriveKeyPair = async (
   keyIndex: number,
   password: string,
   encryptedMasterKeySeed: string,
+  derivationPath?: string,
 ): Promise<KeyPairInfo | false> => {
   let masterKeySeed;
 
@@ -32,7 +33,7 @@ export const deriveKeyPair = async (
     return Promise.reject(false);
   }
 
-  const path = `${keyPath}${keyIndex}`;
+  const path = derivationPath ? `${derivationPath}${keyIndex}` : `${keyPath}${keyIndex}`;
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);
 
