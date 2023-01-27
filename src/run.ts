@@ -89,14 +89,12 @@ const mainSend = async () => {
 
   const fromAddress = keyPairZero.address;
 
-  const sendAmount = 1.2;
+  const sendAmount = 0.2;
 
   const sendTxMessages = await transactions.getSendTx(fromAddress, [
     { amount: sendAmount, toAddress: keyPairOne.address },
-    // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+    { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
-
-  // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
 
   const signedTx = await transactions.sign(fromAddress, sendTxMessages);
 
@@ -246,19 +244,20 @@ const mainWithdrawAllRewards = async () => {
 };
 
 // cosmosjs withdraw rewards
-const mainSdsPrepay = async () => {
+const mainSdsPrepay = async (hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
   console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
     return;
   }
 
-  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
+  const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.5 }]);
   //
   console.log('from mainSdsPrepay - calling tx sign');
   const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
@@ -421,12 +420,12 @@ const getOzoneBalance = async () => {
   console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
 };
 
-const getBalanceCardMetrics = async () => {
+const getBalanceCardMetrics = async (hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeed = await createMasterKeySeed(phrase, password);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
   console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
@@ -1430,15 +1429,16 @@ const main = async () => {
     ...sdkEnv,
     chainId: resolvedChainID,
     // pp a
-    ppNodeUrl: 'http://34.85.35.181',
-    ppNodePort: '8141',
+    // ppNodeUrl: 'http://34.85.35.181',
+    // ppNodePort: '8141',
     // pp b
-    // ppNodeUrl: 'http://52.14.150.146',
-    // ppNodePort: '8159',
+    ppNodeUrl: 'http://52.14.150.146',
+    ppNodePort: '8159',
   });
 
+  const hdPathIndex = 0;
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
   console.log('masterKeySeedInfo', masterKeySeedInfo);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
@@ -1466,11 +1466,11 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
-  // await getBalanceCardMetrics();
+  await getBalanceCardMetrics(hdPathIndex);
 
-  // await mainSdsPrepay();
+  // await mainSdsPrepay(hdPathIndex);
 
-  await mainSend();
+  // await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M

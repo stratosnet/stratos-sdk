@@ -24,7 +24,8 @@ import {
 import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
-import * as Types from './types';
+
+// import * as Types from './types';
 
 export interface BalanceCardMetrics {
   available: string;
@@ -120,7 +121,8 @@ export const getOzoneMetricValue = (denom?: string | undefined, amount?: string 
 
   const balanceInWei = createBigNumber(amount);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, 9).toFormat(decimalShortPrecision, ROUND_DOWN);
+  console.log('balance', balance);
   const balanceToReturn = `${balance} ${printableDenome}`;
   return balanceToReturn;
 };
@@ -161,7 +163,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.DelegatedBalanceResult) => {
       const balanceInWei = createBigNumber(entry.balance.amount);
-      const validatorAddress = entry.validator_address;
+      const validatorAddress = entry.delegation?.validator_address;
       const validatorBalance = getBalanceCardMetricValue(entry.balance.denom, entry.balance.amount);
 
       detailedBalance.delegated[validatorAddress] = validatorBalance;
@@ -209,7 +211,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
   }
 
-  // temporary disabling that
   try {
     const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
 
@@ -247,7 +248,7 @@ export const getMaxAvailableBalance = async (
 
   const currentBalance = coin?.amount || '0';
 
-  const feeAmount = createBigNumber(standardFeeAmount);
+  const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = createBigNumber(currentBalance);
 
   if (balanceInWei.gt(0)) {

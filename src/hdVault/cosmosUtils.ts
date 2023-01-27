@@ -86,8 +86,11 @@ export const deserializeWithEncryptionKey = async (
   }
   const hdPaths = accounts.map(({ hdPath }) => stringToPath(hdPath));
 
-  return StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+  const options = {
     hdPaths: hdPaths,
     prefix: firstPrefix,
-  });
+  };
+  // console.log('cosmosUtils - options to use ', options);
+
+  return StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
 };

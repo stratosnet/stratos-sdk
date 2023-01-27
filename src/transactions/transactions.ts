@@ -71,10 +71,19 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
 };
 
 export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
+  const gas = baseGasAmount + perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+
+  // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
+  // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
+  const dynamicFeeAmount = standardFeeAmount(gas);
+
+  const feeAmount = [{ amount: String(dynamicFeeAmount), denom: stratosDenom }];
+
   const fee = {
-    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }], // 200_000
-    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
+    amount: feeAmount,
+    gas: `${gas}`,
   };
+
   console.log('fee', fee);
   return fee;
 };
@@ -85,7 +94,7 @@ export const sign = async (
   memo = '',
   givenFee?: Types.TransactionFee,
 ): Promise<TxRaw> => {
-  const fee = givenFee ? givenFee : getStandardFee();
+  const fee = givenFee ? givenFee : getStandardFee(txMessages.length);
 
   const client = await getCosmos();
 

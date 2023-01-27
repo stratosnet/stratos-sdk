@@ -62,9 +62,11 @@ export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
 }
 
 export interface DelegatedBalanceResult {
-  delegator_address: string;
-  validator_address: string;
-  shares: string;
+  delegation: {
+    delegator_address: string;
+    validator_address: string;
+    shares: string;
+  };
   balance: Amount;
 }
 

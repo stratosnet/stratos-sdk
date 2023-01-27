@@ -96,12 +96,11 @@ const mainSend = async () => {
         return;
     }
     const fromAddress = keyPairZero.address;
-    const sendAmount = 1.2;
+    const sendAmount = 0.2;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
         { amount: sendAmount, toAddress: keyPairOne.address },
-        // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
-    // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
     if (signedTx) {
         try {
@@ -223,16 +222,16 @@ const mainWithdrawAllRewards = async () => {
     }
 };
 // cosmosjs withdraw rewards
-const mainSdsPrepay = async () => {
+const mainSdsPrepay = async (hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
     console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
     if (!keyPairZero) {
         return;
     }
-    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }]);
+    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.5 }]);
     //
     console.log('from mainSdsPrepay - calling tx sign');
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
@@ -354,11 +353,11 @@ const getOzoneBalance = async () => {
     const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
     console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
 };
-const getBalanceCardMetrics = async () => {
+const getBalanceCardMetrics = async (hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
     console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
     if (!keyPairZero) {
         return;
@@ -1047,9 +1046,13 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
         // pp a
-        ppNodeUrl: 'http://34.85.35.181', ppNodePort: '8141' }));
+        // ppNodeUrl: 'http://34.85.35.181',
+        // ppNodePort: '8141',
+        // pp b
+        ppNodeUrl: 'http://52.14.150.146', ppNodePort: '8159' }));
+    const hdPathIndex = 0;
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     console.log('masterKeySeedInfo', masterKeySeedInfo);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
@@ -1067,9 +1070,9 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    // await getBalanceCardMetrics();
-    // await mainSdsPrepay();
-    await mainSend();
+    await getBalanceCardMetrics(hdPathIndex);
+    // await mainSdsPrepay(hdPathIndex);
+    // await mainSend();
     // await testUploadRequest();
     // 100000000 100 M
     //   3500000 3.5 M

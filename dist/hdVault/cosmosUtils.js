@@ -58,10 +58,12 @@ const deserializeWithEncryptionKey = async (password, serialization) => {
         throw new Error('Accounts do not all have the same prefix');
     }
     const hdPaths = accounts.map(({ hdPath }) => (0, crypto_1.stringToPath)(hdPath));
-    return StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, {
+    const options = {
         hdPaths: hdPaths,
         prefix: firstPrefix,
-    });
+    };
+    // console.log('cosmosUtils - options to use ', options);
+    return StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
 };
 exports.deserializeWithEncryptionKey = deserializeWithEncryptionKey;
 //# sourceMappingURL=cosmosUtils.js.map

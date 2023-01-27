@@ -70,16 +70,21 @@ const broadcast = async (signedTx) => {
 };
 exports.broadcast = broadcast;
 const getStandardFee = (numberOfMessages = 1) => {
+    const gas = tokens_1.baseGasAmount + tokens_1.perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+    // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
+    // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
+    const dynamicFeeAmount = (0, tokens_1.standardFeeAmount)(gas);
+    const feeAmount = [{ amount: String(dynamicFeeAmount), denom: hdVault_1.stratosDenom }];
     const fee = {
-        amount: [{ amount: String(tokens_1.standardFeeAmount), denom: hdVault_1.stratosDenom }],
-        gas: String(tokens_1.baseGasAmount + tokens_1.perMsgGasAmount * numberOfMessages), // 500_000 + 100_000 * 1 = 6000000000000
+        amount: feeAmount,
+        gas: `${gas}`,
     };
     console.log('fee', fee);
     return fee;
 };
 exports.getStandardFee = getStandardFee;
 const sign = async (address, txMessages, memo = '', givenFee) => {
-    const fee = givenFee ? givenFee : (0, exports.getStandardFee)();
+    const fee = givenFee ? givenFee : (0, exports.getStandardFee)(txMessages.length);
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
     return signedTx;
