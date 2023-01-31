@@ -1,5 +1,18 @@
-export const decimalPrecision = 9;
+// 1 STOS = 10^18 wei = 10^9Gwei for new denom of stchain
+
+// WEI and GWEI
+export const decimalPrecision = 18;
+
+// export const minGasPrice = 10_000_000; // wei or 0.01gwei for chain itself
+export const minGasPrice = 10_000_000_000; // wei or 1gwei for tropos
+
+// ui
 export const decimalShortPrecision = 4;
-export const standardFeeAmount = 200000; // in ustos
-export const perMsgGasAmount = 100000; // just a number
-export const baseGasAmount = 500000; // this number would give gives gas price of 50_000 / 400_000 = 0.125 USTOS per unit
+
+export const perMsgGasAmount = 100_000;
+export const baseGasAmount = 500_000;
+export const defaultGasAmount = baseGasAmount + perMsgGasAmount * 1;
+
+export const standardFeeAmount = (gas = defaultGasAmount): number => {
+  return minGasPrice * gas;
+};

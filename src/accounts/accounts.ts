@@ -1,5 +1,6 @@
 import _get from 'lodash/get';
-import { stratosDenom, stratosTopDenom } from '../config/hdVault';
+import { hdVault } from '../config';
+import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
 import {
   BigNumberValue,
@@ -18,44 +19,26 @@ import {
   getUnboundingBalance,
   networkTypes,
   requestBalanceIncrease,
+  sendUserRequestGetOzone,
 } from '../services/network';
 import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
-import * as Types from './types';
+
+// import * as Types from './types';
 
 export interface BalanceCardMetrics {
   available: string;
   delegated: string;
   unbounding: string;
   reward: string;
+  ozone: string;
   detailedBalance?: any;
 }
 
-export const getAccountsData = async (keyPairAddress: string): Promise<Types.CosmosAccountData> => {
+export const increaseBalance = async (walletAddress: string, faucetUrl: string, denom?: string) => {
   try {
-    const accountsData = await getAccountsDataFromNetwork(keyPairAddress);
-
-    const { response, error } = accountsData;
-
-    if (error) {
-      throw new Error(`Could not get account data. Details: ${error.message}`);
-    }
-
-    if (!response) {
-      throw new Error('Could not get account data. Response is empty');
-    }
-
-    return response;
-  } catch (err) {
-    console.log('Could not get accounts', (err as Error).message);
-    throw err;
-  }
-};
-
-export const increaseBalance = async (walletAddress: string, faucetUrl: string) => {
-  try {
-    const result = await requestBalanceIncrease(walletAddress, faucetUrl);
+    const result = await requestBalanceIncrease(walletAddress, faucetUrl, denom);
 
     const { error: faucetError } = result;
 
@@ -79,10 +62,8 @@ export const getBalance = async (
   requestedDenom: string,
   decimals = decimalShortPrecision,
 ): Promise<string> => {
-  // const accountsData = await getAccountsData(keyPairAddress);
   const accountBalanceData = await getBalancesDataFromNetwork(keyPairAddress);
 
-  // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
   const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
@@ -125,18 +106,41 @@ export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: s
   return balanceToReturn;
 };
 
+// @todo merge with get balance card value
+export const getOzoneMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
+  const isStratosDenom = denom === stratosUozDenom;
+
+  const printableDenome = stratosOzDenom.toUpperCase();
+
+  if (!isStratosDenom) {
+    return `0.0000 ${printableDenome}`;
+  }
+  if (!amount) {
+    return `0.0000 ${printableDenome}`;
+  }
+
+  const balanceInWei = createBigNumber(amount);
+
+  const balance = fromWei(balanceInWei, 9).toFormat(decimalShortPrecision, ROUND_DOWN);
+  console.log('balance', balance);
+  const balanceToReturn = `${balance} ${printableDenome}`;
+  return balanceToReturn;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
     available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     delegated: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     unbounding: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     reward: `0.0000 ${stratosTopDenom.toUpperCase()}`,
+    ozone: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     detailedBalance: {},
   };
 
   const detailedBalance: { [key: string]: any } = {
     delegated: {},
     reward: {},
+    ozone: '',
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -159,14 +163,14 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.DelegatedBalanceResult) => {
       const balanceInWei = createBigNumber(entry.balance.amount);
-      const validatorAddress = entry.validator_address;
+      const validatorAddress = entry.delegation?.validator_address;
       const validatorBalance = getBalanceCardMetricValue(entry.balance.denom, entry.balance.amount);
 
       detailedBalance.delegated[validatorAddress] = validatorBalance;
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    const myDelegated = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
+    const myDelegated = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
 
     cardMetricsResult.delegated = myDelegated;
   }
@@ -184,7 +188,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
-    cardMetricsResult.unbounding = getBalanceCardMetricValue('ustos', `${amountInWei || ''}`);
+    cardMetricsResult.unbounding = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);
@@ -207,6 +211,22 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
   }
 
+  try {
+    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+
+    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+
+    if (!ozoneBalanceError) {
+      const amount = ozoneBalanceRespone?.result.ozone;
+
+      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+
+      detailedBalance.ozone = amount;
+    }
+  } catch (error) {
+    console.log('could not get ozone balance , error', error);
+  }
+
   cardMetricsResult.detailedBalance = detailedBalance;
 
   return cardMetricsResult;
@@ -217,15 +237,18 @@ export const getMaxAvailableBalance = async (
   requestedDenom: string,
   decimals = 4,
 ): Promise<string> => {
-  const accountsData = await getAccountsData(keyPairAddress);
+  console.log('from max av balance');
+  // const accountsData = await getAccountsData(keyPairAddress);
 
-  const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  const accountBalanceData = await getBalancesDataFromNetwork(keyPairAddress);
+  // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
+  const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 
   const currentBalance = coin?.amount || '0';
 
-  const feeAmount = createBigNumber(standardFeeAmount);
+  const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = createBigNumber(currentBalance);
 
   if (balanceInWei.gt(0)) {

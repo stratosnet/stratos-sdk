@@ -2,17 +2,22 @@ import CID from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
 import multihashing from 'multihashing-async';
-import * as Types from './types';
+import Sdk from '../../Sdk';
+import { delay } from '../helpers';
+import { networkTypes, sendUserRequestList } from '../network';
+import { FileInfoItem } from '../network/types';
 
-async function wait(fn: any, ms: number) {
-  while (!fn()) {
-    await delay(ms);
-  }
-}
+// import * as Types from './types';
 
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// async function wait(fn: any, ms: number) {
+//   while (!fn()) {
+//     await delay(ms);
+//   }
+// }
+//
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
 export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   try {
@@ -36,13 +41,50 @@ export const calculateFileHash = async (filePath: string): Promise<string> => {
   return realFileHash;
 };
 
-const processFileChunk = async () => {};
+// const processFileChunk = async () => {};
+
+export interface OpenedFileInfo {
+  size: number;
+  filehash: string;
+}
+
+export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => {
+  let openedFileInfo: OpenedFileInfo = { size: 0, filehash: '' };
+
+  try {
+    const fileStream = fs.createReadStream(filePath);
+    const stats = fs.statSync(filePath);
+
+    const _filehash = await calculateFileHash(filePath);
+
+    openedFileInfo = await new Promise((resolve, reject) => {
+      const result = {
+        size: 0,
+        filehash: _filehash,
+      };
+
+      fileStream.on('readable', function () {
+        result.size = stats.size;
+        resolve(result);
+      });
+
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  return openedFileInfo;
+};
 
 export const getFileChunks = async (filePath: string, chunkSize = 10000): Promise<Buffer[]> => {
   let chunksList: Buffer[] = [];
   try {
     const fileStream = fs.createReadStream(filePath);
     const stats = fs.statSync(filePath);
+    // console.log('🚀 ~ file: filesystem.ts ~ line 46 ~ getFileChunks ~ stats', stats);
 
     chunksList = await new Promise((resolve, reject) => {
       let bytesRead = 0;
@@ -54,10 +96,13 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
           // no-constant-condition
           const chunk = fileStream.read(chunkSize);
 
+          console.log('ch size', chunkSize);
+
           if (!chunk || !chunk.length) {
             break;
           }
 
+          console.log('chunked chunk length', chunk.length);
           bytesRead += chunk.length;
 
           result.push(chunk);
@@ -77,8 +122,29 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
   return chunksList;
 };
 
+export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: number): Promise<Buffer> => {
+  let chunksList: Buffer;
+
+  try {
+    chunksList = await new Promise(resolve => {
+      const chunk = fileStream.read(readChunkSize);
+
+      // if (chunk) {
+      // console.log('chunk a read size', chunk.length);
+      // }
+
+      resolve(chunk);
+    });
+  } catch (error) {
+    console.log(error);
+    throw 'could not read file chunk';
+  }
+  return chunksList;
+};
+
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
-  await delay(2000);
+  await delay(100);
+  // await delay(2000);
   const base64data = chunk.toString('base64');
   return base64data;
 }
@@ -116,11 +182,43 @@ export const decodeFileChunks = async (encodedChunksList: string[]): Promise<Buf
   return decodedChunksList;
 };
 
-export const getEncodedFileChunks = async (filePath: string, chunksSize = 10000): Promise<string[]> => {
-  const fileChunksList = await getFileChunks(filePath, chunksSize);
+export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000): Promise<string[]> => {
+  const fileChunksList = await getFileChunks(filePath, chunkSize);
   const encodedFileChunksList = await encodeFileChunks(fileChunksList);
-
   return encodedFileChunksList;
+};
+
+// export const getEncodedFileChunk = async (
+//   fileStream: fs.ReadStream,
+//   offsetStart: number,
+//   offsetEnd: number,
+// ): Promise<string> => {
+//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
+//
+//   const encodedChunk = await encodeBuffer(fileChunk);
+//   return encodedChunk;
+// };
+
+export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
+  try {
+    const fileStream = fs.createReadStream(filePath);
+
+    const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
+      fileStream.on('readable', function () {
+        resolve(fileStream);
+      });
+
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+
+    return myStream;
+  } catch (error) {
+    const errorMessage = `could not create file stream at path ${filePath}`;
+    console.log(errorMessage, error);
+    throw new Error(errorMessage);
+  }
 };
 
 export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
@@ -134,4 +232,42 @@ export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   } catch (err) {
     console.log(`Could not write file to ${filePath}: Details: ${(err as Error).message}`);
   }
+};
+
+type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
+
+interface UserFileListResponse {
+  files: FileInfoItem[];
+  originalResponse: RequestUserFilesResponse;
+}
+
+export const getUserUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
+  const extraParams = [
+    {
+      walletaddr: address,
+      page,
+    },
+  ];
+
+  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+
+  const message = `connecting to ${connectedUrl}`;
+
+  console.log(message);
+  const callResult = await sendUserRequestList(extraParams);
+
+  const { response } = callResult;
+
+  // console.log('file list request result', JSON.stringify(callResult));
+
+  if (!response) {
+    throw 'Could not fetch a list of files. No response in the call result';
+  }
+
+  const userFiles = response.result.fileinfo;
+
+  return {
+    originalResponse: response,
+    files: userFiles,
+  };
 };

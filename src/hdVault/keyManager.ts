@@ -1,12 +1,15 @@
 import { log } from '../services/helpers';
+import * as cosmosWallet from './cosmosWallet';
 import * as keyUtils from './keyUtils';
 import { convertArrayToString, convertStringToArray, MnemonicPhrase } from './mnemonic';
+
 export interface LegacyMasterKeyInfo {
   readonly encryptedMasterKeySeed: sjcl.SjclCipherEncrypted;
   readonly masterKeySeedAddress: string;
   readonly masterKeySeedPublicKey: Uint8Array;
   readonly masterKeySeedEncodedPublicKey: string;
 }
+
 export interface MasterKeyInfo extends LegacyMasterKeyInfo {
   readonly encryptedMasterKeySeed: sjcl.SjclCipherEncrypted;
   readonly masterKeySeedAddress: string;
@@ -14,6 +17,34 @@ export interface MasterKeyInfo extends LegacyMasterKeyInfo {
   readonly masterKeySeedEncodedPublicKey: string;
   readonly encryptedWalletInfo: string;
 }
+
+export const createMasterKeySeedFromGivenSeed = async (
+  derivedMasterKeySeed: Uint8Array,
+  password: string,
+): Promise<LegacyMasterKeyInfo> => {
+  const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
+
+  const pubkey = await cosmosWallet.getMasterKeySeedPublicKey(derivedMasterKeySeed);
+
+  // old address
+  // const masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
+
+  // new address
+  const fullPubkey = await cosmosWallet.getMasterKeySeedPublicKeyWithKeccak(derivedMasterKeySeed);
+  const masterKeySeedAddress = keyUtils.getAddressFromPubKeyWithKeccak(fullPubkey);
+
+  const masterKeySeedPublicKey = await keyUtils.getAminoPublicKey(pubkey); // 1 amino dep  - encodeAminoPubkey
+  const masterKeySeedEncodedPublicKey = await keyUtils.getEncodedPublicKey(masterKeySeedPublicKey);
+
+  const masterKeyInfo = {
+    encryptedMasterKeySeed,
+    masterKeySeedAddress,
+    masterKeySeedPublicKey,
+    masterKeySeedEncodedPublicKey,
+  };
+
+  return masterKeyInfo;
+};
 
 // exposed outside, used in the DesktopWallet to "create" a wallet
 export const createMasterKeySeed = async (
@@ -28,34 +59,20 @@ export const createMasterKeySeed = async (
   const wallet = await keyUtils.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));
 
   log('Calling helper to serialize the wallet');
-  const encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+
+  let encryptedWalletInfo;
+
+  try {
+    encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+  } catch (error) {
+    throw new Error(`could not serialize wallet (sdk), ${(error as Error).message}`);
+  }
 
   log('Creating master key seed info from the seed');
   const legacyMasterKeyInfo = await createMasterKeySeedFromGivenSeed(derivedMasterKeySeed, password);
 
   log('Master key info is ready');
   const masterKeyInfo = { ...legacyMasterKeyInfo, encryptedWalletInfo };
-
-  return masterKeyInfo;
-};
-
-export const createMasterKeySeedFromGivenSeed = async (
-  derivedMasterKeySeed: Uint8Array,
-  password: string,
-): Promise<LegacyMasterKeyInfo> => {
-  const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
-
-  const pubkey = await keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed);
-  const masterKeySeedPublicKey = await keyUtils.getAminoPublicKey(pubkey); // 1 amino dep  - encodeAminoPubkey
-  const masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey); // 2 amino dep  - pubkeyToAddress
-  const masterKeySeedEncodedPublicKey = await keyUtils.getEncodedPublicKey(masterKeySeedPublicKey);
-
-  const masterKeyInfo = {
-    encryptedMasterKeySeed,
-    masterKeySeedAddress,
-    masterKeySeedPublicKey,
-    masterKeySeedEncodedPublicKey,
-  };
 
   return masterKeyInfo;
 };

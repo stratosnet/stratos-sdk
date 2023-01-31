@@ -1,4 +1,4 @@
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+export { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 export interface KeyPairInfo {
     keyIndex: number;
     address: string;
@@ -12,4 +12,4 @@ export interface TransactionMessage {
     signingKeyPath: string;
 }
 export declare const deriveKeyPair: (keyIndex: number, password: string, encryptedMasterKeySeed: string) => Promise<KeyPairInfo | false>;
-export declare const deserializeEncryptedWallet: (serializedWallet: string, password: string) => Promise<DirectSecp256k1HdWallet>;
+export declare const deserializeEncryptedWallet: (serializedWallet: string, password: string) => Promise<import("./StratosDirectSecp256k1HdWallet").default>;

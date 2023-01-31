@@ -1,6 +1,8 @@
 import axios from 'axios';
 import JSONbig from 'json-bigint';
+import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
+import { log } from '../../services/helpers';
 import * as Types from './types';
 
 const _axios = axios.create({});
@@ -25,6 +27,12 @@ const getRpcRoute = (): string => {
   const { rpcUrl } = Sdk.environment;
 
   return rpcUrl;
+};
+
+const getPpNodeRoute = (): string => {
+  const { ppNodeUrl, ppNodePort } = Sdk.environment;
+
+  return `${ppNodeUrl}:${ppNodePort}`;
 };
 
 const getExplorerRoute = (): string => {
@@ -61,15 +69,20 @@ export const apiPost = async (
   data?: Types.ParsedTransactionData,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.NetworkAxiosDataResult> => {
+  const myConfig = {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    timeout: 30000,
+  };
+
   let axiosResponse;
 
   try {
-    axiosResponse = await _axios.post(url, data, config);
+    axiosResponse = await _axios.post(url, data, { ...config, ...myConfig });
   } catch (err) {
     const e: Error = err as Error;
     return { error: { message: e.message } };
   }
-
   try {
     const myResponse = axiosResponse.data;
     return { response: myResponse };
@@ -110,23 +123,16 @@ export const sendRpcCall = async <N>(
     method: 'eth_protocolVersion',
     params: [],
   };
-  console.log('h', config);
-  const url = `${getRpcRoute()}/status`;
+  const url = `${getPpNodeRoute()}`;
+
+  log('from network ~ rpc call url', url);
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  console.log('call', payload);
-  //const dataResult = await apiPost(url, payload, { ...config });
-  //console.log(dataResult);
+  // log('from network - calling rpc', payload);
+  const dataResult = await apiPost(url, payload, { ...config });
 
-  const dataResult = {
-    response: {
-      jsonrpc: '2.0',
-      id: 1,
-      result: { return: '1', offsetstart: 0, offsetend: 1234 },
-    },
-  };
-
+  // log('from network - rpc post result', payload);
   return dataResult;
 };
 
@@ -251,7 +257,6 @@ export const getTxList = async (
     account: address,
     limit: 5,
   };
-  // console.log('🚀 ~ file: network.ts ~ line 129 ~ params', params);
 
   if (type) {
     params.operation = type;
@@ -322,6 +327,10 @@ export const getAvailableBalance = async (
   const url = `${getRestRoute()}/bank/balances/${address}`;
 
   const dataResult = await apiGet(url, config);
+  console.log(
+    '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+    JSON.stringify(dataResult),
+  );
 
   return dataResult;
 };
@@ -362,18 +371,23 @@ export const getRewardBalance = async (
 export const requestBalanceIncrease = async (
   walletAddress: string,
   faucetUrl: string,
+  denom = hdVault.stratosDenom, // ustos and now wei
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.SubmitTransactionDataResult> => {
-  const url = `${faucetUrl}/${walletAddress}`;
-  const dataResult = await apiPost(url, {}, config);
+  const url = `${faucetUrl}`;
+
+  const payload = {
+    denom,
+    address: walletAddress.trim(),
+  };
+  const dataResult = await apiPost(url, payload, config);
 
   return dataResult;
 };
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-
-  console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
+  // console.log('uu', url);
 
   const dataResult = await apiGet(url, config);
 
@@ -397,31 +411,109 @@ export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T)
     params: extraParams,
   };
 
+  // console.log('network, rpc payload to be sent');
+  // const { id } = payload;
+  // const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
+  // const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
+  // console.log(myData);
+  // console.log(payload);
+
   return payload;
 };
 
-export const sendUserRequestUpload = async (
-  extraParams: Types.FileUserRequestUploadParams,
+export const sendUserRequestList = async (
+  extraParams: Types.FileUserRequestListParams[],
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.FileUserRequestUploadResult> => {
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>> => {
   const msgId = 1;
-  const method = 'user_requestUpload';
+  const method = 'user_requestList';
 
-  const payload = getRpcPayload<Types.FileUserRequestUploadParams>(msgId, method, extraParams);
+  const payload = getRpcPayload<Types.FileUserRequestListParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 
   return dataResult;
 };
 
-export const sendUserUploadData = async (
-  extraParams: Types.FileUserUploadDataParams,
+export const sendUserRequestUpload = async (
+  extraParams: Types.FileUserRequestUploadParams[],
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.FileUserUploadDataResult> => {
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestUpload';
+
+  const payload = getRpcPayload<Types.FileUserRequestUploadParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestDownload = async (
+  extraParams: Types.FileUserRequestDownloadParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestDownload';
+
+  const payload = getRpcPayload<Types.FileUserRequestDownloadParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserDownloadData = async (
+  extraParams: Types.FileUserDownloadDataParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>> => {
+  const msgId = 1;
+  const method = 'user_downloadData';
+
+  const payload = getRpcPayload<Types.FileUserDownloadDataParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserDownloadedFileInfo = async (
+  extraParams: Types.FileUserDownloadedFileInfoParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>> => {
+  const msgId = 1;
+  const method = 'user_downloadedFileInfo';
+
+  const payload = getRpcPayload<Types.FileUserDownloadedFileInfoParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestGetOzone = async (
+  extraParams: Types.FileUserRequestGetOzoneParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestGetOzone';
+
+  const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+  // console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+
+  return dataResult;
+};
+
+export const sendUserUploadData = async (
+  extraParams: Types.FileUserUploadDataParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>> => {
   const msgId = 1;
   const method = 'user_uploadData';
 
-  const payload = getRpcPayload<Types.FileUserUploadDataParams>(msgId, method, extraParams);
+  const payload = getRpcPayload<Types.FileUserUploadDataParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 

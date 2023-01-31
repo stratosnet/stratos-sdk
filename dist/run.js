@@ -1,18 +1,11 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -29,1027 +22,1067 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var dotenv_1 = __importDefault(require("dotenv"));
-var fs_1 = __importDefault(require("fs"));
-// import keccak256 from 'keccak256';
-// import md5File from 'md5-file';
-var multihashing_async_1 = __importDefault(require("multihashing-async"));
-var path_1 = __importDefault(require("path"));
-// import { Keccak } from 'sha3';
-var accounts = __importStar(require("./accounts"));
-var hdVault_1 = require("./hdVault");
-var keyManager_1 = require("./hdVault/keyManager");
-var keyUtils = __importStar(require("./hdVault/keyUtils"));
-var wallet_1 = require("./hdVault/wallet");
-var Sdk_1 = __importDefault(require("./Sdk"));
-var FilesystemService = __importStar(require("./services/filesystem"));
-var Network = __importStar(require("./services/network"));
-var transactions = __importStar(require("./transactions"));
-var transactionTypes = __importStar(require("./transactions/types"));
-var validators = __importStar(require("./validators"));
-// import md5 from 'blueimp-md5';
-var crypto_1 = __importDefault(require("crypto"));
-// import multihash from 'multihashes';
-var cids_1 = __importDefault(require("cids"));
+const encoding_1 = require("@cosmjs/encoding");
+const dotenv_1 = __importDefault(require("dotenv"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const accounts = __importStar(require("./accounts"));
+const config_1 = require("./config");
+const hdVault_1 = require("./hdVault");
+const cosmosUtils_1 = require("./hdVault/cosmosUtils");
+const cosmosWallet = __importStar(require("./hdVault/cosmosWallet"));
+const keyManager_1 = require("./hdVault/keyManager");
+const keyUtils = __importStar(require("./hdVault/keyUtils"));
+const wallet_1 = require("./hdVault/wallet");
+const Sdk_1 = __importDefault(require("./Sdk"));
+const cosmos_1 = require("./services/cosmos");
+const FilesystemService = __importStar(require("./services/filesystem"));
+const helpers_1 = require("./services/helpers");
+const Network = __importStar(require("./services/network"));
+const transactions = __importStar(require("./transactions"));
+const transactionTypes = __importStar(require("./transactions/types"));
+const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
-var password = 'XXXX';
-var _a = process.env.ZERO_MNEMONIC, zeroUserMnemonic = _a === void 0 ? '' : _a;
-var sdkEnvDev = {
+const password = 'XXXX';
+const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
+const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
     chainId: 'dev-chain-46',
     explorerUrl: 'https://explorer-dev.thestratos.org',
 };
-var sdkEnvTest = {
-    restUrl: 'https://rest-test.thestratos.org',
-    rpcUrl: 'https://rpc-test.thestratos.org',
-    chainId: 'test-chain-1',
-    explorerUrl: 'https://explorer-test.thestratos.org',
+const sdkEnvTest = {
+    key: 'testnet',
+    name: 'Tropos-4',
+    restUrl: 'https://rest-tropos.thestratos.org',
+    rpcUrl: 'https://rpc-tropos.thestratos.org',
+    chainId: 'stratos-testnet-2',
+    explorerUrl: 'https://big-dipper-tropos.thestratos.org',
+    faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 // export type PathBuilder = (account_index: number) => HdPath;
 // creates an account and derives 2 keypairs
-var mainFour = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                console.log('keyPairZero', keyPairZero);
-                return [2 /*return*/];
-        }
-    });
-}); };
+const mainFour = async () => {
+    // const mm =
+    // 'athlete bird sponsor fantasy salute rug erosion run drink unusual immune decade boy blind sorry sad match resemble moment network aim volume diagram beach';
+    // const phrase = mnemonic.convertStringToArray(mm);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    console.log('keyPairZero', keyPairZero);
+    // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
+    // console.log('keyPairOne', keyPairOne);
+};
 // cosmosjs send
-var mainSend = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, fromAddress, sendAmount, sendTxMessages, signedTx, result, error_1, err;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
-            case 3:
-                keyPairOne = _a.sent();
-                if (!keyPairOne) {
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
-            case 4:
-                keyPairTwo = _a.sent();
-                if (!keyPairTwo) {
-                    return [2 /*return*/];
-                }
-                fromAddress = keyPairZero.address;
-                sendAmount = 4.2;
-                return [4 /*yield*/, transactions.getSendTx(fromAddress, [
-                        { amount: sendAmount, toAddress: keyPairOne.address },
-                        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
-                    ])];
-            case 5:
-                sendTxMessages = _a.sent();
-                return [4 /*yield*/, transactions.sign(fromAddress, sendTxMessages)];
-            case 6:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 10];
-                _a.label = 7;
-            case 7:
-                _a.trys.push([7, 9, , 10]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 8:
-                result = _a.sent();
-                console.log('broadcasting result!', result);
-                return [3 /*break*/, 10];
-            case 9:
-                error_1 = _a.sent();
-                err = error_1;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 10];
-            case 10: return [2 /*return*/];
+const mainSend = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const keyPairOne = await (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString);
+    if (!keyPairOne) {
+        return;
+    }
+    const keyPairTwo = await (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString);
+    if (!keyPairTwo) {
+        return;
+    }
+    const fromAddress = keyPairZero.address;
+    const sendAmount = 0.2;
+    const sendTxMessages = await transactions.getSendTx(fromAddress, [
+        { amount: sendAmount, toAddress: keyPairOne.address },
+        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+    ]);
+    const signedTx = await transactions.sign(fromAddress, sendTxMessages);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('broadcasting result!', result);
         }
-    });
-}); };
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
 // cosmosjs delegate
-var mainDelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_2, err;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                delegatorAddress = keyPairZero.address;
-                console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
-                return [4 /*yield*/, transactions.getDelegateTx(delegatorAddress, [
-                        { amount: 1, validatorAddress: validatorAddress },
-                        { amount: 2, validatorAddress: validatorAddress },
-                    ])];
-            case 3:
-                sendTxMessages = _a.sent();
-                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
-            case 4:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 8];
-                _a.label = 5;
-            case 5:
-                _a.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 6:
-                result = _a.sent();
-                console.log('delegate broadcasting result!!! :)', result);
-                return [3 /*break*/, 8];
-            case 7:
-                error_2 = _a.sent();
-                err = error_2;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
+const mainDelegate = async () => {
+    const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const delegatorAddress = keyPairZero.address;
+    console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
+    const sendTxMessages = await transactions.getDelegateTx(delegatorAddress, [
+        { amount: 1, validatorAddress },
+        { amount: 2, validatorAddress },
+    ]);
+    // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+    const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('delegate broadcasting result!!! :)', result);
         }
-    });
-}); };
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
 // cosmosjs undelegate
-var mainUndelegate = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_3, err;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                delegatorAddress = keyPairZero.address;
-                return [4 /*yield*/, transactions.getUnDelegateTx(delegatorAddress, [
-                        { amount: 0.3, validatorAddress: validatorAddress },
-                        { amount: 0.2, validatorAddress: validatorAddress },
-                    ])];
-            case 3:
-                sendTxMessages = _a.sent();
-                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
-            case 4:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 8];
-                _a.label = 5;
-            case 5:
-                _a.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 6:
-                result = _a.sent();
-                console.log('undelegate result :)', result);
-                return [3 /*break*/, 8];
-            case 7:
-                error_3 = _a.sent();
-                err = error_3;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
+const mainUndelegate = async () => {
+    const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const delegatorAddress = keyPairZero.address;
+    const sendTxMessages = await transactions.getUnDelegateTx(delegatorAddress, [
+        { amount: 0.3, validatorAddress },
+        { amount: 0.2, validatorAddress },
+    ]);
+    // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
+    const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('undelegate result :)', result);
         }
-    });
-}); };
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
 // cosmosjs withdraw rewards
-var mainWithdrawRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var validatorAddress, phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessages, signedTx, result, error_4, err;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                delegatorAddress = keyPairZero.address;
-                return [4 /*yield*/, transactions.getWithdrawalRewardTx(delegatorAddress, [
-                        { validatorAddress: validatorAddress },
-                        { validatorAddress: validatorAddress },
-                    ])];
-            case 3:
-                sendTxMessages = _a.sent();
-                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessages)];
-            case 4:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 8];
-                _a.label = 5;
-            case 5:
-                _a.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 6:
-                result = _a.sent();
-                console.log('delegate withdrawal result :)', result);
-                return [3 /*break*/, 8];
-            case 7:
-                error_4 = _a.sent();
-                err = error_4;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
+const mainWithdrawRewards = async () => {
+    const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const delegatorAddress = keyPairZero.address;
+    const sendTxMessages = await transactions.getWithdrawalRewardTx(delegatorAddress, [
+        { validatorAddress },
+        { validatorAddress },
+    ]);
+    const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('delegate withdrawal result :)', result);
         }
-    });
-}); };
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
 // cosmosjs withdraw all rewards
-var mainWithdrawAllRewards = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, sendTxMessage, signedTx, result, error_5, err;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                delegatorAddress = keyPairZero.address;
-                console.log('🚀 ~ file: run.ts ~ line 295 ~ mainWithdrawAllRewards ~ delegatorAddress', delegatorAddress);
-                return [4 /*yield*/, transactions.getWithdrawalAllRewardTx(delegatorAddress)];
-            case 3:
-                sendTxMessage = _a.sent();
-                return [4 /*yield*/, transactions.sign(delegatorAddress, sendTxMessage)];
-            case 4:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 8];
-                _a.label = 5;
-            case 5:
-                _a.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 6:
-                result = _a.sent();
-                console.log('delegate withdrawal all result :)', result);
-                return [3 /*break*/, 8];
-            case 7:
-                error_5 = _a.sent();
-                err = error_5;
-                console.log('error broadcasting', err.message);
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
+const mainWithdrawAllRewards = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const delegatorAddress = keyPairZero.address;
+    console.log('🚀 ~ file: run.ts ~ line 295 ~ mainWithdrawAllRewards ~ delegatorAddress', delegatorAddress);
+    const sendTxMessage = await transactions.getWithdrawalAllRewardTx(delegatorAddress);
+    const signedTx = await transactions.sign(delegatorAddress, sendTxMessage);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('delegate withdrawal all result :)', result);
         }
-    });
-}); };
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
 // cosmosjs withdraw rewards
-var mainSdsPrepay = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, sendTxMessages, signedTx, result, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 3 }])];
-            case 3:
-                sendTxMessages = _a.sent();
-                return [4 /*yield*/, transactions.sign(keyPairZero.address, sendTxMessages)];
-            case 4:
-                signedTx = _a.sent();
-                if (!signedTx) return [3 /*break*/, 8];
-                _a.label = 5;
-            case 5:
-                _a.trys.push([5, 7, , 8]);
-                return [4 /*yield*/, transactions.broadcast(signedTx)];
-            case 6:
-                result = _a.sent();
-                console.log('broadcast prepay result', result);
-                return [3 /*break*/, 8];
-            case 7:
-                err_1 = _a.sent();
-                console.log('error broadcasting', err_1.message);
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
+const mainSdsPrepay = async (hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
+    if (!keyPairZero) {
+        return;
+    }
+    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.5 }]);
+    //
+    console.log('from mainSdsPrepay - calling tx sign');
+    const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
+    if (signedTx) {
+        try {
+            console.log('from mainSdsPrepay - calling tx broadcast');
+            const result = await transactions.broadcast(signedTx);
+            console.log('broadcast prepay result', result);
         }
-    });
-}); };
-var getAccountTrasactions = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroAddress, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1)];
-            case 1:
-                r = _a.sent();
-                console.log('r!!', r.data);
-                console.log('r!!', r.data[1]);
-                return [2 /*return*/];
+        catch (err) {
+            console.log('error broadcasting', err.message);
         }
-    });
-}); };
-var getValidators = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var vData;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, validators.getValidators()];
-            case 1:
-                vData = _a.sent();
-                console.log('vData');
-                return [2 /*return*/];
-        }
-    });
-}); };
-var mainBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, keyPairOne, keyPairTwo, b0, b1, b2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString)];
-            case 3:
-                keyPairOne = _a.sent();
-                if (!keyPairOne) {
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
-            case 4:
-                keyPairTwo = _a.sent();
-                if (!keyPairTwo) {
-                    return [2 /*return*/];
-                }
-                console.log('keyPairZero', keyPairZero.address);
-                console.log('keyPairOne', keyPairOne.address);
-                console.log('keyPairTwo', keyPairTwo.address);
-                return [4 /*yield*/, accounts.getBalance(keyPairZero.address, 'ustos')];
-            case 5:
-                b0 = _a.sent();
-                return [4 /*yield*/, accounts.getBalance(keyPairOne.address, 'ustos')];
-            case 6:
-                b1 = _a.sent();
-                return [4 /*yield*/, accounts.getBalance(keyPairTwo.address, 'ustos')];
-            case 7:
-                b2 = _a.sent();
-                console.log('our bal keyPairZero', b0);
-                console.log('our bal keyPairOne', b1);
-                console.log('our bal keyPairTwo', b2);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getAvailableBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                console.log('keyPairZero', keyPairZero.address);
-                address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, Network.getAvailableBalance(address)];
-            case 3:
-                bResult = _a.sent();
-                response = bResult.response;
-                console.log('our available balanace', response === null || response === void 0 ? void 0 : response.result);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getDelegatedBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                console.log('keyPairZero', keyPairZero.address);
-                address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, Network.getDelegatedBalance(address)];
-            case 3:
-                bResult = _a.sent();
-                response = bResult.response;
-                console.log('our delegated balanace', response === null || response === void 0 ? void 0 : response.result[0].balance);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getUnboundingBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                console.log('keyPairZero', keyPairZero.address);
-                address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, Network.getUnboundingBalance(address)];
-            case 3:
-                bResult = _a.sent();
-                response = bResult.response;
-                console.log('our unbounding balanace', response === null || response === void 0 ? void 0 : response.result); // an array ?
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getRewardBalance = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, address, bResult, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                console.log('keyPairZero', keyPairZero.address);
-                address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                return [4 /*yield*/, Network.getRewardBalance(address)];
-            case 3:
-                bResult = _a.sent();
-                response = bResult.response;
-                console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.result.rewards); // an array ?
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getBalanceCardMetrics = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeed, encryptedMasterKeySeedString, keyPairZero, delegatorAddress, b;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeed = _a.sent();
-                encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString)];
-            case 2:
-                keyPairZero = _a.sent();
-                if (!keyPairZero) {
-                    return [2 /*return*/];
-                }
-                delegatorAddress = keyPairZero.address;
-                return [4 /*yield*/, accounts.getBalanceCardMetrics(delegatorAddress)];
-            case 3:
-                b = _a.sent();
-                console.log('balanace card metrics ', b);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var formatBalanceFromWei = function () {
-    var amount = '50000';
-    var balanceOne = accounts.formatBalanceFromWei(amount, 4);
+    }
+};
+const uploadRequest = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 311 ~ uploadRequest ~ keyPairZero', keyPairZero);
+    if (!keyPairZero) {
+        return;
+    }
+    const filehash = 'v05ahm53rv07iscjr3cf5c8cjjmq1q64sb8d4aqo';
+    const walletaddr = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const messageToSign = `${filehash}${walletaddr}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZero.privateKey);
+    console.log('🚀 ~ file: run.ts ~ line 342 ~ uploadRequest ~ signature', signature);
+    const pubkeyMine = await cosmosWallet.getPublicKeyFromPrivKey((0, encoding_1.fromHex)(keyPairZero.privateKey));
+    const valid = await keyUtils.verifySignature(messageToSign, signature, pubkeyMine.value);
+    console.log('🚀 ~ file: run.ts ~ line 349 ~ uploadRequest ~ valid', valid);
+};
+const getAccountTrasactions = async () => {
+    const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+    console.log('r!!', r.data);
+    console.log('r!!', r.data[1]);
+};
+const getValidators = async () => {
+    const vData = await validators.getValidators();
+    console.log('vData');
+};
+const mainBalance = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const keyPairOne = await (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString);
+    if (!keyPairOne) {
+        return;
+    }
+    const keyPairTwo = await (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString);
+    if (!keyPairTwo) {
+        return;
+    }
+    console.log('keyPairZero', keyPairZero.address);
+    console.log('keyPairOne', keyPairOne.address);
+    console.log('keyPairTwo', keyPairTwo.address);
+    const b0 = await accounts.getBalance(keyPairZero.address, 'ustos');
+    const b1 = await accounts.getBalance(keyPairOne.address, 'ustos');
+    const b2 = await accounts.getBalance(keyPairTwo.address, 'ustos');
+    console.log('our bal keyPairZero', b0);
+    console.log('our bal keyPairOne', b1);
+    console.log('our bal keyPairTwo', b2);
+};
+const getDelegatedBalance = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    console.log('keyPairZero', keyPairZero.address);
+    const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const bResult = await Network.getDelegatedBalance(address);
+    const { response } = bResult;
+    console.log('our delegated balanace', response === null || response === void 0 ? void 0 : response.result[0].balance);
+};
+const getUnboundingBalance = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    console.log('keyPairZero', keyPairZero.address);
+    const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const bResult = await Network.getUnboundingBalance(address);
+    const { response } = bResult;
+    console.log('our unbounding balanace', response === null || response === void 0 ? void 0 : response.result); // an array ?
+};
+const getRewardBalance = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    console.log('keyPairZero', keyPairZero.address);
+    const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const bResult = await Network.getRewardBalance(address);
+    const { response } = bResult;
+    console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.result.rewards); // an array ?
+};
+const getOzoneBalance = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
+    console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
+};
+const getBalanceCardMetrics = async (hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+    if (!keyPairZero) {
+        return;
+    }
+    const delegatorAddress = keyPairZero.address;
+    // const delegatorAddress = wen;
+    const b = await accounts.getBalanceCardMetrics(delegatorAddress);
+    console.log('balanace card metrics ', b);
+};
+const formatBalanceFromWei = () => {
+    const amount = '50000';
+    const balanceOne = accounts.formatBalanceFromWei(amount, 4);
     console.log('🚀 ~ file: run.ts ~ line 464 ~ formatBalanceFromWei ~ balanceOne', balanceOne);
-    var balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
+    const balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
     console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
-var getStandardFee = function () {
-    var fee = transactions.getStandardFee(3);
-    var sendTx = transactions.getSendTx;
-    console.log('fee', fee);
+const runFaucet = async () => {
+    // const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+    const walletAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+    // const faucetUrl = 'https://faucet-tropos.thestratos.org/credit';
+    // const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosDenom);
+    const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+    const result = await accounts.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
+    console.log('faucet result', result);
 };
-var runFaucet = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var walletAddress, faucetUrl, result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-                faucetUrl = 'https://faucet-test.thestratos.org/faucet';
-                return [4 /*yield*/, accounts.increaseBalance(walletAddress, faucetUrl)];
-            case 1:
-                result = _a.sent();
-                console.log('faucet result', result);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getChainId = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var chain;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, Network.getChainId()];
-            case 1:
-                chain = _a.sent();
-                console.log('status result!!', chain);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var getTxHistoryN = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var zeroAddress, type, txType, result, response, txs, fTx;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                zeroAddress = 'st1trlky7dx25er4p85waycqel6lxjnl0qunc7hpt';
-                type = transactionTypes.HistoryTxType.Delegate;
-                txType = transactionTypes.BlockChainTxMsgTypesMap.get(type) || '';
-                console.log('🚀 ~ file: run.ts ~ line 558 ~ getTxHistory ~ txType !', txType);
-                return [4 /*yield*/, Network.getTxListBlockchain(zeroAddress, '', 1)];
-            case 1:
-                result = _a.sent();
-                console.log('status result!!', result);
-                response = result.response;
-                if (!response) {
-                    return [2 /*return*/, 'aaa!!!'];
-                }
-                txs = response.txs;
-                fTx = txs[0];
-                return [2 /*return*/, false];
-        }
-    });
-}); };
-var getTxHistory = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var wallet, firstAccount, zeroAddress, result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
-            case 1:
-                wallet = _a.sent();
-                console.log('running getTxHistory');
-                return [4 /*yield*/, wallet.getAccounts()];
-            case 2:
-                firstAccount = (_a.sent())[0];
-                zeroAddress = firstAccount.address;
-                return [4 /*yield*/, accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1)];
-            case 3:
-                result = _a.sent();
-                console.log('hist result!! !', result);
-                return [2 /*return*/, true];
-        }
-    });
-}); };
-var cosmosWalletCreateTest = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var phrase, masterKeySeedInfo, encryptedMasterKeySeed, encryptedMasterKeySeedString, derivedMasterKeySeed;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-                return [4 /*yield*/, (0, keyManager_1.createMasterKeySeed)(phrase, password)];
-            case 1:
-                masterKeySeedInfo = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
-                encryptedMasterKeySeed = masterKeySeedInfo.encryptedMasterKeySeed;
-                encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
-                return [4 /*yield*/, keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString)];
-            case 2:
-                derivedMasterKeySeed = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed', derivedMasterKeySeed);
-                return [2 /*return*/];
-        }
-    });
-}); };
-var testAccountData = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var wallet, firstAccount;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, keyUtils.createWalletAtPath(0, zeroUserMnemonic)];
-            case 1:
-                wallet = _a.sent();
-                return [4 /*yield*/, wallet.getAccounts()];
-            case 2:
-                firstAccount = (_a.sent())[0];
-                console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
-                return [2 /*return*/];
-        }
-    });
-}); };
+const getTxHistory = async () => {
+    const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+    console.log('running getTxHistory');
+    const [firstAccount] = await wallet.getAccounts();
+    const zeroAddress = firstAccount.address;
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+    console.log('hist result!! !', result);
+    return true;
+};
+const cosmosWalletCreateTest = async () => {
+    // Old way
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    console.log('🚀 ~ file: run.ts ~ line 512 ~ cosmosWalletCreateTest ~ masterKeySeedInfo', masterKeySeedInfo);
+    const { encryptedMasterKeySeed, encryptedWalletInfo } = masterKeySeedInfo;
+    const encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
+    const derivedMasterKeySeed = await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 517 ~ cosmosWalletCreateTest ~ derivedMasterKeySeed', derivedMasterKeySeed);
+    const newWallet = await (0, cosmosUtils_1.deserializeWithEncryptionKey)(password, encryptedWalletInfo);
+    console.log('🚀 ~ file: run.ts ~ line 524 ~ cosmosWalletCreateTest ~ newWallet', newWallet);
+    const [f] = await newWallet.getAccounts();
+    console.log('🚀 ~ file: run.ts ~ line 527 ~ cosmosWalletCreateTest ~ f', f);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    console.log('keyPairZeroA from crearted masterKeySeedInfo', keyPairZeroA);
+    // 1
+    // const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+    // const walletOne = await keyUtils.createWalletAtPath(1, zeroUserMnemonic);
+    // 2
+    // const wallets = await keyUtils.generateWallets(3, zeroUserMnemonic);
+    // const [walletInfo] = wallets;
+    // const [_walletAddress, wallet] = walletInfo;
+    // const walletMasterKeySeed = (wallet as any).seed; // accessing a private field
+    // const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, walletMasterKeySeed);
+    // const encryptedMasterKeySeedString = encryptedMasterKeySeed.toString();
+    // const derivedMasterKeySeed = await keyUtils.decryptMasterKeySeed(password, encryptedMasterKeySeedString);
+};
+const testAccountData = async () => {
+    // const list = await Network.getValidatorsList();
+    const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+    const [firstAccount] = await wallet.getAccounts();
+    console.log('🚀 ~ file: run.ts ~ line 621 ~ testAccountData ~ firstAccount', firstAccount);
+    // const vData = await validators.getValidatorsBondedToDelegator(firstAccount.address);
+    // console.log('st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6');
+    // console.log('vData', vData);
+    // const vInfo = await Network.getValidator('stvaloper1evqx4vnc0jhkgd4f5kruz7vuwt6lse3zfkex5u');
+    // console.log('🚀 ~ file: run.ts ~ line 629 ~ testAccountData ~ vInfo', vInfo);
+    // const accountsData2 = await accounts.getAccountsData(firstAccount.address);
+    // console.log('🚀 ~ file: run.ts ~ line 598 ~ testAccountData ~ accountsData2', accountsData2);
+};
 // async function processFile(path: string, handler: any) {
-//   const stream = fs.createReadStream(path);
-//   for await (const chunk of stream) {
-//     await handler(chunk);
-//   }
+const testFile = async () => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = 'stratos_landing_page.png';
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileWritePath = path_1.default.resolve(SRC_ROOT, `new_${imageFileName}`);
+    console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
+    let buff = fs_1.default.readFileSync(fileReadPath);
+    let base64dataOriginal = buff.toString('base64');
+    const chunksOfBuffers = await FilesystemService.getFileChunks(fileReadPath);
+    const fullBuf = Buffer.concat(chunksOfBuffers);
+    const base64dataFullBuf = fullBuf.toString('base64');
+    const chunksOfBase64Promises = chunksOfBuffers.map(async (chunk) => {
+        const pp = await FilesystemService.encodeBuffer(chunk);
+        return pp;
+    });
+    const chunksOfBase64 = await Promise.all(chunksOfBase64Promises);
+    const restoredChunksOfBuffers = chunksOfBase64.map(base64dataChunk => Buffer.from(base64dataChunk, 'base64'));
+    const buffWriteT = Buffer.concat(restoredChunksOfBuffers);
+    const base64data = buffWriteT.toString('base64');
+    console.log('🚀 ~ file: run.ts ~ line 720 ~ testFile ~ base64dataOriginal', base64dataOriginal.length);
+    console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64data', base64data.length);
+    console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64dataFullBuf', base64dataFullBuf.length);
+    // const buffWrite = Buffer.from(base64dataOriginal, 'base64'); // ok 1
+    // const buffWrite = fullBuf; // ok 2
+    // const buffWrite = Buffer.from(base64dataFullBuf, 'base64'); // ok 3
+    // const buffWrite = buffWriteT; // ok 4
+    const buffWrite = Buffer.from(base64data, 'base64'); // ok 5
+    fs_1.default.writeFileSync(fileWritePath, buffWrite);
+};
+const testFileHash = async () => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = 'stratos_landing_page.png';
+    const expectedHash = 'v05ahm53rv07iscjr3cf5c8cjjmq1q64sb8d4aqo';
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const realFileHash2 = await FilesystemService.calculateFileHash(fileReadPath);
+    console.log('🚀 ~  ~ realFileHash2', realFileHash2);
+    console.log('🚀 ~   ~ expectedHash', expectedHash);
+};
+const testUploadRequest = async () => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    // const imageFileName = 'stratos_landing_page.png';
+    // const imageFileName = 'img7.png';
+    const imageFileName = 'file100M1';
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    console.log('file info', fileInfo);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    // console.log('🚀 ~ file: run.ts ~ line 617 ~ testUploadRequest ~ keyPairZeroA', keyPairZeroA);
+    if (!keyPairZeroA) {
+        return;
+    }
+    const { address, publicKey } = keyPairZeroA;
+    const messageToSign = `${fileInfo.filehash}${address}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+    const extraParams = [
+        {
+            filename: imageFileName,
+            filesize: fileInfo.size,
+            filehash: fileInfo.filehash,
+            walletaddr: address,
+            walletpubkey: publicKey,
+            signature,
+        },
+    ];
+    // only requesting the upload
+    const callResult = await Network.sendUserRequestUpload(extraParams);
+    const { response } = callResult;
+    console.log('🚀 ~ file: run.ts ~ line 905 ~ testIt ~ response', JSON.stringify(response, null, 2));
+    // now upload itself
+    if (!response) {
+        return;
+    }
+    const connectedUrl = `${Sdk_1.default.environment.ppNodeUrl}:${Sdk_1.default.environment.ppNodePort}`;
+    return {
+        data: `response from ${connectedUrl}`,
+        response,
+    };
+};
+const testRequestUserFileList = async (page) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZeroA) {
+        console.log('Error. We dont have a keypair');
+        return;
+    }
+    const { address } = keyPairZeroA;
+    // const page = 4;
+    const userFileList = await FilesystemService.getUserUploadedFileList(address, page);
+    console.log('retrieved user file list', userFileList);
+    //   const extraParams = [
+    //     {
+    //       walletaddr: address,
+    //       page: 0,
+    //     },
+    //   ];
+    //
+    //   const callResult = await Network.sendUserRequestList(extraParams);
+    //
+    //   const { response } = callResult;
+    //
+    //   console.log('file list request result', JSON.stringify(callResult));
+    //
+    //   // now upload itself
+    //   if (!response) {
+    //     return;
+    //   }
+    //
+    //   const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+    //
+    //   return {
+    //     data: `response from ${connectedUrl}`,
+    //     response,
+    //   };
+};
+// move to utils
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
 // }
-function processChunk(chunk) {
-    return __awaiter(this, void 0, void 0, function () {
-        var base64data;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    console.log('process chunk...');
-                    return [4 /*yield*/, delay(2000)];
-                case 1:
-                    _a.sent();
-                    console.log('process chunk... done');
-                    base64data = chunk.toString('base64');
-                    return [2 /*return*/, base64data];
+// read local file and write a new one
+const testReadAndWriteLocal = async (filename) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = filename;
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    console.log('fileInfo', fileInfo);
+    // const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+    let readSize = 0;
+    const stats = fs_1.default.statSync(fileReadPath);
+    const fileSize = stats.size;
+    console.log('stats', stats);
+    const step = 5000000;
+    let offsetStart = 0;
+    let offsetEnd = step;
+    const encodedFileChunks = [];
+    let completedProgress = 0;
+    const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+    while (readSize < fileSize) {
+        const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
+        if (!fileChunk) {
+            break;
+        }
+        // if (fileChunk) {
+        const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+        readSize = readSize + fileChunk.length;
+        completedProgress = (100 * readSize) / fileSize;
+        console.log(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+        offsetStart = offsetEnd;
+        offsetEnd = offsetEnd + step;
+        encodedFileChunks.push(encodedFileChunk);
+        // }
+    }
+    const fileWritePath = path_1.default.resolve(SRC_ROOT, `my_new_${filename}`);
+    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+    console.log('fileWritePath ', fileWritePath);
+    console.log('encoded file chunks length', encodedFileChunks.length);
+    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+    console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+    console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+    FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+    console.log('we should have an entire file written');
+    const encodedFile = await FilesystemService.encodeFile(decodedFile);
+    console.log('this is not be shown as the string is way too long');
+    await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+};
+// read local file and write a new one (multiple IO)
+const testReadAndWriteLocalWorking = async (filename) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = filename;
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    console.log('fileInfo', fileInfo);
+    const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+    let readSize = 0;
+    const stats = fs_1.default.statSync(fileReadPath);
+    const fileSize = stats.size;
+    console.log('stats', stats);
+    const step = 5000000;
+    let offsetStart = 0;
+    let offsetEnd = step;
+    const maxStep = 65536;
+    const readChunkSize = offsetEnd - offsetStart;
+    const encodedFileChunks = [];
+    let completedProgress = 0;
+    while (readSize < fileSize) {
+        let fileChunk;
+        if (readChunkSize < maxStep) {
+            fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+        }
+        else {
+            let remained = readChunkSize;
+            const subChunks = [];
+            while (remained > 0) {
+                const currentStep = remained > maxStep ? maxStep : remained;
+                subChunks.push(currentStep);
+                remained = remained - currentStep;
             }
-        });
-    });
-}
-function wait(fn, ms) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!!fn()) return [3 /*break*/, 2];
-                    return [4 /*yield*/, delay(ms)];
-                case 1:
-                    _a.sent();
-                    return [3 /*break*/, 0];
-                case 2: return [2 /*return*/];
+            const myList = [];
+            for (const chunkLength of subChunks) {
+                const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+                await (0, helpers_1.delay)(100);
+                myList.push(chunkMini);
             }
-        });
+            const filteredList = myList.filter(Boolean);
+            const aggregatedBuf = Buffer.concat(filteredList);
+            fileChunk = aggregatedBuf;
+        }
+        if (!fileChunk) {
+            break;
+        }
+        if (fileChunk) {
+            const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+            readSize = readSize + fileChunk.length;
+            completedProgress = (100 * readSize) / fileSize;
+            console.log(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+            offsetStart = offsetEnd;
+            offsetEnd = offsetEnd + step;
+            encodedFileChunks.push(encodedFileChunk);
+        }
+    }
+    const fileWritePath = path_1.default.resolve(SRC_ROOT, `my_new_${filename}`);
+    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+    console.log('fileWritePath ', fileWritePath);
+    console.log('encoded file chunks length', encodedFileChunks.length);
+    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+    console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+    console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+    FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+    console.log('we should have an entire file written');
+    const encodedFile = await FilesystemService.encodeFile(decodedFile);
+    console.log('this is not be shown as the string is way too long');
+    await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+};
+const testDl = async (filename, filehashA, filesizeA) => {
+    var _a;
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    console.log(`downloading file ${filename}`);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZeroA) {
+        return;
+    }
+    const { address, publicKey } = keyPairZeroA;
+    // const filehash = fileInfo.filehash;
+    const filehash = filehashA;
+    // const filesize = fileInfo.size;
+    const filesize = filesizeA;
+    const sdmAddress = address;
+    const filehandle = `sdm://${sdmAddress}/${filehash}`;
+    const messageToSign = `${filehash}${address}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+    const extraParams = [
+        {
+            filehandle,
+            walletaddr: address,
+            walletpubkey: publicKey,
+            signature,
+        },
+    ];
+    const callResultRequestDl = await Network.sendUserRequestDownload(extraParams);
+    const { response: responseRequestDl } = callResultRequestDl;
+    if (!responseRequestDl) {
+        console.log('we dont have response for dl request. it might be an error', callResultRequestDl);
+        return;
+    }
+    const { result: resultWithOffesets } = responseRequestDl;
+    let offsetStartGlobal = 0;
+    let offsetEndGlobal = 0;
+    let isContinueGlobal = 0;
+    const fileInfoChunks = [];
+    const { return: isContinueInit, reqid, offsetstart: offsetstartInit, offsetend: offsetendInit, filedata, } = resultWithOffesets;
+    const responseDownloadInitFormatted = { isContinueInit, offsetstartInit, offsetendInit };
+    console.log('responseDownloadInitFormatted', responseDownloadInitFormatted);
+    if (offsetendInit === undefined) {
+        console.log('a we dont have an offest. could be an error. response is', responseRequestDl);
+        return;
+    }
+    if (offsetstartInit === undefined) {
+        console.log('b we dont have an offest. could be an error. response is', responseRequestDl);
+        return;
+    }
+    isContinueGlobal = +isContinueInit;
+    offsetStartGlobal = +offsetstartInit;
+    offsetEndGlobal = +offsetendInit;
+    const fileChunk = { offsetstart: offsetEndGlobal, offsetend: offsetEndGlobal, filedata };
+    fileInfoChunks.push(fileChunk);
+    while (isContinueGlobal === 2) {
+        (0, helpers_1.log)('from run.ts - will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
+        const extraParamsForDownload = [
+            {
+                filehash,
+                reqid,
+            },
+        ];
+        const callResultDownload = await Network.sendUserDownloadData(extraParamsForDownload);
+        const { response: responseDownload } = callResultDownload;
+        if (!responseDownload) {
+            console.log('we dont have response. it might be an error', callResultDownload);
+            return;
+        }
+        const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
+        const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
+        console.log('responseDownloadFormatted', responseDownloadFormatted);
+        const { result: { offsetend: offsetendDownload, offsetstart: offsetstartDownload, return: isContinueDownload, filedata: downloadedFileData, }, } = responseDownload;
+        isContinueGlobal = +isContinueDownload;
+        // if (offsetstartDownload && offsetendDownload) {
+        if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
+            offsetStartGlobal = +offsetstartDownload;
+            offsetEndGlobal = +offsetendDownload;
+            const fileChunkDl = {
+                offsetstart: offsetStartGlobal,
+                offsetend: offsetEndGlobal,
+                filedata: downloadedFileData,
+            };
+            fileInfoChunks.push(Object.assign({}, fileChunkDl));
+        }
+    }
+    let downloadConfirmed = '-1';
+    if (isContinueGlobal === 3) {
+        const extraParamsForDownload = [
+            {
+                filehash,
+                filesize,
+                reqid,
+            },
+        ];
+        const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
+        (0, helpers_1.log)('call result download', JSON.stringify(callResultDownloadFileInfo));
+        const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
+        downloadConfirmed = ((_a = responseDownloadFileInfo === null || responseDownloadFileInfo === void 0 ? void 0 : responseDownloadFileInfo.result) === null || _a === void 0 ? void 0 : _a.return) || '-1';
+        (0, helpers_1.log)('🚀 ~ file: run.ts ~ line 1097 ~ testIt ~ responseDownloadFileInfo', responseDownloadFileInfo);
+    }
+    if (+downloadConfirmed !== 0) {
+        throw Error('could not get download confirmation');
+    }
+    const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
+        const res = a.offsetstart - b.offsetstart;
+        return res;
     });
-}
-function delay(ms) {
-    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
-}
-function processFileByChunk(filePath, chunkSize) {
-    if (chunkSize === void 0) { chunkSize = 10000; }
-    return __awaiter(this, void 0, void 0, function () {
-        var foo, fileStream_1, stats_1, error_6;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    foo = [];
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    fileStream_1 = fs_1.default.createReadStream(filePath);
-                    stats_1 = fs_1.default.statSync(filePath);
-                    return [4 /*yield*/, new Promise(function (resolve, reject) {
-                            var bytesRead = 0;
-                            var result = [];
-                            fileStream_1.on('readable', function () {
-                                return __awaiter(this, void 0, void 0, function () {
-                                    var chunk;
-                                    return __generator(this, function (_a) {
-                                        /* eslint-disable-next-line no-constant-condition */
-                                        while (true) {
-                                            chunk = fileStream_1.read(chunkSize);
-                                            if (!chunk || !chunk.length) {
-                                                break;
-                                            }
-                                            bytesRead += chunk.length;
-                                            result.push(chunk);
-                                        }
-                                        if (bytesRead >= stats_1.size) {
-                                            resolve(result);
-                                        }
-                                        return [2 /*return*/];
-                                    });
-                                });
-                            });
-                            fileStream_1.on('error', function (error) {
-                                reject(error);
-                            });
-                        })];
-                case 2:
-                    foo = _a.sent();
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_6 = _a.sent();
-                    console.log(error_6);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/, foo];
+    // log('sortedFileInfoChunks, ', sortedFileInfoChunks);
+    (0, helpers_1.log)('sortedFileInfoChunks.length ', sortedFileInfoChunks.length);
+    const encodedFileChunks = sortedFileInfoChunks
+        .map(fileInfoChunk => {
+        (0, helpers_1.log)('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
+        return fileInfoChunk.filedata || '';
+    })
+        .filter(Boolean);
+    (0, helpers_1.log)('encodedFileChunks', encodedFileChunks.length);
+    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+    (0, helpers_1.log)(`file is saved into ${fileWritePathFromBuff}`, fileWritePathFromBuff);
+    FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+};
+// request upload and upload
+const testIt = async (filename) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = filename;
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZeroA) {
+        return;
+    }
+    const { address, publicKey } = keyPairZeroA;
+    const messageToSign = `${fileInfo.filehash}${address}`;
+    const stats = fs_1.default.statSync(fileReadPath);
+    const fileSize = stats.size;
+    console.log('stats', stats);
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+    const extraParams = [
+        {
+            filename: imageFileName,
+            filesize: fileInfo.size,
+            filehash: fileInfo.filehash,
+            walletaddr: address,
+            walletpubkey: publicKey,
+            signature,
+        },
+    ];
+    const callResultInit = await Network.sendUserRequestUpload(extraParams);
+    const { response: responseInit } = callResultInit;
+    (0, helpers_1.log)('call result init', JSON.stringify(callResultInit));
+    if (!responseInit) {
+        console.log('we dont have response. it might be an error', callResultInit);
+        return;
+    }
+    const { result: resultWithOffesets } = responseInit;
+    (0, helpers_1.log)('result with offesets', resultWithOffesets);
+    let offsetStartGlobal = 0;
+    let offsetEndGlobal = 0;
+    let isContinueGlobal = 0;
+    const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
+    if (offsetendInit === undefined) {
+        console.log('a we dont have an offest. could be an error. response is', responseInit);
+        return;
+    }
+    if (offsetstartInit === undefined) {
+        console.log('b we dont have an offest. could be an error. response is', responseInit);
+        return;
+    }
+    let readSize = 0;
+    // const maxStep = 65536;
+    let completedProgress = 0;
+    isContinueGlobal = +isContinueInit;
+    offsetStartGlobal = +offsetstartInit;
+    offsetEndGlobal = +offsetendInit;
+    const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+    while (isContinueGlobal === 1) {
+        const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
+        if (!fileChunk) {
+            console.log('fileChunk is missing, Exiting ', fileChunk);
+            break;
+        }
+        (0, helpers_1.log)('from run.ts - completed before encoding a chunk to base64', completedProgress);
+        if (fileChunk) {
+            const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+            readSize = readSize + fileChunk.length;
+            completedProgress = (100 * readSize) / fileSize;
+            (0, helpers_1.log)(`from run.ts - completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+            // upload
+            const extraParamsForUpload = [
+                {
+                    filehash: fileInfo.filehash,
+                    data: encodedFileChunk,
+                },
+            ];
+            // isContinueGlobal = 0;
+            // log('from run.ts - completed', completedProgress);
+            (0, helpers_1.log)('from run.ts - will call upload', offsetStartGlobal, offsetEndGlobal);
+            const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
+            (0, helpers_1.log)('call result upload', JSON.stringify(callResultUpload));
+            const { response: responseUpload } = callResultUpload;
+            // log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+            if (!responseUpload) {
+                console.log('we dont have response. it might be an error', callResultUpload);
+                return;
             }
-        });
-    });
-}
-var testFile = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var PROJECT_ROOT, SRC_ROOT, fileReadPath, fileWritePath, buff, base64dataOriginal, chunksOfBuffers, fullBuf, base64dataFullBuf, chunksOfBase64Promises, chunksOfBase64, restoredChunksOfBuffers, buffWriteT, base64data, buffWrite;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
-                SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                fileReadPath = path_1.default.resolve(SRC_ROOT, 'my_image.png');
-                fileWritePath = path_1.default.resolve(SRC_ROOT, 'my_image_new.png');
-                console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
-                buff = fs_1.default.readFileSync(fileReadPath);
-                base64dataOriginal = buff.toString('base64');
-                return [4 /*yield*/, processFileByChunk(fileReadPath)];
-            case 1:
-                chunksOfBuffers = _a.sent();
-                fullBuf = Buffer.concat(chunksOfBuffers);
-                base64dataFullBuf = fullBuf.toString('base64');
-                chunksOfBase64Promises = chunksOfBuffers.map(function (chunk) { return __awaiter(void 0, void 0, void 0, function () {
-                    var pp;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4 /*yield*/, processChunk(chunk)];
-                            case 1:
-                                pp = _a.sent();
-                                return [2 /*return*/, pp];
-                        }
-                    });
-                }); });
-                return [4 /*yield*/, Promise.all(chunksOfBase64Promises)];
-            case 2:
-                chunksOfBase64 = _a.sent();
-                restoredChunksOfBuffers = chunksOfBase64.map(function (base64dataChunk) {
-                    return Buffer.from(base64dataChunk, 'base64');
-                });
-                buffWriteT = Buffer.concat(restoredChunksOfBuffers);
-                base64data = buffWriteT.toString('base64');
-                console.log('🚀 ~ file: run.ts ~ line 720 ~ testFile ~ base64dataOriginal', base64dataOriginal.length);
-                console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64data', base64data.length);
-                console.log('🚀 ~ file: run.ts ~ line 729 ~ testFile ~ base64dataFullBuf', base64dataFullBuf.length);
-                buffWrite = Buffer.from(base64dataFullBuf, 'base64');
-                // const buffWrite = buffWriteT; // ok 4
-                // const buffWrite = Buffer.from(base64data, 'base64'); // ok 5
-                fs_1.default.writeFileSync(fileWritePath, buffWrite);
-                return [2 /*return*/];
+            const { result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload }, } = responseUpload;
+            if (offsetendUpload === undefined) {
+                console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+                return;
+            }
+            if (offsetstartUpload === undefined) {
+                console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+                return;
+            }
+            isContinueGlobal = +isContinueUpload;
+            offsetStartGlobal = +offsetstartUpload;
+            offsetEndGlobal = +offsetendUpload;
         }
-    });
-}); };
-var calcFileHash = function (fileBuffer) { return __awaiter(void 0, void 0, void 0, function () {
-    var md5Digest, data, ecodedHash, cid, realFileHash;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
-                console.log('🚀 ~ file: run.ts ~ line 823 ~ calcFileHash2 ~ md5Digest in string', md5Digest.toString('hex'));
-                console.log('🚀 ~ file: run.ts ~ line 807 ~ calcFileHash2 ~ md5Digest (buffer in hex)', md5Digest);
-                data = new Uint8Array(md5Digest);
-                console.log('🚀 ~ file: run.ts ~ line 831 ~ calcFileHash2 ~ data (in dec, matching w go, 16 bites)', data);
-                return [4 /*yield*/, (0, multihashing_async_1.default)(md5Digest, 'keccak-256')];
-            case 1:
-                ecodedHash = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 811 ~ calcFileHash2 ~ ecodedHash (flieHash in go)', ecodedHash);
-                cid = new cids_1.default(1, 'raw', ecodedHash, 'base32hex');
-                console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
-                realFileHash = cid.toString();
-                // old
-                // const ecodedHash2 = await multihash.encode(md5Digest, 'keccak-256');
-                // console.log(
-                //   '🚀 ~ file: run.ts ~ line 845 ~ calcFileHash2 ~ ecodedHash2 (thats where it is fucked. it looks like data, but prepended with 27 and 16)',
-                //   ecodedHash2,
-                // );
-                // const cid2 = new CID(1, 'raw', ecodedHash2, 'base32hex');
-                // const realFileHash2 = cid2.toString();
-                // console.log('🚀 ~ file: run.ts ~ line 853 ~ calcFileHash2 ~ fucked realFileHash2', realFileHash2);
-                //
-                return [2 /*return*/, realFileHash];
+    }
+};
+// request upload and upload (multiple IO)
+const testItWorking = async (filename) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = filename;
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZeroA) {
+        return;
+    }
+    const { address, publicKey } = keyPairZeroA;
+    const messageToSign = `${fileInfo.filehash}${address}`;
+    const stats = fs_1.default.statSync(fileReadPath);
+    const fileSize = stats.size;
+    console.log('stats', stats);
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+    const extraParams = [
+        {
+            filename: imageFileName,
+            filesize: fileInfo.size,
+            filehash: fileInfo.filehash,
+            walletaddr: address,
+            walletpubkey: publicKey,
+            signature,
+        },
+    ];
+    const callResultInit = await Network.sendUserRequestUpload(extraParams);
+    const { response: responseInit } = callResultInit;
+    console.log('call result init', JSON.stringify(callResultInit));
+    if (!responseInit) {
+        console.log('we dont have response. it might be an error', callResultInit);
+        return;
+    }
+    const { result: resultWithOffesets } = responseInit;
+    console.log('result with offesets', resultWithOffesets);
+    let offsetStartGlobal = 0;
+    let offsetEndGlobal = 0;
+    let isContinueGlobal = 0;
+    const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
+    if (offsetendInit === undefined) {
+        console.log('a we dont have an offest. could be an error. response is', responseInit);
+        return;
+    }
+    if (offsetstartInit === undefined) {
+        console.log('b we dont have an offest. could be an error. response is', responseInit);
+        return;
+    }
+    const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+    let readSize = 0;
+    // const stats = fs.statSync(fileReadPath);
+    // const fileSize = stats.size;
+    // console.log('stats', stats);
+    const maxStep = 65536;
+    let completedProgress = 0;
+    isContinueGlobal = +isContinueInit;
+    offsetStartGlobal = +offsetstartInit;
+    offsetEndGlobal = +offsetendInit;
+    while (isContinueGlobal === 1) {
+        const readChunkSize = offsetEndGlobal - offsetStartGlobal;
+        let fileChunk;
+        if (readChunkSize < maxStep) {
+            fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
         }
-    });
-}); };
-var calcFileHash3 = function (fileHash) { return __awaiter(void 0, void 0, void 0, function () {
-    var a, ecodedHash, cid, realFileHash;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                a = Buffer.from(fileHash);
-                console.log('🚀 ~ file: run.ts ~ line 808 ~ calcFileHash3 ~ a', a);
-                return [4 /*yield*/, (0, multihashing_async_1.default)(a, 'keccak-256', 20)];
-            case 1:
-                ecodedHash = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 809 ~ calcFileHash3 ~ ecodedHash', ecodedHash);
-                cid = new cids_1.default(1, 'raw', ecodedHash, 'base32hex');
-                console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
-                realFileHash = cid.toString();
-                return [2 /*return*/, realFileHash];
+        else {
+            let remained = readChunkSize;
+            const subChunks = [];
+            while (remained > 0) {
+                const currentStep = remained > maxStep ? maxStep : remained;
+                subChunks.push(currentStep);
+                remained = remained - currentStep;
+            }
+            const myList = [];
+            for (const chunkLength of subChunks) {
+                const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+                await (0, helpers_1.delay)(10);
+                myList.push(chunkMini);
+            }
+            const filteredList = myList.filter(Boolean);
+            const aggregatedBuf = Buffer.concat(filteredList);
+            // console.log('aggregatedBuf', aggregatedBuf);
+            fileChunk = aggregatedBuf;
         }
-    });
-}); };
-// working file hash
-var calcFileHash2 = function (fileBuffer) { return __awaiter(void 0, void 0, void 0, function () {
-    var md5Digest, ecodedHash, cid, realFileHash;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
-                console.log('🚀 ~ file: run.ts ~ line 823 ~ calcFileHash2 ~ md5Digest in string', md5Digest.toString('hex'));
-                console.log('🚀 ~ file: run.ts ~ line 807 ~ calcFileHash2 ~ md5Digest (buffer in hex)', md5Digest);
-                return [4 /*yield*/, (0, multihashing_async_1.default)(md5Digest, 'keccak-256', 20)];
-            case 1:
-                ecodedHash = _a.sent();
-                console.log('🚀 ~ file: run.ts ~ line 811 ~ calcFileHash2 ~ ecodedHash (flieHash in go)', ecodedHash);
-                cid = new cids_1.default(1, 'raw', ecodedHash, 'base32hex');
-                console.log('🚀 ~ file: run.ts ~ line 813 ~ calcFileHash2 ~ cid', cid);
-                realFileHash = cid.toString();
-                return [2 /*return*/, realFileHash];
+        if (!fileChunk) {
+            console.log('fileChunk is missing, Exiting ', fileChunk);
+            break;
         }
-    });
-}); };
-var testB = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var PROJECT_ROOT, SRC_ROOT, expectedHash, fileReadPath, fileBuffer, realFileHash2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
-                SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                expectedHash = 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg';
-                fileReadPath = path_1.default.resolve(SRC_ROOT, 'my_test_read.t');
-                fileBuffer = fs_1.default.readFileSync(fileReadPath);
-                return [4 /*yield*/, calcFileHash2(fileBuffer)];
-            case 1:
-                realFileHash2 = _a.sent();
-                console.log('🚀 ~  ~ realFileHash2', realFileHash2);
-                console.log('🚀 ~   ~ expectedHash', expectedHash);
-                return [2 /*return*/];
+        if (fileChunk) {
+            const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+            readSize = readSize + fileChunk.length;
+            completedProgress = (100 * readSize) / fileSize;
+            console.log(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+            // upload
+            const extraParamsForUpload = [
+                {
+                    filehash: fileInfo.filehash,
+                    data: encodedFileChunk,
+                },
+            ];
+            // isContinueGlobal = 0;
+            (0, helpers_1.log)('from run.ts params for upload', extraParamsForUpload);
+            const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
+            console.log('call result upload', JSON.stringify(callResultUpload));
+            const { response: responseUpload } = callResultUpload;
+            console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+            if (!responseUpload) {
+                console.log('we dont have response. it might be an error', callResultUpload);
+                return;
+            }
+            const { result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload }, } = responseUpload;
+            if (offsetendUpload === undefined) {
+                console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+                return;
+            }
+            if (offsetstartUpload === undefined) {
+                console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+                return;
+            }
+            isContinueGlobal = +isContinueUpload;
+            offsetStartGlobal = +offsetstartUpload;
+            offsetEndGlobal = +offsetendUpload;
         }
-    });
-}); };
-var testIt = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var PROJECT_ROOT, SRC_ROOT, fileReadPath, realHash, extraParams, callResult, response, _a, offsetend, offsetstart, isContinue, chunkSize, encodedFileChunks, pCalls, res;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
-                SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-                fileReadPath = path_1.default.resolve(SRC_ROOT, 'my_image.png');
-                return [4 /*yield*/, FilesystemService.calculateFileHash(fileReadPath)];
-            case 1:
-                realHash = _b.sent();
-                extraParams = {
-                    filename: 't9.t',
-                    filesize: 68,
-                    filehash: 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg',
-                    walletaddr: 'st1macvxhdy33kphmwv7kvvk28hpg0xn7nums5klu',
-                    walletpubkey: 'stpub1',
-                };
-                return [4 /*yield*/, Network.sendUserRequestUpload(extraParams)];
-            case 2:
-                callResult = _b.sent();
-                response = callResult.response;
-                if (!response) {
-                    return [2 /*return*/];
-                }
-                _a = response.result, offsetend = _a.offsetend, offsetstart = _a.offsetstart, isContinue = _a.return;
-                chunkSize = offsetstart;
-                return [4 /*yield*/, FilesystemService.getEncodedFileChunks(fileReadPath)];
-            case 3:
-                encodedFileChunks = _b.sent();
-                pCalls = encodedFileChunks.map(function (currentChunk) { return __awaiter(void 0, void 0, void 0, function () {
-                    var extraParamsUpload, callTwoResult;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                extraParamsUpload = {
-                                    filehash: 'v05ahm57soq8erhnhv70m8pek9rprtu8v0d9g3mg',
-                                    data: currentChunk,
-                                };
-                                return [4 /*yield*/, Network.sendUserUploadData(extraParamsUpload)];
-                            case 1:
-                                callTwoResult = _a.sent();
-                                console.log('🚀 ~ file: run.ts ~ line 889 ~ testIt ~ result', callTwoResult);
-                                return [2 /*return*/];
-                        }
-                    });
-                }); });
-                return [4 /*yield*/, Promise.all(pCalls)];
-            case 4:
-                res = _b.sent();
-                console.log('🚀 ~ file: run.ts ~ line 891 ~ testIt ~ res', res);
-                return [2 /*return*/];
+    }
+};
+const main = async () => {
+    let resolvedChainID;
+    // const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
+    Sdk_1.default.init(Object.assign({}, sdkEnv));
+    try {
+        const resolvedChainIDToTest = await Network.getChainId();
+        if (!resolvedChainIDToTest) {
+            throw new Error('Chain id is empty. Exiting');
         }
-    });
-}); };
-var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var resolvedChainID, sdkEnv, error_7;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                sdkEnv = sdkEnvDev;
-                return [4 /*yield*/, Sdk_1.default.init(__assign({}, sdkEnv))];
-            case 1:
-                _a.sent();
-                _a.label = 2;
-            case 2:
-                _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, Network.getChainId()];
-            case 3:
-                resolvedChainID = _a.sent();
-                return [3 /*break*/, 5];
-            case 4:
-                error_7 = _a.sent();
-                console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error_7);
-                throw new Error('Could not resolve chain id');
-            case 5:
-                if (!resolvedChainID) {
-                    throw new Error('Chain id is empty. Exiting');
-                }
-                return [4 /*yield*/, Sdk_1.default.init(__assign(__assign({}, sdkEnv), { chainId: resolvedChainID }))];
-            case 6:
-                _a.sent();
-                // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-                // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-                // const serialized = masterKeySeedInfo.encryptedWalletInfo;
-                // const serialized = await getSerializedWalletFromPhrase(zeroUserMnemonic, password);
-                // we have to initialize a client prior to use cosmos
-                // const _cosmosClient = await getCosmos(serialized, password);
-                cosmosWalletCreateTest();
-                return [2 /*return*/];
-        }
-    });
-}); };
+        console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
+        resolvedChainID = resolvedChainIDToTest;
+    }
+    catch (error) {
+        console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
+        throw new Error('Could not resolve chain id');
+    }
+    // 2
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
+        // pp a
+        // ppNodeUrl: 'http://34.85.35.181',
+        // ppNodePort: '8141',
+        // pp b
+        ppNodeUrl: 'http://52.14.150.146', ppNodePort: '8159' }));
+    const hdPathIndex = 0;
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    console.log('masterKeySeedInfo', masterKeySeedInfo);
+    const serialized = masterKeySeedInfo.encryptedWalletInfo;
+    const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
+    // const filename = 'file4_10M_jan20';
+    // const filename = 'file1_200M_jan22';
+    // request and upload
+    // await testIt(filename);
+    // download the file
+    const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
+    const filesize = 200000000;
+    const filename = 'file1_200M_jan22';
+    // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
+    // const filesize = 10000000;
+    // const filename = 'file4_10M_jan20';
+    // await testDl(filename, filehash, filesize);
+    // await testRequestUserFileList(0);
+    // await testReadAndWriteLocal(filename);
+    await getBalanceCardMetrics(hdPathIndex);
+    // await mainSdsPrepay(hdPathIndex);
+    // await mainSend();
+    // await testUploadRequest();
+    // 100000000 100 M
+    //   3500000 3.5 M
+    // await testRequestData();
+    // cosmosWalletCreateTest();
+    // testFile();
+    // testFileHash();
+    // await runFaucet();
+    // uploadRequest();
+    // testBigInt();
+};
 main();
 //# sourceMappingURL=run.js.map

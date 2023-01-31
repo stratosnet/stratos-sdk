@@ -3,24 +3,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hexToString = exports.stringToHex = exports.uint8ArrayToBase64str = exports.uint8ArrayToBuffer = exports.uint8arrayToHexStr = exports.bufferToUint8Array = exports.bufferToHexStr = exports.hexStrToUint8Array = exports.hexStrToBuffer = void 0;
-var tweetnacl_util_1 = __importDefault(require("tweetnacl-util"));
-var hexStrToBuffer = function (input) { return Buffer.from(input, 'hex'); };
+exports.mergeUint8Arrays = exports.hexToString = exports.stringToHex = exports.uint8ArrayToBase64str = exports.uint8ArrayToBuffer = exports.uint8arrayToHexStr = exports.bufferToUint8Array = exports.bufferToHexStr = exports.hexStrToUint8Array = exports.hexStrToBuffer = void 0;
+const tweetnacl_util_1 = __importDefault(require("tweetnacl-util"));
+const hexStrToBuffer = (input) => Buffer.from(input, 'hex');
 exports.hexStrToBuffer = hexStrToBuffer;
-var hexStrToUint8Array = function (input) { return Uint8Array.from(Buffer.from(input, 'hex')); };
+const hexStrToUint8Array = (input) => Uint8Array.from(Buffer.from(input, 'hex'));
 exports.hexStrToUint8Array = hexStrToUint8Array;
-var bufferToHexStr = function (input) { return input.toString('hex'); };
+const bufferToHexStr = (input) => input.toString('hex');
 exports.bufferToHexStr = bufferToHexStr;
-var bufferToUint8Array = function (input) { return Uint8Array.from(input); };
+const bufferToUint8Array = (input) => Uint8Array.from(input);
 exports.bufferToUint8Array = bufferToUint8Array;
-var uint8arrayToHexStr = function (input) { return Buffer.from(input).toString('hex'); };
+const uint8arrayToHexStr = (input) => Buffer.from(input).toString('hex');
 exports.uint8arrayToHexStr = uint8arrayToHexStr;
-var uint8ArrayToBuffer = function (input) { return (0, exports.hexStrToBuffer)((0, exports.uint8arrayToHexStr)(input)); };
+const uint8ArrayToBuffer = (input) => (0, exports.hexStrToBuffer)((0, exports.uint8arrayToHexStr)(input));
 exports.uint8ArrayToBuffer = uint8ArrayToBuffer;
-var uint8ArrayToBase64str = function (input) { return tweetnacl_util_1.default.encodeBase64(input); };
+const uint8ArrayToBase64str = (input) => tweetnacl_util_1.default.encodeBase64(input);
 exports.uint8ArrayToBase64str = uint8ArrayToBase64str;
-var stringToHex = function (input) { return Buffer.from(input, 'utf8').toString('hex'); };
+const stringToHex = (input) => Buffer.from(input, 'utf8').toString('hex');
 exports.stringToHex = stringToHex;
-var hexToString = function (input) { return Buffer.from(input, 'hex').toString('utf-8'); };
+const hexToString = (input) => Buffer.from(input, 'hex').toString('utf-8');
 exports.hexToString = hexToString;
+function mergeUint8Arrays(a1, a2) {
+    // sum of individual array lengths
+    const mergedArray = new Uint8Array(a1.length + a2.length);
+    mergedArray.set(a1);
+    mergedArray.set(a2, a1.length);
+    return mergedArray;
+}
+exports.mergeUint8Arrays = mergeUint8Arrays;
 //# sourceMappingURL=utils.js.map

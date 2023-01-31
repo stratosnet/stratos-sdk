@@ -1,18 +1,11 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -29,133 +22,63 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = exports.createMasterKeySeed = void 0;
-var helpers_1 = require("../services/helpers");
-var keyUtils = __importStar(require("./keyUtils"));
-var mnemonic_1 = require("./mnemonic");
+exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
+const helpers_1 = require("../services/helpers");
+const cosmosWallet = __importStar(require("./cosmosWallet"));
+const keyUtils = __importStar(require("./keyUtils"));
+const mnemonic_1 = require("./mnemonic");
+const createMasterKeySeedFromGivenSeed = async (derivedMasterKeySeed, password) => {
+    const encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
+    const pubkey = await cosmosWallet.getMasterKeySeedPublicKey(derivedMasterKeySeed);
+    // old address
+    // const masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
+    // new address
+    const fullPubkey = await cosmosWallet.getMasterKeySeedPublicKeyWithKeccak(derivedMasterKeySeed);
+    const masterKeySeedAddress = keyUtils.getAddressFromPubKeyWithKeccak(fullPubkey);
+    const masterKeySeedPublicKey = await keyUtils.getAminoPublicKey(pubkey); // 1 amino dep  - encodeAminoPubkey
+    const masterKeySeedEncodedPublicKey = await keyUtils.getEncodedPublicKey(masterKeySeedPublicKey);
+    const masterKeyInfo = {
+        encryptedMasterKeySeed,
+        masterKeySeedAddress,
+        masterKeySeedPublicKey,
+        masterKeySeedEncodedPublicKey,
+    };
+    return masterKeyInfo;
+};
+exports.createMasterKeySeedFromGivenSeed = createMasterKeySeedFromGivenSeed;
 // exposed outside, used in the DesktopWallet to "create" a wallet
-var createMasterKeySeed = function (phrase, password, hdPathIndex) {
-    if (hdPathIndex === void 0) { hdPathIndex = 0; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var derivedMasterKeySeed, wallet, encryptedWalletInfo, legacyMasterKeyInfo, masterKeyInfo;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    (0, helpers_1.log)('Generating master key seed');
-                    return [4 /*yield*/, keyUtils.generateMasterKeySeed(phrase)];
-                case 1:
-                    derivedMasterKeySeed = _a.sent();
-                    (0, helpers_1.log)('Creating wallet');
-                    return [4 /*yield*/, keyUtils.createWalletAtPath(hdPathIndex, (0, mnemonic_1.convertArrayToString)(phrase))];
-                case 2:
-                    wallet = _a.sent();
-                    (0, helpers_1.log)('Calling helper to serialize the wallet');
-                    return [4 /*yield*/, keyUtils.serializeWallet(wallet, password)];
-                case 3:
-                    encryptedWalletInfo = _a.sent();
-                    (0, helpers_1.log)('Creating master key seed info from the seed');
-                    return [4 /*yield*/, (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password)];
-                case 4:
-                    legacyMasterKeyInfo = _a.sent();
-                    (0, helpers_1.log)('Master key info is ready');
-                    masterKeyInfo = __assign(__assign({}, legacyMasterKeyInfo), { encryptedWalletInfo: encryptedWalletInfo });
-                    return [2 /*return*/, masterKeyInfo];
-            }
-        });
-    });
+const createMasterKeySeed = async (phrase, password, hdPathIndex = 0) => {
+    (0, helpers_1.log)('Generating master key seed');
+    const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
+    (0, helpers_1.log)('Creating wallet');
+    const wallet = await keyUtils.createWalletAtPath(hdPathIndex, (0, mnemonic_1.convertArrayToString)(phrase));
+    (0, helpers_1.log)('Calling helper to serialize the wallet');
+    let encryptedWalletInfo;
+    try {
+        encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
+    }
+    catch (error) {
+        throw new Error(`could not serialize wallet (sdk), ${error.message}`);
+    }
+    (0, helpers_1.log)('Creating master key seed info from the seed');
+    const legacyMasterKeyInfo = await (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password);
+    (0, helpers_1.log)('Master key info is ready');
+    const masterKeyInfo = Object.assign(Object.assign({}, legacyMasterKeyInfo), { encryptedWalletInfo });
+    return masterKeyInfo;
 };
 exports.createMasterKeySeed = createMasterKeySeed;
-var createMasterKeySeedFromGivenSeed = function (derivedMasterKeySeed, password) { return __awaiter(void 0, void 0, void 0, function () {
-    var encryptedMasterKeySeed, pubkey, masterKeySeedPublicKey, masterKeySeedAddress, masterKeySeedEncodedPublicKey, masterKeyInfo;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                encryptedMasterKeySeed = keyUtils.encryptMasterKeySeed(password, derivedMasterKeySeed);
-                return [4 /*yield*/, keyUtils.getMasterKeySeedPublicKey(derivedMasterKeySeed)];
-            case 1:
-                pubkey = _a.sent();
-                return [4 /*yield*/, keyUtils.getAminoPublicKey(pubkey)];
-            case 2:
-                masterKeySeedPublicKey = _a.sent();
-                masterKeySeedAddress = keyUtils.getAddressFromPubKey(pubkey);
-                return [4 /*yield*/, keyUtils.getEncodedPublicKey(masterKeySeedPublicKey)];
-            case 3:
-                masterKeySeedEncodedPublicKey = _a.sent();
-                masterKeyInfo = {
-                    encryptedMasterKeySeed: encryptedMasterKeySeed,
-                    masterKeySeedAddress: masterKeySeedAddress,
-                    masterKeySeedPublicKey: masterKeySeedPublicKey,
-                    masterKeySeedEncodedPublicKey: masterKeySeedEncodedPublicKey,
-                };
-                return [2 /*return*/, masterKeyInfo];
-        }
-    });
-}); };
-exports.createMasterKeySeedFromGivenSeed = createMasterKeySeedFromGivenSeed;
 // exposed outside, used in the DesktopWallet to login
-var unlockMasterKeySeed = function (password, encryptedMasterKeySeed) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed)];
-            case 1: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
+const unlockMasterKeySeed = async (password, encryptedMasterKeySeed) => {
+    return await keyUtils.unlockMasterKeySeed(password, encryptedMasterKeySeed);
+};
 exports.unlockMasterKeySeed = unlockMasterKeySeed;
 // helper to provide an encripted, serialized wallet from a given mnemonic
-var getSerializedWalletFromPhrase = function (userMnemonic, password, hdPathIndex) {
-    if (hdPathIndex === void 0) { hdPathIndex = 0; }
-    return __awaiter(void 0, void 0, void 0, function () {
-        var phrase, masterKeySeedInfo, serialized;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    phrase = (0, mnemonic_1.convertStringToArray)(userMnemonic);
-                    return [4 /*yield*/, (0, exports.createMasterKeySeed)(phrase, password, hdPathIndex)];
-                case 1:
-                    masterKeySeedInfo = _a.sent();
-                    serialized = masterKeySeedInfo.encryptedWalletInfo;
-                    return [2 /*return*/, serialized];
-            }
-        });
-    });
+const getSerializedWalletFromPhrase = async (userMnemonic, password, hdPathIndex = 0) => {
+    const phrase = (0, mnemonic_1.convertStringToArray)(userMnemonic);
+    const masterKeySeedInfo = await (0, exports.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const serialized = masterKeySeedInfo.encryptedWalletInfo;
+    return serialized;
 };
 exports.getSerializedWalletFromPhrase = getSerializedWalletFromPhrase;
 //# sourceMappingURL=keyManager.js.map

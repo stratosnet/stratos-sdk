@@ -12,12 +12,11 @@ module.exports = {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'prettier', 'simple-import-sort', 'import'],
+  plugins: ['@typescript-eslint', 'prettier', 'import'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
-    'plugin:prettier/recommended',
     'plugin:import/typescript',
   ],
   rules: {
@@ -31,7 +30,6 @@ module.exports = {
     radix: ['warn', 'always'],
     'spaced-comment': ['warn', 'always', { line: { markers: ['/ <reference'] } }],
     'import/no-cycle': 'warn',
-    'simple-import-sort/sort': 'warn',
     '@typescript-eslint/array-type': ['warn', { default: 'array-simple' }],
     '@typescript-eslint/await-thenable': 'warn',
     '@typescript-eslint/ban-types': 'warn',

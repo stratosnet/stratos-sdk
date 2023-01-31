@@ -1,19 +1,16 @@
+import { GeneratedType } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes } from '@cosmjs/stargate';
+import { DeliverTxResponse } from '@cosmjs/stargate';
+import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
-import { getAccountsData } from '../accounts';
 import { stratosDenom } from '../config/hdVault';
 import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
-import Sdk from '../Sdk';
+// import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
-
-import { GeneratedType } from '@cosmjs/proto-signing';
-import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
-
-import { DeliverTxResponse } from '@cosmjs/stargate';
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
@@ -73,26 +70,37 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   }
 };
 
+export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
+  const gas = baseGasAmount + perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+
+  // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
+  // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
+  const dynamicFeeAmount = standardFeeAmount(gas);
+
+  const feeAmount = [{ amount: String(dynamicFeeAmount), denom: stratosDenom }];
+
+  const fee = {
+    amount: feeAmount,
+    gas: `${gas}`,
+  };
+
+  console.log('fee', fee);
+  return fee;
+};
+
 export const sign = async (
   address: string,
   txMessages: Types.TxMessage[],
   memo = '',
   givenFee?: Types.TransactionFee,
 ): Promise<TxRaw> => {
-  const fee = givenFee ? givenFee : getStandardFee();
+  const fee = givenFee ? givenFee : getStandardFee(txMessages.length);
 
   const client = await getCosmos();
-  const signedTx = client.sign(address, txMessages, fee, memo);
+
+  const signedTx = await client.sign(address, txMessages, fee, memo);
 
   return signedTx;
-};
-
-export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
-  const fee = {
-    amount: [{ amount: String(standardFeeAmount), denom: stratosDenom }],
-    gas: String(baseGasAmount + perMsgGasAmount * numberOfMessages),
-  };
-  return fee;
 };
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
@@ -105,28 +113,29 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
 };
 
 // @depricated ?
-export const getBaseTx = async (
-  keyPairAddress: string,
-  memo = '',
-  numberOfMessages = 1,
-): Promise<Types.BaseTransaction> => {
-  const accountsData = await getAccountsData(keyPairAddress);
+// export const getBaseTx = async (
+//   keyPairAddress: string,
+//   memo = '',
+//   numberOfMessages = 1,
+// ): Promise<Types.BaseTransaction> => {
+//   console.log('get base tx 1');
+//   const accountsData = await getAccountsData(keyPairAddress);
 
-  const oldSequence = String(accountsData.account.sequence);
-  const newSequence = parseInt(oldSequence);
+//   const oldSequence = String(accountsData.account.sequence);
+//   const newSequence = parseInt(oldSequence);
 
-  const { chainId } = Sdk.environment;
+//   const { chainId } = Sdk.environment;
 
-  const myTx = {
-    chain_id: chainId,
-    fee: getStandardFee(numberOfMessages),
-    memo,
-    account_number: String(accountsData.account.account_number),
-    sequence: `${newSequence}`,
-  };
+//   const myTx = {
+//     chain_id: chainId,
+//     fee: getStandardFee(numberOfMessages),
+//     memo,
+//     account_number: String(accountsData.account.account_number),
+//     sequence: `${newSequence}`,
+//   };
 
-  return myTx;
-};
+//   return myTx;
+// };
 
 export const getSendTx = async (
   keyPairAddress: string,
@@ -307,6 +316,8 @@ export const getSdsPrepayTx = async (
         coins: getStandardAmount([amount]),
       },
     };
+
+    console.log('message to be signed', JSON.stringify(message));
 
     messagesList.push(message);
 

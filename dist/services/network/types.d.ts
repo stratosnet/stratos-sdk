@@ -52,9 +52,11 @@ export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
     response?: CosmosAccountBalanceResponse;
 }
 export interface DelegatedBalanceResult {
-    delegator_address: string;
-    validator_address: string;
-    shares: string;
+    delegation: {
+        delegator_address: string;
+        validator_address: string;
+        shares: string;
+    };
     balance: Amount;
 }
 export interface Rewards {
@@ -107,7 +109,7 @@ export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
         result: UnboundingBalanceResult[];
     };
 }
-export declare type TransactionData = string;
+export type TransactionData = string;
 export interface ParsedTransactionData {
 }
 export interface SubmitTransactionDataResult extends NetworkAxiosDataResult {
@@ -125,7 +127,7 @@ export interface TxFee {
     amount: TxAmount[];
     gas: string;
 }
-export declare type TxDataDataAmount = TxAmount[] | TxAmount;
+export type TxDataDataAmount = TxAmount[] | TxAmount;
 export interface TxData {
     sender: string;
     nonce?: number | null;
@@ -352,6 +354,25 @@ export interface EthProtocolRpcResponse extends MainRpcResponse {
 export interface EthProtocolRpcResult extends NetworkAxiosDataResult {
     response?: EthProtocolRpcResponse;
 }
+export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
+    response?: T;
+}
+export interface FileUserRequestListParams {
+    walletaddr: string;
+    page: number;
+}
+export interface FileInfoItem {
+    filehash: string;
+    filesize: number;
+    filename: string;
+    createtime: number;
+}
+export interface FileUserRequestListResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        fileinfo: FileInfoItem[];
+    };
+}
 export interface FileUserRequestUploadParams {
     filename: string;
     filesize: number;
@@ -359,15 +380,49 @@ export interface FileUserRequestUploadParams {
     walletaddr: string;
     walletpubkey: string;
 }
+export interface FileUserRequestDownloadParams {
+    filehandle: string;
+    walletaddr: string;
+    walletpubkey: string;
+    signature: string;
+}
+export interface FileUserRequestDownloadResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+        reqid: string;
+        offsetstart: string;
+        offsetend: string;
+        filedata: string;
+    };
+}
+export interface FileUserDownloadDataParams {
+    filehash: string;
+    reqid: string;
+}
+export interface FileUserDownloadDataResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3';
+        offsetstart?: string;
+        offsetend?: string;
+        filedata?: string;
+    };
+}
+export interface FileUserDownloadedFileInfoParams {
+    filehash: string;
+    reqid: string;
+    filesize: number;
+}
+export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3';
+    };
+}
 export interface FileUserRequestUploadResponse extends MainRpcResponse {
     result: {
         return: '0' | '1';
         offsetstart?: string;
         offsetend?: string;
     };
-}
-export interface FileUserRequestUploadResult extends NetworkAxiosDataResult {
-    response?: FileUserRequestUploadResponse;
 }
 export interface FileUserUploadDataParams {
     filehash: string;
@@ -380,6 +435,12 @@ export interface FileUserUploadDataResponse extends MainRpcResponse {
         offsetend?: string;
     };
 }
-export interface FileUserUploadDataResult extends NetworkAxiosDataResult {
-    response?: FileUserUploadDataResponse;
+export interface FileUserRequestGetOzoneParams {
+    walletaddr: string;
+}
+export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1';
+        ozone?: string;
+    };
 }

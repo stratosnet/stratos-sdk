@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -20,43 +24,43 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatBaseTx = void 0;
-var TxTypes = __importStar(require("../../../../transactions/types"));
-var formatTxAmounts_1 = require("./formatTxAmounts");
-var formatBaseTx = function (txItem) {
+const TxTypes = __importStar(require("../../../../transactions/types"));
+const formatTxAmounts_1 = require("./formatTxAmounts");
+const formatBaseTx = (txItem) => {
     var _a, _b, _c, _d, _e;
-    var msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
+    const msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
     if (!msg) {
         throw Error('There is no single message in the transaction!');
     }
-    var block = txItem.height;
-    var hash = txItem.txhash;
-    var time = txItem.timestamp;
-    var dateTimeString = new Date(time).toLocaleString();
-    var attributes = (_d = (_c = txItem === null || txItem === void 0 ? void 0 : txItem.logs[0]) === null || _c === void 0 ? void 0 : _c.events[0]) === null || _d === void 0 ? void 0 : _d.attributes;
-    var eventSender = '';
+    const block = txItem.height;
+    const hash = txItem.txhash;
+    const time = txItem.timestamp;
+    const dateTimeString = new Date(time).toLocaleString();
+    const attributes = (_d = (_c = txItem === null || txItem === void 0 ? void 0 : txItem.logs[0]) === null || _c === void 0 ? void 0 : _c.events[0]) === null || _d === void 0 ? void 0 : _d.attributes;
+    let eventSender = '';
     if (Array.isArray(attributes)) {
-        attributes.forEach(function (element) {
+        attributes.forEach(element => {
             if (!eventSender && element.key === 'sender') {
                 eventSender = element.value;
             }
         });
     }
-    var txType = msg.type;
-    var resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-    var txAmount = (0, formatTxAmounts_1.formatTxAmounts)(txItem);
-    var txFee = (0, formatTxAmounts_1.formatTxFee)(txItem);
-    var msgTo = ((_e = msg === null || msg === void 0 ? void 0 : msg.value) === null || _e === void 0 ? void 0 : _e.to_address) || '';
+    const txType = msg.type;
+    const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
+    const txAmount = (0, formatTxAmounts_1.formatTxAmounts)(txItem);
+    const txFee = (0, formatTxAmounts_1.formatTxFee)(txItem);
+    const msgTo = ((_e = msg === null || msg === void 0 ? void 0 : msg.value) === null || _e === void 0 ? void 0 : _e.to_address) || '';
     return {
-        eventSender: eventSender,
+        eventSender,
         sender: '',
         to: msgTo,
         type: resolvedType,
-        txType: txType,
-        block: "" + block,
+        txType,
+        block: `${block}`,
         amount: txAmount,
         time: dateTimeString,
-        hash: hash,
-        txFee: txFee,
+        hash,
+        txFee,
         originalTransactionData: txItem,
     };
 };

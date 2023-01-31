@@ -8,8 +8,14 @@ export const bip39Password = '';
 export const stratosCoinType = "606'/0'/0/";
 export const stratosAddressPrefix = 'st';
 export const stratosPubkeyPrefix = 'stpub';
-export const stratosDenom = 'ustos';
+
+// export const stratosDenom = 'ustos';
+export const stratosDenom = 'wei';
+
 export const stratosTopDenom = 'stos';
+
+export const stratosUozDenom = 'uoz';
+export const stratosOzDenom = 'oz';
 
 export const keyPath = `${masterkey}${bip44purpose}${stratosCoinType}`;
 

@@ -1,6 +1,6 @@
 import * as TxTypes from '../../../transactions/types';
 import * as NetworkTypes from '../../network/types';
-export declare type TxFormatter = (txItem: NetworkTypes.BlockChainTx) => FormattedBlockChainTx;
+export type TxFormatter = (txItem: NetworkTypes.BlockChainTx) => FormattedBlockChainTx;
 export interface FormattedBlockChainTx {
     eventSender?: string;
     sender: string;

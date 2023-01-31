@@ -62,9 +62,11 @@ export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
 }
 
 export interface DelegatedBalanceResult {
-  delegator_address: string;
-  validator_address: string;
-  shares: string;
+  delegation: {
+    delegator_address: string;
+    validator_address: string;
+    shares: string;
+  };
   balance: Amount;
 }
 
@@ -412,6 +414,32 @@ export interface EthProtocolRpcResult extends NetworkAxiosDataResult {
   response?: EthProtocolRpcResponse;
 }
 
+// commom filesystem - used in used requests, rename and reuse it for other requests
+export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
+  response?: T;
+}
+
+// request list
+export interface FileUserRequestListParams {
+  walletaddr: string;
+  page: number;
+}
+
+// export type FileUserRequestListParamsA = FileUserRequestListParams[];
+
+export interface FileInfoItem {
+  filehash: string;
+  filesize: number;
+  filename: string;
+  createtime: number;
+}
+export interface FileUserRequestListResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1';
+    fileinfo: FileInfoItem[];
+  };
+}
+
 // request upload
 export interface FileUserRequestUploadParams {
   filename: string;
@@ -421,16 +449,55 @@ export interface FileUserRequestUploadParams {
   walletpubkey: string;
 }
 
+export interface FileUserRequestDownloadParams {
+  filehandle: string;
+  walletaddr: string;
+  walletpubkey: string;
+  signature: string;
+}
+
+export interface FileUserRequestDownloadResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2';
+    reqid: string;
+    offsetstart: string;
+    offsetend: string;
+    filedata: string;
+  };
+}
+
+export interface FileUserDownloadDataParams {
+  filehash: string;
+  reqid: string;
+}
+
+export interface FileUserDownloadDataResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2' | '3';
+    offsetstart?: string;
+    offsetend?: string;
+    filedata?: string;
+  };
+}
+
+export interface FileUserDownloadedFileInfoParams {
+  filehash: string;
+  reqid: string;
+  filesize: number;
+}
+
+export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1' | '2' | '3';
+  };
+}
+
 export interface FileUserRequestUploadResponse extends MainRpcResponse {
   result: {
     return: '0' | '1';
     offsetstart?: string;
     offsetend?: string;
   };
-}
-
-export interface FileUserRequestUploadResult extends NetworkAxiosDataResult {
-  response?: FileUserRequestUploadResponse;
 }
 
 // upload data
@@ -447,6 +514,13 @@ export interface FileUserUploadDataResponse extends MainRpcResponse {
   };
 }
 
-export interface FileUserUploadDataResult extends NetworkAxiosDataResult {
-  response?: FileUserUploadDataResponse;
+export interface FileUserRequestGetOzoneParams {
+  walletaddr: string;
+}
+
+export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
+  result: {
+    return: '0' | '1';
+    ozone?: string;
+  };
 }
