@@ -34,6 +34,7 @@ const bigNumber_1 = require("../services/bigNumber");
 const cosmos_1 = require("../services/cosmos");
 const validators_1 = require("../validators");
 const Types = __importStar(require("./types"));
+const maxMessagesPerTx = 500;
 function* payloadGenerator(dataList) {
     while (dataList.length) {
         yield dataList.shift();
@@ -69,22 +70,25 @@ const broadcast = async (signedTx) => {
     }
 };
 exports.broadcast = broadcast;
-const getStandardFee = (numberOfMessages = 1) => {
-    const gas = tokens_1.baseGasAmount + tokens_1.perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
-    // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
-    // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
-    const dynamicFeeAmount = (0, tokens_1.standardFeeAmount)(gas);
-    const feeAmount = [{ amount: String(dynamicFeeAmount), denom: hdVault_1.stratosDenom }];
-    const fee = {
+const getStandardFee = async (signerAddress, txMessages, memo = '') => {
+    if (txMessages.length > maxMessagesPerTx) {
+        throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
+    }
+    const client = await (0, cosmos_1.getCosmos)();
+    const gas = await client.simulate(signerAddress, txMessages, memo);
+    const estimatedGas = gas + tokens_1.gasDelta;
+    const amount = tokens_1.minGasPrice.multipliedBy(estimatedGas).toString();
+    const feeAmount = [{ amount, denom: hdVault_1.stratosDenom }];
+    const fees = {
         amount: feeAmount,
-        gas: `${gas}`,
+        gas: `${estimatedGas}`,
     };
-    console.log('fee', fee);
-    return fee;
+    return fees;
 };
 exports.getStandardFee = getStandardFee;
 const sign = async (address, txMessages, memo = '', givenFee) => {
-    const fee = givenFee ? givenFee : (0, exports.getStandardFee)(txMessages.length);
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    const fee = givenFee ? givenFee : (await (0, exports.getStandardFee)(address, txMessages, memo));
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
     return signedTx;

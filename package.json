@@ -36,7 +36,7 @@
     "doc": "typedoc --out docs src",
     "update-proto": "yarn upgrade @stratos-network/stratos-cosmosjs-types",
     "start:once": "yarn cli:build; yarn start:run:once",
-    "start:run:once": "node dist/run.js ",
+    "start:run:once": "node --trace-warnings dist/run.js ",
     "cli:build": "tsc"
   },
   "lint-staged": {

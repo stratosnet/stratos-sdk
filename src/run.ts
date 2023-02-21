@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import * as accounts from './accounts';
-import { hdVault } from './config';
-import { mnemonic } from './hdVault';
+import { hdVault, tokens } from './config';
+import { mnemonic, wallet } from './hdVault';
 import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 import * as cosmosWallet from './hdVault/cosmosWallet';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
@@ -60,6 +60,35 @@ const mainFour = async () => {
 
   // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
   // console.log('keyPairOne', keyPairOne);
+};
+
+const simulateSend = async () => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const fromAddress = keyPairZero.address;
+
+  const sendAmount = 0.2;
+
+  const sendTxMessages = await transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: keyPairZero.address },
+  ]);
+
+  console.log('keyPairZero.address', keyPairZero.address);
+
+  const fees = await transactions.getStandardFee(keyPairZero.address, sendTxMessages);
+
+  console.log('fees', fees);
+  console.log('standardFeeAmount', tokens.standardFeeAmount());
+  console.log('minGasPrice', tokens.minGasPrice.toString());
 };
 
 // cosmosjs send
@@ -543,8 +572,8 @@ const testFile = async () => {
   const fileWritePath = path.resolve(SRC_ROOT, `new_${imageFileName}`);
   console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
 
-  let buff = fs.readFileSync(fileReadPath);
-  let base64dataOriginal = buff.toString('base64');
+  const buff = fs.readFileSync(fileReadPath);
+  const base64dataOriginal = buff.toString('base64');
 
   const chunksOfBuffers = await FilesystemService.getFileChunks(fileReadPath);
   const fullBuf = Buffer.concat(chunksOfBuffers);
@@ -1467,6 +1496,8 @@ const main = async () => {
   // await testReadAndWriteLocal(filename);
 
   await getBalanceCardMetrics(hdPathIndex);
+
+  // await simulateSend();
 
   // await mainSdsPrepay(hdPathIndex);
 
