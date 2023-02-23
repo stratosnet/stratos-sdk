@@ -10,6 +10,7 @@ import * as cosmosWallet from './hdVault/cosmosWallet';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
+import { LegacyTx } from './proto/stratos/evm/v1/tx';
 import Sdk from './Sdk';
 import { getCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
@@ -60,6 +61,54 @@ const mainFour = async () => {
 
   // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
   // console.log('keyPairOne', keyPairOne);
+};
+
+const evmSend = async () => {
+  Sdk.init({
+    ...sdkEnvTest,
+    ...{
+      restUrl: 'http://localhost:1317',
+      rpcUrl: 'http://localhost:26657',
+      chainId: 'test-chain',
+    },
+  });
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const fromAddress = keyPairZero.address;
+
+  const serialized = masterKeySeed.encryptedWalletInfo;
+
+  const _cosmosClient = await getCosmos(serialized, password);
+
+  const { sequence } = await _cosmosClient.getSequence(fromAddress);
+
+  const payload = LegacyTx.fromPartial({
+    nonce: sequence,
+    gasPrice: (1_000_000_000).toString(),
+    gas: 21_000,
+    to: '0x000000000000000000000000000000000000dEaD',
+    value: '1',
+  });
+  const signedTx = await _cosmosClient.signAsEvm(payload, keyPairZero);
+  if (signedTx) {
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('broadcasting result!', result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
 };
 
 const simulateSend = async () => {
@@ -1465,35 +1514,37 @@ const main = async () => {
     ppNodePort: '8159',
   });
 
-  const hdPathIndex = 0;
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
-  console.log('masterKeySeedInfo', masterKeySeedInfo);
+  await evmSend();
 
-  const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  // const hdPathIndex = 0;
+  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  // const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
+  // console.log('masterKeySeedInfo', masterKeySeedInfo);
 
-  const _cosmosClient = await getCosmos(serialized, password);
+  // const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
-  // const filename = 'file4_10M_jan20';
+  // const _cosmosClient = await getCosmos(serialized, password);
+
+  // // const filename = 'file4_10M_jan20';
+  // // const filename = 'file1_200M_jan22';
+
+  // // request and upload
+  // // await testIt(filename);
+
+  // // download the file
+
+  // const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
+  // const filesize = 200000000;
   // const filename = 'file1_200M_jan22';
 
-  // request and upload
-  // await testIt(filename);
+  // // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
+  // // const filesize = 10000000;
+  // // const filename = 'file4_10M_jan20';
 
-  // download the file
+  // // await testDl(filename, filehash, filesize);
 
-  const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
-  const filesize = 200000000;
-  const filename = 'file1_200M_jan22';
-
-  // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
-  // const filesize = 10000000;
-  // const filename = 'file4_10M_jan20';
-
-  // await testDl(filename, filehash, filesize);
-
-  // await testRequestUserFileList(0);
-  // await testReadAndWriteLocal(filename);
+  // // await testRequestUserFileList(0);
+  // // await testReadAndWriteLocal(filename);
 
   // await getBalanceCardMetrics(hdPathIndex);
 

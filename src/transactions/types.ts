@@ -1,5 +1,12 @@
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Any } from 'cosmjs-types/google/protobuf/any';
+import {
+  MsgEthereumTx,
+  LegacyTx,
+  DynamicFeeTx,
+  ExtensionOptionsEthereumTx,
+} from '../proto/stratos/evm/v1/tx';
 import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 
 export enum TxMsgTypes {
@@ -29,6 +36,12 @@ export enum TxMsgTypes {
   RegisterCreateIndexingNode = '/stratos.register.v1.MsgCreateMetaNode', // 13 RegisterCreateIndexingNode
   RegisterRemoveIndexingNode = '/stratos.register.v1.MsgRemoveMetaNode', // 14  RegisterRemoveIndexingNode
   RegisterIndexingNodeRegistrationVote = '/stratos.register.v1.MsgIndexingNodeRegistrationVote', // 15 RegisterIndexingNodeRegistrationVote
+}
+
+export enum TxMsgTypes {
+  EvmMsgEthereumTx = '/stratos.evm.v1.MsgEthereumTx',
+  EvmLegacyTx = '/stratos.evm.v1.LegacyTx',
+  EvmExtensionOptionsEthereumTx = '/stratos.evm.v1.ExtensionOptionsEthereumTx',
 }
 
 export enum HistoryTxType {
@@ -225,7 +238,17 @@ export interface SdsPrepayTxMessage {
   };
 }
 
-export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
+export interface EvmTxMessage {
+  typeUrl: TxMsgTypes;
+  value: MsgEthereumTx;
+}
+
+export type TxMessage =
+  | SendTxMessage
+  | DelegateTxMessage
+  | WithdrawalRewardTxMessage
+  | SdsPrepayTxMessage
+  | EvmTxMessage;
 
 export interface SendTxPayload {
   amount: number;
@@ -247,9 +270,29 @@ export interface SdsPrepayTxPayload {
   amount: number;
 }
 
+export type EvmLegacyTxPayload = LegacyTx;
+export type EvmDynamicFeeTxPayload = DynamicFeeTx;
+export type EvmTxPayload = EvmLegacyTxPayload | EvmDynamicFeeTxPayload;
+
 export type TxPayload =
   | SendTxPayload
   | DelegateTxPayload
   | UnDelegateTxPayload
   | WithdrawalRewardTxPayload
   | SdsPrepayTxPayload;
+
+export const evmExtensionOptions = [
+  Any.fromPartial({
+    value: ExtensionOptionsEthereumTx.encode({}).finish(),
+    typeUrl: TxMsgTypes.EvmExtensionOptionsEthereumTx,
+  }),
+];
+
+export const evmTransactionFields = [
+  { name: 'nonce', maxLength: 32 },
+  { name: 'gasPrice', maxLength: 32 },
+  { name: 'gas', maxLength: 32 },
+  { name: 'to', length: 20 },
+  { name: 'value', maxLength: 32 },
+  { name: 'data' },
+];

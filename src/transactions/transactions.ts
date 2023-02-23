@@ -1,8 +1,9 @@
+import { fromBech32, toHex } from '@cosmjs/encoding';
 import { GeneratedType } from '@cosmjs/proto-signing';
-import { defaultRegistryTypes } from '@cosmjs/stargate';
-import { DeliverTxResponse } from '@cosmjs/stargate';
+import { defaultRegistryTypes, DeliverTxResponse } from '@cosmjs/stargate';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Any } from 'cosmjs-types/google/protobuf/any';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import {
@@ -32,6 +33,9 @@ export const getStratosTransactionRegistryTypes = () => {
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
     [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
+    [Types.TxMsgTypes.EvmExtensionOptionsEthereumTx, ExtensionOptionsEthereumTx],
+    [Types.TxMsgTypes.EvmLegacyTx, LegacyTx],
+    [Types.TxMsgTypes.EvmMsgEthereumTx, MsgEthereumTx],
 
     // [Types.TxMsgTypes.PotWithdraw, Coin],
     // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
@@ -129,8 +133,7 @@ export const getStandardFee = async (
     return fees;
   } catch (error) {
     throw new Error(
-      `Could not simutlate the fee calculation. Error details: ${
-        (error as Error).message || JSON.stringify(error)
+      `Could not simutlate the fee calculation. Error details: ${(error as Error).message || JSON.stringify(error)
       }`,
     );
   }
@@ -374,4 +377,24 @@ export const getSdsPrepayTx = async (
   }
 
   return messagesList;
+};
+
+export const getEvmLegacyTx = (
+  senderAddress: string,
+  payload: Types.EvmLegacyTxPayload,
+): Types.EvmTxMessage[] => {
+  const data = Any.fromPartial({
+    value: LegacyTx.encode(payload).finish(),
+    typeUrl: Types.TxMsgTypes.EvmLegacyTx,
+  });
+  const value = MsgEthereumTx.fromJSON({
+    data,
+    from: '0x' + toHex(fromBech32(senderAddress).data),
+  });
+  return [
+    {
+      typeUrl: Types.TxMsgTypes.EvmMsgEthereumTx,
+      value,
+    },
+  ];
 };
