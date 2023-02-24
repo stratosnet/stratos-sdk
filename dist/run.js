@@ -44,6 +44,7 @@ const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
 const transactions = __importStar(require("./transactions"));
+const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
 const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
@@ -77,6 +78,47 @@ const mainFour = async () => {
     console.log('keyPairZero', keyPairZero);
     // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
     // console.log('keyPairOne', keyPairOne);
+};
+const evmSend = async () => {
+    // Sdk.init({
+    //   ...sdkEnvTest,
+    //   ...{
+    //     restUrl: 'http://localhost:1317',
+    //     rpcUrl: 'http://localhost:26657',
+    //     chainId: 'test-chain',
+    //   },
+    // });
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const fromAddress = keyPairZero.address;
+    const serialized = masterKeySeed.encryptedWalletInfo;
+    const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
+    const { sequence } = await _cosmosClient.getSequence(fromAddress);
+    const payload = evm.DynamicFeeTx.fromPartial({
+        chainId: '2048',
+        nonce: sequence,
+        gasFeeCap: (1000000000).toString(),
+        gas: 21000,
+        to: '0x000000000000000000000000000000000000dEaD',
+        value: '1',
+    });
+    console.log('simulated gas', await _cosmosClient.execEvm(payload, keyPairZero, true));
+    const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('broadcasting result!', result);
+        }
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
 };
 const simulateSend = async () => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1069,6 +1111,7 @@ const main = async () => {
         // ppNodePort: '8141',
         // pp b
         ppNodeUrl: 'http://52.14.150.146', ppNodePort: '8159' }));
+    // await evmSend();
     const hdPathIndex = 0;
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);

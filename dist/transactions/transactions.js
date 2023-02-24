@@ -33,6 +33,7 @@ const tokens_1 = require("../config/tokens");
 const bigNumber_1 = require("../services/bigNumber");
 const cosmos_1 = require("../services/cosmos");
 const validators_1 = require("../validators");
+const evm = __importStar(require("./evm"));
 const Types = __importStar(require("./types"));
 const maxMessagesPerTx = 500;
 function* payloadGenerator(dataList) {
@@ -45,6 +46,7 @@ const getStratosTransactionRegistryTypes = () => {
     const stratosTxRegistryTypes = [
         ...stargate_1.defaultRegistryTypes,
         [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
+        ...evm.registryTypes,
         // [Types.TxMsgTypes.PotWithdraw, Coin],
         // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
         // [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
@@ -91,19 +93,16 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
-    const defaultFee = (0, exports.getStandardDefaultFee)();
-    console.log('defaultFee ', defaultFee);
     try {
         const client = await (0, cosmos_1.getCosmos)();
         const gas = await client.simulate(signerAddress, txMessages, '');
-        const estimatedGas = gas + tokens_1.gasDelta;
-        const amount = tokens_1.minGasPrice.multipliedBy(estimatedGas).toString();
+        const estimatedGas = Math.round(gas * tokens_1.gasAdjustment);
+        const amount = tokens_1.minGasPrice.mul(estimatedGas).toString();
         const feeAmount = [{ amount, denom: hdVault_1.stratosDenom }];
         const fees = {
             amount: feeAmount,
             gas: `${estimatedGas}`,
         };
-        console.log('fees with simulation', fees);
         return fees;
     }
     catch (error) {

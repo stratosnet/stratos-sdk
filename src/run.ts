@@ -64,14 +64,14 @@ const mainFour = async () => {
 };
 
 const evmSend = async () => {
-  Sdk.init({
-    ...sdkEnvTest,
-    ...{
-      restUrl: 'http://localhost:1317',
-      rpcUrl: 'http://localhost:26657',
-      chainId: 'test-chain',
-    },
-  });
+  // Sdk.init({
+  //   ...sdkEnvTest,
+  //   ...{
+  //     restUrl: 'http://localhost:1317',
+  //     rpcUrl: 'http://localhost:26657',
+  //     chainId: 'test-chain',
+  //   },
+  // });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
@@ -1516,37 +1516,37 @@ const main = async () => {
     ppNodePort: '8159',
   });
 
-  await evmSend();
+  // await evmSend();
 
-  // const hdPathIndex = 0;
-  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  // const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
-  // console.log('masterKeySeedInfo', masterKeySeedInfo);
+  const hdPathIndex = 0;
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
+  console.log('masterKeySeedInfo', masterKeySeedInfo);
 
-  // const serialized = masterKeySeedInfo.encryptedWalletInfo;
+  const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
-  // const _cosmosClient = await getCosmos(serialized, password);
+  const _cosmosClient = await getCosmos(serialized, password);
 
-  // // const filename = 'file4_10M_jan20';
-  // // const filename = 'file1_200M_jan22';
-
-  // // request and upload
-  // // await testIt(filename);
-
-  // // download the file
-
-  // const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
-  // const filesize = 200000000;
+  // const filename = 'file4_10M_jan20';
   // const filename = 'file1_200M_jan22';
 
-  // // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
-  // // const filesize = 10000000;
-  // // const filename = 'file4_10M_jan20';
+  // request and upload
+  // await testIt(filename);
 
-  // // await testDl(filename, filehash, filesize);
+  // download the file
 
-  // // await testRequestUserFileList(0);
-  // // await testReadAndWriteLocal(filename);
+  const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
+  const filesize = 200000000;
+  const filename = 'file1_200M_jan22';
+
+  // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
+  // const filesize = 10000000;
+  // const filename = 'file4_10M_jan20';
+
+  // await testDl(filename, filehash, filesize);
+
+  // await testRequestUserFileList(0);
+  // await testReadAndWriteLocal(filename);
 
   // await getBalanceCardMetrics(hdPathIndex);
 

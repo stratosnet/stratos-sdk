@@ -12,7 +12,7 @@ import {
   perMsgGasAmount,
   standardFeeAmount,
   minGasPrice,
-  gasDelta,
+  gasAdjustment,
 } from '../config/tokens';
 // import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
@@ -113,25 +113,23 @@ export const getStandardFee = async (
     );
   }
 
-  const defaultFee = getStandardDefaultFee();
-  console.log('defaultFee ', defaultFee);
   try {
     const client = await getCosmos();
     const gas = await client.simulate(signerAddress, txMessages, '');
-    const estimatedGas = gas + gasDelta;
+    const estimatedGas = Math.round(gas * gasAdjustment);
 
-    const amount = minGasPrice.multipliedBy(estimatedGas).toString();
+    const amount = minGasPrice.mul(estimatedGas).toString();
 
     const feeAmount = [{ amount, denom: stratosDenom }];
     const fees = {
       amount: feeAmount,
       gas: `${estimatedGas}`,
     };
-    console.log('fees with simulation', fees);
     return fees;
   } catch (error) {
     throw new Error(
-      `Could not simutlate the fee calculation. Error details: ${(error as Error).message || JSON.stringify(error)
+      `Could not simutlate the fee calculation. Error details: ${
+        (error as Error).message || JSON.stringify(error)
       }`,
     );
   }
