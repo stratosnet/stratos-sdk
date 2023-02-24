@@ -18,6 +18,7 @@ import {
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getValidatorsBondedToDelegator } from '../validators';
+import * as evm from './evm';
 import * as Types from './types';
 
 const maxMessagesPerTx = 500;
@@ -33,10 +34,7 @@ export const getStratosTransactionRegistryTypes = () => {
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
     [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
-    [Types.TxMsgTypes.EvmExtensionOptionsEthereumTx, ExtensionOptionsEthereumTx],
-    [Types.TxMsgTypes.EvmLegacyTx, LegacyTx],
-    [Types.TxMsgTypes.EvmMsgEthereumTx, MsgEthereumTx],
-
+    ...evm.registryTypes,
     // [Types.TxMsgTypes.PotWithdraw, Coin],
     // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
 
@@ -377,24 +375,4 @@ export const getSdsPrepayTx = async (
   }
 
   return messagesList;
-};
-
-export const getEvmLegacyTx = (
-  senderAddress: string,
-  payload: Types.EvmLegacyTxPayload,
-): Types.EvmTxMessage[] => {
-  const data = Any.fromPartial({
-    value: LegacyTx.encode(payload).finish(),
-    typeUrl: Types.TxMsgTypes.EvmLegacyTx,
-  });
-  const value = MsgEthereumTx.fromJSON({
-    data,
-    from: '0x' + toHex(fromBech32(senderAddress).data),
-  });
-  return [
-    {
-      typeUrl: Types.TxMsgTypes.EvmMsgEthereumTx,
-      value,
-    },
-  ];
 };

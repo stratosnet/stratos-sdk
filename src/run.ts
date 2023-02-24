@@ -10,13 +10,13 @@ import * as cosmosWallet from './hdVault/cosmosWallet';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
-import { LegacyTx } from './proto/stratos/evm/v1/tx';
 import Sdk from './Sdk';
 import { getCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
 import { log, delay } from './services/helpers';
 import * as Network from './services/network';
 import * as transactions from './transactions';
+import * as evm from './transactions/evm';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
@@ -92,14 +92,16 @@ const evmSend = async () => {
 
   const { sequence } = await _cosmosClient.getSequence(fromAddress);
 
-  const payload = LegacyTx.fromPartial({
+  const payload = evm.DynamicFeeTx.fromPartial({
+    chainId: '2048',
     nonce: sequence,
-    gasPrice: (1_000_000_000).toString(),
+    gasFeeCap: (1_000_000_000).toString(),
     gas: 21_000,
     to: '0x000000000000000000000000000000000000dEaD',
     value: '1',
   });
-  const signedTx = await _cosmosClient.signAsEvm(payload, keyPairZero);
+  console.log('simulated gas', await _cosmosClient.execEvm(payload, keyPairZero, true));
+  const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
   if (signedTx) {
     try {
       const result = await transactions.broadcast(signedTx);
