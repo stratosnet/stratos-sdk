@@ -1434,8 +1434,8 @@ const testItWorking = async (filename: string) => {
 const main = async () => {
   let resolvedChainID: string;
 
-  // const sdkEnv = sdkEnvTest;
-  const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvDev;
 
   Sdk.init({ ...sdkEnv });
 

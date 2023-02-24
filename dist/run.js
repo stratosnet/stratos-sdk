@@ -1047,8 +1047,8 @@ const testItWorking = async (filename) => {
 };
 const main = async () => {
     let resolvedChainID;
-    // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();

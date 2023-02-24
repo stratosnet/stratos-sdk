@@ -5,7 +5,14 @@ import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
-import { decimalPrecision, minGasPrice, gasDelta } from '../config/tokens';
+import {
+  baseGasAmount,
+  decimalPrecision,
+  perMsgGasAmount,
+  standardFeeAmount,
+  minGasPrice,
+  gasDelta,
+} from '../config/tokens';
 // import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
@@ -72,28 +79,57 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   }
 };
 
+export const getStandardDefaultFee = (): Types.TransactionFee => {
+  const gas = baseGasAmount + perMsgGasAmount; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+
+  // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
+  // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
+  const dynamicFeeAmount = standardFeeAmount(gas);
+
+  const feeAmount = [{ amount: String(dynamicFeeAmount), denom: stratosDenom }];
+
+  const fee = {
+    amount: feeAmount,
+    gas: `${gas}`,
+  };
+
+  return fee;
+};
+
 export const getStandardFee = async (
-  signerAddress: string,
-  txMessages: Types.TxMessage[],
-  memo = '',
+  signerAddress?: string,
+  txMessages?: Types.TxMessage[],
 ): Promise<Types.TransactionFee> => {
+  if (!txMessages || !signerAddress) {
+    return getStandardDefaultFee();
+  }
+
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(
       `Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`,
     );
   }
-  const client = await getCosmos();
-  const gas = await client.simulate(signerAddress, txMessages, memo);
-  const estimatedGas = gas + gasDelta;
 
-  const amount = minGasPrice.multipliedBy(estimatedGas).toString();
+  try {
+    const client = await getCosmos();
+    const gas = await client.simulate(signerAddress, txMessages, '');
+    const estimatedGas = gas + gasDelta;
 
-  const feeAmount = [{ amount, denom: stratosDenom }];
-  const fees = {
-    amount: feeAmount,
-    gas: `${estimatedGas}`,
-  };
-  return fees;
+    const amount = minGasPrice.multipliedBy(estimatedGas).toString();
+
+    const feeAmount = [{ amount, denom: stratosDenom }];
+    const fees = {
+      amount: feeAmount,
+      gas: `${estimatedGas}`,
+    };
+    return fees;
+  } catch (error) {
+    throw new Error(
+      `Could not simutlate the fee calculation. Error details: ${
+        (error as Error).message || JSON.stringify(error)
+      }`,
+    );
+  }
 };
 
 export const sign = async (
@@ -103,7 +139,7 @@ export const sign = async (
   givenFee?: Types.TransactionFee,
 ): Promise<TxRaw> => {
   // eslint-disable-next-line @typescript-eslint/await-thenable
-  const fee = givenFee ? givenFee : await getStandardFee(address, txMessages, memo);
+  const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
 
   const client = await getCosmos();
 
