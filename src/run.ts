@@ -1495,13 +1495,13 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
-  await getBalanceCardMetrics(hdPathIndex);
+  // await getBalanceCardMetrics(hdPathIndex);
 
   // await simulateSend();
 
   // await mainSdsPrepay(hdPathIndex);
 
-  // await mainSend();
+  await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M
