@@ -92,6 +92,7 @@ export const getStandardDefaultFee = (): Types.TransactionFee => {
     amount: feeAmount,
     gas: `${gas}`,
   };
+  console.log('standard default fee', fee);
 
   return fee;
 };
@@ -110,6 +111,8 @@ export const getStandardFee = async (
     );
   }
 
+  const defaultFee = getStandardDefaultFee();
+  console.log('defaultFee ', defaultFee);
   try {
     const client = await getCosmos();
     const gas = await client.simulate(signerAddress, txMessages, '');
@@ -122,6 +125,7 @@ export const getStandardFee = async (
       amount: feeAmount,
       gas: `${estimatedGas}`,
     };
+    console.log('fees with simulation', fees);
     return fees;
   } catch (error) {
     throw new Error(

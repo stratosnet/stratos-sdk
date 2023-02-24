@@ -80,6 +80,7 @@ const getStandardDefaultFee = () => {
         amount: feeAmount,
         gas: `${gas}`,
     };
+    console.log('standard default fee', fee);
     return fee;
 };
 exports.getStandardDefaultFee = getStandardDefaultFee;
@@ -90,6 +91,8 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
+    const defaultFee = (0, exports.getStandardDefaultFee)();
+    console.log('defaultFee ', defaultFee);
     try {
         const client = await (0, cosmos_1.getCosmos)();
         const gas = await client.simulate(signerAddress, txMessages, '');
@@ -100,6 +103,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
             amount: feeAmount,
             gas: `${estimatedGas}`,
         };
+        console.log('fees with simulation', fees);
         return fees;
     }
     catch (error) {

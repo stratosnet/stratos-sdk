@@ -7,7 +7,7 @@ const bigNumber_1 = require("../services/bigNumber");
 // WEI and GWEI
 exports.decimalPrecision = 18;
 exports.minGasPrice = (0, bigNumber_1.toWei)('1', 9); // wei or 1gwei for tropos
-exports.gasDelta = 10000; // delta for gas addition as non deterministic simulate
+exports.gasDelta = 100000; // delta for gas addition as non deterministic simulate
 // ui
 exports.decimalShortPrecision = 4;
 exports.perMsgGasAmount = 100000;
