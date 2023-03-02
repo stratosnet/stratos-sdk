@@ -1,6 +1,7 @@
 import { encodeSecp256k1Pubkey, StdFee } from '@cosmjs/amino';
-import { fromBase64, toBase64 } from '@cosmjs/encoding';
-import { Int53 } from '@cosmjs/math';
+import { ExtendedSecp256k1Signature, Secp256k1 } from '@cosmjs/crypto';
+import { fromBase64, toBase64, fromHex } from '@cosmjs/encoding';
+import { Int53, Uint53 } from '@cosmjs/math';
 import {
   EncodeObject,
   encodePubkey,
@@ -14,10 +15,17 @@ import {
   SignerData, // AccountParser,
   SigningStargateClientOptions,
 } from '@cosmjs/stargate';
+import { createProtobufRpcClient } from '@cosmjs/stargate/build/queryclient';
 import { HttpEndpoint, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
+import { SimulateRequest, ServiceClientImpl } from 'cosmjs-types/cosmos/tx/v1beta1/service';
+import { TxRaw, AuthInfo, Fee, Tx, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
+import { ethers } from 'ethers';
+import { minGasPrice } from '../config/tokens';
+import { wallet } from '../hdVault';
+import * as evm from '../transactions/evm';
 
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 
@@ -42,12 +50,58 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     this.mySigner = signer;
   }
 
+  public getQueryService(): ServiceClientImpl | undefined {
+    const queryClient = this.getQueryClient();
+    if (!queryClient) return;
+    const rpc = createProtobufRpcClient(queryClient);
+    return new ServiceClientImpl(rpc);
+  }
+
+  public async ecdsaSignatures(
+    raw: any,
+    keyPair: wallet.KeyPairInfo,
+    prefix?: number,
+  ): Promise<ExtendedSecp256k1Signature> {
+    let rawTransaction = ethers.utils.RLP.encode(raw);
+    if (prefix) {
+      const rawBuffer = Buffer.concat([
+        Buffer.from(prefix.toString(16).padStart(2, '0'), 'hex'),
+        Buffer.from(ethers.utils.arrayify(rawTransaction)),
+      ]);
+      rawTransaction = ethers.utils.hexlify(rawBuffer);
+    }
+    const hash = ethers.utils.keccak256(rawTransaction);
+    return await Secp256k1.createSignature(ethers.utils.arrayify(hash), fromHex(keyPair.privateKey));
+  }
+
+  private async simulateEvm(payload: evm.DynamicFeeTx, fee: StdFee): Promise<number> {
+    const messages = evm.getEvmMsgs(payload).map(m => this.registry.encodeAsAny(m));
+    const tx = Tx.fromPartial({
+      authInfo: AuthInfo.fromPartial({
+        fee: Fee.fromPartial({ amount: fee.amount as Coin[], gasLimit: fee.gas }),
+        signerInfos: [],
+      }),
+      body: TxBody.fromPartial({
+        messages: Array.from(messages),
+        extensionOptions: evm.evmExtensionOptions,
+      }),
+      signatures: [],
+    });
+    const request = SimulateRequest.fromPartial({
+      txBytes: Tx.encode(tx).finish(),
+    });
+    const response = await this.getQueryService()?.Simulate(request);
+    const gasUsed = response?.gasInfo?.gasUsed?.toString() || '21000';
+    return Uint53.fromString(gasUsed).toNumber();
+  }
+
   public async sign(
     signerAddress: string,
     messages: readonly EncodeObject[],
     fee: StdFee,
     memo: string,
     explicitSignerData?: SignerData,
+    extensionOptions?: Any[],
   ): Promise<TxRaw> {
     let signerData: SignerData;
 
@@ -70,10 +124,104 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     //   signerData,
     // );
 
-    return this.signDirectStratos(signerAddress, messages, fee, memo, signerData);
+    return this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
   }
 
-  private async getEthSecpStratosEncodedPubkey(signerAddress: string) {
+  public async execEvm(
+    payload: evm.DynamicFeeTx,
+    keyPair: wallet.KeyPairInfo,
+    simulate: boolean,
+  ): Promise<TxRaw | number> {
+    const chainId = +(payload.chainId || '0'); // NOTE: Should be retrieved from API but currently only available on web3 api
+    const nonce = payload.nonce || (await this.getSequence(keyPair.address)).sequence;
+    const gasTipCap = ethers.utils.bigNumberify(payload.gasTipCap || '0'); // NOTE: Useless but keeped for a london sync
+    const gasFeeCap = ethers.utils.bigNumberify(payload.gasFeeCap || minGasPrice.toString());
+    const to = payload.to || '0x';
+    const value = ethers.utils.bigNumberify(payload.value || 0);
+    const data = payload.data;
+    const accesses = payload.accesses; // NOTE: Not supported on stratos yet, but required for signing
+    const gas = simulate ? evm.maxGas : payload.gas || 0;
+    // NOTE: Ordered as set
+    const transaction: any = {
+      chainId,
+      nonce,
+      gasTipCap,
+      gasFeeCap,
+      gas,
+      to,
+      value,
+      data,
+      accesses,
+    };
+
+    const raw: any = [];
+    evm.evmTransactionFields.forEach(fieldInfo => {
+      let v = transaction[fieldInfo.name] || [];
+      v = ethers.utils.arrayify(ethers.utils.hexlify(v));
+      // Fixed-width field
+      if (fieldInfo.length && v.length !== fieldInfo.length && v.length > 0) {
+        throw new Error('invalid length for ' + fieldInfo.name);
+      }
+      // Variable-width (with a maximum)
+      if (fieldInfo.maxLength) {
+        v = ethers.utils.stripZeros(v);
+        if (v.length > fieldInfo.maxLength) {
+          throw new Error('invalid length for ' + fieldInfo.name);
+        }
+      }
+      if (fieldInfo.asStruct && v.length === 0) {
+        raw.push([]); // for rlp struct{}{}
+        return;
+      }
+      raw.push(ethers.utils.hexlify(v));
+    });
+
+    const signature = await this.ecdsaSignatures(raw, keyPair, evm.TxTypes.Eip1559);
+    const signedPayload = evm.DynamicFeeTx.fromPartial({
+      chainId: chainId.toString(),
+      nonce,
+      gasTipCap: gasTipCap.toString(),
+      gasFeeCap: gasFeeCap.toString(),
+      gas,
+      to,
+      value: value.toString(),
+      data,
+      accesses,
+      v: Uint8Array.from([signature.recovery]),
+      r: signature.r(32),
+      s: signature.s(32),
+    });
+
+    const fee: StdFee = {
+      amount: [{ amount: gasFeeCap.add(gasTipCap).mul(signedPayload.gas).toString(), denom: 'wei' }],
+      gas: `${signedPayload.gas}`,
+    };
+
+    if (simulate) {
+      return await this.simulateEvm(signedPayload, fee);
+    }
+
+    const txBodyEncodeObject: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: {
+        messages: evm.getEvmMsgs(signedPayload),
+        extensionOptions: evm.evmExtensionOptions,
+      },
+    };
+    const bodyBytes = this.registry.encode(txBodyEncodeObject);
+    const authInfoBytes = makeAuthInfoBytes([], fee.amount, +fee.gas);
+    return TxRaw.fromPartial({
+      bodyBytes,
+      authInfoBytes,
+    });
+  }
+
+  public async signForEvm(payload: evm.DynamicFeeTx, keyPair: wallet.KeyPairInfo): Promise<TxRaw> {
+    payload.gas = payload.gas || ((await this.execEvm(payload, keyPair, true)) as number);
+    return (await this.execEvm(payload, keyPair, false)) as TxRaw;
+  }
+
+  private async getEthSecpStratosEncodedPubkey(signerAddress: string): Promise<Any> {
     const accountFromSigner = (await this.mySigner.getAccounts()).find(
       account => account.address === signerAddress,
     );
@@ -96,7 +244,7 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     return pubkeyEncodedStratos;
   }
 
-  private async getCosmosEncodedPubkey(signerAddress: string) {
+  private async getCosmosEncodedPubkey(signerAddress: string): Promise<Any> {
     const accountFromSigner = (await this.mySigner.getAccounts()).find(
       account => account.address === signerAddress,
     );
@@ -118,6 +266,7 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     fee: StdFee,
     memo: string,
     { accountNumber, sequence, chainId }: SignerData,
+    extensionOptions?: Any[],
   ): Promise<TxRaw> {
     const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
     const pubkeyEncodedToUse = pubkeyEncodedStratos;
@@ -125,8 +274,9 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     const txBodyEncodeObject: TxBodyEncodeObject = {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: {
-        messages: messages,
-        memo: memo,
+        messages,
+        memo,
+        extensionOptions,
       },
     };
 

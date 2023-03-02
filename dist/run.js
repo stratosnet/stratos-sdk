@@ -44,6 +44,7 @@ const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
 const transactions = __importStar(require("./transactions"));
+const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
 const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
@@ -77,6 +78,66 @@ const mainFour = async () => {
     console.log('keyPairZero', keyPairZero);
     // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
     // console.log('keyPairOne', keyPairOne);
+};
+const evmSend = async () => {
+    // Sdk.init({
+    //   ...sdkEnvTest,
+    //   ...{
+    //     restUrl: 'http://localhost:1317',
+    //     rpcUrl: 'http://localhost:26657',
+    //     chainId: 'test-chain',
+    //   },
+    // });
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const fromAddress = keyPairZero.address;
+    const serialized = masterKeySeed.encryptedWalletInfo;
+    const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
+    const { sequence } = await _cosmosClient.getSequence(fromAddress);
+    const payload = evm.DynamicFeeTx.fromPartial({
+        chainId: '2048',
+        nonce: sequence,
+        gasFeeCap: (1000000000).toString(),
+        gas: 21000,
+        to: '0x000000000000000000000000000000000000dEaD',
+        value: '1',
+    });
+    console.log('simulated gas', await _cosmosClient.execEvm(payload, keyPairZero, true));
+    const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
+    if (signedTx) {
+        try {
+            const result = await transactions.broadcast(signedTx);
+            console.log('broadcasting result!', result);
+        }
+        catch (error) {
+            const err = error;
+            console.log('error broadcasting', err.message);
+        }
+    }
+};
+const simulateSend = async () => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    if (!keyPairZero) {
+        return;
+    }
+    const fromAddress = keyPairZero.address;
+    const sendAmount = 0.2;
+    const sendTxMessages = await transactions.getSendTx(fromAddress, [
+        { amount: sendAmount, toAddress: keyPairZero.address },
+    ]);
+    console.log('keyPairZero.address', keyPairZero.address);
+    const fees = await transactions.getStandardFee(keyPairZero.address, sendTxMessages);
+    console.log('fees', fees);
+    console.log('standardFeeAmount', config_1.tokens.standardFeeAmount());
+    console.log('minGasPrice', config_1.tokens.minGasPrice.toString());
 };
 // cosmosjs send
 const mainSend = async () => {
@@ -440,8 +501,8 @@ const testFile = async () => {
     const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
     const fileWritePath = path_1.default.resolve(SRC_ROOT, `new_${imageFileName}`);
     console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
-    let buff = fs_1.default.readFileSync(fileReadPath);
-    let base64dataOriginal = buff.toString('base64');
+    const buff = fs_1.default.readFileSync(fileReadPath);
+    const base64dataOriginal = buff.toString('base64');
     const chunksOfBuffers = await FilesystemService.getFileChunks(fileReadPath);
     const fullBuf = Buffer.concat(chunksOfBuffers);
     const base64dataFullBuf = fullBuf.toString('base64');
@@ -1028,8 +1089,8 @@ const testItWorking = async (filename) => {
 };
 const main = async () => {
     let resolvedChainID;
-    // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
@@ -1050,6 +1111,7 @@ const main = async () => {
         // ppNodePort: '8141',
         // pp b
         ppNodeUrl: 'http://52.14.150.146', ppNodePort: '8159' }));
+    // await evmSend();
     const hdPathIndex = 0;
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
@@ -1070,9 +1132,10 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    await getBalanceCardMetrics(hdPathIndex);
+    // await getBalanceCardMetrics(hdPathIndex);
+    // await simulateSend();
     // await mainSdsPrepay(hdPathIndex);
-    // await mainSend();
+    await mainSend();
     // await testUploadRequest();
     // 100000000 100 M
     //   3500000 3.5 M

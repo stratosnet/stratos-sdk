@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import * as accounts from './accounts';
-import { hdVault } from './config';
-import { mnemonic } from './hdVault';
+import { hdVault, tokens } from './config';
+import { mnemonic, wallet } from './hdVault';
 import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 import * as cosmosWallet from './hdVault/cosmosWallet';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/keyManager';
@@ -16,6 +16,7 @@ import * as FilesystemService from './services/filesystem';
 import { log, delay } from './services/helpers';
 import * as Network from './services/network';
 import * as transactions from './transactions';
+import * as evm from './transactions/evm';
 import * as transactionTypes from './transactions/types';
 import * as validators from './validators';
 
@@ -60,6 +61,85 @@ const mainFour = async () => {
 
   // const keyPairOne = await deriveKeyPair(1, password, encryptedMasterKeySeedString);
   // console.log('keyPairOne', keyPairOne);
+};
+
+const evmSend = async () => {
+  // Sdk.init({
+  //   ...sdkEnvTest,
+  //   ...{
+  //     restUrl: 'http://localhost:1317',
+  //     rpcUrl: 'http://localhost:26657',
+  //     chainId: 'test-chain',
+  //   },
+  // });
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const fromAddress = keyPairZero.address;
+
+  const serialized = masterKeySeed.encryptedWalletInfo;
+
+  const _cosmosClient = await getCosmos(serialized, password);
+
+  const { sequence } = await _cosmosClient.getSequence(fromAddress);
+
+  const payload = evm.DynamicFeeTx.fromPartial({
+    chainId: '2048',
+    nonce: sequence,
+    gasFeeCap: (1_000_000_000).toString(),
+    gas: 21_000,
+    to: '0x000000000000000000000000000000000000dEaD',
+    value: '1',
+  });
+  console.log('simulated gas', await _cosmosClient.execEvm(payload, keyPairZero, true));
+  const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
+  if (signedTx) {
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('broadcasting result!', result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
+const simulateSend = async () => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+
+  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const fromAddress = keyPairZero.address;
+
+  const sendAmount = 0.2;
+
+  const sendTxMessages = await transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: keyPairZero.address },
+  ]);
+
+  console.log('keyPairZero.address', keyPairZero.address);
+
+  const fees = await transactions.getStandardFee(keyPairZero.address, sendTxMessages);
+
+  console.log('fees', fees);
+  console.log('standardFeeAmount', tokens.standardFeeAmount());
+  console.log('minGasPrice', tokens.minGasPrice.toString());
 };
 
 // cosmosjs send
@@ -543,8 +623,8 @@ const testFile = async () => {
   const fileWritePath = path.resolve(SRC_ROOT, `new_${imageFileName}`);
   console.log('🚀 ~ file: run.ts ~ line 631 ~ testFile ~ fileReadPath', fileReadPath);
 
-  let buff = fs.readFileSync(fileReadPath);
-  let base64dataOriginal = buff.toString('base64');
+  const buff = fs.readFileSync(fileReadPath);
+  const base64dataOriginal = buff.toString('base64');
 
   const chunksOfBuffers = await FilesystemService.getFileChunks(fileReadPath);
   const fullBuf = Buffer.concat(chunksOfBuffers);
@@ -1405,8 +1485,8 @@ const testItWorking = async (filename: string) => {
 const main = async () => {
   let resolvedChainID: string;
 
-  // const sdkEnv = sdkEnvTest;
-  const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvDev;
 
   Sdk.init({ ...sdkEnv });
 
@@ -1435,6 +1515,8 @@ const main = async () => {
     ppNodeUrl: 'http://52.14.150.146',
     ppNodePort: '8159',
   });
+
+  // await evmSend();
 
   const hdPathIndex = 0;
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1466,11 +1548,13 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
-  await getBalanceCardMetrics(hdPathIndex);
+  // await getBalanceCardMetrics(hdPathIndex);
+
+  // await simulateSend();
 
   // await mainSdsPrepay(hdPathIndex);
 
-  // await mainSend();
+  await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M

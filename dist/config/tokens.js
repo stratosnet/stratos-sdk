@@ -1,18 +1,19 @@
 "use strict";
-// 1 STOS = 10^18 wei = 10^9Gwei for new denom of stchain
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.standardFeeAmount = exports.defaultGasAmount = exports.baseGasAmount = exports.perMsgGasAmount = exports.decimalShortPrecision = exports.minGasPrice = exports.decimalPrecision = void 0;
+exports.standardFeeAmount = exports.defaultGasAmount = exports.baseGasAmount = exports.perMsgGasAmount = exports.decimalShortPrecision = exports.gasAdjustment = exports.minGasPrice = exports.decimalPrecision = void 0;
+const ethers_1 = require("ethers");
+// 1 STOS = 10^18 wei = 10^9Gwei for new denom of stchain
 // WEI and GWEI
 exports.decimalPrecision = 18;
-// export const minGasPrice = 10_000_000; // wei or 0.01gwei for chain itself
-exports.minGasPrice = 10000000000; // wei or 1gwei for tropos
+exports.minGasPrice = ethers_1.ethers.utils.parseUnits('1', 9); // wei or 1gwei for tropos
+exports.gasAdjustment = 1.4; // adjustment for gas mult as non deterministic simulate
 // ui
 exports.decimalShortPrecision = 4;
 exports.perMsgGasAmount = 100000;
 exports.baseGasAmount = 500000;
 exports.defaultGasAmount = exports.baseGasAmount + exports.perMsgGasAmount * 1;
 const standardFeeAmount = (gas = exports.defaultGasAmount) => {
-    return exports.minGasPrice * gas;
+    return exports.minGasPrice.mul(gas).toNumber();
 };
 exports.standardFeeAmount = standardFeeAmount;
 //# sourceMappingURL=tokens.js.map

@@ -1,16 +1,27 @@
+import { fromBech32, toHex } from '@cosmjs/encoding';
 import { GeneratedType } from '@cosmjs/proto-signing';
-import { defaultRegistryTypes } from '@cosmjs/stargate';
-import { DeliverTxResponse } from '@cosmjs/stargate';
+import { defaultRegistryTypes, DeliverTxResponse } from '@cosmjs/stargate';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Any } from 'cosmjs-types/google/protobuf/any';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
-import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
+import {
+  baseGasAmount,
+  decimalPrecision,
+  perMsgGasAmount,
+  standardFeeAmount,
+  minGasPrice,
+  gasAdjustment,
+} from '../config/tokens';
 // import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
 import { getValidatorsBondedToDelegator } from '../validators';
+import * as evm from './evm';
 import * as Types from './types';
+
+const maxMessagesPerTx = 500;
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
@@ -23,7 +34,7 @@ export const getStratosTransactionRegistryTypes = () => {
   const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
     [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
-
+    ...evm.registryTypes,
     // [Types.TxMsgTypes.PotWithdraw, Coin],
     // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
 
@@ -70,8 +81,8 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   }
 };
 
-export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
-  const gas = baseGasAmount + perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+export const getStandardDefaultFee = (): Types.TransactionFee => {
+  const gas = baseGasAmount + perMsgGasAmount; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
 
   // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
   // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
@@ -83,9 +94,45 @@ export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
     amount: feeAmount,
     gas: `${gas}`,
   };
+  console.log('standard default fee', fee);
 
-  console.log('fee', fee);
   return fee;
+};
+
+export const getStandardFee = async (
+  signerAddress?: string,
+  txMessages?: Types.TxMessage[],
+): Promise<Types.TransactionFee> => {
+  if (!txMessages || !signerAddress) {
+    return getStandardDefaultFee();
+  }
+
+  if (txMessages.length > maxMessagesPerTx) {
+    throw new Error(
+      `Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`,
+    );
+  }
+
+  try {
+    const client = await getCosmos();
+    const gas = await client.simulate(signerAddress, txMessages, '');
+    const estimatedGas = Math.round(gas * gasAdjustment);
+
+    const amount = minGasPrice.mul(estimatedGas).toString();
+
+    const feeAmount = [{ amount, denom: stratosDenom }];
+    const fees = {
+      amount: feeAmount,
+      gas: `${estimatedGas}`,
+    };
+    return fees;
+  } catch (error) {
+    throw new Error(
+      `Could not simutlate the fee calculation. Error details: ${
+        (error as Error).message || JSON.stringify(error)
+      }`,
+    );
+  }
 };
 
 export const sign = async (
@@ -94,7 +141,8 @@ export const sign = async (
   memo = '',
   givenFee?: Types.TransactionFee,
 ): Promise<TxRaw> => {
-  const fee = givenFee ? givenFee : getStandardFee(txMessages.length);
+  // eslint-disable-next-line @typescript-eslint/await-thenable
+  const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
 
   const client = await getCosmos();
 

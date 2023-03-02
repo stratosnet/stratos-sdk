@@ -14,7 +14,8 @@ declare global {
     }
 }
 export declare const broadcast: (signedTx: TxRaw) => Promise<DeliverTxResponse>;
-export declare const getStandardFee: (numberOfMessages?: number) => Types.TransactionFee;
+export declare const getStandardDefaultFee: () => Types.TransactionFee;
+export declare const getStandardFee: (signerAddress?: string, txMessages?: Types.TxMessage[]) => Promise<Types.TransactionFee>;
 export declare const sign: (address: string, txMessages: Types.TxMessage[], memo?: string, givenFee?: Types.TransactionFee) => Promise<TxRaw>;
 export declare const getStandardAmount: (amounts: number[]) => Types.AmountType[];
 export declare const getSendTx: (keyPairAddress: string, sendPayload: Types.SendTxPayload[]) => Promise<Types.SendTxMessage[]>;

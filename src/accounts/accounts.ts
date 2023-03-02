@@ -251,6 +251,7 @@ export const getMaxAvailableBalance = async (
   const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = createBigNumber(currentBalance);
 
+  // NOTE: Do we need this?
   if (balanceInWei.gt(0)) {
     const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
     return balance;
