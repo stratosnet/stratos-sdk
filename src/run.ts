@@ -373,12 +373,17 @@ const uploadRequest = async () => {
 };
 
 const getAccountTrasactions = async () => {
-  const zeroAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
+  const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  // const zeroAddress = 'st1z90fgwxegaa46x5eu423veupxtygf24yx0zk5p';
 
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+  // "@type": "/cosmos.staking.v1beta1.MsgDelegate",
 
-  console.log('r!!', r.data);
-  console.log('r!!', r.data[1]);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 3, 2);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 
 const getValidators = async () => {
@@ -1521,7 +1526,7 @@ const main = async () => {
   const hdPathIndex = 0;
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
-  console.log('masterKeySeedInfo', masterKeySeedInfo);
+  // console.log('masterKeySeedInfo', masterKeySeedInfo);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
@@ -1554,7 +1559,7 @@ const main = async () => {
 
   // await mainSdsPrepay(hdPathIndex);
 
-  await mainSend();
+  // await mainSend();
   // await testUploadRequest();
 
   // 100000000 100 M
@@ -1568,6 +1573,7 @@ const main = async () => {
   // uploadRequest();
 
   // testBigInt();
+  await getAccountTrasactions();
 };
 
 main();

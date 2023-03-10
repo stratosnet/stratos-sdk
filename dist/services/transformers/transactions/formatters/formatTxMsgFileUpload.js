@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatTxMsgFileUpload = void 0;
 const formatBaseTx_1 = require("./formatBaseTx");
-const formatTxMsgFileUpload = (txItem) => {
-    var _a, _b, _c;
-    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txItem);
-    const msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
-    const msgFrom = ((_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.reporter) || baseTx.eventSender || '';
-    return Object.assign(Object.assign({}, baseTx), { sender: msgFrom });
+const formatTxMsgFileUpload = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
+    // const msgFrom = msg?.value?.reporter || baseTx.eventSender || '';
+    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txResponseItemTxBodyMessage, txResponseItemLogEntry);
+    const toAddress = 'n/a';
+    const msgFrom = baseTx.eventSender || baseTx.sender || 'n/a';
+    return Object.assign(Object.assign({}, baseTx), { sender: msgFrom, to: toAddress });
 };
 exports.formatTxMsgFileUpload = formatTxMsgFileUpload;
 //# sourceMappingURL=formatTxMsgFileUpload.js.map

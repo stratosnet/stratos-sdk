@@ -1,3 +1,4 @@
+import { ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
 export interface BalanceCardMetrics {
     available: string;
@@ -20,4 +21,4 @@ export declare const getBalanceCardMetricValue: (denom?: string | undefined, amo
 export declare const getOzoneMetricValue: (denom?: string | undefined, amount?: string | undefined) => string;
 export declare const getBalanceCardMetrics: (keyPairAddress: string) => Promise<BalanceCardMetrics>;
 export declare const getMaxAvailableBalance: (keyPairAddress: string, requestedDenom: string, decimals?: number) => Promise<string>;
-export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number) => Promise<TxTypes.ParsedTxData>;
+export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number) => Promise<ParsedTxData>;

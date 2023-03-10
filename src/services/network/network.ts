@@ -1,5 +1,7 @@
+import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
+import qs from 'qs';
 import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
 import { log } from '../../services/helpers';
@@ -99,8 +101,14 @@ export const apiGet = async (
 ): Promise<Types.NetworkAxiosDataResult> => {
   let axiosResponse;
 
+  const myParamsSerializer = function (params: unknown[]) {
+    return qs.stringify(params, { arrayFormat: 'repeat' });
+  };
+
+  const myConfig = { ...config, paramsSerializer: myParamsSerializer };
+
   try {
-    axiosResponse = await _axios.get(url, config);
+    axiosResponse = await _axios.get(url, myConfig);
   } catch (err) {
     return { error: { message: (err as Error).message } };
   }
@@ -208,22 +216,26 @@ export const submitTransaction = async <T extends Types.TransactionData>(
 export const getTxListBlockchain = async (
   address: string,
   type: string,
-  page = 1,
+  givenPage = 1,
+  pageLimit = 5,
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.RestTxListDataResult> => {
-  // const url = `${getRestRoute()}/txs?message.action=send&message.sender=${address}`;
+): Promise<Types.RestTxHistoryDataResult> => {
+  const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
 
-  const url = `${getRestRoute()}/txs`;
-
-  const params: { page: number; 'message.sender': string; 'message.action'?: string; limit: number } = {
-    page,
-    limit: 3,
-    'message.sender': address,
-  };
+  const givenEvents = [`message.sender='${address}'`];
 
   if (type) {
-    params['message.action'] = type;
+    const msgTypeActionParameter = `message.action='${type}'`;
+    givenEvents.push(msgTypeActionParameter);
   }
+
+  const params = {
+    events: givenEvents,
+    'pagination.limit': pageLimit,
+    'pagination.offset': givenPage,
+    'pagination.count_total': true,
+    order_by: 'ORDER_BY_DESC',
+  };
 
   const dataResult = await apiGet(url, {
     ...config,
@@ -251,6 +263,7 @@ export const getTxList = async (
   // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
   // const url = `${getExplorerRoute()}/api/cleanup`;
   const url = `${getExplorerRoute()}/api/getAccountHistory`;
+  console.log('url 1', url);
 
   const params: { page: number; account: string; limit: number; operation?: string } = {
     page,

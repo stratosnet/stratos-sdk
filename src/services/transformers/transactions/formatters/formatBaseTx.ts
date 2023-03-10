@@ -1,53 +1,44 @@
 import * as TxTypes from '../../../../transactions/types';
 import * as NetworkTypes from '../../../network/types';
 import * as Types from '../../transactions/types';
-import { formatTxAmounts, formatTxFee } from './formatTxAmounts';
+import { emptyAmounts } from './formatTxAmounts';
 
-export const formatBaseTx = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
-  const msg = txItem.tx?.value?.msg[0];
-
-  if (!msg) {
-    throw Error('There is no single message in the transaction!');
-  }
-
-  const block = txItem.height;
-  const hash = txItem.txhash;
-  const time = txItem.timestamp;
-
-  const dateTimeString = new Date(time).toLocaleString();
-
-  const attributes = txItem?.logs[0]?.events[0]?.attributes;
-
+const findSenderFromLogEvents = (txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog): string => {
   let eventSender = '';
 
-  if (Array.isArray(attributes)) {
-    attributes.forEach(element => {
-      if (!eventSender && element.key === 'sender') {
-        eventSender = element.value;
-      }
-    });
+  if (!txResponseItemLogEntry) {
+    return eventSender;
   }
 
-  const txType = msg.type;
+  txResponseItemLogEntry.events.forEach(({ attributes }) => {
+    if (Array.isArray(attributes)) {
+      attributes.forEach(element => {
+        if (!eventSender && element.key === 'sender') {
+          eventSender = element.value;
+        }
+      });
+    }
+  });
 
+  return eventSender;
+};
+
+export const formatBaseTx = (
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  const eventSender = findSenderFromLogEvents(txResponseItemLogEntry);
+  const sender = '';
+  const msgTo = '';
+  const txType = txResponseItemTxBodyMessage['@type'];
   const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-
-  const txAmount = formatTxAmounts(txItem);
-  const txFee = formatTxFee(txItem);
-
-  const msgTo = msg?.value?.to_address || '';
 
   return {
     eventSender,
-    sender: '',
+    sender,
     to: msgTo,
     type: resolvedType,
     txType,
-    block: `${block}`,
-    amount: txAmount,
-    time: dateTimeString,
-    hash,
-    txFee,
-    originalTransactionData: txItem,
+    amounts: emptyAmounts,
   };
 };

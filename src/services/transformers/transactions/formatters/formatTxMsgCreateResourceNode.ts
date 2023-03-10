@@ -1,18 +1,20 @@
+import * as NetworkTypes from '../../../network/types';
 import * as Types from '../types';
 import { formatBaseTx } from './formatBaseTx';
-import * as NetworkTypes from '../../../network/types';
 
 export const formatTxMsgCreateResourceNode = (
-  txItem: NetworkTypes.BlockChainTx,
-): Types.FormattedBlockChainTx => {
-  const baseTx = formatBaseTx(txItem);
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
 
-  const msg = txItem.tx?.value?.msg[0];
+  const toAddress = 'n/a';
 
-  const msgFrom = msg?.value?.reporter || baseTx.eventSender || '';
+  const msgFrom = baseTx.eventSender || baseTx.sender || 'n/a';
 
   return {
     ...baseTx,
     sender: msgFrom,
+    to: toAddress,
   };
 };

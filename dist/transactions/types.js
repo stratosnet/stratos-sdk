@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TxHistoryTypesMap = exports.BlockChainTxMsgTypesMap = exports.TxMsgTypesMap = exports.TxHistoryTypes = exports.HistoryTxType = exports.TxMsgTypes = void 0;
+// import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 var TxMsgTypes;
 (function (TxMsgTypes) {
     TxMsgTypes["Account"] = "/cosmos.auth.v1beta1.BaseAccount";

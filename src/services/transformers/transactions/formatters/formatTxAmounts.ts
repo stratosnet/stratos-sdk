@@ -3,13 +3,36 @@ import { decimalPrecision } from '../../../../config/tokens';
 import { create as createBigNumber, fromWei, ROUND_DOWN } from '../../../../services/bigNumber';
 import * as NetworkTypes from '../../../network/types';
 
-const caclulateAmount = (singleAmount: string) => {
+export const emptyAmounts = [{ amount: '0', denom: 'n/a' }];
+
+export const caclulateAmount = (singleAmount: string) => {
   const balanceInWei = createBigNumber(singleAmount);
 
   const txAmount = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
   const currentAmount = `${txAmount} ${stratosTopDenom.toUpperCase()}`;
 
   return currentAmount || '0';
+};
+
+export const formatTxMultipleAmounts = (multipleAmounts: NetworkTypes.Amount[]): NetworkTypes.Amount[] => {
+  if (!Array.isArray(multipleAmounts)) {
+    return emptyAmounts;
+  }
+
+  const amounts = multipleAmounts.map((element: NetworkTypes.Amount) => {
+    const currentAmount = caclulateAmount(`${element.amount}`);
+
+    const calculatedAmount = currentAmount || '0';
+    return { amount: calculatedAmount.trim(), denom: element.denom };
+  });
+
+  return amounts.length ? amounts : emptyAmounts;
+};
+
+export const formatTxSingleAmount = (singleAmount: NetworkTypes.Amount): NetworkTypes.Amount[] => {
+  const calculatedAmount = caclulateAmount(`${singleAmount}`);
+
+  return [{ amount: calculatedAmount.trim(), denom: singleAmount.denom }];
 };
 
 export const formatTxAmounts = (txItem: NetworkTypes.BlockChainTx): string => {
@@ -39,13 +62,13 @@ export const formatTxAmounts = (txItem: NetworkTypes.BlockChainTx): string => {
   return currentAmount || '0';
 };
 
-export const formatTxFee = (txItem: NetworkTypes.BlockChainTx): string => {
-  const fee = txItem.tx?.value?.fee;
+export const formatTxFee = (feeInfo: NetworkTypes.RestTxFeeInfo): string[] => {
+  const { amount } = feeInfo;
 
-  const multipleFees = fee?.amount;
+  const multipleFees = amount;
 
   if (!Array.isArray(multipleFees)) {
-    return '0';
+    return ['0'];
   }
 
   const amounts = multipleFees.map(element => {
@@ -54,7 +77,5 @@ export const formatTxFee = (txItem: NetworkTypes.BlockChainTx): string => {
     return currentAmount || '0';
   });
 
-  const currentAmount = amounts.join(' ').trim();
-
-  return currentAmount || '0';
+  return amounts;
 };

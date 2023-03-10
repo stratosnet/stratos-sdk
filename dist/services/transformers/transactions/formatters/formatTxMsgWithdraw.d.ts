@@ -1,3 +1,3 @@
-import * as Types from '../types';
 import * as NetworkTypes from '../../../network/types';
-export declare const formatTxMsgWithdraw: (txItem: NetworkTypes.BlockChainTx) => Types.FormattedBlockChainTx;
+import * as Types from '../types';
+export declare const formatTxMsgWithdraw: (txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage, txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog) => Types.FormattedBlockChainTxMessage;

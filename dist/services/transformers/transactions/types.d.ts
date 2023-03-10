@@ -1,16 +1,26 @@
 import * as TxTypes from '../../../transactions/types';
 import * as NetworkTypes from '../../network/types';
-export type TxFormatter = (txItem: NetworkTypes.BlockChainTx) => FormattedBlockChainTx;
-export interface FormattedBlockChainTx {
+export type TxFormatter = (txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage, txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog) => FormattedBlockChainTxMessage;
+export interface FormattedBlockChainTxMessage {
     eventSender?: string;
     sender: string;
     to: string;
     type: TxTypes.HistoryTxType;
     txType: string;
+    amounts: NetworkTypes.Amount[];
+}
+export interface FormattedBlockChainTx {
     block: string;
-    amount: string;
     time: string;
     hash: string;
-    txFee: string;
-    originalTransactionData: NetworkTypes.BlockChainTx;
+    txFee: string[];
+    memo: string;
+    statusCode: number;
+    originalTransactionData: NetworkTypes.RestTxResponseTx;
+    txMessages: FormattedBlockChainTxMessage[];
+}
+export interface ParsedTxData {
+    data: FormattedBlockChainTx[];
+    total: string;
+    page: number;
 }

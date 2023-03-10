@@ -1,5 +1,6 @@
 export const now = () => new Date().toLocaleString();
 
+// NOTE - did log for console output - use -> console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 export const log = (message: string, ...rest: any) => {
   console.log(
     `"${now()}" - ${message}`,

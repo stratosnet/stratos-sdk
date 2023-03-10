@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChainId = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
+const qs_1 = __importDefault(require("qs"));
 const config_1 = require("../../config");
 const Sdk_1 = __importDefault(require("../../Sdk"));
 const helpers_1 = require("../../services/helpers");
@@ -80,8 +81,12 @@ const apiPost = async (url, data, config) => {
 exports.apiPost = apiPost;
 const apiGet = async (url, config) => {
     let axiosResponse;
+    const myParamsSerializer = function (params) {
+        return qs_1.default.stringify(params, { arrayFormat: 'repeat' });
+    };
+    const myConfig = Object.assign(Object.assign({}, config), { paramsSerializer: myParamsSerializer });
     try {
-        axiosResponse = await _axios.get(url, config);
+        axiosResponse = await _axios.get(url, myConfig);
     }
     catch (err) {
         return { error: { message: err.message } };
@@ -156,17 +161,20 @@ const submitTransaction = async (delegatorAddr, data, config) => {
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;
-const getTxListBlockchain = async (address, type, page = 1, config) => {
-    // const url = `${getRestRoute()}/txs?message.action=send&message.sender=${address}`;
-    const url = `${getRestRoute()}/txs`;
-    const params = {
-        page,
-        limit: 3,
-        'message.sender': address,
-    };
+const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, config) => {
+    const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+    const givenEvents = [`message.sender='${address}'`];
     if (type) {
-        params['message.action'] = type;
+        const msgTypeActionParameter = `message.action='${type}'`;
+        givenEvents.push(msgTypeActionParameter);
     }
+    const params = {
+        events: givenEvents,
+        'pagination.limit': pageLimit,
+        'pagination.offset': givenPage,
+        'pagination.count_total': true,
+        order_by: 'ORDER_BY_DESC',
+    };
     const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
     return dataResult;
 };
@@ -184,6 +192,7 @@ const getTxList = async (address, type, page = 1, config) => {
     // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
     // const url = `${getExplorerRoute()}/api/cleanup`;
     const url = `${getExplorerRoute()}/api/getAccountHistory`;
+    console.log('url 1', url);
     const params = {
         page,
         account: address,

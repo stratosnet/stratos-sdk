@@ -1,16 +1,22 @@
+import * as NetworkTypes from '../../../network/types';
 import * as Types from '../types';
 import { formatBaseTx } from './formatBaseTx';
-import * as NetworkTypes from '../../../network/types';
 
-export const formatTxMsgWithdraw = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
-  const baseTx = formatBaseTx(txItem);
+export const formatTxMsgWithdraw = (
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  // const msgFrom = msg?.value?.reporter || baseTx.eventSender || '';
 
-  const msg = txItem.tx?.value?.msg[0];
+  const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
 
-  const msgFrom = msg?.value?.reporter || baseTx.eventSender || '';
+  const toAddress = 'n/a';
+
+  const msgFrom = baseTx.eventSender || baseTx.sender || 'n/a';
 
   return {
     ...baseTx,
     sender: msgFrom,
+    to: toAddress,
   };
 };

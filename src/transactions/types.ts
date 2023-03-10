@@ -1,6 +1,7 @@
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+
+// import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 
 export enum TxMsgTypes {
   Account = '/cosmos.auth.v1beta1.BaseAccount', // Account 10
@@ -112,13 +113,13 @@ export interface EmptyObject {
   [key: string]: any;
 }
 
-export interface ParsedTxItem extends FormattedBlockChainTx {}
+// export interface ParsedTxItem extends FormattedBlockChainTx {}
 
-export interface ParsedTxData {
-  data: FormattedBlockChainTx[];
-  total: string;
-  page: number;
-}
+// export interface ParsedTxData {
+//   data: FormattedBlockChainTx[][];
+//   total: string;
+//   page: number;
+// }
 
 export interface BroadcastResult extends DeliverTxResponse {}
 
