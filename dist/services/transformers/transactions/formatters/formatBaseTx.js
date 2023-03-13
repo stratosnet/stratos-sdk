@@ -25,6 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatBaseTx = void 0;
 const TxTypes = __importStar(require("../../../../transactions/types"));
+// import * as TxTypes from '../types';
 const formatTxAmounts_1 = require("./formatTxAmounts");
 const findSenderFromLogEvents = (txResponseItemLogEntry) => {
     let eventSender = '';
@@ -47,8 +48,10 @@ const formatBaseTx = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
     const sender = '';
     const msgTo = '';
     const txType = txResponseItemTxBodyMessage['@type'];
+    console.log('txType', txType);
     const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-    return {
+    console.log('resolvedType', resolvedType);
+    const res = {
         eventSender,
         sender,
         to: msgTo,
@@ -56,6 +59,7 @@ const formatBaseTx = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
         txType,
         amounts: formatTxAmounts_1.emptyAmounts,
     };
+    return res;
 };
 exports.formatBaseTx = formatBaseTx;
 //# sourceMappingURL=formatBaseTx.js.map

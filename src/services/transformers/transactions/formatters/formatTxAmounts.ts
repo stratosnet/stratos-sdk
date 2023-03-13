@@ -30,9 +30,11 @@ export const formatTxMultipleAmounts = (multipleAmounts: NetworkTypes.Amount[]):
 };
 
 export const formatTxSingleAmount = (singleAmount: NetworkTypes.Amount): NetworkTypes.Amount[] => {
-  const calculatedAmount = caclulateAmount(`${singleAmount}`);
+  const { amount, denom } = singleAmount;
 
-  return [{ amount: calculatedAmount.trim(), denom: singleAmount.denom }];
+  const calculatedAmount = caclulateAmount(`${amount}`);
+
+  return [{ amount: calculatedAmount.trim(), denom }];
 };
 
 export const formatTxAmounts = (txItem: NetworkTypes.BlockChainTx): string => {

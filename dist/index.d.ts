@@ -6,6 +6,7 @@ export * as cosmosService from './services/cosmos';
 export * as networkService from './services/network/network';
 export * as networkTypes from './services/network/types';
 export * as Transformers from './services/transformers';
+export * as transformerTypes from './services/transformers/transactions/types';
 export * as walletService from './services/walletService';
 export * as transactions from './transactions';
 export * as transactionTypes from './transactions/types';

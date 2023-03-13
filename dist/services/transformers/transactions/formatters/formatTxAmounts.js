@@ -25,8 +25,9 @@ const formatTxMultipleAmounts = (multipleAmounts) => {
 };
 exports.formatTxMultipleAmounts = formatTxMultipleAmounts;
 const formatTxSingleAmount = (singleAmount) => {
-    const calculatedAmount = (0, exports.caclulateAmount)(`${singleAmount}`);
-    return [{ amount: calculatedAmount.trim(), denom: singleAmount.denom }];
+    const { amount, denom } = singleAmount;
+    const calculatedAmount = (0, exports.caclulateAmount)(`${amount}`);
+    return [{ amount: calculatedAmount.trim(), denom }];
 };
 exports.formatTxSingleAmount = formatTxSingleAmount;
 const formatTxAmounts = (txItem) => {
