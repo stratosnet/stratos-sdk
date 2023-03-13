@@ -1,6 +1,7 @@
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+
+// import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 
 export enum TxMsgTypes {
   Account = '/cosmos.auth.v1beta1.BaseAccount', // Account 10
@@ -90,35 +91,25 @@ export const BlockChainTxMsgTypesMap = new Map<number, string>([
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
-  [TxHistoryTypes.SdsAll, HistoryTxType.All],
-  // [TxMsgTypes.Account, HistoryTxType.Account],
-  [TxHistoryTypes.Transfer, HistoryTxType.Transfer],
-  [TxHistoryTypes.Delegate, HistoryTxType.Delegate],
-  [TxHistoryTypes.Undelegate, HistoryTxType.Undelegate],
-  [TxHistoryTypes.GetReward, HistoryTxType.GetReward],
-  // [TxMsgTypes.CreateValidator, HistoryTxType.CreateValidator],
-  [TxHistoryTypes.SdsPrepay, HistoryTxType.SdsPrepay],
-  // [TxMsgTypes.SdsFileUpload, HistoryTxType.SdsFileUpload],
-  // [TxMsgTypes.PotVolumeReport, HistoryTxType.PotVolumeReport],
-  // [TxMsgTypes.PotWithdraw, HistoryTxType.PotWithdraw],
-  // [TxMsgTypes.RegisterCreateResourceNode, HistoryTxType.RegisterCreateResourceNode],
-  // [TxMsgTypes.RegisterRemoveResourceNode, HistoryTxType.RegisterRemoveResourceNode],
-  // [TxMsgTypes.RegisterCreateIndexingNode, HistoryTxType.RegisterCreateIndexingNode],
-  // [TxMsgTypes.RegisterRemoveIndexingNode, HistoryTxType.RegisterRemoveIndexingNode],
-  // [TxMsgTypes.RegisterIndexingNodeRegistrationVote, HistoryTxType.RegisterIndexingNodeRegistrationVote],
+  [TxMsgTypes.SdsAll, HistoryTxType.All],
+  [TxMsgTypes.Send, HistoryTxType.Transfer],
+  [TxMsgTypes.Delegate, HistoryTxType.Delegate],
+  [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
+  [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
+  [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
 ]);
 
 export interface EmptyObject {
   [key: string]: any;
 }
 
-export interface ParsedTxItem extends FormattedBlockChainTx {}
+// export interface ParsedTxItem extends FormattedBlockChainTx {}
 
-export interface ParsedTxData {
-  data: FormattedBlockChainTx[];
-  total: string;
-  page: number;
-}
+// export interface ParsedTxData {
+//   data: FormattedBlockChainTx[][];
+//   total: string;
+//   page: number;
+// }
 
 export interface BroadcastResult extends DeliverTxResponse {}
 

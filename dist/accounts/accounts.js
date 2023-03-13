@@ -201,12 +201,9 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     return balance;
 };
 exports.getMaxAvailableBalance = getMaxAvailableBalance;
-const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page) => {
-    // const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
+const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
     const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-    // const txListResult = await getTxList(address, txType, page);
-    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page);
-    // console.log('🚀 ~ file: accounts.ts ~ line 252 ~ txListResult', JSON.stringify(txListResult, null, 2));
+    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit);
     const { response, error } = txListResult;
     if (error) {
         throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
@@ -215,18 +212,22 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
         throw new Error('Could not fetch tx history');
     }
     const parsedData = [];
-    const { txs: data = [], total_count: total } = response;
-    console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
-    data.forEach(txItem => {
+    const { tx_responses: data = [], pagination } = response;
+    console.log('getAccountTrasactions response', response);
+    const { total } = pagination;
+    data.forEach(txResponseItem => {
         try {
-            const parsed = (0, transactions_1.transformTx)(txItem);
+            const parsed = (0, transactions_1.transformTx)(txResponseItem);
             parsedData.push(parsed);
         }
         catch (err) {
             console.log(`Parsing error: ${err.message}`);
         }
     });
-    const result = { data: parsedData, total, page: page || 1 };
+    const totalUnformatted = parseInt(total) / pageLimit;
+    const totalPages = Math.ceil(totalUnformatted);
+    const result = { data: parsedData, total, page: page || 1, totalPages };
+    console.dir(result, { depth: null, colors: true, maxArrayLength: null });
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;

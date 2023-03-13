@@ -22,7 +22,7 @@ import {
   sendUserRequestGetOzone,
 } from '../services/network';
 import { transformTx } from '../services/transformers/transactions';
-import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
 
 // import * as Types from './types';
@@ -265,15 +265,12 @@ export const getMaxAvailableBalance = async (
 export const getAccountTrasactions = async (
   address: string,
   type = TxTypes.HistoryTxType.All,
-  page?: number,
-): Promise<TxTypes.ParsedTxData> => {
-  // const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
-
+  page = 1,
+  pageLimit = 5,
+): Promise<ParsedTxData> => {
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
-  // const txListResult = await getTxList(address, txType, page);
-  const txListResult = await getTxListBlockchain(address, txType, page);
-  // console.log('🚀 ~ file: accounts.ts ~ line 252 ~ txListResult', JSON.stringify(txListResult, null, 2));
+  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit);
 
   const { response, error } = txListResult;
 
@@ -287,19 +284,25 @@ export const getAccountTrasactions = async (
 
   const parsedData: FormattedBlockChainTx[] = [];
 
-  const { txs: data = [], total_count: total } = response;
-  console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+  const { tx_responses: data = [], pagination } = response;
+  console.log('getAccountTrasactions response', response);
+  const { total } = pagination;
 
-  data.forEach(txItem => {
+  data.forEach(txResponseItem => {
     try {
-      const parsed = transformTx(txItem);
+      const parsed = transformTx(txResponseItem);
       parsedData.push(parsed);
     } catch (err) {
       console.log(`Parsing error: ${(err as Error).message}`);
     }
   });
 
-  const result = { data: parsedData, total, page: page || 1 };
+  const totalUnformatted = parseInt(total) / pageLimit;
+  const totalPages = Math.ceil(totalUnformatted);
+
+  const result = { data: parsedData, total, page: page || 1, totalPages };
+
+  console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 
   return result;
 };

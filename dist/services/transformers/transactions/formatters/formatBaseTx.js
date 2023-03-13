@@ -25,44 +25,41 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatBaseTx = void 0;
 const TxTypes = __importStar(require("../../../../transactions/types"));
+// import * as TxTypes from '../types';
 const formatTxAmounts_1 = require("./formatTxAmounts");
-const formatBaseTx = (txItem) => {
-    var _a, _b, _c, _d, _e;
-    const msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
-    if (!msg) {
-        throw Error('There is no single message in the transaction!');
-    }
-    const block = txItem.height;
-    const hash = txItem.txhash;
-    const time = txItem.timestamp;
-    const dateTimeString = new Date(time).toLocaleString();
-    const attributes = (_d = (_c = txItem === null || txItem === void 0 ? void 0 : txItem.logs[0]) === null || _c === void 0 ? void 0 : _c.events[0]) === null || _d === void 0 ? void 0 : _d.attributes;
+const findSenderFromLogEvents = (txResponseItemLogEntry) => {
     let eventSender = '';
-    if (Array.isArray(attributes)) {
-        attributes.forEach(element => {
-            if (!eventSender && element.key === 'sender') {
-                eventSender = element.value;
-            }
-        });
+    if (!txResponseItemLogEntry) {
+        return eventSender;
     }
-    const txType = msg.type;
+    txResponseItemLogEntry.events.forEach(({ attributes }) => {
+        if (Array.isArray(attributes)) {
+            attributes.forEach(element => {
+                if (!eventSender && element.key === 'sender') {
+                    eventSender = element.value;
+                }
+            });
+        }
+    });
+    return eventSender;
+};
+const formatBaseTx = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
+    const eventSender = findSenderFromLogEvents(txResponseItemLogEntry);
+    const sender = '';
+    const msgTo = '';
+    const txType = txResponseItemTxBodyMessage['@type'];
+    console.log('txType', txType);
     const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-    const txAmount = (0, formatTxAmounts_1.formatTxAmounts)(txItem);
-    const txFee = (0, formatTxAmounts_1.formatTxFee)(txItem);
-    const msgTo = ((_e = msg === null || msg === void 0 ? void 0 : msg.value) === null || _e === void 0 ? void 0 : _e.to_address) || '';
-    return {
+    console.log('resolvedType', resolvedType);
+    const res = {
         eventSender,
-        sender: '',
+        sender,
         to: msgTo,
         type: resolvedType,
         txType,
-        block: `${block}`,
-        amount: txAmount,
-        time: dateTimeString,
-        hash,
-        txFee,
-        originalTransactionData: txItem,
+        amounts: formatTxAmounts_1.emptyAmounts,
     };
+    return res;
 };
 exports.formatBaseTx = formatBaseTx;
 //# sourceMappingURL=formatBaseTx.js.map

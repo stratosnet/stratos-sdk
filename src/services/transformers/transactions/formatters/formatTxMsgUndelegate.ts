@@ -1,18 +1,27 @@
-import * as Types from '../types';
-import { formatBaseTx } from './formatBaseTx';
 import * as NetworkTypes from '../../../network/types';
+import * as Types from '../types';
+import { isUndelegateTxBodyMessage } from '../utils';
+import { formatBaseTx } from './formatBaseTx';
+import { formatTxSingleAmount } from './formatTxAmounts';
 
-export const formatTxMsgUndelegate = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
-  const baseTx = formatBaseTx(txItem);
+export const formatTxMsgUndelegate = (
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
 
-  const msg = txItem.tx?.value?.msg[0];
+  if (!isUndelegateTxBodyMessage(txResponseItemTxBodyMessage)) {
+    return baseTx;
+  }
 
-  const msgFrom = msg?.value?.validator_address || baseTx.eventSender || '';
-  const msgTo = msg?.value?.delegator_address || baseTx.to;
+  const { delegator_address, validator_address, amount } = txResponseItemTxBodyMessage;
+
+  const amounts = formatTxSingleAmount(amount);
 
   return {
     ...baseTx,
-    sender: msgFrom,
-    to: msgTo,
+    sender: validator_address,
+    to: delegator_address,
+    amounts,
   };
 };

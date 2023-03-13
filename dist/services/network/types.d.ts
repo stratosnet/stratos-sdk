@@ -444,3 +444,138 @@ export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
         ozone?: string;
     };
 }
+export interface RestTxFeeInfo {
+    amount: Amount[];
+    gas_limit: string;
+    payer: string;
+    granter: string;
+}
+export interface RestTxAuthInfo {
+    signer_infos: RestTxSignerInfo[];
+    fee: RestTxFeeInfo;
+}
+export interface RestTxSignerInfo {
+    public_key: {
+        ['@type']: string;
+        key: string;
+    };
+    mode_info: {
+        single: {
+            mode: string;
+        };
+    };
+    sequence: string;
+}
+export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
+    response?: RestTxHistoryResponse;
+}
+export interface RestTxHistoryResponse {
+    pagination: {
+        next_key: string;
+        total: string;
+    };
+    txs: RestTx[];
+    tx_responses: RestTxResponse[];
+}
+export interface RestTx {
+    body: RestTxBody;
+    auth_info: RestTxAuthInfo;
+    signatures: string[];
+}
+export interface RestTxResponse {
+    height: string;
+    txhash: string;
+    codespace: string;
+    code: number;
+    data: string;
+    raw_log: string;
+    logs: RestTxResponseLog[];
+    info: string;
+    gas_wanted: string;
+    gas_used: string;
+    tx: RestTxResponseTx;
+    timestamp: string;
+    events: RestTxResponseEvent[];
+}
+export interface RestTxBody {
+    messages: RestTxBodyMessage[];
+    memo: string;
+    timeout_height: string;
+    extension_options: [];
+    non_critical_extension_options: [];
+}
+export interface RestSendTxBody extends RestTxBody {
+    messages: RestSendTxBodyMessage[];
+}
+export interface RestDelegateTxBody extends RestTxBody {
+    messages: RestDelegateTxBodyMessage[];
+}
+export interface RestUndelegateTxBody extends RestTxBody {
+    messages: RestUndelegateTxBodyMessage[];
+}
+export interface RestGetRewardsTxBody extends RestTxBody {
+    messages: RestGetRewardsTxBodyMessage[];
+}
+export interface RestSdsPrepayTxBody extends RestTxBody {
+    messages: RestSdsPrepayTxBodyMessage[];
+}
+export interface RestTxBodyMessage {
+    ['@type']: string;
+}
+export interface RestSendTxBodyMessage extends RestTxBodyMessage {
+    from_address: string;
+    to_address: string;
+    amount: Amount[];
+}
+export interface RestDelegateTxBodyMessage extends RestTxBodyMessage {
+    delegator_address: string;
+    validator_address: string;
+    amount: Amount;
+}
+export interface RestUndelegateTxBodyMessage extends RestDelegateTxBodyMessage {
+}
+export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {
+    delegator_address: string;
+    validator_address: string;
+}
+export interface RestSdsPrepayTxBodyMessage extends RestTxBodyMessage {
+    sender: string;
+    coins: Amount[];
+}
+export interface RestSendTx extends RestTx {
+    body: RestSendTxBody;
+}
+export interface RestDelegateTx {
+    body: RestDelegateTxBody;
+}
+export interface RestUndelegateTx {
+    body: RestUndelegateTxBody;
+}
+export interface RestGetRewardsTx {
+    body: RestGetRewardsTxBody;
+}
+export interface RestSdsPrepayTx {
+    body: RestSdsPrepayTxBody;
+}
+export interface RestTxResponseEventAttribute {
+    key: string;
+    value: string;
+    index: boolean;
+}
+export interface RestTxResponseEvent {
+    type: string;
+    attributes: RestTxResponseEventAttribute[];
+}
+export interface RestTxResponseLog {
+    msg_index: number;
+    log: string;
+    events: RestTxResponseEvent[];
+}
+export interface RestTxResponseTx extends RestTx {
+    ['@type']: string;
+}
+export interface RestTxErrorResponse {
+    code: number;
+    message: string;
+    details: string[];
+}

@@ -1,7 +1,8 @@
 import * as TxTypes from '../../../transactions/types';
+import * as NetworkTypes from '../../network/types';
 import * as Types from '../transactions/types';
 import * as Formatters from './formatters';
-import * as NetworkTypes from '../../network/types';
+import { formatTxFee } from './formatters/formatTxAmounts';
 
 export const TxHistoryTypesMap = new Map<string, Types.TxFormatter>([
   [TxTypes.TxMsgTypes.SdsAll, Formatters.formatTxdDefault], // default.
@@ -30,18 +31,39 @@ export const getTransformer = (txType: TxTypes.TxMsgTypes): Types.TxFormatter =>
   return TxHistoryTypesMap.get(txType) || Formatters.formatTxdDefault;
 };
 
-export const transformTx = (txItem: NetworkTypes.BlockChainTx) => {
-  const transactionType = txItem.tx?.value?.msg[0]?.type as TxTypes.TxMsgTypes;
-  const transactionTransformer = getTransformer(transactionType);
+export const transformTx = (txResponseItem: NetworkTypes.RestTxResponse): Types.FormattedBlockChainTx => {
+  const { code, tx, logs, height: block, txhash: hash, timestamp: time } = txResponseItem;
+  const {
+    body,
+    auth_info: { fee },
+  } = tx;
 
-  let transformedTransaction;
+  const { memo } = body;
 
-  try {
-    transformedTransaction = transactionTransformer(txItem);
-  } catch (err) {
-    console.log(`Could not parse txItem with hash "${txItem.txhash}"`, (err as Error).message);
-    throw new Error(`Could not parse txItem with hash "${txItem.txhash}"`);
-  }
+  const dateTimeString = new Date(time).toLocaleString();
 
-  return transformedTransaction;
+  const transformedTransactionMessages = body.messages.map((bodyMessage, messageIndex) => {
+    const transactionType = bodyMessage['@type'] as TxTypes.TxMsgTypes;
+    const transactionTransformer = getTransformer(transactionType);
+
+    const messageLogEntry = logs.find(logEntry => {
+      return `${logEntry.msg_index}` === `${messageIndex}`;
+    });
+    const transformedTransactionMessage = transactionTransformer(bodyMessage, messageLogEntry);
+
+    return transformedTransactionMessage;
+  });
+
+  const txFee = formatTxFee(fee);
+
+  return {
+    statusCode: code,
+    block,
+    time: dateTimeString,
+    hash,
+    txFee,
+    memo,
+    originalTransactionData: tx,
+    txMessages: transformedTransactionMessages,
+  };
 };

@@ -8,7 +8,7 @@ export declare const getAccountBalance: (address: string, config?: Types.Network
 export declare const getStakingValidators: (address: string, config?: Types.NetworkAxiosConfig) => Promise<Types.AccountsDataResult>;
 export declare const getSubmitTransactionData: <T extends string>(data?: T | undefined) => Types.DataResult;
 export declare const submitTransaction: <T extends string>(delegatorAddr: string, data?: T | undefined, config?: Types.NetworkAxiosConfig) => Promise<Types.SubmitTransactionDataResult>;
-export declare const getTxListBlockchain: (address: string, type: string, page?: number, config?: Types.NetworkAxiosConfig) => Promise<Types.RestTxListDataResult>;
+export declare const getTxListBlockchain: (address: string, type: string, givenPage?: number, pageLimit?: number, config?: Types.NetworkAxiosConfig) => Promise<Types.RestTxHistoryDataResult>;
 /**
  * @param address
  * @deprecated
