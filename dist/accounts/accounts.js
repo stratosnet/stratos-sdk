@@ -224,8 +224,8 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
             console.log(`Parsing error: ${err.message}`);
         }
     });
-    const a = parseInt(total) / pageLimit;
-    const totalPages = Math.ceil(a);
+    const totalUnformatted = parseInt(total) / pageLimit;
+    const totalPages = Math.ceil(totalUnformatted);
     const result = { data: parsedData, total, page: page || 1, totalPages };
     console.dir(result, { depth: null, colors: true, maxArrayLength: null });
     return result;

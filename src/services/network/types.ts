@@ -611,6 +611,9 @@ export interface RestGetRewardsTxBody extends RestTxBody {
   messages: RestGetRewardsTxBodyMessage[];
 }
 
+export interface RestSdsPrepayTxBody extends RestTxBody {
+  messages: RestSdsPrepayTxBodyMessage[];
+}
 export interface RestTxBodyMessage {
   ['@type']: string;
 }
@@ -634,6 +637,10 @@ export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {
   validator_address: string;
 }
 
+export interface RestSdsPrepayTxBodyMessage extends RestTxBodyMessage {
+  sender: string;
+  coins: Amount[];
+}
 export interface RestSendTx extends RestTx {
   body: RestSendTxBody;
 }
@@ -648,6 +655,10 @@ export interface RestUndelegateTx {
 
 export interface RestGetRewardsTx {
   body: RestGetRewardsTxBody;
+}
+
+export interface RestSdsPrepayTx {
+  body: RestSdsPrepayTxBody;
 }
 
 export interface RestTxResponseEventAttribute {

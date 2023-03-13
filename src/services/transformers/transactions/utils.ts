@@ -25,3 +25,9 @@ export const isGetRewardsTxBodyMessage = (
 ): bodyMessage is NetworkTypes.RestGetRewardsTxBodyMessage => {
   return bodyMessage['@type'] === TxTypes.TxMsgTypes.WithdrawRewards;
 };
+
+export const isPrepayTxBodyMessage = (
+  bodyMessage: NetworkTypes.RestTxBodyMessage,
+): bodyMessage is NetworkTypes.RestSdsPrepayTxBodyMessage => {
+  return bodyMessage['@type'] === TxTypes.TxMsgTypes.SdsPrepay;
+};

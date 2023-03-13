@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isGetRewardsTxBodyMessage = exports.isUndelegateTxBodyMessage = exports.isDelegateTxBodyMessage = exports.isSendTxBodyMessage = void 0;
+exports.isPrepayTxBodyMessage = exports.isGetRewardsTxBodyMessage = exports.isUndelegateTxBodyMessage = exports.isDelegateTxBodyMessage = exports.isSendTxBodyMessage = void 0;
 const TxTypes = __importStar(require("../../../transactions/types"));
 const isSendTxBodyMessage = (bodyMessage) => {
     // return 'from_address' in bodyMessage;
@@ -42,4 +42,8 @@ const isGetRewardsTxBodyMessage = (bodyMessage) => {
     return bodyMessage['@type'] === TxTypes.TxMsgTypes.WithdrawRewards;
 };
 exports.isGetRewardsTxBodyMessage = isGetRewardsTxBodyMessage;
+const isPrepayTxBodyMessage = (bodyMessage) => {
+    return bodyMessage['@type'] === TxTypes.TxMsgTypes.SdsPrepay;
+};
+exports.isPrepayTxBodyMessage = isPrepayTxBodyMessage;
 //# sourceMappingURL=utils.js.map

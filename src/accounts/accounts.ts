@@ -297,8 +297,8 @@ export const getAccountTrasactions = async (
     }
   });
 
-  const a = parseInt(total) / pageLimit;
-  const totalPages = Math.ceil(a);
+  const totalUnformatted = parseInt(total) / pageLimit;
+  const totalPages = Math.ceil(totalUnformatted);
 
   const result = { data: parsedData, total, page: page || 1, totalPages };
 
