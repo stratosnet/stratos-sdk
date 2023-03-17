@@ -92,6 +92,39 @@ export const formatBalanceFromWei = (amount: string, requiredPrecision: number, 
   return fullBalance;
 };
 
+export const getBalanceCardMetricDinamicValue = (denom?: string | undefined, amount?: string | undefined) => {
+  const isStratosDenom = denom === stratosDenom;
+
+  if (!isStratosDenom) {
+    return '0.0000 STOS';
+  }
+  if (!amount) {
+    return '0.0000 STOS';
+  }
+  const balanceInWei = createBigNumber(amount);
+
+  let dynamicPrecision = decimalShortPrecision;
+
+  let counter = 0;
+
+  let balance = '0';
+
+  const maxAdditionalDigits = 4;
+
+  let isStillZero = counter < maxAdditionalDigits;
+
+  do {
+    balance = fromWei(balanceInWei, decimalPrecision).toFormat(dynamicPrecision, ROUND_DOWN);
+    const parsetBalance = parseFloat(balance);
+    isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
+    dynamicPrecision++;
+    counter++;
+  } while (isStillZero);
+
+  const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
+  return balanceToReturn;
+};
+
 export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
   const isStratosDenom = denom === stratosDenom;
 
@@ -199,12 +232,14 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       const validatorAddress = entry.delegation?.validator_address;
       const validatorBalance = getBalanceCardMetricValue(entry.balance.denom, entry.balance.amount);
 
+      // in stos
       detailedBalance.delegated[validatorAddress] = validatorBalance;
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
     const myDelegated = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
 
+    // in stos
     cardMetricsResult.delegated = myDelegated;
   }
 
@@ -225,7 +260,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);
-
   const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
 
   if (!rewardBalanceError) {
@@ -236,12 +270,19 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     entries?.forEach((entry: networkTypes.Rewards) => {
       const validatorAddress = entry.validator_address;
+      // in wei
       const validatorBalance = entry.reward?.[0]?.amount || '0';
 
+      // in stos
+      // const validatorBalanceInWei = entry.reward?.[0]?.amount || '0';
+      // const validatorBalance = getBalanceCardMetricDinamicValue(denom, validatorBalanceInWei);
+
+      // in wei
       detailedBalance.reward[validatorAddress] = validatorBalance;
     }, 0);
 
-    cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
+    // in stos
+    cardMetricsResult.reward = getBalanceCardMetricDinamicValue(denom, amount);
   }
 
   cardMetricsResult.detailedBalance = detailedBalance;

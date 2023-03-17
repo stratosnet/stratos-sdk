@@ -20,6 +20,7 @@ export declare const increaseBalance: (walletAddress: string, faucetUrl: string,
 }>;
 export declare const getBalance: (keyPairAddress: string, requestedDenom: string, decimals?: number) => Promise<string>;
 export declare const formatBalanceFromWei: (amount: string, requiredPrecision: number, appendDenom?: boolean) => string;
+export declare const getBalanceCardMetricDinamicValue: (denom?: string | undefined, amount?: string | undefined) => string;
 export declare const getBalanceCardMetricValue: (denom?: string | undefined, amount?: string | undefined) => string;
 export declare const getOzoneMetricValue: (denom?: string | undefined, amount?: string | undefined) => string;
 export declare const getOtherBalanceCardMetrics: (keyPairAddress: string) => Promise<OtherBalanceCardMetrics>;
