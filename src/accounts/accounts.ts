@@ -25,14 +25,16 @@ import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
 
-// import * as Types from './types';
+export interface OtherBalanceCardMetrics {
+  ozone?: string;
+  detailedBalance?: any;
+}
 
 export interface BalanceCardMetrics {
   available: string;
   delegated: string;
   unbounding: string;
   reward: string;
-  ozone: string;
   detailedBalance?: any;
 }
 
@@ -127,20 +129,51 @@ export const getOzoneMetricValue = (denom?: string | undefined, amount?: string 
   return balanceToReturn;
 };
 
+export const getOtherBalanceCardMetrics = async (
+  keyPairAddress: string,
+): Promise<OtherBalanceCardMetrics> => {
+  const cardMetricsResult = {
+    ozone: `0.0000 ${stratosTopDenom.toUpperCase()}`,
+    detailedBalance: {},
+  };
+
+  const detailedBalance: { [key: string]: any } = {
+    ozone: '',
+  };
+
+  try {
+    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+
+    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+
+    if (!ozoneBalanceError) {
+      const amount = ozoneBalanceRespone?.result.ozone;
+
+      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+
+      detailedBalance.ozone = amount;
+    }
+  } catch (error) {
+    console.log('could not get ozone balance , error', error);
+  }
+
+  cardMetricsResult.detailedBalance = detailedBalance;
+
+  return cardMetricsResult;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
     available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     delegated: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     unbounding: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     reward: `0.0000 ${stratosTopDenom.toUpperCase()}`,
-    ozone: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     detailedBalance: {},
   };
 
   const detailedBalance: { [key: string]: any } = {
     delegated: {},
     reward: {},
-    ozone: '',
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -209,22 +242,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     }, 0);
 
     cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
-  }
-
-  try {
-    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
-
-    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
-
-    if (!ozoneBalanceError) {
-      const amount = ozoneBalanceRespone?.result.ozone;
-
-      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
-
-      detailedBalance.ozone = amount;
-    }
-  } catch (error) {
-    console.log('could not get ozone balance , error', error);
   }
 
   cardMetricsResult.detailedBalance = detailedBalance;

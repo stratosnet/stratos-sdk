@@ -408,16 +408,18 @@ const getRewardBalance = async () => {
     const { response } = bResult;
     console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.result.rewards); // an array ?
 };
-const getOzoneBalance = async () => {
+const getOzoneBalance = async (hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
     if (!keyPairZero) {
         return;
     }
-    const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
-    console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
+    // const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
+    // console.log('🚀 ~ file: run.ts ~ line 296 ~ getOzoneBalance ~ callResultB', callResultB);
+    const b = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
+    console.log('other balanace card metrics ', b);
 };
 const getBalanceCardMetrics = async (hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1110,12 +1112,10 @@ const main = async () => {
         throw new Error('Could not resolve chain id');
     }
     // 2
-    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
-        // pp a
-        // ppNodeUrl: 'http://34.85.35.181',
-        // ppNodePort: '8141',
-        // pp b
-        ppNodeUrl: 'http://52.14.150.146', ppNodePort: '8159' }));
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID }));
+    // tropos
+    // ppNodeUrl: 'http://35.233.251.112',
+    //     ppNodePort: '8159',
     // await evmSend();
     const hdPathIndex = 0;
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1137,9 +1137,10 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    // await getBalanceCardMetrics(hdPathIndex);
+    await getBalanceCardMetrics(hdPathIndex);
     // await simulateSend();
     // await mainSdsPrepay(hdPathIndex);
+    // await getOzoneBalance(hdPathIndex);
     // await mainSend();
     // await testUploadRequest();
     // 100000000 100 M
@@ -1151,7 +1152,7 @@ const main = async () => {
     // await runFaucet();
     // uploadRequest();
     // testBigInt();
-    await getAccountTrasactions();
+    // await getAccountTrasactions();
 };
 main();
 //# sourceMappingURL=run.js.map

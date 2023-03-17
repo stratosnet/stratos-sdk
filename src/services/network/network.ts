@@ -34,6 +34,12 @@ const getRpcRoute = (): string => {
 const getPpNodeRoute = (): string => {
   const { ppNodeUrl, ppNodePort } = Sdk.environment;
 
+  if (!ppNodeUrl || !ppNodePort) {
+    throw new Error(
+      'SDK must be initialized with pp node url and port prior to use the getPpNodeRoute function',
+    );
+  }
+
   return `${ppNodeUrl}:${ppNodePort}`;
 };
 
@@ -514,7 +520,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  // console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+  console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOzoneMetricValue = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
+exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.getOzoneMetricValue = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
 const get_1 = __importDefault(require("lodash/get"));
 const config_1 = require("../config");
 const hdVault_1 = require("../config/hdVault");
@@ -105,6 +105,30 @@ const getOzoneMetricValue = (denom, amount) => {
     return balanceToReturn;
 };
 exports.getOzoneMetricValue = getOzoneMetricValue;
+const getOtherBalanceCardMetrics = async (keyPairAddress) => {
+    const cardMetricsResult = {
+        ozone: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
+        detailedBalance: {},
+    };
+    const detailedBalance = {
+        ozone: '',
+    };
+    try {
+        const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
+        const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+        if (!ozoneBalanceError) {
+            const amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
+            cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
+            detailedBalance.ozone = amount;
+        }
+    }
+    catch (error) {
+        console.log('could not get ozone balance , error', error);
+    }
+    cardMetricsResult.detailedBalance = detailedBalance;
+    return cardMetricsResult;
+};
+exports.getOtherBalanceCardMetrics = getOtherBalanceCardMetrics;
 const getBalanceCardMetrics = async (keyPairAddress) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     const cardMetricsResult = {
@@ -112,13 +136,11 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
         delegated: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         unbounding: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         reward: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
-        ozone: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         detailedBalance: {},
     };
     const detailedBalance = {
         delegated: {},
         reward: {},
-        ozone: '',
     };
     const availableBalanceResult = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
@@ -165,18 +187,6 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
             detailedBalance.reward[validatorAddress] = validatorBalance;
         }, 0);
         cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
-    }
-    try {
-        const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
-        const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
-        if (!ozoneBalanceError) {
-            const amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
-            cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
-            detailedBalance.ozone = amount;
-        }
-    }
-    catch (error) {
-        console.log('could not get ozone balance , error', error);
     }
     cardMetricsResult.detailedBalance = detailedBalance;
     return cardMetricsResult;

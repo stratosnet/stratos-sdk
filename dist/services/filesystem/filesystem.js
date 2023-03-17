@@ -8,7 +8,6 @@ const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
-const Sdk_1 = __importDefault(require("../../Sdk"));
 const helpers_1 = require("../helpers");
 const network_1 = require("../network");
 // import * as Types from './types';
@@ -216,9 +215,9 @@ const getUserUploadedFileList = async (address, page = 0) => {
             page,
         },
     ];
-    const connectedUrl = `${Sdk_1.default.environment.ppNodeUrl}:${Sdk_1.default.environment.ppNodePort}`;
-    const message = `connecting to ${connectedUrl}`;
-    console.log(message);
+    // const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+    // const message = `connecting to ${connectedUrl}`;
+    // console.log(message);
     const callResult = await (0, network_1.sendUserRequestList)(extraParams);
     const { response } = callResult;
     // console.log('file list request result', JSON.stringify(callResult));
