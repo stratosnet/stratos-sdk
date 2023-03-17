@@ -1523,8 +1523,8 @@ const main = async () => {
     // pp b
     // ppNodeUrl: 'http://52.14.150.146',
     // ppNodePort: '8159',
-    // ppNodeUrl: 'http://35.233.251.112',
-    // ppNodePort: '8159',
+    ppNodeUrl: 'http://35.233.251.112',
+    ppNodePort: '8159',
   });
 
   // tropos
@@ -1563,7 +1563,7 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
-  await getBalanceCardMetrics(hdPathIndex);
+  // await getBalanceCardMetrics(hdPathIndex);
 
   // await simulateSend();
 
@@ -1584,7 +1584,7 @@ const main = async () => {
   // uploadRequest();
 
   // testBigInt();
-  // await getAccountTrasactions();
+  await getAccountTrasactions();
 };
 
 main();

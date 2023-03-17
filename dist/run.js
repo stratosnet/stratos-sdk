@@ -1112,7 +1112,14 @@ const main = async () => {
         throw new Error('Could not resolve chain id');
     }
     // 2
-    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID }));
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
+        // pp a
+        // ppNodeUrl: 'http://34.85.35.181',
+        // ppNodePort: '8141',
+        // pp b
+        // ppNodeUrl: 'http://52.14.150.146',
+        // ppNodePort: '8159',
+        ppNodeUrl: 'http://35.233.251.112', ppNodePort: '8159' }));
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
     //     ppNodePort: '8159',
@@ -1137,7 +1144,7 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
-    await getBalanceCardMetrics(hdPathIndex);
+    // await getBalanceCardMetrics(hdPathIndex);
     // await simulateSend();
     // await mainSdsPrepay(hdPathIndex);
     // await getOzoneBalance(hdPathIndex);
@@ -1152,7 +1159,7 @@ const main = async () => {
     // await runFaucet();
     // uploadRequest();
     // testBigInt();
-    // await getAccountTrasactions();
+    await getAccountTrasactions();
 };
 main();
 //# sourceMappingURL=run.js.map

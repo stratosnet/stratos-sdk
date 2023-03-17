@@ -1,3 +1,4 @@
+import { getBalanceCardMetricDinamicValue } from '../../../../accounts/accounts';
 import * as NetworkTypes from '../../../network/types';
 import * as Types from '../types';
 import { isGetRewardsTxBodyMessage } from '../utils';
@@ -10,6 +11,7 @@ const findReceivedAmounts = (
 ): NetworkTypes.Amount[] => {
   let receivedCoinsAmount = '';
   let receivedDenom = '';
+  let receivedCoinsAmountFormatted = '';
 
   if (!txResponseItemLogEntry) {
     return emptyAmounts;
@@ -35,12 +37,14 @@ const findReceivedAmounts = (
       const tmpReceivedCoinsAmount = `${element.value}`;
       receivedCoinsAmount = `${parseInt(tmpReceivedCoinsAmount)}`;
       receivedDenom = tmpReceivedCoinsAmount.replace(`${receivedCoinsAmount}`, '');
+      receivedCoinsAmountFormatted = getBalanceCardMetricDinamicValue(receivedDenom, receivedCoinsAmount);
     }
   });
 
   return [
     {
-      amount: receivedCoinsAmount,
+      // amount: receivedCoinsAmount,
+      amount: receivedCoinsAmountFormatted,
       denom: receivedDenom,
     },
   ];
