@@ -490,9 +490,9 @@ const getRewardBalance = async () => {
   console.log('our reward balanace', response?.result.rewards); // an array ?
 };
 
-const getOzoneBalance = async () => {
+const getOzoneBalance = async (hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeed = await createMasterKeySeed(phrase, password);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
@@ -501,8 +501,12 @@ const getOzoneBalance = async () => {
     return;
   }
 
-  const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
-  console.log('🚀 ~ file: run.ts ~ line 296 ~ mainSdsPrepay ~ callResultB', callResultB);
+  // const callResultB = await Network.sendUserRequestGetOzone([{ walletaddr: keyPairZero.address }]);
+  // console.log('🚀 ~ file: run.ts ~ line 296 ~ getOzoneBalance ~ callResultB', callResultB);
+
+  const b = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
+
+  console.log('other balanace card metrics ', b);
 };
 
 const getBalanceCardMetrics = async (hdPathIndex: number) => {
@@ -1517,9 +1521,15 @@ const main = async () => {
     // ppNodeUrl: 'http://34.85.35.181',
     // ppNodePort: '8141',
     // pp b
-    ppNodeUrl: 'http://52.14.150.146',
-    ppNodePort: '8159',
+    // ppNodeUrl: 'http://52.14.150.146',
+    // ppNodePort: '8159',
+    // ppNodeUrl: 'http://35.233.251.112',
+    // ppNodePort: '8159',
   });
+
+  // tropos
+  // ppNodeUrl: 'http://35.233.251.112',
+  //     ppNodePort: '8159',
 
   // await evmSend();
 
@@ -1553,11 +1563,12 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
-  // await getBalanceCardMetrics(hdPathIndex);
+  await getBalanceCardMetrics(hdPathIndex);
 
   // await simulateSend();
 
   // await mainSdsPrepay(hdPathIndex);
+  // await getOzoneBalance(hdPathIndex);
 
   // await mainSend();
   // await testUploadRequest();
@@ -1573,7 +1584,7 @@ const main = async () => {
   // uploadRequest();
 
   // testBigInt();
-  await getAccountTrasactions();
+  // await getAccountTrasactions();
 };
 
 main();

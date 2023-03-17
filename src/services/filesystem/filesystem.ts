@@ -249,11 +249,11 @@ export const getUserUploadedFileList = async (address: string, page = 0): Promis
     },
   ];
 
-  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
+  // const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
 
-  const message = `connecting to ${connectedUrl}`;
+  // const message = `connecting to ${connectedUrl}`;
 
-  console.log(message);
+  // console.log(message);
   const callResult = await sendUserRequestList(extraParams);
 
   const { response } = callResult;
