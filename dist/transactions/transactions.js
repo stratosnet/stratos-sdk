@@ -94,6 +94,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
     try {
+        console.log('txMessages from simulate', txMessages, signerAddress);
         const client = await (0, cosmos_1.getCosmos)();
         const gas = await client.simulate(signerAddress, txMessages, '');
         const estimatedGas = Math.round(gas * tokens_1.gasAdjustment);
@@ -112,7 +113,8 @@ const getStandardFee = async (signerAddress, txMessages) => {
 exports.getStandardFee = getStandardFee;
 const sign = async (address, txMessages, memo = '', givenFee) => {
     // eslint-disable-next-line @typescript-eslint/await-thenable
-    const fee = givenFee ? givenFee : await (0, exports.getStandardFee)(address, txMessages);
+    // const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
+    const fee = givenFee ? givenFee : (0, exports.getStandardDefaultFee)();
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
     return signedTx;
@@ -262,7 +264,9 @@ const getSdsPrepayTx = async (senderAddress, prepayPayload) => {
             typeUrl: Types.TxMsgTypes.SdsPrepay,
             value: {
                 sender: senderAddress,
-                coins: (0, exports.getStandardAmount)([amount]),
+                beneficiary: senderAddress,
+                // coins: getStandardAmount([amount]),
+                amount: (0, exports.getStandardAmount)([amount]),
             },
         };
         console.log('message to be signed', JSON.stringify(message));
