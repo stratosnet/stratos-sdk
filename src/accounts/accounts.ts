@@ -172,6 +172,7 @@ export const getOtherBalanceCardMetrics = async (
 
   const detailedBalance: { [key: string]: any } = {
     ozone: '',
+    sequence: '',
   };
 
   try {
@@ -181,10 +182,12 @@ export const getOtherBalanceCardMetrics = async (
 
     if (!ozoneBalanceError) {
       const amount = ozoneBalanceRespone?.result.ozone;
+      const sequence = ozoneBalanceRespone?.result.sequencynumber;
 
       cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
 
       detailedBalance.ozone = amount;
+      detailedBalance.sequence = sequence;
     }
   } catch (error) {
     console.log('could not get ozone balance , error', error);

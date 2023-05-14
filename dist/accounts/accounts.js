@@ -137,14 +137,17 @@ const getOtherBalanceCardMetrics = async (keyPairAddress) => {
     };
     const detailedBalance = {
         ozone: '',
+        sequence: '',
     };
     try {
         const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
         const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
         if (!ozoneBalanceError) {
             const amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
+            const sequence = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.sequencynumber;
             cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
             detailedBalance.ozone = amount;
+            detailedBalance.sequence = sequence;
         }
     }
     catch (error) {

@@ -212,7 +212,9 @@ export interface SdsPrepayTxMessage {
   typeUrl: TxMsgTypes;
   value: {
     sender: string;
-    coins: AmountType[];
+    // NOTE: this is still coins on tropos and it is amount on devnet
+    // coins: AmountType[];
+    amount: AmountType[];
   };
 }
 

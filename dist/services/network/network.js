@@ -62,7 +62,8 @@ const apiPost = async (url, data, config) => {
     const myConfig = {
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 30000,
+        // timeout: 31000,
+        // timeout: 31000,
     };
     let axiosResponse;
     try {
@@ -111,8 +112,8 @@ const sendRpcCall = async (givenPayload, config) => {
         params: [],
     };
     const url = `${getPpNodeRoute()}`;
-    (0, helpers_1.log)('from network ~ rpc call url', url);
     const payload = Object.assign(Object.assign({}, defaultPayload), givenPayload);
+    (0, helpers_1.log)('from network ~ rpc call url', url);
     // log('from network - calling rpc', payload);
     const dataResult = await (0, exports.apiPost)(url, payload, Object.assign({}, config));
     // log('from network - rpc post result', payload);

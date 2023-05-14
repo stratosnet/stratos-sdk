@@ -129,7 +129,7 @@ export interface SdsPrepayTxMessage {
     typeUrl: TxMsgTypes;
     value: {
         sender: string;
-        coins: AmountType[];
+        amount: AmountType[];
     };
 }
 export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;

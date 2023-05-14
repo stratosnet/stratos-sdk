@@ -326,6 +326,7 @@ const mainWithdrawAllRewards = async () => {
 // cosmosjs withdraw rewards
 const mainSdsPrepay = async (hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  console.log('mnemonic ', zeroUserMnemonic);
 
   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
@@ -338,7 +339,7 @@ const mainSdsPrepay = async (hdPathIndex: number) => {
   }
 
   const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.5 }]);
-  //
+
   console.log('from mainSdsPrepay - calling tx sign');
   const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
 
@@ -382,8 +383,8 @@ const getAccountTrasactions = async () => {
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 3, 2);
-  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 3, 2);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 
 const getValidators = async () => {
@@ -536,9 +537,19 @@ const formatBalanceFromWei = () => {
   console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
 
-const runFaucet = async () => {
-  // const walletAddress = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
-  const walletAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+const runFaucet = async (hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+  // const walletAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  const walletAddress = keyPairZero.address;
+  console.log('walletAddress', walletAddress);
 
   // const faucetUrl = 'https://faucet-tropos.thestratos.org/credit';
   // const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosDenom);
@@ -1159,7 +1170,7 @@ const testDl = async (filename: string, filehashA: string, filesizeA: number) =>
 };
 
 // request upload and upload
-const testIt = async (filename: string) => {
+const testIt = async (filename: string, hdPathIndex: number) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
@@ -1169,16 +1180,33 @@ const testIt = async (filename: string) => {
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  // const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
 
-  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const keyPairZeroA = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeed.encryptedMasterKeySeed.toString(),
+  );
 
   if (!keyPairZeroA) {
     return;
   }
 
   const { address, publicKey } = keyPairZeroA;
-  const messageToSign = `${fileInfo.filehash}${address}`;
+  const ozoneBalance = await accounts.getOtherBalanceCardMetrics(address);
+
+  const { detailedBalance } = ozoneBalance;
+
+  if (!detailedBalance) {
+    throw new Error('no sequence is presented in the ozone balance response');
+  }
+
+  const { sequence } = detailedBalance;
+
+  const messageToSign = `${fileInfo.filehash}${address}${sequence}`;
+  // const messageToSign = `${fileInfo.filehash}${address}`;
 
   const stats = fs.statSync(fileReadPath);
   const fileSize = stats.size;
@@ -1196,18 +1224,20 @@ const testIt = async (filename: string) => {
     },
   ];
 
+  log('beginning init call');
   const callResultInit = await Network.sendUserRequestUpload(extraParams);
 
   const { response: responseInit } = callResultInit;
 
-  log('call result init', JSON.stringify(callResultInit));
+  log('call result init (end of init)', JSON.stringify(callResultInit));
 
   if (!responseInit) {
-    console.log('we dont have response. it might be an error', callResultInit);
+    log('we dont have response. it might be an error', callResultInit);
     return;
   }
 
   const { result: resultWithOffesets } = responseInit;
+
   log('result with offesets', resultWithOffesets);
 
   let offsetStartGlobal = 0;
@@ -1221,38 +1251,42 @@ const testIt = async (filename: string) => {
   } = resultWithOffesets;
 
   if (offsetendInit === undefined) {
-    console.log('a we dont have an offest. could be an error. response is', responseInit);
+    log('a we dont have an offest. could be an error. response is', responseInit);
     return;
   }
+
   if (offsetstartInit === undefined) {
-    console.log('b we dont have an offest. could be an error. response is', responseInit);
+    log('b we dont have an offest. could be an error. response is', responseInit);
     return;
   }
 
   let readSize = 0;
-
-  // const maxStep = 65536;
-
   let completedProgress = 0;
 
   isContinueGlobal = +isContinueInit;
   offsetStartGlobal = +offsetstartInit;
   offsetEndGlobal = +offsetendInit;
 
+  log('starting to get file buffer');
   const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+  log('ended  get file buffer');
 
   while (isContinueGlobal === 1) {
+    log('!!! while start, starting getting a slice');
+
     const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
+    log('slice is retrieved');
 
     if (!fileChunk) {
-      console.log('fileChunk is missing, Exiting ', fileChunk);
+      log('fileChunk is missing, Exiting ', fileChunk);
       break;
     }
 
-    log('from run.ts - completed before encoding a chunk to base64', completedProgress);
-
     if (fileChunk) {
+      log('encodeBuffer start');
       const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+      log('encodeBuffer end');
+
       readSize = readSize + fileChunk.length;
 
       completedProgress = (100 * readSize) / fileSize;
@@ -1271,20 +1305,18 @@ const testIt = async (filename: string) => {
         },
       ];
 
-      // isContinueGlobal = 0;
-      // log('from run.ts - completed', completedProgress);
-      log('from run.ts - will call upload', offsetStartGlobal, offsetEndGlobal);
+      // log('from run.ts - will call upload', offsetStartGlobal, offsetEndGlobal);
 
+      log('will call upload (start)');
       const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
-
-      log('call result upload', JSON.stringify(callResultUpload));
+      log('call result upload (end)', JSON.stringify(callResultUpload));
 
       const { response: responseUpload } = callResultUpload;
 
       // log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
 
       if (!responseUpload) {
-        console.log('we dont have response. it might be an error', callResultUpload);
+        log('we dont have response. it might be an error', callResultUpload);
 
         return;
       }
@@ -1294,24 +1326,25 @@ const testIt = async (filename: string) => {
       } = responseUpload;
 
       if (offsetendUpload === undefined) {
-        console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+        log('1 we dont have an offest. could be an error. response is', responseUpload);
         return;
       }
 
       if (offsetstartUpload === undefined) {
-        console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+        log('2 we dont have an offest. could be an error. response is', responseUpload);
         return;
       }
 
       isContinueGlobal = +isContinueUpload;
       offsetStartGlobal = +offsetstartUpload;
       offsetEndGlobal = +offsetendUpload;
+      log('while end ___');
     }
   }
 };
 
 // request upload and upload (multiple IO)
-const testItWorking = async (filename: string) => {
+const testItWorking = async (filename: string, hdPathIndex: number) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
@@ -1321,22 +1354,40 @@ const testItWorking = async (filename: string) => {
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
-  const keyPairZeroA = await deriveKeyPair(0, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
 
-  if (!keyPairZeroA) {
+  if (!keyPairZero) {
     return;
   }
 
-  const { address, publicKey } = keyPairZeroA;
-  const messageToSign = `${fileInfo.filehash}${address}`;
+  const walletAddress = keyPairZero.address;
+  console.log('walletAddress', walletAddress);
+
+  const { address, publicKey } = keyPairZero;
+
+  log('now sending a get getOzoneBalance request (from the file upload)');
+  const ozoneBalance = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
+  const { detailedBalance } = ozoneBalance;
+
+  if (!detailedBalance) {
+    throw new Error('no sequence is presented in the ozone balance response');
+  }
+
+  const { sequence } = detailedBalance;
+
+  const messageToSign = `${fileInfo.filehash}${address}${sequence}`;
 
   const stats = fs.statSync(fileReadPath);
   const fileSize = stats.size;
-  console.log('stats', stats);
+  log('stats', stats);
 
-  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZeroA.privateKey);
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keyPairZero.privateKey);
+
+  // log('sending a get getOzoneBalance request is done (from the file upload)');
+
   const extraParams = [
     {
       filename: imageFileName,
@@ -1348,19 +1399,20 @@ const testItWorking = async (filename: string) => {
     },
   ];
 
+  log('INIT params to be sent to the network', extraParams);
   const callResultInit = await Network.sendUserRequestUpload(extraParams);
 
   const { response: responseInit } = callResultInit;
 
-  console.log('call result init', JSON.stringify(callResultInit));
+  log('INIT call result init', JSON.stringify(callResultInit));
 
   if (!responseInit) {
-    console.log('we dont have response. it might be an error', callResultInit);
+    log('we dont have response. it might be an error', callResultInit);
     return;
   }
 
   const { result: resultWithOffesets } = responseInit;
-  console.log('result with offesets', resultWithOffesets);
+  // log('INIT result with offesets', resultWithOffesets);
 
   let offsetStartGlobal = 0;
   let offsetEndGlobal = 0;
@@ -1373,11 +1425,12 @@ const testItWorking = async (filename: string) => {
   } = resultWithOffesets;
 
   if (offsetendInit === undefined) {
-    console.log('a we dont have an offest. could be an error. response is', responseInit);
+    log('a we dont have an offest. could be an error. response is', responseInit);
     return;
   }
+
   if (offsetstartInit === undefined) {
-    console.log('b we dont have an offest. could be an error. response is', responseInit);
+    log('b we dont have an offest. could be an error. response is', responseInit);
     return;
   }
 
@@ -1429,7 +1482,7 @@ const testItWorking = async (filename: string) => {
     }
 
     if (!fileChunk) {
-      console.log('fileChunk is missing, Exiting ', fileChunk);
+      log('fileChunk is missing, Exiting ', fileChunk);
       break;
     }
 
@@ -1439,7 +1492,7 @@ const testItWorking = async (filename: string) => {
 
       completedProgress = (100 * readSize) / fileSize;
 
-      console.log(
+      log(
         `completed ${readSize} from ${fileSize} bytes, or ${(
           Math.round(completedProgress * 100) / 100
         ).toFixed(2)}%`,
@@ -1454,18 +1507,18 @@ const testItWorking = async (filename: string) => {
       ];
 
       // isContinueGlobal = 0;
-      log('from run.ts params for upload', extraParamsForUpload);
+      // log('from run.ts params for upload', extraParamsForUpload);
 
       const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
 
-      console.log('call result upload', JSON.stringify(callResultUpload));
+      log('call result upload', JSON.stringify(callResultUpload));
 
       const { response: responseUpload } = callResultUpload;
 
-      console.log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
+      // log('🚀 ~ file: run.ts ~ line 766 ~ testIt ~ result', callResultUpload);
 
       if (!responseUpload) {
-        console.log('we dont have response. it might be an error', callResultUpload);
+        log('we dont have response. it might be an error', callResultUpload);
 
         return;
       }
@@ -1475,12 +1528,12 @@ const testItWorking = async (filename: string) => {
       } = responseUpload;
 
       if (offsetendUpload === undefined) {
-        console.log('1 we dont have an offest. could be an error. response is', responseUpload);
+        log('1 we dont have an offest. could be an error. response is', responseUpload);
         return;
       }
 
       if (offsetstartUpload === undefined) {
-        console.log('2 we dont have an offest. could be an error. response is', responseUpload);
+        log('2 we dont have an offest. could be an error. response is', responseUpload);
         return;
       }
 
@@ -1494,8 +1547,8 @@ const testItWorking = async (filename: string) => {
 const main = async () => {
   let resolvedChainID: string;
 
-  const sdkEnv = sdkEnvTest;
-  // const sdkEnv = sdkEnvDev;
+  // const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvDev;
 
   Sdk.init({ ...sdkEnv });
 
@@ -1523,8 +1576,14 @@ const main = async () => {
     // pp b
     // ppNodeUrl: 'http://52.14.150.146',
     // ppNodePort: '8159',
-    ppNodeUrl: 'http://35.233.251.112',
-    ppNodePort: '8159',
+    // ppNodeUrl: 'http://34.145.36.237',
+    // ppNodePort: '8135',
+
+    // 34.145.36.237:8135
+    // 35.233.85.255:8142
+    ppNodeUrl: 'http://35.233.85.255',
+    ppNodePort: '8142',
+    // 34.145.36.237:8135
   });
 
   // tropos
@@ -1550,9 +1609,20 @@ const main = async () => {
 
   // download the file
 
-  const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
-  const filesize = 200000000;
-  const filename = 'file1_200M_jan22';
+  // const filehash = 'v05ahm51atjqkpte7gnqa94bl3p731odvvdvfvo8';
+  // const filesize = 200000000;
+
+  // const filename = 'file1_50M_may_5';
+  // const filename = 'file2_75M_may_5';
+  // const filename = 'file3_100M_may_5';
+  // const filename = 'file3_100M_may_5';
+  // const filename = 'file6_30M_may_5';
+  // const filename = 'file8_20M_may_5';
+  // const filename = 'file9_50M_may_5';
+  // const filename = 'file10_75M_may_5';
+  // const filename = 'file10_75M_may_5';
+  // const filename = 'file11_1000M_may_5';
+  const filename = 'file12_75M_may_5';
 
   // const filehash = 'v05ahm54qtdk0oogho52ujtk5v6rdlpbhumfshmg';
   // const filesize = 10000000;
@@ -1563,7 +1633,11 @@ const main = async () => {
   // await testRequestUserFileList(0);
   // await testReadAndWriteLocal(filename);
 
+  // 1 Check balance
   // await getBalanceCardMetrics(hdPathIndex);
+
+  // 2 Add funds via faucet
+  // await runFaucet(hdPathIndex);
 
   // await simulateSend();
 
@@ -1572,6 +1646,8 @@ const main = async () => {
 
   // await mainSend();
   // await testUploadRequest();
+  // await testItWorking(filename, hdPathIndex);
+  await testIt(filename, hdPathIndex);
 
   // 100000000 100 M
   //   3500000 3.5 M
@@ -1580,11 +1656,10 @@ const main = async () => {
   // testFile();
   // testFileHash();
 
-  // await runFaucet();
   // uploadRequest();
 
   // testBigInt();
-  await getAccountTrasactions();
+  // await getAccountTrasactions();
 };
 
 main();

@@ -442,6 +442,7 @@ export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
     result: {
         return: '0' | '1';
         ozone?: string;
+        sequencynumber?: string;
     };
 }
 export interface RestTxFeeInfo {
