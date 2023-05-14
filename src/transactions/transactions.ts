@@ -114,6 +114,7 @@ export const getStandardFee = async (
   }
 
   try {
+    console.log('txMessages from simulate', txMessages, signerAddress);
     const client = await getCosmos();
     const gas = await client.simulate(signerAddress, txMessages, '');
     const estimatedGas = Math.round(gas * gasAdjustment);
@@ -143,6 +144,7 @@ export const sign = async (
 ): Promise<TxRaw> => {
   // eslint-disable-next-line @typescript-eslint/await-thenable
   const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
+  // const fee = givenFee ? givenFee : getStandardDefaultFee();
 
   const client = await getCosmos();
 
@@ -361,7 +363,10 @@ export const getSdsPrepayTx = async (
       typeUrl: Types.TxMsgTypes.SdsPrepay,
       value: {
         sender: senderAddress,
-        coins: getStandardAmount([amount]),
+        beneficiary: senderAddress,
+        // NOTE: this is still coins on tropos and it is amount on devnet
+        // coins: getStandardAmount([amount]),
+        amount: getStandardAmount([amount]),
       },
     };
 
