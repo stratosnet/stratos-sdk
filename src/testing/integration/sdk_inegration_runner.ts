@@ -50,11 +50,14 @@ try {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const envConfig = require(envConfigFile);
 
-const { keys: walletKeys, hostUrl: envHostUrl, faucetMnemonic } = envConfig;
+const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
 
-const { mainFaucet, receiverOne } = walletKeys;
+const { mainFaucet } = walletKeys;
 
 log('loaded config ', envConfig);
+log('faucet pkey ', mainFaucet);
+log('pp node url and port ', ppNodeAndPort);
+log('faucet mnemonic', faucetMnemonic);
 
 let GLOBAL_CHAIN_ID = '';
 
