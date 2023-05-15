@@ -15,6 +15,7 @@ import { getCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
 import { log, delay } from './services/helpers';
 import * as Network from './services/network';
+import * as integration from './testing/integration/sdk_inegration_runner';
 import * as transactions from './transactions';
 import * as evm from './transactions/evm';
 import * as transactionTypes from './transactions/types';
@@ -1647,7 +1648,7 @@ const main = async () => {
   // await mainSend();
   // await testUploadRequest();
   // await testItWorking(filename, hdPathIndex);
-  await testIt(filename, hdPathIndex);
+  // await testIt(filename, hdPathIndex);
 
   // 100000000 100 M
   //   3500000 3.5 M
@@ -1660,6 +1661,8 @@ const main = async () => {
 
   // testBigInt();
   // await getAccountTrasactions();
+  console.log('yes!', process.env.NODE_PATH);
+  await integration.createAnAccount(0);
 };
 
 main();
