@@ -43,6 +43,7 @@ const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
+const integration = __importStar(require("./testing/integration/sdk_inegration_runner"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -1201,7 +1202,7 @@ const main = async () => {
     // await mainSend();
     // await testUploadRequest();
     // await testItWorking(filename, hdPathIndex);
-    await testIt(filename, hdPathIndex);
+    // await testIt(filename, hdPathIndex);
     // 100000000 100 M
     //   3500000 3.5 M
     // await testRequestData();
@@ -1211,6 +1212,8 @@ const main = async () => {
     // uploadRequest();
     // testBigInt();
     // await getAccountTrasactions();
+    console.log('yes!', process.env.NODE_PATH);
+    await integration.createAnAccount(0);
 };
 main();
 //# sourceMappingURL=run.js.map

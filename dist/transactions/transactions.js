@@ -113,8 +113,8 @@ const getStandardFee = async (signerAddress, txMessages) => {
 exports.getStandardFee = getStandardFee;
 const sign = async (address, txMessages, memo = '', givenFee) => {
     // eslint-disable-next-line @typescript-eslint/await-thenable
-    // const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
-    const fee = givenFee ? givenFee : (0, exports.getStandardDefaultFee)();
+    const fee = givenFee ? givenFee : await (0, exports.getStandardFee)(address, txMessages);
+    // const fee = givenFee ? givenFee : getStandardDefaultFee();
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
     return signedTx;
@@ -265,6 +265,7 @@ const getSdsPrepayTx = async (senderAddress, prepayPayload) => {
             value: {
                 sender: senderAddress,
                 beneficiary: senderAddress,
+                // NOTE: this is still coins on tropos and it is amount on devnet
                 // coins: getStandardAmount([amount]),
                 amount: (0, exports.getStandardAmount)([amount]),
             },
