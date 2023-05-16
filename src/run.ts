@@ -1662,7 +1662,7 @@ const main = async () => {
   // testBigInt();
   // await getAccountTrasactions();
   console.log('yes!', process.env.NODE_PATH);
-  await integration.createAnAccount(0);
+  await integration.getFaucetAvailableBalance(0);
 };
 
 main();

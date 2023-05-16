@@ -26,11 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.restoreAccount = exports.createAnAccount = void 0;
-const cosmos_1 = require("../..//services/cosmos");
+exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+const accounts = __importStar(require("../../accounts"));
 const hdVault_1 = require("../../hdVault");
 const keyManager_1 = require("../../hdVault/keyManager");
 const Sdk_1 = __importDefault(require("../../Sdk"));
+const cosmos_1 = require("../../services/cosmos");
 const helpers_1 = require("../../services/helpers");
 const Network = __importStar(require("../../services/network"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -70,9 +71,12 @@ catch (err) {
 }
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const envConfig = require(envConfigFile);
-const { keys: walletKeys, hostUrl: envHostUrl, faucetMnemonic } = envConfig;
-const { mainFaucet, receiverOne } = walletKeys;
+const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
+const { mainFaucet } = walletKeys;
 (0, helpers_1.log)('loaded config ', envConfig);
+(0, helpers_1.log)('faucet pkey ', mainFaucet);
+(0, helpers_1.log)('pp node url and port ', ppNodeAndPort);
+(0, helpers_1.log)('faucet mnemonic', faucetMnemonic);
 let GLOBAL_CHAIN_ID = '';
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
@@ -106,40 +110,93 @@ const main = async (zeroUserMnemonic, hdPathIndex = 0) => {
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, ppNodeUrl: 'http://35.233.85.255', ppNodePort: '8142' }));
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    (0, helpers_1.log)('masterKeySeedInfo', masterKeySeedInfo);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     (0, helpers_1.log)('main ~ serialized ', serialized);
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
     return true;
 };
+const createKeypairFromMnemonic = async (phrase, hdPathIndex = 0) => {
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    let keyPairZero;
+    try {
+        keyPairZero = await hdVault_1.wallet.deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        throw new Error('could not create keypar by the helper');
+    }
+    if (!keyPairZero) {
+        throw new Error(`keypar was not derived`);
+    }
+    return keyPairZero;
+};
 const createAnAccount = async (hdPathIndex = 0) => {
     (0, helpers_1.log)('////////////////  createAnAccount //////////////// ');
-    await main(faucetMnemonic, hdPathIndex);
-    (0, helpers_1.log)('running createAnAccount');
+    // await main(faucetMnemonic, hdPathIndex);
+    const phrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+    const { address, publicKey, keyIndex } = keyPairZero;
+    if (keyIndex !== hdPathIndex) {
+        throw new Error(`keypar index ${keyIndex} does not match with expected ${hdPathIndex}`);
+    }
+    if (!address.startsWith('st')) {
+        throw new Error(`keypar address "${address}" does not start with "st"`);
+    }
+    if (!publicKey.startsWith('stpub')) {
+        throw new Error(`keypar publicKey "${publicKey}" does not start with "stput"`);
+    }
     return true;
 };
 exports.createAnAccount = createAnAccount;
 const restoreAccount = async (hdPathIndex = 0) => {
     (0, helpers_1.log)('////////////////  restoreAnAccount //////////////// ');
-    await main(faucetMnemonic, hdPathIndex);
-    (0, helpers_1.log)('running restoreAnAccount');
+    // await main(faucetMnemonic, hdPathIndex);
+    const mnemonicToCheck = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+    const phrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToCheck);
+    const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+    const { address, publicKey, keyIndex } = keyPairZero;
+    const expectedKeyIndex = 0;
+    const expectedAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+    const expectedPublicKey = 'stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms';
+    if (keyIndex !== expectedKeyIndex) {
+        throw new Error(`keypar index ${keyIndex} does not match with expected ${expectedKeyIndex}`);
+    }
+    if (address !== expectedAddress) {
+        throw new Error(`keypar address "${address}" does not match with expected "${expectedAddress}"`);
+    }
+    if (publicKey !== expectedPublicKey) {
+        throw new Error(`keypar publicKey "${publicKey}" does not match with expected "${expectedPublicKey}"`);
+    }
     return true;
 };
 exports.restoreAccount = restoreAccount;
-// const getBalanceCardMetrics = async (hdPathIndex: number) => {
-//   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-//   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
-//
-//   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-//   const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
-//   console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
-//
-//   if (!keyPairZero) {
-//     return;
-//   }
-//
-//   const delegatorAddress = keyPairZero.address;
-//   const b = await accounts.getBalanceCardMetrics(delegatorAddress);
-//
-//   console.log('balanace card metrics ', b);
-// };
+const getFaucetAvailableBalance = async (hdPathIndex = 0) => {
+    (0, helpers_1.log)('////////////////  getFaucetAvailableBalance //////////////// ');
+    await main(faucetMnemonic, hdPathIndex);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(faucetMnemonic);
+    const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+    const { address } = keyPairZero;
+    const b = await accounts.getBalanceCardMetrics(address);
+    const { available } = b;
+    if (!available) {
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`faucet account "${address}" must have available balanace`);
+    }
+    try {
+        const [balanceValue] = available.split(' ');
+        if (!(parseFloat(balanceValue) > 0)) {
+            throw new Error(`faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`);
+        }
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`could not check faucet account "${address}" balanace`);
+    }
+    // log('balanace card metrics ', b);
+    return true;
+};
+exports.getFaucetAvailableBalance = getFaucetAvailableBalance;
 //# sourceMappingURL=sdk_inegration_runner.js.map
