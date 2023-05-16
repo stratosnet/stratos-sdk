@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { exit } from 'process';
-import { getCosmos } from '../..//services/cosmos';
+import * as accounts from '../../accounts';
 import { mnemonic, wallet } from '../../hdVault';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from '../../hdVault/keyManager';
 import Sdk from '../../Sdk';
+import { getCosmos } from '../../services/cosmos';
 import { log, delay } from '../../services/helpers';
 import * as Network from '../../services/network';
 
@@ -109,6 +110,7 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
+  log('masterKeySeedInfo', masterKeySeedInfo);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
@@ -119,12 +121,46 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
   return true;
 };
 
+const createKeypairFromMnemonic = async (
+  phrase: mnemonic.MnemonicPhrase,
+  hdPathIndex = 0,
+): Promise<wallet.KeyPairInfo> => {
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  let keyPairZero;
+  try {
+    keyPairZero = await wallet.deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('could not create keypar by the helper');
+  }
+  if (!keyPairZero) {
+    throw new Error(`keypar was not derived`);
+  }
+  return keyPairZero;
+};
+
 export const createAnAccount = async (hdPathIndex = 0): Promise<boolean> => {
   log('////////////////  createAnAccount //////////////// ');
 
-  await main(faucetMnemonic, hdPathIndex);
+  // await main(faucetMnemonic, hdPathIndex);
 
-  log('running createAnAccount');
+  const phrase = mnemonic.generateMnemonicPhrase(24);
+  const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+
+  const { address, publicKey, keyIndex } = keyPairZero;
+
+  if (keyIndex !== hdPathIndex) {
+    throw new Error(`keypar index ${keyIndex} does not match with expected ${hdPathIndex}`);
+  }
+
+  if (!address.startsWith('st')) {
+    throw new Error(`keypar address "${address}" does not start with "st"`);
+  }
+
+  if (!publicKey.startsWith('stpub')) {
+    throw new Error(`keypar publicKey "${publicKey}" does not start with "stput"`);
+  }
 
   return true;
 };
@@ -132,26 +168,67 @@ export const createAnAccount = async (hdPathIndex = 0): Promise<boolean> => {
 export const restoreAccount = async (hdPathIndex = 0): Promise<boolean> => {
   log('////////////////  restoreAnAccount //////////////// ');
 
-  await main(faucetMnemonic, hdPathIndex);
+  // await main(faucetMnemonic, hdPathIndex);
 
-  log('running restoreAnAccount');
+  const mnemonicToCheck =
+    'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
+
+  const phrase = mnemonic.convertStringToArray(mnemonicToCheck);
+  const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+
+  const { address, publicKey, keyIndex } = keyPairZero;
+
+  const expectedKeyIndex = 0;
+  const expectedAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  const expectedPublicKey = 'stpub1qdaazld397esglujfxsvwwtd8ygytzqnj5ven52guvvdpvaqdnn52ecsjms';
+
+  if (keyIndex !== expectedKeyIndex) {
+    throw new Error(`keypar index ${keyIndex} does not match with expected ${expectedKeyIndex}`);
+  }
+
+  if (address !== expectedAddress) {
+    throw new Error(`keypar address "${address}" does not match with expected "${expectedAddress}"`);
+  }
+
+  if (publicKey !== expectedPublicKey) {
+    throw new Error(`keypar publicKey "${publicKey}" does not match with expected "${expectedPublicKey}"`);
+  }
 
   return true;
 };
-// const getBalanceCardMetrics = async (hdPathIndex: number) => {
-//   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-//   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
-//
-//   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-//   const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
-//   console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
-//
-//   if (!keyPairZero) {
-//     return;
-//   }
-//
-//   const delegatorAddress = keyPairZero.address;
-//   const b = await accounts.getBalanceCardMetrics(delegatorAddress);
-//
-//   console.log('balanace card metrics ', b);
-// };
+
+export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolean> => {
+  log('////////////////  getFaucetAvailableBalance //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const phrase = mnemonic.convertStringToArray(faucetMnemonic);
+  const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+
+  const { address } = keyPairZero;
+
+  const b = await accounts.getBalanceCardMetrics(address);
+
+  const { available } = b;
+
+  if (!available) {
+    log('Balances', b);
+    throw new Error(`faucet account "${address}" must have available balanace`);
+  }
+
+  try {
+    const [balanceValue] = available.split(' ');
+    if (!(parseFloat(balanceValue) > 0)) {
+      throw new Error(
+        `faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b);
+    throw new Error(`could not check faucet account "${address}" balanace`);
+  }
+
+  // log('balanace card metrics ', b);
+  return true;
+};
