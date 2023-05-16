@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
 const accounts = __importStar(require("../../accounts"));
 const hdVault_1 = require("../../hdVault");
 const keyManager_1 = require("../../hdVault/keyManager");
@@ -34,10 +34,12 @@ const Sdk_1 = __importDefault(require("../../Sdk"));
 const cosmos_1 = require("../../services/cosmos");
 const helpers_1 = require("../../services/helpers");
 const Network = __importStar(require("../../services/network"));
+const transactions = __importStar(require("../../transactions"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getAppRootDir() {
     let currentDir = __dirname;
     while (!fs.existsSync(path.join(currentDir, 'package.json'))) {
@@ -195,8 +197,50 @@ const getFaucetAvailableBalance = async (hdPathIndex = 0) => {
         (0, helpers_1.log)('Balances', b);
         throw new Error(`could not check faucet account "${address}" balanace`);
     }
-    // log('balanace card metrics ', b);
     return true;
 };
 exports.getFaucetAvailableBalance = getFaucetAvailableBalance;
+const sendTransferTx = async (hdPathIndex = 0) => {
+    (0, helpers_1.log)('////////////////  sendTransferTx //////////////// ');
+    const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+    const senderPhrase = hdVault_1.mnemonic.convertStringToArray(faucetMnemonic);
+    const keyPairZero = await createKeypairFromMnemonic(senderPhrase, hdPathIndex);
+    const { address: fromAddress } = keyPairZero;
+    const sendAmount = 0.2;
+    const sendTxMessages = await transactions.getSendTx(fromAddress, [
+        { amount: sendAmount, toAddress: keyPairReceiver.address },
+    ]);
+    const signedTx = await transactions.sign(fromAddress, sendTxMessages);
+    if (!signedTx) {
+        throw new Error('Could not sign the transfer transaction');
+    }
+    try {
+        const result = await transactions.broadcast(signedTx);
+        (0, helpers_1.log)('result', result);
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        throw new Error('Could not broadcast the transfer transaction');
+    }
+    const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
+    const { available } = b;
+    if (!available) {
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`receiver account "${keyPairReceiver.address}" have not received transfer transaction or balance was not updated `);
+    }
+    try {
+        const [balanceValue] = available.split(' ');
+        if (!(parseFloat(balanceValue) > 0)) {
+            throw new Error(`account "${keyPairReceiver.address}" must have available balanace, but its balance is ${balanceValue}`);
+        }
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`could not check faucet account "${keyPairReceiver.address}" balanace`);
+    }
+    return true;
+};
+exports.sendTransferTx = sendTransferTx;
 //# sourceMappingURL=sdk_inegration_runner.js.map

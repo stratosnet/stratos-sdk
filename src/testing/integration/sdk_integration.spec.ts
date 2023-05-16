@@ -36,5 +36,15 @@ describe(`Stratos SDK integration (integration test)`, () => {
       },
       extendedExecutionTimeout,
     );
+    it(
+      'Sends a transfer tx and checks that receiver balance was updated',
+      done => {
+        void Integration.sendTransferTx().then(result => {
+          expect(result).toBe(true);
+          done();
+        });
+      },
+      extendedExecutionTimeout,
+    );
   });
 });

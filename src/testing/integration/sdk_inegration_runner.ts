@@ -7,12 +7,14 @@ import Sdk from '../../Sdk';
 import { getCosmos } from '../../services/cosmos';
 import { log, delay } from '../../services/helpers';
 import * as Network from '../../services/network';
+import * as transactions from '../../transactions';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getAppRootDir() {
   let currentDir = __dirname;
   while (!fs.existsSync(path.join(currentDir, 'package.json'))) {
@@ -229,6 +231,60 @@ export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolea
     throw new Error(`could not check faucet account "${address}" balanace`);
   }
 
-  // log('balanace card metrics ', b);
+  return true;
+};
+
+export const sendTransferTx = async (hdPathIndex = 0): Promise<boolean> => {
+  log('////////////////  sendTransferTx //////////////// ');
+  const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  const senderPhrase = mnemonic.convertStringToArray(faucetMnemonic);
+  const keyPairZero = await createKeypairFromMnemonic(senderPhrase, hdPathIndex);
+
+  const { address: fromAddress } = keyPairZero;
+
+  const sendAmount = 0.2;
+
+  const sendTxMessages = await transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: keyPairReceiver.address },
+  ]);
+
+  const signedTx = await transactions.sign(fromAddress, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the transfer transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the transfer transaction');
+  }
+
+  const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
+
+  const { available } = b;
+
+  if (!available) {
+    log('Balances', b);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" have not received transfer transaction or balance was not updated `,
+    );
+  }
+
+  try {
+    const [balanceValue] = available.split(' ');
+    if (!(parseFloat(balanceValue) > 0)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have available balanace, but its balance is ${balanceValue}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b);
+    throw new Error(`could not check faucet account "${keyPairReceiver.address}" balanace`);
+  }
   return true;
 };

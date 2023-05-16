@@ -1212,8 +1212,8 @@ const main = async () => {
     // uploadRequest();
     // testBigInt();
     // await getAccountTrasactions();
-    console.log('yes!', process.env.NODE_PATH);
-    await integration.getFaucetAvailableBalance(0);
+    // console.log('yes!', process.env.NODE_PATH);
+    await integration.sendTransferTx(0);
 };
 main();
 //# sourceMappingURL=run.js.map
