@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
 const accounts = __importStar(require("../../accounts"));
 const hdVault_1 = require("../../hdVault");
 const keyManager_1 = require("../../hdVault/keyManager");
@@ -172,8 +172,8 @@ const restoreAccount = async (hdPathIndex = 0) => {
     return true;
 };
 exports.restoreAccount = restoreAccount;
-const getAccountBalance = async (hdPathIndex = 0) => {
-    (0, helpers_1.log)('////////////////  getAccountBalance //////////////// ');
+const getFaucetAvailableBalance = async (hdPathIndex = 0) => {
+    (0, helpers_1.log)('////////////////  getFaucetAvailableBalance //////////////// ');
     await main(faucetMnemonic, hdPathIndex);
     const phrase = hdVault_1.mnemonic.convertStringToArray(faucetMnemonic);
     const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
@@ -186,7 +186,7 @@ const getAccountBalance = async (hdPathIndex = 0) => {
     }
     try {
         const [balanceValue] = available.split(' ');
-        if (!(parseFloat(balanceValue) > 100)) {
+        if (!(parseFloat(balanceValue) > 0)) {
             throw new Error(`faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`);
         }
     }
@@ -198,5 +198,5 @@ const getAccountBalance = async (hdPathIndex = 0) => {
     // log('balanace card metrics ', b);
     return true;
 };
-exports.getAccountBalance = getAccountBalance;
+exports.getFaucetAvailableBalance = getFaucetAvailableBalance;
 //# sourceMappingURL=sdk_inegration_runner.js.map

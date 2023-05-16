@@ -41,8 +41,8 @@ describe(`Stratos SDK integration (integration test)`, () => {
                 done();
             });
         }, extendedExecutionTimeout);
-        it('Check that faucet accout has balance', done => {
-            void Integration.getAccountBalance().then(result => {
+        it('Check that faucet account has balance', done => {
+            void Integration.getFaucetAvailableBalance().then(result => {
                 expect(result).toBe(true);
                 done();
             });
