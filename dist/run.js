@@ -51,6 +51,10 @@ const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
 const password = 'XXXX';
 const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
+// const testMnemonic =
+//   'audit purity oyster message exile divert trick project ticket media real army human coffee always aisle detect october town noodle critic caught amused uphold';
+//
+// const zeroUserMnemonic = testMnemonic;
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
@@ -1213,7 +1217,13 @@ const main = async () => {
     // testBigInt();
     // await getAccountTrasactions();
     // console.log('yes!', process.env.NODE_PATH);
-    await integration.sendTransferTx(0);
+    //
+    const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    await integration.sendDelegateTx(0, receiverMnemonic);
+    await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
+    await integration.sendUndelegateTx(0, receiverMnemonic);
+    (0, helpers_1.log)('givenReceiverMnemonic', receiverMnemonic);
 };
 main();
 //# sourceMappingURL=run.js.map

@@ -26,6 +26,10 @@ dotenv.config();
 const password = 'XXXX';
 
 const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
+// const testMnemonic =
+//   'audit purity oyster message exile divert trick project ticket media real army human coffee always aisle detect october town noodle critic caught amused uphold';
+//
+// const zeroUserMnemonic = testMnemonic;
 
 const sdkEnvDev = {
   restUrl: 'https://rest-dev.thestratos.org',
@@ -1662,7 +1666,13 @@ const main = async () => {
   // testBigInt();
   // await getAccountTrasactions();
   // console.log('yes!', process.env.NODE_PATH);
-  await integration.sendTransferTx(0);
+  //
+  const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  await integration.sendDelegateTx(0, receiverMnemonic);
+  await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
+  await integration.sendUndelegateTx(0, receiverMnemonic);
+  log('givenReceiverMnemonic', receiverMnemonic);
 };
 
 main();
