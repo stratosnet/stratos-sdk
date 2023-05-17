@@ -1,3 +1,4 @@
+import { log } from 'console';
 import _get from 'lodash/get';
 import { hdVault } from '../config';
 import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
@@ -210,6 +211,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const detailedBalance: { [key: string]: any } = {
     delegated: {},
     reward: {},
+    unbounding: {},
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -251,15 +253,30 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
 
   if (!unboundingBalanceError) {
-    const entries = unboundingBalanceResponse?.result?.[0]?.entries;
+    const entries = unboundingBalanceResponse?.result;
 
-    const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.UnboundingEntry) => {
-      const balanceInWei = createBigNumber(entry.balance);
+    const amountInWeiA = entries?.reduce(
+      (acc: BigNumberValue, entry: networkTypes.UnboundingBalanceResult) => {
+        const balanceEntries = entry?.entries;
 
-      return plusBigNumber(acc, balanceInWei);
-    }, 0);
+        const validatorAddress = entry.validator_address;
 
-    cardMetricsResult.unbounding = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
+        const amountInWeiB = balanceEntries.reduce(
+          (accInternal: BigNumberValue, entryInternal: networkTypes.UnboundingEntry) => {
+            const balanceInWeiI = createBigNumber(entryInternal.balance);
+            return plusBigNumber(accInternal, balanceInWeiI);
+          },
+          0,
+        );
+
+        const validatorBalance = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWeiB}`);
+        detailedBalance.unbounding[validatorAddress] = validatorBalance;
+        return plusBigNumber(acc, amountInWeiB);
+      },
+      0,
+    );
+    const unboundingBalance = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWeiA}`);
+    cardMetricsResult.unbounding = unboundingBalance;
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);

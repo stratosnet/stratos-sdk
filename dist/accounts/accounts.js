@@ -158,7 +158,7 @@ const getOtherBalanceCardMetrics = async (keyPairAddress) => {
 };
 exports.getOtherBalanceCardMetrics = getOtherBalanceCardMetrics;
 const getBalanceCardMetrics = async (keyPairAddress) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     const cardMetricsResult = {
         available: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         delegated: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
@@ -169,6 +169,7 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     const detailedBalance = {
         delegated: {},
         reward: {},
+        unbounding: {},
     };
     const availableBalanceResult = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
@@ -197,19 +198,27 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     const unboundingBalanceResult = await (0, network_1.getUnboundingBalance)(keyPairAddress);
     const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
     if (!unboundingBalanceError) {
-        const entries = (_f = (_e = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.entries;
-        const amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
-            const balanceInWei = (0, bigNumber_1.create)(entry.balance);
-            return (0, bigNumber_1.plus)(acc, balanceInWei);
+        const entries = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result;
+        const amountInWeiA = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
+            const balanceEntries = entry === null || entry === void 0 ? void 0 : entry.entries;
+            const validatorAddress = entry.validator_address;
+            const amountInWeiB = balanceEntries.reduce((accInternal, entryInternal) => {
+                const balanceInWeiI = (0, bigNumber_1.create)(entryInternal.balance);
+                return (0, bigNumber_1.plus)(accInternal, balanceInWeiI);
+            }, 0);
+            const validatorBalance = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWeiB}`);
+            detailedBalance.unbounding[validatorAddress] = validatorBalance;
+            return (0, bigNumber_1.plus)(acc, amountInWeiB);
         }, 0);
-        cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWei || ''}`);
+        const unboundingBalance = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWeiA}`);
+        cardMetricsResult.unbounding = unboundingBalance;
     }
     const rewardBalanceResult = await (0, network_1.getRewardBalance)(keyPairAddress);
     const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
     if (!rewardBalanceError) {
-        const entries = (_g = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _g === void 0 ? void 0 : _g.rewards;
-        const amount = (_k = (_j = (_h = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _h === void 0 ? void 0 : _h.total) === null || _j === void 0 ? void 0 : _j[0]) === null || _k === void 0 ? void 0 : _k.amount;
-        const denom = (_o = (_m = (_l = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _l === void 0 ? void 0 : _l.total) === null || _m === void 0 ? void 0 : _m[0]) === null || _o === void 0 ? void 0 : _o.denom;
+        const entries = (_e = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _e === void 0 ? void 0 : _e.rewards;
+        const amount = (_h = (_g = (_f = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _f === void 0 ? void 0 : _f.total) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.amount;
+        const denom = (_l = (_k = (_j = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _j === void 0 ? void 0 : _j.total) === null || _k === void 0 ? void 0 : _k[0]) === null || _l === void 0 ? void 0 : _l.denom;
         entries === null || entries === void 0 ? void 0 : entries.forEach((entry) => {
             var _a, _b;
             const validatorAddress = entry.validator_address;

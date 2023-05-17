@@ -43,7 +43,6 @@ const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
-const integration = __importStar(require("./testing/integration/sdk_inegration_runner"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -51,6 +50,10 @@ const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
 const password = 'XXXX';
 const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
+// const testMnemonic =
+//   'audit purity oyster message exile divert trick project ticket media real army human coffee always aisle detect october town noodle critic caught amused uphold';
+//
+// const zeroUserMnemonic = testMnemonic;
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
@@ -1193,7 +1196,7 @@ const main = async () => {
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex);
+    await getBalanceCardMetrics(hdPathIndex);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex);
     // await simulateSend();
@@ -1212,8 +1215,14 @@ const main = async () => {
     // uploadRequest();
     // testBigInt();
     // await getAccountTrasactions();
-    console.log('yes!', process.env.NODE_PATH);
-    await integration.getFaucetAvailableBalance(0);
+    // console.log('yes!', process.env.NODE_PATH);
+    //
+    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+    // await integration.sendDelegateTx(0, receiverMnemonic);
+    // await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
+    // await integration.sendUndelegateTx(0, receiverMnemonic);
+    // log('givenReceiverMnemonic', receiverMnemonic);
 };
 main();
 //# sourceMappingURL=run.js.map

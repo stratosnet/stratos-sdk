@@ -4,15 +4,18 @@ import * as accounts from '../../accounts';
 import { mnemonic, wallet } from '../../hdVault';
 import { createMasterKeySeed, getSerializedWalletFromPhrase } from '../../hdVault/keyManager';
 import Sdk from '../../Sdk';
-import { getCosmos } from '../../services/cosmos';
+import { getCosmos, resetCosmos, StratosCosmos } from '../../services/cosmos';
 import { log, delay } from '../../services/helpers';
 import * as Network from '../../services/network';
+import * as transactions from '../../transactions';
+import * as validators from '../../validators';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getAppRootDir() {
   let currentDir = __dirname;
   while (!fs.existsSync(path.join(currentDir, 'package.json'))) {
@@ -73,44 +76,49 @@ log('Using sdk config', sdkEnvDev);
 
 const password = 'yourSecretPassword';
 
-const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean> => {
-  let resolvedChainID: string;
-
+const main = async (zeroUserMnemonic: string, hdPathIndex = 0, resetSdk = false): Promise<boolean> => {
   const sdkEnv = sdkEnvDev;
 
   Sdk.init({ ...sdkEnv });
 
-  if (GLOBAL_CHAIN_ID) {
-    log('main ~ sdk already initialized. Exiting');
-    return false;
-  }
+  if (!GLOBAL_CHAIN_ID) {
+    // log('main ~ sdk already initialized. Exiting');
+    try {
+      const resolvedChainIDToTest = await Network.getChainId();
 
-  try {
-    const resolvedChainIDToTest = await Network.getChainId();
+      if (!resolvedChainIDToTest) {
+        throw new Error('Chain id is empty. Exiting');
+      }
 
-    if (!resolvedChainIDToTest) {
-      throw new Error('Chain id is empty. Exiting');
+      log('main ~ resolvedChainIDToTest', resolvedChainIDToTest);
+      // resolvedChainID = resolvedChainIDToTest;
+      GLOBAL_CHAIN_ID = resolvedChainIDToTest;
+    } catch (error) {
+      log('main ~ resolvedChainID error', error);
+      throw new Error('Could not resolve chain id');
     }
 
-    log('main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-    resolvedChainID = resolvedChainIDToTest;
-  } catch (error) {
-    log('main ~ resolvedChainID error', error);
-    throw new Error('Could not resolve chain id');
+    Sdk.init({
+      ...sdkEnv,
+      chainId: GLOBAL_CHAIN_ID,
+      ppNodeUrl: 'http://35.233.85.255',
+      ppNodePort: '8142',
+    });
   }
 
-  GLOBAL_CHAIN_ID = resolvedChainID;
+  if (resetSdk) {
+    resetCosmos();
+  }
 
-  Sdk.init({
-    ...sdkEnv,
-    chainId: resolvedChainID,
-    ppNodeUrl: 'http://35.233.85.255',
-    ppNodePort: '8142',
-  });
+  if (StratosCosmos.cosmosInstance) {
+    log('we have keypar initialized, exiting');
+    return true;
+  }
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
   log('masterKeySeedInfo', masterKeySeedInfo);
+  log('zeroUserMnemonic', zeroUserMnemonic);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
@@ -226,9 +234,352 @@ export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolea
   } catch (error) {
     log('Error', error);
     log('Balances', b);
-    throw new Error(`could not check faucet account "${address}" balanace`);
+    throw new Error(`could not check faucet account "${address}" balance`);
   }
 
-  // log('balanace card metrics ', b);
+  return true;
+};
+
+const sendFromFaucetToReceiver = async (
+  senderHdPathIndex: number,
+  keyPairReceiver: wallet.KeyPairInfo,
+  amount: number,
+): Promise<boolean> => {
+  const senderPhrase = mnemonic.convertStringToArray(faucetMnemonic);
+  const keyPairZero = await createKeypairFromMnemonic(senderPhrase, senderHdPathIndex);
+
+  const { address: fromAddress } = keyPairZero;
+
+  const sendAmount = amount;
+
+  const sendTxMessages = await transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: keyPairReceiver.address },
+  ]);
+
+  const signedTx = await transactions.sign(fromAddress, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the transfer transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the transfer transaction');
+  }
+  return true;
+};
+
+export const sendTransferTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''): Promise<boolean> => {
+  log('////////////////  sendTransferTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.3);
+
+  const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
+
+  const { available } = b;
+
+  if (!available) {
+    log('Balances', b);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" have not received transfer transaction or balance was not updated `,
+    );
+  }
+
+  try {
+    const [balanceValue] = available.split(' ');
+    if (!(parseFloat(balanceValue) > 0)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have available balanace, but its balance is ${balanceValue}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b);
+    throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
+  }
+  return true;
+};
+
+export const sendDelegateTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+  expectedDelegated = '0.2',
+): Promise<boolean> => {
+  log('//////////////// sendDelegateTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
+
+  await main(receiverMnemonic, hdPathIndex, true);
+
+  const { address } = keyPairReceiver;
+
+  const validatorsInfo = await validators.getValidators();
+
+  if (!validatorsInfo) {
+    throw new Error('validatorsInfo is empty');
+  }
+
+  const { data: validatorsList } = validatorsInfo;
+
+  const validatorAddresses = validatorsList.map(validator => ({
+    validatorAddress: validator.address,
+  }));
+
+  if (!validatorAddresses.length) {
+    throw new Error('validatorsList is empty');
+  }
+  const validatorsToUse = validatorAddresses.slice(0, 2);
+
+  log('validatorsToUse', validatorsToUse);
+
+  const delegationInfo = validatorsToUse.map(({ validatorAddress }) => ({ amount: 0.1, validatorAddress }));
+
+  const sendTxMessages = await transactions.getDelegateTx(address, delegationInfo);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the delegate transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the delegate transaction');
+  }
+
+  const b = await accounts.getBalanceCardMetrics(address);
+  log('balance from delegated', b);
+
+  const { delegated } = b;
+
+  if (!delegated) {
+    log('Balances', b);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" have not received delegation transaction or balance was not updated `,
+    );
+  }
+
+  try {
+    const [balanceValue] = delegated.split(' ');
+    const a = parseFloat(balanceValue).toFixed(1);
+    if (!(a === expectedDelegated)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have available delegate balance, but its balance is ${balanceValue}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b);
+    throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
+  }
+  return true;
+};
+
+export const sendWithdrawRewardsTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// sendWithdrawRewardsTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex, true);
+
+  const { address } = keyPairReceiver;
+
+  const validatorsInfo = await validators.getValidators();
+
+  if (!validatorsInfo) {
+    throw new Error('validatorsInfo is empty');
+  }
+
+  const { data: validatorsList } = validatorsInfo;
+
+  const validatorAddresses = validatorsList.map(validator => ({
+    validatorAddress: validator.address,
+  }));
+
+  if (!validatorAddresses.length) {
+    throw new Error('validatorsList is empty');
+  }
+
+  const validatorsToUse = validatorAddresses.slice(0, 2);
+
+  log('validatorsToUse', validatorsToUse);
+
+  const sendTxMessages = await transactions.getWithdrawalRewardTx(address, validatorsToUse);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the get withdrawal rewards transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the get withdrawal rewards transaction');
+  }
+
+  return true;
+};
+
+export const sendWithdrawAllRewardsTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// sendWithdrawAllRewardsTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex, true);
+
+  const { address } = keyPairReceiver;
+
+  const validatorsInfo = await validators.getValidators();
+
+  if (!validatorsInfo) {
+    throw new Error('validatorsInfo is empty');
+  }
+
+  const { data: validatorsList } = validatorsInfo;
+
+  const validatorAddresses = validatorsList.map(validator => ({
+    validatorAddress: validator.address,
+  }));
+
+  if (!validatorAddresses.length) {
+    throw new Error('validatorsList is empty');
+  }
+
+  const sendTxMessages = await transactions.getWithdrawalAllRewardTx(address);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the get withdrawal all rewards transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the get withdrawal all rewards transaction');
+  }
+
+  return true;
+};
+
+export const sendUndelegateTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+  expectedDelegated = '0.2',
+): Promise<boolean> => {
+  log('//////////////// sendUndelegateTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex, true);
+
+  const { address } = keyPairReceiver;
+
+  const validatorsInfo = await validators.getValidators();
+
+  if (!validatorsInfo) {
+    throw new Error('validatorsInfo is empty');
+  }
+
+  const { data: validatorsList } = validatorsInfo;
+
+  const validatorAddresses = validatorsList.map(validator => ({
+    validatorAddress: validator.address,
+  }));
+
+  if (!validatorAddresses.length) {
+    throw new Error('validatorsList is empty');
+  }
+  const validatorsToUse = validatorAddresses.slice(0, 2);
+
+  log('validatorsToUse', validatorsToUse);
+
+  const delegationInfo = validatorsToUse.map(({ validatorAddress }) => ({ amount: 0.1, validatorAddress }));
+
+  const sendTxMessages = await transactions.getUnDelegateTx(address, delegationInfo);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the undelegate transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the undelegate transaction');
+  }
+
+  const b1 = await accounts.getBalanceCardMetrics(address);
+  const { unbounding } = b1;
+
+  if (!unbounding) {
+    log('Balances', b1);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" does not have expected unbounding balance `,
+    );
+  }
+
+  try {
+    const [balanceValue] = unbounding.split(' ');
+    const a = parseFloat(balanceValue).toFixed(1);
+    if (!(a === expectedDelegated)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have unbounding balance, but its unbounding balance is ${balanceValue}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b1);
+    throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
+  }
   return true;
 };

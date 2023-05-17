@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @jest-environment node
  */
+const hdVault_1 = require("../../hdVault");
 const Integration = __importStar(require("./sdk_inegration_runner"));
 const extendedExecutionTimeout = 18000;
 describe(`Stratos SDK integration (integration test)`, () => {
@@ -43,6 +44,34 @@ describe(`Stratos SDK integration (integration test)`, () => {
         }, extendedExecutionTimeout);
         it('Check that faucet account has balance', done => {
             void Integration.getFaucetAvailableBalance().then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+    });
+    describe('Transactions', () => {
+        const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+        const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+        it('Sends a transfer tx and checks that receiver balance was updated', done => {
+            void Integration.sendTransferTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a delegation tx and checks that receiver balance was updated', done => {
+            void Integration.sendDelegateTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a withdraw rewards tx ', done => {
+            void Integration.sendWithdrawRewardsTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a withdraw all rewards tx ', done => {
+            void Integration.sendWithdrawAllRewardsTx(0, receiverMnemonic).then(result => {
                 expect(result).toBe(true);
                 done();
             });
