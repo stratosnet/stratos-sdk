@@ -431,13 +431,6 @@ const sendUndelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', exp
         throw new Error('Could not broadcast the undelegate transaction');
     }
     const b1 = await accounts.getBalanceCardMetrics(address);
-    // log('balance from undelegated', b1);
-    // await delay(20000);
-    // const b2 = await accounts.getBalanceCardMetrics(address);
-    // log('balance from undelegated', b2);
-    // await delay(20000);
-    // const b3 = await accounts.getBalanceCardMetrics(address);
-    // log('balance from undelegated', b3);
     const { unbounding } = b1;
     if (!unbounding) {
         (0, helpers_1.log)('Balances', b1);

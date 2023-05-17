@@ -1639,7 +1639,7 @@ const main = async () => {
   // await testReadAndWriteLocal(filename);
 
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex);
+  await getBalanceCardMetrics(hdPathIndex);
 
   // 2 Add funds via faucet
   // await runFaucet(hdPathIndex);
@@ -1667,12 +1667,12 @@ const main = async () => {
   // await getAccountTrasactions();
   // console.log('yes!', process.env.NODE_PATH);
   //
-  const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-  await integration.sendDelegateTx(0, receiverMnemonic);
-  await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
-  await integration.sendUndelegateTx(0, receiverMnemonic);
-  log('givenReceiverMnemonic', receiverMnemonic);
+  // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+  // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  // await integration.sendDelegateTx(0, receiverMnemonic);
+  // await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
+  // await integration.sendUndelegateTx(0, receiverMnemonic);
+  // log('givenReceiverMnemonic', receiverMnemonic);
 };
 
 main();

@@ -43,7 +43,6 @@ const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
-const integration = __importStar(require("./testing/integration/sdk_inegration_runner"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -1197,7 +1196,7 @@ const main = async () => {
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex);
+    await getBalanceCardMetrics(hdPathIndex);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex);
     // await simulateSend();
@@ -1218,12 +1217,12 @@ const main = async () => {
     // await getAccountTrasactions();
     // console.log('yes!', process.env.NODE_PATH);
     //
-    const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
-    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
-    await integration.sendDelegateTx(0, receiverMnemonic);
-    await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
-    await integration.sendUndelegateTx(0, receiverMnemonic);
-    (0, helpers_1.log)('givenReceiverMnemonic', receiverMnemonic);
+    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+    // await integration.sendDelegateTx(0, receiverMnemonic);
+    // await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
+    // await integration.sendUndelegateTx(0, receiverMnemonic);
+    // log('givenReceiverMnemonic', receiverMnemonic);
 };
 main();
 //# sourceMappingURL=run.js.map
