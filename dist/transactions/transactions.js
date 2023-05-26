@@ -23,17 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.getStratosTransactionRegistryTypes = void 0;
-const stargate_1 = require("@cosmjs/stargate");
-const stratosTypes = __importStar(require("@stratos-network/stratos-cosmosjs-types"));
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = void 0;
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
-// import Sdk from '../Sdk';
 const bigNumber_1 = require("../services/bigNumber");
 const cosmos_1 = require("../services/cosmos");
+const helpers_1 = require("../services/helpers");
 const validators_1 = require("../validators");
-const evm = __importStar(require("./evm"));
 const Types = __importStar(require("./types"));
 const maxMessagesPerTx = 500;
 function* payloadGenerator(dataList) {
@@ -41,33 +38,17 @@ function* payloadGenerator(dataList) {
         yield dataList.shift();
     }
 }
-const getStratosTransactionRegistryTypes = () => {
-    const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-    const stratosTxRegistryTypes = [
-        ...stargate_1.defaultRegistryTypes,
-        [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
-        ...evm.registryTypes,
-        // [Types.TxMsgTypes.PotWithdraw, Coin],
-        // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
-        // [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
-        // [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
-        // [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
-        // [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
-    ];
-    return stratosTxRegistryTypes;
-};
-exports.getStratosTransactionRegistryTypes = getStratosTransactionRegistryTypes;
 const broadcast = async (signedTx) => {
     try {
         const client = await (0, cosmos_1.getCosmos)();
+        (0, helpers_1.dirLog)('signedTx to be broadcasted', signedTx);
         const txBytes = tx_1.TxRaw.encode(signedTx).finish();
-        console.log('🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted', JSON.stringify(txBytes));
         const result = await client.broadcastTx(txBytes);
-        console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
+        (0, helpers_1.dirLog)('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
         return result;
     }
     catch (err) {
-        console.log('Could not broadcast', err.message);
+        (0, helpers_1.dirLog)('Could not broadcast', err.message);
         throw err;
     }
 };
@@ -82,7 +63,7 @@ const getStandardDefaultFee = () => {
         amount: feeAmount,
         gas: `${gas}`,
     };
-    console.log('standard default fee', fee);
+    (0, helpers_1.dirLog)('standard default fee', fee);
     return fee;
 };
 exports.getStandardDefaultFee = getStandardDefaultFee;
@@ -90,11 +71,11 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (!txMessages || !signerAddress) {
         return (0, exports.getStandardDefaultFee)();
     }
+    (0, helpers_1.dirLog)('from getStandardFee txMessages', txMessages);
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
     try {
-        console.log('txMessages from simulate', txMessages, signerAddress);
         const client = await (0, cosmos_1.getCosmos)();
         const gas = await client.simulate(signerAddress, txMessages, '');
         const estimatedGas = Math.round(gas * tokens_1.gasAdjustment);
@@ -107,6 +88,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
         return fees;
     }
     catch (error) {
+        (0, helpers_1.log)('Full error from simutlate', error);
         throw new Error(`Could not simutlate the fee calculation. Error details: ${error.message || JSON.stringify(error)}`);
     }
 };
@@ -270,7 +252,7 @@ const getSdsPrepayTx = async (senderAddress, prepayPayload) => {
                 amount: (0, exports.getStandardAmount)([amount]),
             },
         };
-        console.log('message to be signed', JSON.stringify(message));
+        (0, helpers_1.dirLog)('sds prepay message to be signed', message);
         messagesList.push(message);
         iteratedData = payloadToProcess.next();
     }

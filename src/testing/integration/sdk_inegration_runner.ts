@@ -2,13 +2,14 @@
 import { exit } from 'process';
 import * as accounts from '../../accounts';
 import { mnemonic, wallet } from '../../hdVault';
-import { createMasterKeySeed, getSerializedWalletFromPhrase } from '../../hdVault/keyManager';
+import { createMasterKeySeed } from '../../hdVault/keyManager';
 import Sdk from '../../Sdk';
-import { getCosmos, resetCosmos, StratosCosmos } from '../../services/cosmos';
+import { getCosmos, resetCosmos } from '../../services/cosmos';
 import { log, delay } from '../../services/helpers';
 import * as Network from '../../services/network';
 import * as transactions from '../../transactions';
 import * as validators from '../../validators';
+import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
@@ -26,6 +27,26 @@ function getAppRootDir() {
     }
   }
   return currentDir;
+}
+
+function buildPpNodeUrl(givenUrl: string): string[] {
+  const ppProtocolPostition = givenUrl.lastIndexOf('://');
+
+  if (!(ppProtocolPostition > 1)) {
+    log(`pp node config value must be proved. "${givenUrl}" is not a valid value`);
+    log('ppProtocolPostition', ppProtocolPostition);
+    exit(1);
+  }
+  const ppPortPostition = givenUrl.lastIndexOf(':');
+
+  if (ppProtocolPostition === ppPortPostition) {
+    return [givenUrl, ''];
+  }
+
+  const ppUrl = givenUrl.slice(0, ppPortPostition || givenUrl.length);
+  const ppPort = ppPortPostition ? givenUrl.slice(ppPortPostition + 1) : '';
+
+  return [ppUrl, ppPort];
 }
 
 let APP_ROOT_DIR = '';
@@ -59,9 +80,9 @@ const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
 const { mainFaucet } = walletKeys;
 
 log('loaded config ', envConfig);
-log('faucet pkey ', mainFaucet);
-log('pp node url and port ', ppNodeAndPort);
-log('faucet mnemonic', faucetMnemonic);
+log('faucet pkey from the config ', mainFaucet);
+log('pp node url and port from the config', ppNodeAndPort);
+log('faucet mnemonic from the config', faucetMnemonic);
 
 let GLOBAL_CHAIN_ID = '';
 
@@ -76,13 +97,14 @@ log('Using sdk config', sdkEnvDev);
 
 const password = 'yourSecretPassword';
 
-const main = async (zeroUserMnemonic: string, hdPathIndex = 0, resetSdk = false): Promise<boolean> => {
+const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean> => {
   const sdkEnv = sdkEnvDev;
+
+  resetCosmos();
 
   Sdk.init({ ...sdkEnv });
 
   if (!GLOBAL_CHAIN_ID) {
-    // log('main ~ sdk already initialized. Exiting');
     try {
       const resolvedChainIDToTest = await Network.getChainId();
 
@@ -90,39 +112,32 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0, resetSdk = false)
         throw new Error('Chain id is empty. Exiting');
       }
 
-      log('main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-      // resolvedChainID = resolvedChainIDToTest;
+      log('main - resolvedChainIDToTest', resolvedChainIDToTest);
       GLOBAL_CHAIN_ID = resolvedChainIDToTest;
     } catch (error) {
-      log('main ~ resolvedChainID error', error);
+      log('main - resolvedChainID error', error);
       throw new Error('Could not resolve chain id');
     }
-
-    Sdk.init({
-      ...sdkEnv,
-      chainId: GLOBAL_CHAIN_ID,
-      ppNodeUrl: 'http://35.233.85.255',
-      ppNodePort: '8142',
-    });
   }
 
-  if (resetSdk) {
-    resetCosmos();
-  }
+  const ppNodeAndPortToUse = buildPpNodeUrl(ppNodeAndPort);
+  const [ppUrl, ppPort] = ppNodeAndPortToUse;
 
-  if (StratosCosmos.cosmosInstance) {
-    log('we have keypar initialized, exiting');
-    return true;
-  }
+  log('main - will be using ppNodeAndPortToUse', ppNodeAndPortToUse);
+
+  Sdk.init({
+    ...sdkEnv,
+    chainId: GLOBAL_CHAIN_ID,
+    ppNodeUrl: ppUrl,
+    ppNodePort: ppPort,
+  });
 
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
-  log('masterKeySeedInfo', masterKeySeedInfo);
-  log('zeroUserMnemonic', zeroUserMnemonic);
+
+  log('main - sdk initialized user mnemonic', zeroUserMnemonic);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
-
-  log('main ~ serialized ', serialized);
 
   const _cosmosClient = await getCosmos(serialized, password);
 
@@ -151,7 +166,7 @@ const createKeypairFromMnemonic = async (
 export const createAnAccount = async (hdPathIndex = 0): Promise<boolean> => {
   log('////////////////  createAnAccount //////////////// ');
 
-  // await main(faucetMnemonic, hdPathIndex);
+  await main(faucetMnemonic, hdPathIndex);
 
   const phrase = mnemonic.generateMnemonicPhrase(24);
   const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
@@ -176,7 +191,7 @@ export const createAnAccount = async (hdPathIndex = 0): Promise<boolean> => {
 export const restoreAccount = async (hdPathIndex = 0): Promise<boolean> => {
   log('////////////////  restoreAnAccount //////////////// ');
 
-  // await main(faucetMnemonic, hdPathIndex);
+  await main(faucetMnemonic, hdPathIndex);
 
   const mnemonicToCheck =
     'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
@@ -227,9 +242,8 @@ export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolea
   try {
     const [balanceValue] = available.split(' ');
     if (!(parseFloat(balanceValue) > 0)) {
-      throw new Error(
-        `faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`,
-      );
+      log(`faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`);
+      exit(1);
     }
   } catch (error) {
     log('Error', error);
@@ -282,7 +296,7 @@ export const sendTransferTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
 
   const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
 
-  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.3);
+  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
 
   const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
 
@@ -328,7 +342,7 @@ export const sendDelegateTx = async (
 
   await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
 
-  await main(receiverMnemonic, hdPathIndex, true);
+  await main(receiverMnemonic, hdPathIndex);
 
   const { address } = keyPairReceiver;
 
@@ -410,7 +424,7 @@ export const sendWithdrawRewardsTx = async (
   const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
 
-  await main(receiverMnemonic, hdPathIndex, true);
+  await main(receiverMnemonic, hdPathIndex);
 
   const { address } = keyPairReceiver;
 
@@ -466,7 +480,7 @@ export const sendWithdrawAllRewardsTx = async (
   const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
 
-  await main(receiverMnemonic, hdPathIndex, true);
+  await main(receiverMnemonic, hdPathIndex);
 
   const { address } = keyPairReceiver;
 
@@ -519,7 +533,7 @@ export const sendUndelegateTx = async (
   const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
 
-  await main(receiverMnemonic, hdPathIndex, true);
+  await main(receiverMnemonic, hdPathIndex);
 
   const { address } = keyPairReceiver;
 
@@ -582,4 +596,101 @@ export const sendUndelegateTx = async (
     throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
   }
   return true;
+};
+
+export const sendSdsPrepayTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+  expectedToSend = 0.2,
+): Promise<boolean> => {
+  log('//////////////// sendSdsPrepayTx //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, expectedToSend + 0.2);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const { address } = keyPairReceiver;
+
+  const sendTxMessages = await transactions.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the sds prepay transaction');
+  }
+
+  try {
+    const result = await transactions.broadcast(signedTx);
+    const { code } = result;
+    if (code > 0) {
+      throw new Error('There was an error with the broadcast, check the result');
+    }
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the sds prepay transaction');
+  }
+  return true;
+};
+
+export const getAccountOzoneBalance = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+  minExpectedOzone = '98', // 98.81 for 0.1 stos
+): Promise<boolean> => {
+  log('//////////////// getAccountOzoneBalance //////////////// ');
+
+  log(
+    `We need to wait for ${OZONE_BALANCE_CHECK_WAIT_TIME} ms before checing the balance to ensure it is updated`,
+  );
+
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const { address } = keyPairReceiver;
+
+  const b = await accounts.getOtherBalanceCardMetrics(address);
+  log('balance from other', b);
+
+  const { ozone } = b;
+
+  if (!ozone) {
+    log('Balances', b);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" have not received prepay transaction or its ozone balance was not updated `,
+    );
+  }
+
+  try {
+    const [balanceValue] = ozone.split(' ');
+    const a = parseFloat(balanceValue).toFixed(4);
+    if (a >= minExpectedOzone) {
+      return true;
+    }
+
+    throw new Error(
+      `account "${address}" must have available ozone balance equal to ${minExpectedOzone}, but its balance is ${balanceValue}`,
+    );
+  } catch (error) {
+    log('Error', error);
+    log('Balances', b);
+    throw new Error(`could not check account "${address}" balance`);
+  }
 };

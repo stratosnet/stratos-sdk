@@ -4,7 +4,7 @@
 import { mnemonic } from '../../hdVault';
 import * as Integration from './sdk_inegration_runner';
 
-const extendedExecutionTimeout = 18000;
+const extendedExecutionTimeout = 60000;
 
 describe(`Stratos SDK integration (integration test)`, () => {
   describe('User Account', () => {
@@ -41,6 +41,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
   describe('Transactions', () => {
     const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+
     it(
       'Sends a transfer tx and checks that receiver balance was updated',
       done => {
@@ -75,6 +76,30 @@ describe(`Stratos SDK integration (integration test)`, () => {
       'Sends a withdraw all rewards tx ',
       done => {
         void Integration.sendWithdrawAllRewardsTx(0, receiverMnemonic).then(result => {
+          expect(result).toBe(true);
+          done();
+        });
+      },
+      extendedExecutionTimeout,
+    );
+  });
+  describe('Prepay and OZONE', () => {
+    const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+    it(
+      'Sends an sds prepay tx',
+      done => {
+        void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
+          expect(result).toBe(true);
+          done();
+        });
+      },
+      extendedExecutionTimeout,
+    );
+    it(
+      'Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.8 OZ',
+      done => {
+        void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.8').then(result => {
           expect(result).toBe(true);
           done();
         });

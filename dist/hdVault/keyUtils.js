@@ -34,7 +34,7 @@ const keccak_1 = __importDefault(require("keccak"));
 const sjcl_1 = __importDefault(require("sjcl"));
 const hdVault_1 = require("../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/StratosDirectSecp256k1HdWallet"));
-const helpers_1 = require("../services/helpers");
+// import { log } from '../services/helpers';
 const cosmosUtils_1 = require("./cosmosUtils");
 const mnemonic_1 = require("./mnemonic");
 /**
@@ -211,12 +211,12 @@ function makePathBuilder(pattern) {
 exports.makePathBuilder = makePathBuilder;
 // @todo clena up this function and extract different encryption methods into helper functions
 const serializeWallet = async (wallet, password) => {
-    (0, helpers_1.log)('Beginning serializing..');
+    // log('Beginning serializing..');
     let encryptedWalletInfoFour;
     try {
         // encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
         encryptedWalletInfoFour = (0, cosmosUtils_1.serializeWithEncryptionKey)(password, wallet);
-        (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
+        // log('Serialization with prepared cryptoJs data Uint8 is done. ');
     }
     catch (error) {
         throw new Error(`Could not serialize a wallet with the encryption key. Error4 - ${error.message}`);

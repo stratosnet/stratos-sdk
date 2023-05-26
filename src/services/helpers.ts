@@ -8,6 +8,14 @@ export const log = (message: string, ...rest: any) => {
   );
 };
 
+export const dirLog = (message: string, ...rest: any) => {
+  const opts = { depth: null, colors: true, maxArrayLength: null };
+
+  const otherData = (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '';
+
+  const data = { messageTime: `"${now()}" - ${message}`, message, otherData };
+};
+
 export async function wait(fn: any, ms: number) {
   while (!fn()) {
     await delay(ms);

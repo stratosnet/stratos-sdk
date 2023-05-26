@@ -124,47 +124,59 @@ const evmSend = async () => {
         }
     }
 };
-const simulateSend = async () => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+const createKeypairFromMnemonic = async (phrase, hdPathIndex = 0) => {
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
-    if (!keyPairZero) {
-        return;
+    let keyPairZero;
+    try {
+        keyPairZero = await hdVault_1.wallet.deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
     }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        throw new Error('could not create keypar by the helper');
+    }
+    if (!keyPairZero) {
+        throw new Error(`keypar was not derived`);
+    }
+    return keyPairZero;
+};
+const simulateSend = async (hdPathIndex, givenReceiverMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    console.log('phrase', phrase);
+    const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
+    console.log('mnemonicToUse', mnemonicToUse);
+    const receiverPhrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToUse);
+    console.log('receiverPhrase', receiverPhrase);
+    const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+    const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase, hdPathIndex);
     const fromAddress = keyPairZero.address;
     const sendAmount = 0.2;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
-        { amount: sendAmount, toAddress: keyPairZero.address },
+        { amount: sendAmount, toAddress: keyPairReceiver.address },
     ]);
     console.log('keyPairZero.address', keyPairZero.address);
+    console.log('keyPairReceiver.address', keyPairReceiver.address);
     const fees = await transactions.getStandardFee(keyPairZero.address, sendTxMessages);
     console.log('fees', fees);
     console.log('standardFeeAmount', config_1.tokens.standardFeeAmount());
     console.log('minGasPrice', config_1.tokens.minGasPrice.toString());
 };
 // cosmosjs send
-const mainSend = async () => {
+const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, hdPathIndexReceiver = 0) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
-    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
-    if (!keyPairZero) {
-        return;
-    }
-    const keyPairOne = await (0, wallet_1.deriveKeyPair)(1, password, encryptedMasterKeySeedString);
-    if (!keyPairOne) {
-        return;
-    }
-    const keyPairTwo = await (0, wallet_1.deriveKeyPair)(2, password, encryptedMasterKeySeedString);
-    if (!keyPairTwo) {
-        return;
-    }
+    console.log('phrase', phrase);
+    const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
+    console.log('mnemonicToUse', mnemonicToUse);
+    const receiverPhrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToUse);
+    console.log('receiverPhrase', receiverPhrase);
+    const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
+    const keyPairOne = await createKeypairFromMnemonic(receiverPhrase, hdPathIndexReceiver);
+    // const keyPairTwo = await createKeypairFromMnemonic(receiverPhrase, 2);
     const fromAddress = keyPairZero.address;
-    const sendAmount = 0.2;
+    const sendAmount = 0.4;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
         { amount: sendAmount, toAddress: keyPairOne.address },
-        { amount: sendAmount + 1, toAddress: keyPairTwo.address },
+        // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
     if (signedTx) {
@@ -287,19 +299,23 @@ const mainWithdrawAllRewards = async () => {
     }
 };
 // cosmosjs withdraw rewards
-const mainSdsPrepay = async (hdPathIndex) => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    console.log('mnemonic ', zeroUserMnemonic);
+const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic) => {
+    // console.log('mnemonic ', zeroUserMnemonic);
+    const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
+    // console.log('mnemonicToUse', mnemonicToUse);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToUse);
+    // console.log('phrase', phrase);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
-    console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
+    // console.log('🚀 ~ file: run.ts ~ line 292 ~ mainSdsPrepay ~ keyPairZero', keyPairZero);
     if (!keyPairZero) {
         return;
     }
-    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.5 }]);
-    console.log('from mainSdsPrepay - calling tx sign');
+    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.1 }]);
+    (0, helpers_1.dirLog)('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
+    let attempts = 0;
     if (signedTx) {
         try {
             console.log('from mainSdsPrepay - calling tx broadcast');
@@ -308,6 +324,12 @@ const mainSdsPrepay = async (hdPathIndex) => {
         }
         catch (err) {
             console.log('error broadcasting', err.message);
+            if (attempts <= 2) {
+                attempts += 1;
+                (0, helpers_1.dirLog)(`attempts ${attempts}, trying again the same signedTx`, signedTx);
+                const result = await transactions.broadcast(signedTx);
+                console.log('broadcast prepay result', result);
+            }
         }
     }
 };
@@ -1195,14 +1217,31 @@ const main = async () => {
     // await testDl(filename, filehash, filesize);
     // await testRequestUserFileList(0);
     // await testReadAndWriteLocal(filename);
+    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+    // const receiverMnemonic = zeroUserMnemonic;
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex);
+    // await getBalanceCardMetrics(hdPathIndex);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex);
-    // await simulateSend();
+    // await simulateSend(hdPathIndex, receiverMnemonic);
     // await mainSdsPrepay(hdPathIndex);
+    await getBalanceCardMetrics(hdPathIndex);
     // await getOzoneBalance(hdPathIndex);
-    // await mainSend();
+    // const hdPathIndexReceiver = 10;
+    // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    //
+    // const masterKeySeedInfoA = await createMasterKeySeed(
+    //   mnemonic.convertStringToArray(receiverMnemonic),
+    //   password,
+    //   hdPathIndexReceiver,
+    // );
+    //
+    // const serializedA = masterKeySeedInfoA.encryptedWalletInfo;
+    //
+    // resetCosmos();
+    //
+    // const _cosmosClientA = await getCosmos(serializedA, password);
     // await testUploadRequest();
     // await testItWorking(filename, hdPathIndex);
     // await testIt(filename, hdPathIndex);
@@ -1217,11 +1256,12 @@ const main = async () => {
     // await getAccountTrasactions();
     // console.log('yes!', process.env.NODE_PATH);
     //
-    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
     // await integration.sendDelegateTx(0, receiverMnemonic);
     // await integration.sendWithdrawAllRewardsTx(0, receiverMnemonic);
     // await integration.sendUndelegateTx(0, receiverMnemonic);
+    // await integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1);
+    // await integration.getAccountOzoneBalance(0, receiverMnemonic, '99.1');
+    // await integration.getAccountOzoneBalance(0, receiverMnemonic, '498.503');
     // log('givenReceiverMnemonic', receiverMnemonic);
 };
 main();

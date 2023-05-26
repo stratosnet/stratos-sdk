@@ -28,7 +28,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const hdVault_1 = require("../../hdVault");
 const Integration = __importStar(require("./sdk_inegration_runner"));
-const extendedExecutionTimeout = 18000;
+const extendedExecutionTimeout = 60000;
 describe(`Stratos SDK integration (integration test)`, () => {
     describe('User Account', () => {
         it('Creates a new account', async () => {
@@ -72,6 +72,22 @@ describe(`Stratos SDK integration (integration test)`, () => {
         }, extendedExecutionTimeout);
         it('Sends a withdraw all rewards tx ', done => {
             void Integration.sendWithdrawAllRewardsTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+    });
+    describe('Prepay and OZONE', () => {
+        const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+        const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+        it('Sends an sds prepay tx', done => {
+            void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.8 OZ', done => {
+            void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.8').then(result => {
                 expect(result).toBe(true);
                 done();
             });

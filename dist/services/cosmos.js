@@ -9,9 +9,9 @@ const StratosSigningStargateClient_1 = require("../hdVault/StratosSigningStargat
 const StratosStargateAccounts_1 = require("../hdVault/StratosStargateAccounts");
 const wallet_1 = require("../hdVault/wallet");
 const Sdk_1 = __importDefault(require("../Sdk"));
-const transactions_1 = require("../transactions/transactions");
+const stratosRegistry_1 = require("../transactions/stratosRegistry");
 const getCosmosClient = async (rpcEndpoint, deserializedWallet) => {
-    const clientRegistryTypes = (0, transactions_1.getStratosTransactionRegistryTypes)();
+    const clientRegistryTypes = (0, stratosRegistry_1.getStratosTransactionRegistryTypes)();
     const clientRegistry = new proto_signing_1.Registry(clientRegistryTypes);
     const options = {
         registry: clientRegistry,

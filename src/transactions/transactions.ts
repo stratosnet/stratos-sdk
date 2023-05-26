@@ -1,9 +1,5 @@
-import { fromBech32, toHex } from '@cosmjs/encoding';
-import { GeneratedType } from '@cosmjs/proto-signing';
-import { defaultRegistryTypes, DeliverTxResponse } from '@cosmjs/stargate';
-import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
+import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { Any } from 'cosmjs-types/google/protobuf/any';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import {
@@ -14,11 +10,10 @@ import {
   minGasPrice,
   gasAdjustment,
 } from '../config/tokens';
-// import Sdk from '../Sdk';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
+import { log, dirLog } from '../services/helpers';
 import { getValidatorsBondedToDelegator } from '../validators';
-import * as evm from './evm';
 import * as Types from './types';
 
 const maxMessagesPerTx = 500;
@@ -28,24 +23,6 @@ function* payloadGenerator(dataList: Types.TxPayload[]) {
     yield dataList.shift();
   }
 }
-
-export const getStratosTransactionRegistryTypes = () => {
-  const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-  const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
-    ...defaultRegistryTypes,
-    [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
-    ...evm.registryTypes,
-    // [Types.TxMsgTypes.PotWithdraw, Coin],
-    // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
-
-    // [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
-    // [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
-    // [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
-    // [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
-  ];
-
-  return stratosTxRegistryTypes;
-};
 
 declare global {
   interface Window {
@@ -63,19 +40,15 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
   try {
     const client = await getCosmos();
 
+    dirLog('signedTx to be broadcasted', signedTx);
     const txBytes = TxRaw.encode(signedTx).finish();
 
-    console.log(
-      '🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted',
-      JSON.stringify(txBytes),
-    );
-
     const result = await client.broadcastTx(txBytes);
-    console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
+    dirLog('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
 
     return result;
   } catch (err) {
-    console.log('Could not broadcast', (err as Error).message);
+    dirLog('Could not broadcast', (err as Error).message);
 
     throw err;
   }
@@ -94,7 +67,7 @@ export const getStandardDefaultFee = (): Types.TransactionFee => {
     amount: feeAmount,
     gas: `${gas}`,
   };
-  console.log('standard default fee', fee);
+  dirLog('standard default fee', fee);
 
   return fee;
 };
@@ -107,6 +80,8 @@ export const getStandardFee = async (
     return getStandardDefaultFee();
   }
 
+  dirLog('from getStandardFee txMessages', txMessages);
+
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(
       `Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`,
@@ -114,7 +89,6 @@ export const getStandardFee = async (
   }
 
   try {
-    console.log('txMessages from simulate', txMessages, signerAddress);
     const client = await getCosmos();
     const gas = await client.simulate(signerAddress, txMessages, '');
     const estimatedGas = Math.round(gas * gasAdjustment);
@@ -128,6 +102,7 @@ export const getStandardFee = async (
     };
     return fees;
   } catch (error) {
+    log('Full error from simutlate', error);
     throw new Error(
       `Could not simutlate the fee calculation. Error details: ${
         (error as Error).message || JSON.stringify(error)
@@ -370,7 +345,7 @@ export const getSdsPrepayTx = async (
       },
     };
 
-    console.log('message to be signed', JSON.stringify(message));
+    dirLog('sds prepay message to be signed', message);
 
     messagesList.push(message);
 
