@@ -7,7 +7,7 @@ export const decimalPrecision = 18;
 
 export const minGasPrice = ethers.utils.parseUnits('1', 9); // wei or 1gwei for tropos
 
-export const gasAdjustment = 1.4; // adjustment for gas mult as non deterministic simulate
+export const gasAdjustment = 2; // adjustment for gas mult as non deterministic simulate
 
 // ui
 export const decimalShortPrecision = 4;
