@@ -348,7 +348,7 @@ const sendUserRequestGetOzone = async (extraParams, config) => {
     const method = 'user_requestGetOzone';
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
-    console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+    (0, helpers_1.dirLog)('🚀 sendUserRequestGetOzone dataResult', dataResult);
     return dataResult;
 };
 exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
@@ -363,6 +363,7 @@ exports.sendUserUploadData = sendUserUploadData;
 const getChainId = async () => {
     var _a, _b;
     const result = await (0, exports.getRpcStatus)();
+    (0, helpers_1.dirLog)('getChainId result', result);
     const { response } = result;
     const chainId = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.network;
     return chainId;

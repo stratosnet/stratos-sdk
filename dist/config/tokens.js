@@ -6,7 +6,7 @@ const ethers_1 = require("ethers");
 // WEI and GWEI
 exports.decimalPrecision = 18;
 exports.minGasPrice = ethers_1.ethers.utils.parseUnits('1', 9); // wei or 1gwei for tropos
-exports.gasAdjustment = 1.4; // adjustment for gas mult as non deterministic simulate
+exports.gasAdjustment = 2; // adjustment for gas mult as non deterministic simulate
 // ui
 exports.decimalShortPrecision = 4;
 exports.perMsgGasAmount = 100000;

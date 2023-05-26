@@ -26,7 +26,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+/* eslint-disable @typescript-eslint/naming-convention */
+const process_1 = require("process");
 const accounts = __importStar(require("../../accounts"));
 const hdVault_1 = require("../../hdVault");
 const keyManager_1 = require("../../hdVault/keyManager");
@@ -36,6 +38,7 @@ const helpers_1 = require("../../services/helpers");
 const Network = __importStar(require("../../services/network"));
 const transactions = __importStar(require("../../transactions"));
 const validators = __importStar(require("../../validators"));
+const config_1 = require("../config");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -51,6 +54,21 @@ function getAppRootDir() {
         }
     }
     return currentDir;
+}
+function buildPpNodeUrl(givenUrl) {
+    const ppProtocolPostition = givenUrl.lastIndexOf('://');
+    if (!(ppProtocolPostition > 1)) {
+        (0, helpers_1.log)(`pp node config value must be proved. "${givenUrl}" is not a valid value`);
+        (0, helpers_1.log)('ppProtocolPostition', ppProtocolPostition);
+        (0, process_1.exit)(1);
+    }
+    const ppPortPostition = givenUrl.lastIndexOf(':');
+    if (ppProtocolPostition === ppPortPostition) {
+        return [givenUrl, ''];
+    }
+    const ppUrl = givenUrl.slice(0, ppPortPostition || givenUrl.length);
+    const ppPort = ppPortPostition ? givenUrl.slice(ppPortPostition + 1) : '';
+    return [ppUrl, ppPort];
 }
 let APP_ROOT_DIR = '';
 try {
@@ -77,9 +95,9 @@ const envConfig = require(envConfigFile);
 const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
 const { mainFaucet } = walletKeys;
 (0, helpers_1.log)('loaded config ', envConfig);
-(0, helpers_1.log)('faucet pkey ', mainFaucet);
-(0, helpers_1.log)('pp node url and port ', ppNodeAndPort);
-(0, helpers_1.log)('faucet mnemonic', faucetMnemonic);
+(0, helpers_1.log)('faucet pkey from the config ', mainFaucet);
+(0, helpers_1.log)('pp node url and port from the config', ppNodeAndPort);
+(0, helpers_1.log)('faucet mnemonic from the config', faucetMnemonic);
 let GLOBAL_CHAIN_ID = '';
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
@@ -89,39 +107,32 @@ const sdkEnvDev = {
 };
 (0, helpers_1.log)('Using sdk config', sdkEnvDev);
 const password = 'yourSecretPassword';
-const main = async (zeroUserMnemonic, hdPathIndex = 0, resetSdk = false) => {
+const main = async (zeroUserMnemonic, hdPathIndex = 0) => {
     const sdkEnv = sdkEnvDev;
+    (0, cosmos_1.resetCosmos)();
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     if (!GLOBAL_CHAIN_ID) {
-        // log('main ~ sdk already initialized. Exiting');
         try {
             const resolvedChainIDToTest = await Network.getChainId();
             if (!resolvedChainIDToTest) {
                 throw new Error('Chain id is empty. Exiting');
             }
-            (0, helpers_1.log)('main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-            // resolvedChainID = resolvedChainIDToTest;
+            (0, helpers_1.log)('main - resolvedChainIDToTest', resolvedChainIDToTest);
             GLOBAL_CHAIN_ID = resolvedChainIDToTest;
         }
         catch (error) {
-            (0, helpers_1.log)('main ~ resolvedChainID error', error);
+            (0, helpers_1.log)('main - resolvedChainID error', error);
             throw new Error('Could not resolve chain id');
         }
-        Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: GLOBAL_CHAIN_ID, ppNodeUrl: 'http://35.233.85.255', ppNodePort: '8142' }));
     }
-    if (resetSdk) {
-        (0, cosmos_1.resetCosmos)();
-    }
-    if (cosmos_1.StratosCosmos.cosmosInstance) {
-        (0, helpers_1.log)('we have keypar initialized, exiting');
-        return true;
-    }
+    const ppNodeAndPortToUse = buildPpNodeUrl(ppNodeAndPort);
+    const [ppUrl, ppPort] = ppNodeAndPortToUse;
+    (0, helpers_1.log)('main - will be using ppNodeAndPortToUse', ppNodeAndPortToUse);
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: GLOBAL_CHAIN_ID, ppNodeUrl: ppUrl, ppNodePort: ppPort }));
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
-    (0, helpers_1.log)('masterKeySeedInfo', masterKeySeedInfo);
-    (0, helpers_1.log)('zeroUserMnemonic', zeroUserMnemonic);
+    (0, helpers_1.log)('main - sdk initialized user mnemonic', zeroUserMnemonic);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
-    (0, helpers_1.log)('main ~ serialized ', serialized);
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
     return true;
 };
@@ -143,7 +154,7 @@ const createKeypairFromMnemonic = async (phrase, hdPathIndex = 0) => {
 };
 const createAnAccount = async (hdPathIndex = 0) => {
     (0, helpers_1.log)('////////////////  createAnAccount //////////////// ');
-    // await main(faucetMnemonic, hdPathIndex);
+    await main(faucetMnemonic, hdPathIndex);
     const phrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
     const { address, publicKey, keyIndex } = keyPairZero;
@@ -161,7 +172,7 @@ const createAnAccount = async (hdPathIndex = 0) => {
 exports.createAnAccount = createAnAccount;
 const restoreAccount = async (hdPathIndex = 0) => {
     (0, helpers_1.log)('////////////////  restoreAnAccount //////////////// ');
-    // await main(faucetMnemonic, hdPathIndex);
+    await main(faucetMnemonic, hdPathIndex);
     const mnemonicToCheck = 'hope skin cliff bench vanish motion swear reveal police cash street example health object penalty random broom prevent obvious dawn shiver leader prize onion';
     const phrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToCheck);
     const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
@@ -196,7 +207,8 @@ const getFaucetAvailableBalance = async (hdPathIndex = 0) => {
     try {
         const [balanceValue] = available.split(' ');
         if (!(parseFloat(balanceValue) > 0)) {
-            throw new Error(`faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`);
+            (0, helpers_1.log)(`faucet account "${address}" must have available balanace, but its balance is ${balanceValue}`);
+            (0, process_1.exit)(1);
         }
     }
     catch (error) {
@@ -236,7 +248,7 @@ const sendTransferTx = async (hdPathIndex = 0, givenReceiverMnemonic = '') => {
         ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
         : hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
-    await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.3);
+    await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
     const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
     const { available } = b;
     if (!available) {
@@ -266,7 +278,7 @@ const sendDelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expec
     const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
-    await main(receiverMnemonic, hdPathIndex, true);
+    await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
     const validatorsInfo = await validators.getValidators();
     if (!validatorsInfo) {
@@ -325,7 +337,7 @@ const sendWithdrawRewardsTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
         : hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
-    await main(receiverMnemonic, hdPathIndex, true);
+    await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
     const validatorsInfo = await validators.getValidators();
     if (!validatorsInfo) {
@@ -364,7 +376,7 @@ const sendWithdrawAllRewardsTx = async (hdPathIndex = 0, givenReceiverMnemonic =
         : hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
-    await main(receiverMnemonic, hdPathIndex, true);
+    await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
     const validatorsInfo = await validators.getValidators();
     if (!validatorsInfo) {
@@ -401,7 +413,7 @@ const sendUndelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', exp
         : hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
-    await main(receiverMnemonic, hdPathIndex, true);
+    await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
     const validatorsInfo = await validators.getValidators();
     if (!validatorsInfo) {
@@ -451,4 +463,69 @@ const sendUndelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', exp
     return true;
 };
 exports.sendUndelegateTx = sendUndelegateTx;
+const sendSdsPrepayTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expectedToSend = 0.2) => {
+    (0, helpers_1.log)('//////////////// sendSdsPrepayTx //////////////// ');
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+    await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, expectedToSend + 0.2);
+    await main(receiverMnemonic, hdPathIndex);
+    const { address } = keyPairReceiver;
+    const sendTxMessages = await transactions.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
+    const signedTx = await transactions.sign(address, sendTxMessages);
+    if (!signedTx) {
+        throw new Error('Could not sign the sds prepay transaction');
+    }
+    try {
+        const result = await transactions.broadcast(signedTx);
+        const { code } = result;
+        if (code > 0) {
+            throw new Error('There was an error with the broadcast, check the result');
+        }
+        (0, helpers_1.log)('result', result);
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        throw new Error('Could not broadcast the sds prepay transaction');
+    }
+    return true;
+};
+exports.sendSdsPrepayTx = sendSdsPrepayTx;
+const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '', minExpectedOzone = '98') => {
+    (0, helpers_1.log)('//////////////// getAccountOzoneBalance //////////////// ');
+    (0, helpers_1.log)(`We need to wait for ${config_1.OZONE_BALANCE_CHECK_WAIT_TIME} ms before checing the balance to ensure it is updated`);
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const { address } = keyPairReceiver;
+    const b = await accounts.getOtherBalanceCardMetrics(address);
+    (0, helpers_1.log)('balance from other', b);
+    const { ozone } = b;
+    if (!ozone) {
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`receiver account "${keyPairReceiver.address}" have not received prepay transaction or its ozone balance was not updated `);
+    }
+    try {
+        const [balanceValue] = ozone.split(' ');
+        const a = parseFloat(balanceValue).toFixed(4);
+        if (a >= minExpectedOzone) {
+            return true;
+        }
+        throw new Error(`account "${address}" must have available ozone balance equal to ${minExpectedOzone}, but its balance is ${balanceValue}`);
+    }
+    catch (error) {
+        (0, helpers_1.log)('Error', error);
+        (0, helpers_1.log)('Balances', b);
+        throw new Error(`could not check account "${address}" balance`);
+    }
+};
+exports.getAccountOzoneBalance = getAccountOzoneBalance;
 //# sourceMappingURL=sdk_inegration_runner.js.map
