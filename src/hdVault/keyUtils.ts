@@ -24,7 +24,7 @@ import {
 import StratosDirectSecp256k1HdWallet, {
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
-import { log } from '../services/helpers';
+// import { log } from '../services/helpers';
 import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
@@ -246,14 +246,14 @@ export const serializeWallet = async (
   wallet: StratosDirectSecp256k1HdWallet,
   password: string,
 ): Promise<string> => {
-  log('Beginning serializing..');
+  // log('Beginning serializing..');
 
   let encryptedWalletInfoFour;
 
   try {
     // encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
     encryptedWalletInfoFour = serializeWithEncryptionKey(password, wallet);
-    log('Serialization with prepared cryptoJs data Uint8 is done. ');
+    // log('Serialization with prepared cryptoJs data Uint8 is done. ');
   } catch (error) {
     throw new Error(
       `Could not serialize a wallet with the encryption key. Error4 - ${(error as Error).message}`,

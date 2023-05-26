@@ -4,7 +4,7 @@ import JSONbig from 'json-bigint';
 import qs from 'qs';
 import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
-import { log } from '../../services/helpers';
+import { log, dirLog } from '../../services/helpers';
 import * as Types from './types';
 
 const _axios = axios.create({});
@@ -520,7 +520,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+  dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };
@@ -541,6 +541,7 @@ export const sendUserUploadData = async (
 
 export const getChainId = async () => {
   const result = await getRpcStatus();
+  dirLog('getChainId result', result);
 
   const { response } = result;
   const chainId = response?.result?.node_info?.network;
