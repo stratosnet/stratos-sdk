@@ -2,12 +2,12 @@
 import fs from 'fs';
 import { networkTypes } from '../network';
 import { FileInfoItem } from '../network/types';
-export declare const getFileBuffer: (filePath: string) => Promise<Buffer>;
-export declare const calculateFileHash: (filePath: string) => Promise<string>;
 export interface OpenedFileInfo {
     size: number;
     filehash: string;
 }
+export declare const getFileBuffer: (filePath: string) => Promise<Buffer>;
+export declare const calculateFileHash: (filePath: string) => Promise<string>;
 export declare const getFileInfo: (filePath: string) => Promise<OpenedFileInfo>;
 export declare const getFileChunks: (filePath: string, chunkSize?: number) => Promise<Buffer[]>;
 export declare const getFileChunk: (fileStream: fs.ReadStream, readChunkSize: number) => Promise<Buffer>;

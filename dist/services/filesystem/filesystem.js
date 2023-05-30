@@ -8,18 +8,9 @@ const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
+// import Sdk from '../../Sdk';
 const helpers_1 = require("../helpers");
 const network_1 = require("../network");
-// import * as Types from './types';
-// async function wait(fn: any, ms: number) {
-//   while (!fn()) {
-//     await delay(ms);
-//   }
-// }
-//
-// function delay(ms: number) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
 const getFileBuffer = async (filePath) => {
     try {
         const fileBuffer = fs_1.default.readFileSync(filePath);
@@ -107,9 +98,6 @@ const getFileChunk = async (fileStream, readChunkSize) => {
     try {
         chunksList = await new Promise(resolve => {
             const chunk = fileStream.read(readChunkSize);
-            // if (chunk) {
-            // console.log('chunk a read size', chunk.length);
-            // }
             resolve(chunk);
         });
     }
@@ -122,7 +110,6 @@ const getFileChunk = async (fileStream, readChunkSize) => {
 exports.getFileChunk = getFileChunk;
 async function encodeBuffer(chunk) {
     await (0, helpers_1.delay)(100);
-    // await delay(2000);
     const base64data = chunk.toString('base64');
     return base64data;
 }
@@ -215,12 +202,8 @@ const getUserUploadedFileList = async (address, page = 0) => {
             page,
         },
     ];
-    // const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
-    // const message = `connecting to ${connectedUrl}`;
-    // console.log(message);
     const callResult = await (0, network_1.sendUserRequestList)(extraParams);
     const { response } = callResult;
-    // console.log('file list request result', JSON.stringify(callResult));
     if (!response) {
         throw 'Could not fetch a list of files. No response in the call result';
     }
