@@ -2,22 +2,14 @@ import CID from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
 import multihashing from 'multihashing-async';
-import Sdk from '../../Sdk';
 import { delay } from '../helpers';
 import { networkTypes, sendUserRequestList } from '../network';
 import { FileInfoItem } from '../network/types';
 
-// import * as Types from './types';
-
-// async function wait(fn: any, ms: number) {
-//   while (!fn()) {
-//     await delay(ms);
-//   }
-// }
-//
-// function delay(ms: number) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
+export interface OpenedFileInfo {
+  size: number;
+  filehash: string;
+}
 
 export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   try {
@@ -40,13 +32,6 @@ export const calculateFileHash = async (filePath: string): Promise<string> => {
 
   return realFileHash;
 };
-
-// const processFileChunk = async () => {};
-
-export interface OpenedFileInfo {
-  size: number;
-  filehash: string;
-}
 
 export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => {
   let openedFileInfo: OpenedFileInfo = { size: 0, filehash: '' };
@@ -129,10 +114,6 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
     chunksList = await new Promise(resolve => {
       const chunk = fileStream.read(readChunkSize);
 
-      // if (chunk) {
-      // console.log('chunk a read size', chunk.length);
-      // }
-
       resolve(chunk);
     });
   } catch (error) {
@@ -144,7 +125,6 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
 
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
   await delay(100);
-  // await delay(2000);
   const base64data = chunk.toString('base64');
   return base64data;
 }
@@ -187,17 +167,6 @@ export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000):
   const encodedFileChunksList = await encodeFileChunks(fileChunksList);
   return encodedFileChunksList;
 };
-
-// export const getEncodedFileChunk = async (
-//   fileStream: fs.ReadStream,
-//   offsetStart: number,
-//   offsetEnd: number,
-// ): Promise<string> => {
-//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
-//
-//   const encodedChunk = await encodeBuffer(fileChunk);
-//   return encodedChunk;
-// };
 
 export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
   try {
@@ -249,16 +218,9 @@ export const getUserUploadedFileList = async (address: string, page = 0): Promis
     },
   ];
 
-  // const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
-
-  // const message = `connecting to ${connectedUrl}`;
-
-  // console.log(message);
   const callResult = await sendUserRequestList(extraParams);
 
   const { response } = callResult;
-
-  // console.log('file list request result', JSON.stringify(callResult));
 
   if (!response) {
     throw 'Could not fetch a list of files. No response in the call result';
