@@ -406,7 +406,7 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  // console.log('uu', url);
+  log('rpc status url ', url);
 
   const dataResult = await apiGet(url, config);
 
@@ -526,6 +526,76 @@ export const sendUserUploadData = async (
   const method = 'user_uploadData';
 
   const payload = getRpcPayload<Types.FileUserUploadDataParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestShare = async <T = Types.FileUserRequestShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestListShare = async <T = Types.FileUserRequestListShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestListShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestListShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestStopShare = async <T = Types.FileUserRequestStopShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestStopShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestStopShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestGetShared = async <T = Types.FileUserRequestGetSharedParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetSharedResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestGetShared';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestDownloadShared = async <T = Types.FileUserRequestDownloadSharedParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadSharedResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestDownloadShared';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 
