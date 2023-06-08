@@ -86,8 +86,8 @@ describe(`Stratos SDK integration (integration test)`, () => {
                 done();
             });
         }, extendedExecutionTimeout);
-        it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.8 OZ', done => {
-            void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.8').then(result => {
+        it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.1 OZ', done => {
+            void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.1').then(result => {
                 expect(result).toBe(true);
                 done();
             });

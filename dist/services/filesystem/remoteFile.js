@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updloadFile = exports.downloadFile = void 0;
+exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFile = exports.downloadFile = exports.getUploadedFileList = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const accounts = __importStar(require("../../accounts"));
@@ -34,6 +34,26 @@ const keyUtils = __importStar(require("../../hdVault/keyUtils"));
 const FilesystemService = __importStar(require("../../services/filesystem"));
 const helpers_1 = require("../../services/helpers");
 const Network = __importStar(require("../../services/network"));
+const network_1 = require("../network");
+const getUploadedFileList = async (address, page = 0) => {
+    const extraParams = [
+        {
+            walletaddr: address,
+            page,
+        },
+    ];
+    const callResult = await (0, network_1.sendUserRequestList)(extraParams);
+    const { response } = callResult;
+    if (!response) {
+        throw 'Could not fetch a list of files. No response in the call result';
+    }
+    const userFiles = response.result.fileinfo;
+    return {
+        originalResponse: response,
+        files: userFiles,
+    };
+};
+exports.getUploadedFileList = getUploadedFileList;
 const downloadFile = async (keypair, filePathToSave, filehashA, filesizeA) => {
     var _a;
     const { address, publicKey } = keypair;
@@ -258,4 +278,91 @@ const updloadFile = async (keypair, fileReadPath) => {
     }
 };
 exports.updloadFile = updloadFile;
+const shareFile = async (keypair, filehash) => {
+    const { address } = keypair;
+    const extraParams = {
+        filehash,
+        walletaddr: address,
+        duration: 0,
+        bool: false,
+    };
+    const callResultRequestShare = await Network.sendUserRequestShare([extraParams]);
+    const { response: responseRequestShare } = callResultRequestShare;
+    if (!responseRequestShare) {
+        (0, helpers_1.dirLog)('we dont have response for start share request. it might be an error', callResultRequestShare);
+        throw 'Could not start sharing the file. No response in the call result';
+    }
+    const userStartShareResult = responseRequestShare.result;
+    const { return: requestReturn, shareid, sharelink } = userStartShareResult;
+    if (parseInt(requestReturn, 10) < 0) {
+        throw new Error(`return field in the response contains an error. Error code "${requestReturn}"`);
+    }
+    if (parseInt(requestReturn, 10) !== 0) {
+        throw new Error(`return field in the response contains an unexpected code "${requestReturn}". Expected code was "0"`);
+    }
+    if (!sharelink || !shareid) {
+        (0, helpers_1.dirLog)('Error: No required fields are presented in the response.', userStartShareResult);
+        throw new Error(`Could not share file with hash "${filehash}". No required "shareid" and "sharelink" in the response`);
+    }
+    return {
+        filehash,
+        sharelink,
+        shareid,
+    };
+};
+exports.shareFile = shareFile;
+const stopFileSharing = async (keypair, shareid) => {
+    const { address } = keypair;
+    const extraParams = {
+        walletaddr: address,
+        shareid,
+    };
+    const callResultRequestStopShare = await Network.sendUserRequestStopShare([extraParams]);
+    const { response: responseRequestStopShare } = callResultRequestStopShare;
+    if (!responseRequestStopShare) {
+        (0, helpers_1.dirLog)('we dont have response for stop share request. it might be an error', callResultRequestStopShare);
+        throw 'Could not stop sharing the file. No response in the call result';
+    }
+    const userStopShareResult = responseRequestStopShare.result;
+    const { return: requestReturn } = userStopShareResult;
+    if (parseInt(requestReturn, 10) < 0) {
+        throw new Error(`return field in the response contains an error. Error code "${requestReturn}"`);
+    }
+    if (parseInt(requestReturn, 10) !== 0) {
+        throw new Error(`return field in the response contains an unexpected code "${requestReturn}". Expected code was "0"`);
+    }
+    return true;
+};
+exports.stopFileSharing = stopFileSharing;
+const getSharedFileList = async (address, page = 0) => {
+    const extraParams = {
+        walletaddr: address,
+        page,
+    };
+    const callResultRequestListShare = await Network.sendUserRequestListShare([extraParams]);
+    const { response: responseRequestListShare } = callResultRequestListShare;
+    if (!responseRequestListShare) {
+        (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);
+        throw 'Could not fetch a list of shared files. No response in the call result';
+    }
+    const userSharedFiles = responseRequestListShare.result;
+    const { totalnumber, fileinfo, return: requestReturn } = userSharedFiles;
+    if (parseInt(requestReturn, 10) < 0) {
+        throw new Error(`return field in the response contains an error. Error code "${requestReturn}"`);
+    }
+    if (parseInt(requestReturn, 10) !== 0) {
+        throw new Error(`return field in the response contains an unexpected code "${requestReturn}". Expected code was "0"`);
+    }
+    if (!fileinfo || !totalnumber) {
+        return {
+            files: [],
+            totalnumber: 0,
+        };
+    }
+    return {
+        files: fileinfo,
+        totalnumber,
+    };
+};
+exports.getSharedFileList = getSharedFileList;
 //# sourceMappingURL=remoteFile.js.map
