@@ -8,7 +8,7 @@ interface UserFileListResponse {
     originalResponse: RequestUserFilesResponse;
 }
 export declare const getUploadedFileList: (address: string, page?: number) => Promise<UserFileListResponse>;
-export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehashA: string, filesizeA: number) => Promise<void>;
+export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string) => Promise<void>;
 export declare const updloadFile: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<void>;
 export declare const shareFile: (keypair: wallet.KeyPairInfo, filehash: string) => Promise<{
     filehash: string;
@@ -20,4 +20,5 @@ export declare const getSharedFileList: (address: string, page?: number) => Prom
     files: Network.networkTypes.SharedFileInfoItem[];
     totalnumber: number;
 }>;
+export declare const downloadSharedFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, sharelink: string) => Promise<void>;
 export {};

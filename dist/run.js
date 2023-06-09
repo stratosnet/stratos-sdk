@@ -536,17 +536,6 @@ const testFile = async () => {
     const buffWrite = Buffer.from(base64data, 'base64'); // ok 5
     fs_1.default.writeFileSync(fileWritePath, buffWrite);
 };
-const testRequestUserStopFileShare = async (shareid, hdPathIndex) => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
-    if (!keyPairZero) {
-        (0, helpers_1.log)('Error. We dont have a keypair');
-        return;
-    }
-    const userFileList = await RemoteFilesystem.stopFileSharing(keyPairZero, shareid);
-    console.log('retrieved user shared file list', userFileList);
-};
 const testRequestUserFileShare = async (filehash, hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
@@ -558,6 +547,17 @@ const testRequestUserFileShare = async (filehash, hdPathIndex) => {
     const userShareFileResult = await RemoteFilesystem.shareFile(keyPairZero, filehash);
     console.log('retrieved user shared file result', userShareFileResult);
 };
+const testRequestUserStopFileShare = async (shareid, hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZero) {
+        (0, helpers_1.log)('Error. We dont have a keypair');
+        return;
+    }
+    const userFileList = await RemoteFilesystem.stopFileSharing(keyPairZero, shareid);
+    console.log('retrieved user shared file list', userFileList);
+};
 const testRequestUserSharedFileList = async (page, hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
@@ -567,9 +567,23 @@ const testRequestUserSharedFileList = async (page, hdPathIndex) => {
         return;
     }
     const { address } = keyPairZeroA;
-    // const page = 4;
     const userFileList = await RemoteFilesystem.getSharedFileList(address, page);
     console.log('retrieved user shared file list', userFileList);
+};
+const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
+    const keyPairZeroA = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeedInfo.encryptedMasterKeySeed.toString());
+    if (!keyPairZeroA) {
+        (0, helpers_1.log)('Error. We dont have a keypair');
+        return;
+    }
+    const { address } = keyPairZeroA;
+    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+    const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(keyPairZeroA, filePathToSave, sharelink);
+    console.log('retrieved user shared file list', userDownloadSharedFileResult);
 };
 const testRequestUserFileList = async (page, hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -735,7 +749,7 @@ const testReadAndWriteLocal = async (filename) => {
 //   console.log('this is not be shown as the string is way too long');
 //   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
 // };
-const testFileDl = async (hdPathIndex, filename, filehash, filesize) => {
+const testFileDl = async (hdPathIndex, filename, filehash) => {
     console.log(`downloading file ${filename}`);
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
@@ -746,7 +760,7 @@ const testFileDl = async (hdPathIndex, filename, filehash, filesize) => {
         return;
     }
     const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
-    await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
+    await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
     (0, helpers_1.log)('done. filePathToSave', filePathToSave);
 };
 const testItFileUp = async (filename, hdPathIndex) => {
@@ -780,7 +794,10 @@ const main = async () => {
         throw new Error('Could not resolve chain id');
     }
     // 2
-    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, ppNodeUrl: 'http://35.233.85.255', ppNodePort: '8142' }));
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
+        // ppNodeUrl: 'http://35.233.85.255',
+        // ppNodePort: '8142',
+        ppNodeUrl: 'http://34.145.36.237', ppNodePort: '8135' }));
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
     //     ppNodePort: '8159',
@@ -818,15 +835,23 @@ const main = async () => {
     const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
     const filesize = 250000000;
     const filename = 'file250_06_06';
-    // await testFileDl(hdPathIndex, filename, filehash, filesize);
+    await testFileDl(hdPathIndex, filename, filehash);
     // 4a
-    await testRequestUserSharedFileList(0, hdPathIndex);
-    const shareid = '72f9812c89bb0b0b';
-    // sharelink: 'rWEa4N_72f9812c89bb0b0b'
+    // await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a
     // await testRequestUserFileShare(filehash, hdPathIndex);
     // 6a
     // await testRequestUserStopFileShare(shareid, hdPathIndex);
+    // 7a
+    // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
+    // filesize: 250000000,
+    // filename: 'file250_06_06',
+    // linktime: 1686242085,
+    // linktimeexp: 1701794085,
+    // shareid: 'd898cb2c8ca8635e',
+    // sharelink: 'gObhyW_d898cb2c8ca8635e'
+    const sharelink = 'gObhyW_d898cb2c8ca8635e';
+    await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // await getBalanceCardMetrics(hdPathIndex);
     // 2 Add funds via faucet
