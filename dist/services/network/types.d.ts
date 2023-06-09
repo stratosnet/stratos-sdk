@@ -394,12 +394,14 @@ export interface FileUserRequestDownloadParams {
 }
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: '0' | '1' | '2' | '3' | '4';
         reqid: string;
         offsetstart: string;
         offsetend: string;
         filedata: string;
     };
+}
+export interface FileUserRequestDownloadSharedResponse extends FileUserRequestDownloadResponse {
 }
 export interface FileUserDownloadDataParams {
     filehash: string;
@@ -638,13 +640,4 @@ export interface FileUserRequestDownloadSharedParams {
     walletpubkey: string;
     signature: string;
     reqid: string;
-}
-export interface FileUserRequestDownloadSharedResponse extends MainRpcResponse {
-    result: {
-        return: '0' | '1' | '2' | '3' | '4';
-        reqid: string;
-        offsetstart: string;
-        offsetend: string;
-        filedata: string;
-    };
 }

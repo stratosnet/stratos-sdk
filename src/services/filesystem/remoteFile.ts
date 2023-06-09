@@ -17,6 +17,130 @@ interface UserFileListResponse {
   originalResponse: RequestUserFilesResponse;
 }
 
+const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDownloadResponse>(
+  responseRequestDownloadShared: T,
+  filehash: string,
+): Promise<Buffer | undefined> => {
+  const { result: resultWithOffesets } = responseRequestDownloadShared;
+
+  let offsetStartGlobal = 0;
+  let offsetEndGlobal = 0;
+  let isContinueGlobal = 0;
+
+  const fileInfoChunks = [];
+
+  const {
+    return: requestDownloadSharedReturn,
+    reqid: reqidDownloadShared,
+    offsetstart: offsetstartInit,
+    offsetend: offsetendInit,
+    filedata,
+  } = resultWithOffesets;
+
+  isContinueGlobal = +requestDownloadSharedReturn;
+  offsetStartGlobal = +offsetstartInit;
+  offsetEndGlobal = +offsetendInit;
+
+  const fileChunk = { offsetstart: offsetStartGlobal, offsetend: offsetEndGlobal, filedata };
+
+  fileInfoChunks.push(fileChunk);
+
+  while (isContinueGlobal === 2) {
+    log('will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
+
+    const extraParamsForUserDownload = [
+      {
+        filehash,
+        reqid: reqidDownloadShared,
+      },
+    ];
+
+    const callResultDownload = await Network.sendUserDownloadData(extraParamsForUserDownload);
+
+    const { response: responseDownload } = callResultDownload;
+
+    if (!responseDownload) {
+      dirLog('we dont have response. it might be an error', callResultDownload);
+
+      return;
+    }
+
+    const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
+    const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
+    dirLog('responseDownloadFormatted', responseDownloadFormatted);
+
+    const {
+      result: {
+        offsetend: offsetendDownload,
+        offsetstart: offsetstartDownload,
+        return: isContinueDownload,
+        filedata: downloadedFileData,
+      },
+    } = responseDownload;
+
+    isContinueGlobal = +isContinueDownload;
+
+    if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
+      offsetStartGlobal = +offsetstartDownload;
+      offsetEndGlobal = +offsetendDownload;
+
+      const fileChunkDl = {
+        offsetstart: offsetStartGlobal,
+        offsetend: offsetEndGlobal,
+        filedata: downloadedFileData,
+      };
+
+      fileInfoChunks.push({ ...fileChunkDl });
+    }
+  }
+
+  let downloadConfirmed = '-1';
+
+  if (isContinueGlobal === 3) {
+    const extraParamsForUserDownload = [
+      {
+        filehash,
+        reqid: reqidDownloadShared,
+      },
+    ];
+
+    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForUserDownload);
+
+    dirLog('call result download', callResultDownloadFileInfo);
+
+    const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
+
+    downloadConfirmed = responseDownloadFileInfo?.result?.return || '-1';
+
+    log('responseDownloadFileInfo', responseDownloadFileInfo);
+  }
+
+  if (+downloadConfirmed !== 0) {
+    throw new Error('could not get download confirmation');
+  }
+
+  const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
+    const res = a.offsetstart - b.offsetstart;
+    return res;
+  });
+
+  log('sortedFileInfoChunks.length ', sortedFileInfoChunks.length);
+
+  const encodedFileChunks = sortedFileInfoChunks
+    .map(fileInfoChunk => {
+      log('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
+      return fileInfoChunk.filedata || '';
+    })
+    .filter(Boolean);
+
+  log('encodedFileChunks', encodedFileChunks.length);
+
+  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+
+  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+  return decodedFile;
+};
+
 export const getUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
   const extraParams = [
     {
@@ -87,23 +211,29 @@ export const downloadFile = async (
 
   const { result: resultWithOffesets } = responseRequestDl;
 
-  let offsetStartGlobal = 0;
-  let offsetEndGlobal = 0;
-  let isContinueGlobal = 0;
-
-  const fileInfoChunks = [];
-
   const {
-    return: isContinueInit,
-    reqid,
+    return: requestDownloadFileReturn,
+    reqid: reqidDownloadFile,
     offsetstart: offsetstartInit,
     offsetend: offsetendInit,
-    filedata,
   } = resultWithOffesets;
 
-  const responseDownloadInitFormatted = { isContinueInit, offsetstartInit, offsetendInit };
+  if (parseInt(requestDownloadFileReturn, 10) < 0) {
+    throw new Error(
+      `return field in the request download shared response contains an error. Error code "${requestDownloadFileReturn}"`,
+    );
+  }
 
-  dirLog('responseDownloadInitFormatted', responseDownloadInitFormatted);
+  if (parseInt(requestDownloadFileReturn, 10) !== 2) {
+    throw new Error(
+      `return field in the response to request download shared has an unexpected code "${requestDownloadFileReturn}". Expected code was "4"`,
+    );
+  }
+
+  if (!reqidDownloadFile) {
+    dirLog('we dont have required fields in the download shared response ', responseRequestDl);
+    throw new Error('required fields "reqid"  is missing in the response');
+  }
 
   if (offsetendInit === undefined) {
     dirLog('a we dont have an offest. could be an error. response is', responseRequestDl);
@@ -115,110 +245,18 @@ export const downloadFile = async (
     return;
   }
 
-  isContinueGlobal = +isContinueInit;
-  offsetStartGlobal = +offsetstartInit;
-  offsetEndGlobal = +offsetendInit;
+  const decodedFile = await processUsedFileDownload<NetworkTypes.FileUserRequestDownloadResponse>(
+    responseRequestDl,
+    filehash,
+  );
 
-  const fileChunk = { offsetstart: offsetStartGlobal, offsetend: offsetEndGlobal, filedata };
-
-  fileInfoChunks.push(fileChunk);
-
-  while (isContinueGlobal === 2) {
-    log('will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
-
-    const extraParamsForDownload = [
-      {
-        filehash,
-        reqid,
-      },
-    ];
-
-    const callResultDownload = await Network.sendUserDownloadData(extraParamsForDownload);
-
-    const { response: responseDownload } = callResultDownload;
-
-    if (!responseDownload) {
-      dirLog('we dont have response. it might be an error', callResultDownload);
-
-      return;
-    }
-
-    const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-    const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-    dirLog('responseDownloadFormatted', responseDownloadFormatted);
-
-    const {
-      result: {
-        offsetend: offsetendDownload,
-        offsetstart: offsetstartDownload,
-        return: isContinueDownload,
-        filedata: downloadedFileData,
-      },
-    } = responseDownload;
-
-    isContinueGlobal = +isContinueDownload;
-
-    if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
-      offsetStartGlobal = +offsetstartDownload;
-      offsetEndGlobal = +offsetendDownload;
-
-      const fileChunkDl = {
-        offsetstart: offsetStartGlobal,
-        offsetend: offsetEndGlobal,
-        filedata: downloadedFileData,
-      };
-
-      fileInfoChunks.push({ ...fileChunkDl });
-    }
+  if (!decodedFile) {
+    throw new Error(
+      `Could not process download of the user file for the "${filehash}" into "${filePathToSave}"`,
+    );
   }
 
-  let downloadConfirmed = '-1';
-
-  if (isContinueGlobal === 3) {
-    const extraParamsForDownload = [
-      {
-        filehash,
-        // filesize,
-        reqid,
-      },
-    ];
-
-    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
-
-    dirLog('call result download', callResultDownloadFileInfo);
-
-    const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
-
-    downloadConfirmed = responseDownloadFileInfo?.result?.return || '-1';
-
-    log('responseDownloadFileInfo', responseDownloadFileInfo);
-  }
-
-  if (+downloadConfirmed !== 0) {
-    throw new Error('could not get download confirmation');
-  }
-
-  const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
-    const res = a.offsetstart - b.offsetstart;
-    return res;
-  });
-
-  log('sortedFileInfoChunks.length ', sortedFileInfoChunks.length);
-
-  const encodedFileChunks = sortedFileInfoChunks
-    .map(fileInfoChunk => {
-      log('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
-      return fileInfoChunk.filedata || '';
-    })
-    .filter(Boolean);
-
-  log('encodedFileChunks', encodedFileChunks.length);
-
-  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-
-  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-
-  log(`file will be saved into ${filePathToSave}`, filePathToSave);
+  log(`downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
 
   FilesystemService.writeFile(filePathToSave, decodedFile);
 };
@@ -581,18 +619,11 @@ export const downloadSharedFile = async (
 
   const { result: resultWithOffesets } = responseRequestDownloadShared;
 
-  let offsetStartGlobal = 0;
-  let offsetEndGlobal = 0;
-  let isContinueGlobal = 0;
-
-  const fileInfoChunks = [];
-
   const {
     return: requestDownloadSharedReturn,
     reqid: reqidDownloadShared,
     offsetstart: offsetstartInit,
     offsetend: offsetendInit,
-    filedata,
   } = resultWithOffesets;
 
   if (parseInt(requestDownloadSharedReturn, 10) < 0) {
@@ -622,109 +653,18 @@ export const downloadSharedFile = async (
     return;
   }
 
-  isContinueGlobal = +requestDownloadSharedReturn;
-  offsetStartGlobal = +offsetstartInit;
-  offsetEndGlobal = +offsetendInit;
+  const decodedFile = await processUsedFileDownload<NetworkTypes.FileUserRequestDownloadSharedResponse>(
+    responseRequestDownloadShared,
+    filehash,
+  );
 
-  const fileChunk = { offsetstart: offsetStartGlobal, offsetend: offsetEndGlobal, filedata };
-
-  fileInfoChunks.push(fileChunk);
-
-  while (isContinueGlobal === 2) {
-    log('will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
-
-    const extraParamsForUserDownload = [
-      {
-        filehash,
-        reqid: reqidDownloadShared,
-      },
-    ];
-
-    const callResultDownload = await Network.sendUserDownloadData(extraParamsForUserDownload);
-
-    const { response: responseDownload } = callResultDownload;
-
-    if (!responseDownload) {
-      dirLog('we dont have response. it might be an error', callResultDownload);
-
-      return;
-    }
-
-    const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-    const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-    dirLog('responseDownloadFormatted', responseDownloadFormatted);
-
-    const {
-      result: {
-        offsetend: offsetendDownload,
-        offsetstart: offsetstartDownload,
-        return: isContinueDownload,
-        filedata: downloadedFileData,
-      },
-    } = responseDownload;
-
-    isContinueGlobal = +isContinueDownload;
-
-    if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
-      offsetStartGlobal = +offsetstartDownload;
-      offsetEndGlobal = +offsetendDownload;
-
-      const fileChunkDl = {
-        offsetstart: offsetStartGlobal,
-        offsetend: offsetEndGlobal,
-        filedata: downloadedFileData,
-      };
-
-      fileInfoChunks.push({ ...fileChunkDl });
-    }
+  if (!decodedFile) {
+    throw new Error(
+      `Could not process download of the user shared file for the "${filehash}" into "${filePathToSave}"`,
+    );
   }
 
-  let downloadConfirmed = '-1';
-
-  if (isContinueGlobal === 3) {
-    const extraParamsForUserDownload = [
-      {
-        filehash,
-        reqid,
-      },
-    ];
-
-    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForUserDownload);
-
-    dirLog('call result download', callResultDownloadFileInfo);
-
-    const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
-
-    downloadConfirmed = responseDownloadFileInfo?.result?.return || '-1';
-
-    log('responseDownloadFileInfo', responseDownloadFileInfo);
-  }
-
-  if (+downloadConfirmed !== 0) {
-    throw new Error('could not get download confirmation');
-  }
-
-  const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
-    const res = a.offsetstart - b.offsetstart;
-    return res;
-  });
-
-  log('sortedFileInfoChunks.length ', sortedFileInfoChunks.length);
-
-  const encodedFileChunks = sortedFileInfoChunks
-    .map(fileInfoChunk => {
-      log('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
-      return fileInfoChunk.filedata || '';
-    })
-    .filter(Boolean);
-
-  log('encodedFileChunks', encodedFileChunks.length);
-
-  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-
-  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-
-  log(`download file will be saved into ${filePathToSave}`, filePathToSave);
+  log(`downloaded shared file will be saved into ${filePathToSave}`, filePathToSave);
 
   FilesystemService.writeFile(filePathToSave, decodedFile);
 };
