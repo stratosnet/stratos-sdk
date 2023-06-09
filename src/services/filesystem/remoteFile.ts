@@ -520,20 +520,6 @@ export const downloadSharedFile = async (
   log(filePathToSave);
   const { address, publicKey } = keypair;
 
-  // const ozoneBalance = await accounts.getOtherBalanceCardMetrics(address);
-  //
-  // const { detailedBalance } = ozoneBalance;
-  //
-  // if (!detailedBalance) {
-  //   throw new Error('no sequence is presented in the ozone balance response');
-  // }
-  //
-  // const { sequence } = detailedBalance;
-  // log(sequence);
-
-  // const sdmAddress = address;
-  // const filehandle = `sdm://${sdmAddress}/${sharelink}`;
-
   const extraParams: NetworkTypes.FileUserRequestGetSharedParams = {
     walletaddr: address,
     walletpubkey: publicKey,
@@ -541,13 +527,13 @@ export const downloadSharedFile = async (
   };
   const callResultRequestGetShared = await Network.sendUserRequestGetShared([extraParams]);
 
-  console.log('callResultRequestGetShared', callResultRequestGetShared);
   const { response: responseRequestGetShared } = callResultRequestGetShared;
 
   if (!responseRequestGetShared) {
     dirLog('we dont have response for dl request. it might be an error', callResultRequestGetShared);
     throw new Error('We dont have response to request get shared call');
   }
+
   const { return: requestGetSharedReturn, reqid, filehash, sequencenumber } = responseRequestGetShared.result;
 
   if (parseInt(requestGetSharedReturn, 10) < 0) {
@@ -583,7 +569,6 @@ export const downloadSharedFile = async (
     extraParamsForDownload,
   ]);
 
-  // console.log('callResultRequestDownloadShared', callResultRequestDownloadShared);
   const { response: responseRequestDownloadShared } = callResultRequestDownloadShared;
 
   if (!responseRequestDownloadShared) {
@@ -605,15 +590,10 @@ export const downloadSharedFile = async (
   const {
     return: requestDownloadSharedReturn,
     reqid: reqidDownloadShared,
-    // return: isContinueInit,
-    // reqid,
     offsetstart: offsetstartInit,
     offsetend: offsetendInit,
     filedata,
   } = resultWithOffesets;
-  // } = responseRequestDownloadShared.result;
-
-  console.log('aaa rrr', responseRequestDownloadShared.result);
 
   if (parseInt(requestDownloadSharedReturn, 10) < 0) {
     throw new Error(
@@ -643,7 +623,6 @@ export const downloadSharedFile = async (
   }
 
   isContinueGlobal = +requestDownloadSharedReturn;
-  // isContinueGlobal = +isContinueInit;
   offsetStartGlobal = +offsetstartInit;
   offsetEndGlobal = +offsetendInit;
 
@@ -703,15 +682,14 @@ export const downloadSharedFile = async (
   let downloadConfirmed = '-1';
 
   if (isContinueGlobal === 3) {
-    const extraParamsForDownload = [
+    const extraParamsForUserDownload = [
       {
         filehash,
-        // filesize,
         reqid,
       },
     ];
 
-    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
+    const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForUserDownload);
 
     dirLog('call result download', callResultDownloadFileInfo);
 
@@ -746,12 +724,7 @@ export const downloadSharedFile = async (
 
   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
 
-  log(`file will be saved into ${filePathToSave}`, filePathToSave);
+  log(`download file will be saved into ${filePathToSave}`, filePathToSave);
 
   FilesystemService.writeFile(filePathToSave, decodedFile);
-  // const { result: resultWithOffesets } = responseRequestDl;
-  //
-  // const messageToSign = `${sharelink}${address}${sequence}`;
-  //
-  // const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 };

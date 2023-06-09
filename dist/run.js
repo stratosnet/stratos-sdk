@@ -835,7 +835,7 @@ const main = async () => {
     const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
     const filesize = 250000000;
     const filename = 'file250_06_06';
-    await testFileDl(hdPathIndex, filename, filehash);
+    // await testFileDl(hdPathIndex, filename, filehash);
     // 4a
     // await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a

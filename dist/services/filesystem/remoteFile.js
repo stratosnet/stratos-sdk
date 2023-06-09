@@ -63,8 +63,6 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
         throw new Error('no sequence is presented in the ozone balance response');
     }
     const { sequence } = detailedBalance;
-    // const filehash = filehashA;
-    // const filesize = filesizeA;
     const sdmAddress = address;
     const filehandle = `sdm://${sdmAddress}/${filehash}`;
     (0, helpers_1.log)('filehandle', filehandle);
@@ -489,14 +487,13 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
     }
     let downloadConfirmed = '-1';
     if (isContinueGlobal === 3) {
-        const extraParamsForDownload = [
+        const extraParamsForUserDownload = [
             {
                 filehash,
-                // filesize,
                 reqid,
             },
         ];
-        const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForDownload);
+        const callResultDownloadFileInfo = await Network.sendUserDownloadedFileInfo(extraParamsForUserDownload);
         (0, helpers_1.dirLog)('call result download', callResultDownloadFileInfo);
         const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
         downloadConfirmed = ((_a = responseDownloadFileInfo === null || responseDownloadFileInfo === void 0 ? void 0 : responseDownloadFileInfo.result) === null || _a === void 0 ? void 0 : _a.return) || '-1';
@@ -521,11 +518,6 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
     const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
     (0, helpers_1.log)(`file will be saved into ${filePathToSave}`, filePathToSave);
     FilesystemService.writeFile(filePathToSave, decodedFile);
-    // const { result: resultWithOffesets } = responseRequestDl;
-    //
-    // const messageToSign = `${sharelink}${address}${sequence}`;
-    //
-    // const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 };
 exports.downloadSharedFile = downloadSharedFile;
 //# sourceMappingURL=remoteFile.js.map
