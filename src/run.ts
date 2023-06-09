@@ -670,26 +670,6 @@ const testFile = async () => {
   fs.writeFileSync(fileWritePath, buffWrite);
 };
 
-const testRequestUserStopFileShare = async (shareid: string, hdPathIndex: number) => {
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-
-  const keyPairZero = await deriveKeyPair(
-    hdPathIndex,
-    password,
-    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
-  );
-
-  if (!keyPairZero) {
-    log('Error. We dont have a keypair');
-    return;
-  }
-
-  const userFileList = await RemoteFilesystem.stopFileSharing(keyPairZero, shareid);
-
-  console.log('retrieved user shared file list', userFileList);
-};
-
 const testRequestUserFileShare = async (filehash: string, hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
@@ -708,6 +688,26 @@ const testRequestUserFileShare = async (filehash: string, hdPathIndex: number) =
   const userShareFileResult = await RemoteFilesystem.shareFile(keyPairZero, filehash);
 
   console.log('retrieved user shared file result', userShareFileResult);
+};
+
+const testRequestUserStopFileShare = async (shareid: string, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZero = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZero) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+
+  const userFileList = await RemoteFilesystem.stopFileSharing(keyPairZero, shareid);
+
+  console.log('retrieved user shared file list', userFileList);
 };
 
 const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) => {
@@ -730,6 +730,36 @@ const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) 
   const userFileList = await RemoteFilesystem.getSharedFileList(address, page);
 
   console.log('retrieved user shared file list', userFileList);
+};
+
+const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink: string) => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZeroA) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+  const { address } = keyPairZeroA;
+
+  const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+
+  const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(
+    keyPairZeroA,
+    filePathToSave,
+    sharelink,
+  );
+
+  console.log('retrieved user shared file list', userDownloadSharedFileResult);
 };
 
 const testRequestUserFileList = async (page: number, hdPathIndex: number) => {
@@ -934,7 +964,7 @@ const testReadAndWriteLocal = async (filename: string) => {
 //   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
 // };
 
-const testFileDl = async (hdPathIndex: number, filename: string, filehash: string, filesize: number) => {
+const testFileDl = async (hdPathIndex: number, filename: string, filehash: string) => {
   console.log(`downloading file ${filename}`);
 
   const PROJECT_ROOT = path.resolve(__dirname, '../');
@@ -955,7 +985,7 @@ const testFileDl = async (hdPathIndex: number, filename: string, filehash: strin
 
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
 
-  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
+  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
 
   log('done. filePathToSave', filePathToSave);
 };
@@ -1006,8 +1036,10 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    ppNodeUrl: 'http://35.233.85.255',
-    ppNodePort: '8142',
+    // ppNodeUrl: 'http://35.233.85.255',
+    // ppNodePort: '8142',
+    ppNodeUrl: 'http://34.145.36.237',
+    ppNodePort: '8135',
   });
 
   // tropos
@@ -1059,19 +1091,28 @@ const main = async () => {
   const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
   const filesize = 250000000;
   const filename = 'file250_06_06';
-  // await testFileDl(hdPathIndex, filename, filehash, filesize);
+  await testFileDl(hdPathIndex, filename, filehash);
 
   // 4a
-  await testRequestUserSharedFileList(0, hdPathIndex);
-
-  const shareid = '72f9812c89bb0b0b';
-  // sharelink: 'rWEa4N_72f9812c89bb0b0b'
+  // await testRequestUserSharedFileList(0, hdPathIndex);
 
   // 5a
   // await testRequestUserFileShare(filehash, hdPathIndex);
 
   // 6a
   // await testRequestUserStopFileShare(shareid, hdPathIndex);
+
+  // 7a
+
+  // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
+  // filesize: 250000000,
+  // filename: 'file250_06_06',
+  // linktime: 1686242085,
+  // linktimeexp: 1701794085,
+  // shareid: 'd898cb2c8ca8635e',
+  // sharelink: 'gObhyW_d898cb2c8ca8635e'
+  const sharelink = 'gObhyW_d898cb2c8ca8635e';
+  await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
   // await getBalanceCardMetrics(hdPathIndex);

@@ -490,7 +490,7 @@ export interface FileUserDownloadDataResponse extends MainRpcResponse {
 export interface FileUserDownloadedFileInfoParams {
   filehash: string;
   reqid: string;
-  filesize: number;
+  filesize?: number;
 }
 
 export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
