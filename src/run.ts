@@ -670,6 +670,98 @@ const testFile = async () => {
   fs.writeFileSync(fileWritePath, buffWrite);
 };
 
+const testRequestUserFileShare = async (filehash: string, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZero = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZero) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+
+  const userShareFileResult = await RemoteFilesystem.shareFile(keyPairZero, filehash);
+
+  console.log('retrieved user shared file result', userShareFileResult);
+};
+
+const testRequestUserStopFileShare = async (shareid: string, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZero = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZero) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+
+  const userFileList = await RemoteFilesystem.stopFileSharing(keyPairZero, shareid);
+
+  console.log('retrieved user shared file list', userFileList);
+};
+
+const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZeroA) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+
+  const { address } = keyPairZeroA;
+
+  const userFileList = await RemoteFilesystem.getSharedFileList(address, page);
+
+  console.log('retrieved user shared file list', userFileList);
+};
+
+const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink: string) => {
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
+
+  const keyPairZeroA = await deriveKeyPair(
+    hdPathIndex,
+    password,
+    masterKeySeedInfo.encryptedMasterKeySeed.toString(),
+  );
+
+  if (!keyPairZeroA) {
+    log('Error. We dont have a keypair');
+    return;
+  }
+  const { address } = keyPairZeroA;
+
+  const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+
+  const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(
+    keyPairZeroA,
+    filePathToSave,
+    sharelink,
+  );
+
+  console.log('retrieved user shared file list', userDownloadSharedFileResult);
+};
+
 const testRequestUserFileList = async (page: number, hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
@@ -688,7 +780,7 @@ const testRequestUserFileList = async (page: number, hdPathIndex: number) => {
   const { address } = keyPairZeroA;
 
   // const page = 4;
-  const userFileList = await FilesystemService.getUserUploadedFileList(address, page);
+  const userFileList = await RemoteFilesystem.getUploadedFileList(address, page);
 
   console.log('retrieved user file list', userFileList);
 };
@@ -766,113 +858,113 @@ const testReadAndWriteLocal = async (filename: string) => {
 };
 
 // read local file and write a new one (multiple IO)
-const testReadAndWriteLocalWorking = async (filename: string) => {
-  const PROJECT_ROOT = path.resolve(__dirname, '../');
-  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+// const testReadAndWriteLocalWorking = async (filename: string) => {
+//   const PROJECT_ROOT = path.resolve(__dirname, '../');
+//   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+//
+//   const imageFileName = filename;
+//   const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
+//
+//   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+//
+//   console.log('fileInfo', fileInfo);
+//
+//   const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
+//
+//   let readSize = 0;
+//
+//   const stats = fs.statSync(fileReadPath);
+//   const fileSize = stats.size;
+//
+//   console.log('stats', stats);
+//
+//   const step = 5000000;
+//   let offsetStart = 0;
+//   let offsetEnd = step;
+//
+//   const maxStep = 65536;
+//
+//   const readChunkSize = offsetEnd - offsetStart;
+//
+//   const encodedFileChunks = [];
+//
+//   let completedProgress = 0;
+//
+//   while (readSize < fileSize) {
+//     let fileChunk;
+//
+//     if (readChunkSize < maxStep) {
+//       fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+//     } else {
+//       let remained = readChunkSize;
+//
+//       const subChunks = [];
+//
+//       while (remained > 0) {
+//         const currentStep = remained > maxStep ? maxStep : remained;
+//         subChunks.push(currentStep);
+//
+//         remained = remained - currentStep;
+//       }
+//
+//       const myList = [];
+//
+//       for (const chunkLength of subChunks) {
+//         const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+//
+//         await delay(100);
+//         myList.push(chunkMini);
+//       }
+//
+//       const filteredList = myList.filter(Boolean);
+//
+//       const aggregatedBuf = Buffer.concat(filteredList);
+//       fileChunk = aggregatedBuf;
+//     }
+//
+//     if (!fileChunk) {
+//       break;
+//     }
+//
+//     if (fileChunk) {
+//       const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+//       readSize = readSize + fileChunk.length;
+//
+//       completedProgress = (100 * readSize) / fileSize;
+//
+//       console.log(
+//         `completed ${readSize} from ${fileSize} bytes, or ${(
+//           Math.round(completedProgress * 100) / 100
+//         ).toFixed(2)}%`,
+//       );
+//       offsetStart = offsetEnd;
+//       offsetEnd = offsetEnd + step;
+//       encodedFileChunks.push(encodedFileChunk);
+//     }
+//   }
+//
+//   const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
+//   const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
+//
+//   console.log('fileWritePath ', fileWritePath);
+//
+//   console.log('encoded file chunks length', encodedFileChunks.length);
+//
+//   const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+//   console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
+//
+//   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+//   console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+//
+//   FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+//   console.log('we should have an entire file written');
+//
+//   const encodedFile = await FilesystemService.encodeFile(decodedFile);
+//   console.log('this is not be shown as the string is way too long');
+//   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+// };
 
-  const imageFileName = filename;
-  const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
-
-  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
-
-  console.log('fileInfo', fileInfo);
-
-  const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
-
-  let readSize = 0;
-
-  const stats = fs.statSync(fileReadPath);
-  const fileSize = stats.size;
-
-  console.log('stats', stats);
-
-  const step = 5000000;
-  let offsetStart = 0;
-  let offsetEnd = step;
-
-  const maxStep = 65536;
-
-  const readChunkSize = offsetEnd - offsetStart;
-
-  const encodedFileChunks = [];
-
-  let completedProgress = 0;
-
-  while (readSize < fileSize) {
-    let fileChunk;
-
-    if (readChunkSize < maxStep) {
-      fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
-    } else {
-      let remained = readChunkSize;
-
-      const subChunks = [];
-
-      while (remained > 0) {
-        const currentStep = remained > maxStep ? maxStep : remained;
-        subChunks.push(currentStep);
-
-        remained = remained - currentStep;
-      }
-
-      const myList = [];
-
-      for (const chunkLength of subChunks) {
-        const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
-
-        await delay(100);
-        myList.push(chunkMini);
-      }
-
-      const filteredList = myList.filter(Boolean);
-
-      const aggregatedBuf = Buffer.concat(filteredList);
-      fileChunk = aggregatedBuf;
-    }
-
-    if (!fileChunk) {
-      break;
-    }
-
-    if (fileChunk) {
-      const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-      readSize = readSize + fileChunk.length;
-
-      completedProgress = (100 * readSize) / fileSize;
-
-      console.log(
-        `completed ${readSize} from ${fileSize} bytes, or ${(
-          Math.round(completedProgress * 100) / 100
-        ).toFixed(2)}%`,
-      );
-      offsetStart = offsetEnd;
-      offsetEnd = offsetEnd + step;
-      encodedFileChunks.push(encodedFileChunk);
-    }
-  }
-
-  const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
-  const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
-
-  console.log('fileWritePath ', fileWritePath);
-
-  console.log('encoded file chunks length', encodedFileChunks.length);
-
-  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-  console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
-
-  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-  console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
-
-  FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
-  console.log('we should have an entire file written');
-
-  const encodedFile = await FilesystemService.encodeFile(decodedFile);
-  console.log('this is not be shown as the string is way too long');
-  await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
-};
-
-const testFileDl = async (hdPathIndex: number, filename: string, filehash: string, filesize: number) => {
+const testFileDl = async (hdPathIndex: number, filename: string, filehash: string) => {
   console.log(`downloading file ${filename}`);
 
   const PROJECT_ROOT = path.resolve(__dirname, '../');
@@ -893,7 +985,7 @@ const testFileDl = async (hdPathIndex: number, filename: string, filehash: strin
 
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
 
-  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
+  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
 
   log('done. filePathToSave', filePathToSave);
 };
@@ -944,8 +1036,10 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    ppNodeUrl: 'http://35.233.85.255',
-    ppNodePort: '8142',
+    // ppNodeUrl: 'http://35.233.85.255',
+    // ppNodePort: '8142',
+    ppNodeUrl: 'http://34.145.36.237',
+    ppNodePort: '8135',
   });
 
   // tropos
@@ -961,21 +1055,6 @@ const main = async () => {
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
   const _cosmosClient = await getCosmos(serialized, password);
-
-  // const filename = 'file4_10M_jan20';
-  // const filename = 'file1_200M_jan22';
-
-  // download the file
-  // const filename = 'file1_50M_may_5';
-  // const filename = 'file2_75M_may_5';
-  // const filename = 'file3_100M_may_5';
-  // const filename = 'file3_100M_may_5';
-  // const filename = 'file6_30M_may_5';
-  // const filename = 'file8_20M_may_5';
-  // const filename = 'file9_50M_may_5';
-  // const filename = 'file10_75M_may_5';
-  // const filename = 'file10_75M_may_5';
-  // const filename = 'file11_1000M_may_5';
 
   // 10M
   // const filehash = 'v05ahm50fffve5i7oh69094ct0infbvk6rsojig0';
@@ -1002,22 +1081,47 @@ const main = async () => {
   // const filesize = 500000000;
   // const filename = 'file500_29_05';
 
-  // await testFileDl(hdPathIndex, filename, filehash, filesize);
+  // 1a
+  // await testRequestUserFileList(0, hdPathIndex);
 
-  // await testRequestUserFileList(0);
-  // await testReadAndWriteLocal(filename);
+  // 2a
+  // await testItFileUp(filename, hdPathIndex);
+
+  // 3a
+  const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
+  const filesize = 250000000;
+  const filename = 'file250_06_06';
+  await testFileDl(hdPathIndex, filename, filehash);
+
+  // 4a
+  // await testRequestUserSharedFileList(0, hdPathIndex);
+
+  // 5a
+  // await testRequestUserFileShare(filehash, hdPathIndex);
+
+  // 6a
+  // await testRequestUserStopFileShare(shareid, hdPathIndex);
+
+  // 7a
+
+  // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
+  // filesize: 250000000,
+  // filename: 'file250_06_06',
+  // linktime: 1686242085,
+  // linktimeexp: 1701794085,
+  // shareid: 'd898cb2c8ca8635e',
+  // sharelink: 'gObhyW_d898cb2c8ca8635e'
+  const sharelink = 'gObhyW_d898cb2c8ca8635e';
+  await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex);
+  // await getBalanceCardMetrics(hdPathIndex);
 
   // 2 Add funds via faucet
   // await runFaucet(hdPathIndex);
 
   // await simulateSend(hdPathIndex, receiverMnemonic);
-
   // await mainSdsPrepay(hdPathIndex);
-
-  // await getBalanceCardMetrics(hdPathIndex);
   // await getOzoneBalance(hdPathIndex);
 
   // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
@@ -1025,11 +1129,6 @@ const main = async () => {
   // const receiverMnemonic = zeroUserMnemonic;
   // const hdPathIndexReceiver = 10;
   // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
-
-  // await testRequestUserFileList(1, hdPathIndex);
-
-  // const filename = 'file750_29_05';
-  // await testItFileUp(filename, hdPathIndex);
 };
 
 main();

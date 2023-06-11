@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import fs from 'fs';
 import multihashing from 'multihashing-async';
 import { delay } from '../helpers';
-import { networkTypes, sendUserRequestList } from '../network';
-import { FileInfoItem } from '../network/types';
+
+// import { networkTypes, sendUserRequestList } from '../network';
+// import { FileInfoItem } from '../network/types';
 
 export interface OpenedFileInfo {
   size: number;
@@ -168,32 +169,27 @@ export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000):
   return encodedFileChunksList;
 };
 
-export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
-  try {
-    const fileStream = fs.createReadStream(filePath);
-
-    const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
-      fileStream.on('readable', function () {
-        resolve(fileStream);
-      });
-
-      fileStream.on('error', function (error) {
-        reject(error);
-      });
-    });
-
-    return myStream;
-  } catch (error) {
-    const errorMessage = `could not create file stream at path ${filePath}`;
-    console.log(errorMessage, error);
-    throw new Error(errorMessage);
-  }
-};
-
-export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
-  const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
-  return writeFile(filePath, decodedFileBuffer);
-};
+// export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
+//   try {
+//     const fileStream = fs.createReadStream(filePath);
+//
+//     const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
+//       fileStream.on('readable', function () {
+//         resolve(fileStream);
+//       });
+//
+//       fileStream.on('error', function (error) {
+//         reject(error);
+//       });
+//     });
+//
+//     return myStream;
+//   } catch (error) {
+//     const errorMessage = `could not create file stream at path ${filePath}`;
+//     console.log(errorMessage, error);
+//     throw new Error(errorMessage);
+//   }
+// };
 
 export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   try {
@@ -203,33 +199,7 @@ export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   }
 };
 
-type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
-
-interface UserFileListResponse {
-  files: FileInfoItem[];
-  originalResponse: RequestUserFilesResponse;
-}
-
-export const getUserUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
-  const extraParams = [
-    {
-      walletaddr: address,
-      page,
-    },
-  ];
-
-  const callResult = await sendUserRequestList(extraParams);
-
-  const { response } = callResult;
-
-  if (!response) {
-    throw 'Could not fetch a list of files. No response in the call result';
-  }
-
-  const userFiles = response.result.fileinfo;
-
-  return {
-    originalResponse: response,
-    files: userFiles,
-  };
+export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
+  const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
+  return writeFile(filePath, decodedFileBuffer);
 };

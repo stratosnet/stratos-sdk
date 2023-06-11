@@ -367,6 +367,12 @@ export interface FileInfoItem {
     filename: string;
     createtime: number;
 }
+export interface SharedFileInfoItem extends Omit<FileInfoItem, 'createtime>'> {
+    linktime: number;
+    linktimeexp: number;
+    shareid: string;
+    sharelink: string;
+}
 export interface FileUserRequestListResponse extends MainRpcResponse {
     result: {
         return: '0' | '1';
@@ -388,12 +394,14 @@ export interface FileUserRequestDownloadParams {
 }
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: '0' | '1' | '2' | '3' | '4';
         reqid: string;
         offsetstart: string;
         offsetend: string;
         filedata: string;
     };
+}
+export interface FileUserRequestDownloadSharedResponse extends FileUserRequestDownloadResponse {
 }
 export interface FileUserDownloadDataParams {
     filehash: string;
@@ -410,7 +418,7 @@ export interface FileUserDownloadDataResponse extends MainRpcResponse {
 export interface FileUserDownloadedFileInfoParams {
     filehash: string;
     reqid: string;
-    filesize: number;
+    filesize?: number;
 }
 export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
     result: {
@@ -579,4 +587,57 @@ export interface RestTxErrorResponse {
     code: number;
     message: string;
     details: string[];
+}
+export interface FileUserRequestShareParams {
+    filehash: string;
+    walletaddr: string;
+    duration: number;
+    bool: boolean;
+}
+export interface FileUserRequestShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+        shareid: string;
+        sharelink: string;
+    };
+}
+export interface FileUserRequestListShareParams {
+    walletaddr: string;
+    page: number;
+}
+export interface FileUserRequestListShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+        fileinfo?: SharedFileInfoItem[];
+        totalnumber?: number;
+    };
+}
+export interface FileUserRequestStopShareParams {
+    walletaddr: string;
+    shareid: string;
+}
+export interface FileUserRequestStopShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+    };
+}
+export interface FileUserRequestGetSharedParams {
+    walletaddr: string;
+    walletpubkey: string;
+    sharelink: string;
+}
+export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3' | '4';
+        reqid: string;
+        filehash: string;
+        sequencenumber: string;
+    };
+}
+export interface FileUserRequestDownloadSharedParams {
+    filehash: string;
+    walletaddr: string;
+    walletpubkey: string;
+    signature: string;
+    reqid: string;
 }

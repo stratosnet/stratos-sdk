@@ -3,14 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserUploadedFileList = exports.writeFile = exports.writeFileToPath = exports.getUploadFileStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFileToPath = exports.writeFile = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
-// import Sdk from '../../Sdk';
 const helpers_1 = require("../helpers");
-const network_1 = require("../network");
 const getFileBuffer = async (filePath) => {
     try {
         const fileBuffer = fs_1.default.readFileSync(filePath);
@@ -151,41 +149,27 @@ const getEncodedFileChunks = async (filePath, chunkSize = 10000) => {
     return encodedFileChunksList;
 };
 exports.getEncodedFileChunks = getEncodedFileChunks;
-// export const getEncodedFileChunk = async (
-//   fileStream: fs.ReadStream,
-//   offsetStart: number,
-//   offsetEnd: number,
-// ): Promise<string> => {
-//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
+// export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
+//   try {
+//     const fileStream = fs.createReadStream(filePath);
 //
-//   const encodedChunk = await encodeBuffer(fileChunk);
-//   return encodedChunk;
+//     const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
+//       fileStream.on('readable', function () {
+//         resolve(fileStream);
+//       });
+//
+//       fileStream.on('error', function (error) {
+//         reject(error);
+//       });
+//     });
+//
+//     return myStream;
+//   } catch (error) {
+//     const errorMessage = `could not create file stream at path ${filePath}`;
+//     console.log(errorMessage, error);
+//     throw new Error(errorMessage);
+//   }
 // };
-const getUploadFileStream = async (filePath) => {
-    try {
-        const fileStream = fs_1.default.createReadStream(filePath);
-        const myStream = await new Promise((resolve, reject) => {
-            fileStream.on('readable', function () {
-                resolve(fileStream);
-            });
-            fileStream.on('error', function (error) {
-                reject(error);
-            });
-        });
-        return myStream;
-    }
-    catch (error) {
-        const errorMessage = `could not create file stream at path ${filePath}`;
-        console.log(errorMessage, error);
-        throw new Error(errorMessage);
-    }
-};
-exports.getUploadFileStream = getUploadFileStream;
-const writeFileToPath = async (filePath, econdedFileContent) => {
-    const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
-    return (0, exports.writeFile)(filePath, decodedFileBuffer);
-};
-exports.writeFileToPath = writeFileToPath;
 const writeFile = (filePath, fileBuffer) => {
     try {
         fs_1.default.writeFileSync(filePath, fileBuffer);
@@ -195,23 +179,9 @@ const writeFile = (filePath, fileBuffer) => {
     }
 };
 exports.writeFile = writeFile;
-const getUserUploadedFileList = async (address, page = 0) => {
-    const extraParams = [
-        {
-            walletaddr: address,
-            page,
-        },
-    ];
-    const callResult = await (0, network_1.sendUserRequestList)(extraParams);
-    const { response } = callResult;
-    if (!response) {
-        throw 'Could not fetch a list of files. No response in the call result';
-    }
-    const userFiles = response.result.fileinfo;
-    return {
-        originalResponse: response,
-        files: userFiles,
-    };
+const writeFileToPath = async (filePath, econdedFileContent) => {
+    const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
+    return (0, exports.writeFile)(filePath, decodedFileBuffer);
 };
-exports.getUserUploadedFileList = getUserUploadedFileList;
+exports.writeFileToPath = writeFileToPath;
 //# sourceMappingURL=filesystem.js.map
