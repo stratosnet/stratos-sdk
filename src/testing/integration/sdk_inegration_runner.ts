@@ -5,6 +5,8 @@ import { mnemonic, wallet } from '../../hdVault';
 import { createMasterKeySeed } from '../../hdVault/keyManager';
 import Sdk from '../../Sdk';
 import { getCosmos, resetCosmos } from '../../services/cosmos';
+import * as FilesystemService from '../../services/filesystem/filesystem';
+import * as RemoteFilesystem from '../../services/filesystem/remoteFile';
 import { log, delay } from '../../services/helpers';
 import * as Network from '../../services/network';
 import * as transactions from '../../transactions';
@@ -48,6 +50,64 @@ function buildPpNodeUrl(givenUrl: string): string[] {
 
   return [ppUrl, ppPort];
 }
+
+async function createLocalTestFile(
+  fileReadPath: string,
+  fileWritePath: string,
+  randomPrefix?: string,
+): Promise<boolean> {
+  let readSize = 0;
+
+  const stats = fs.statSync(fileReadPath);
+  const fileSize = stats.size;
+
+  // log('stats', stats);
+
+  const step = 5000000;
+  let offsetStart = 0;
+  let offsetEnd = step;
+
+  const encodedFileChunks = [];
+
+  let completedProgress = 0;
+
+  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+
+  while (readSize < fileSize) {
+    const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
+
+    if (!fileChunk) {
+      break;
+    }
+
+    const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+    readSize = readSize + fileChunk.length;
+
+    completedProgress = (100 * readSize) / fileSize;
+
+    log(
+      `completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(
+        2,
+      )}%`,
+    );
+    offsetStart = offsetEnd;
+    offsetEnd = offsetEnd + step;
+    encodedFileChunks.push(encodedFileChunk);
+  }
+
+  // that adds a given pseudo randon string from the current timestamp to created a pseudo random file
+  if (randomPrefix) {
+    encodedFileChunks.push(randomPrefix);
+  }
+
+  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+
+  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+  FilesystemService.writeFile(fileWritePath, decodedFile);
+  log('write of the decoded file is done');
+  return true;
+}
+// /////
 
 let APP_ROOT_DIR = '';
 
@@ -693,4 +753,77 @@ export const getAccountOzoneBalance = async (
     log('Balances', b);
     throw new Error(`could not check account "${address}" balance`);
   }
+};
+
+export const uploadFileToRemote = async (
+  fileReadName: string,
+  randomTestPreffix: string,
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// uploadFileToRemote //////////////// ');
+
+  const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+  const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+  const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keypair = await createKeypairFromMnemonic(receiverPhrase);
+
+  const { address } = keypair;
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const localTestFileCreated = await createLocalTestFile(fileReadPath, fileWritePath, randomTestPreffix);
+
+  if (!localTestFileCreated) {
+    const m = `could not create ${fileWritePath} from ${fileReadPath}`;
+    log(m);
+    throw new Error(m);
+  }
+
+  // const sourceHash = await FilesystemService.calculateFileHash(fileReadPath);
+  const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
+
+  // log('sourceHash', sourceHash);
+  // log('targetHash', targetHash);
+
+  const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+
+  const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
+
+  if (+uploadReturn !== 0) {
+    throw new Error(`Upload did not return expected return code 0, and instead we have "${uploadReturn}"`);
+  }
+
+  if (calculatedFileHash !== targetHash) {
+    throw new Error(`Upload did not return expected filehash, ${targetHash}`);
+  }
+
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+
+  const userFileList = await RemoteFilesystem.getUploadedFileList(address, 0);
+
+  const { files } = userFileList;
+
+  if (!files.length) {
+    throw new Error(`The remote file list is empty for address "${address}"`);
+  }
+
+  const [firstUploadedFileInfo] = files;
+
+  const { filehash: remoteFileHash, filename: remoteFileName } = firstUploadedFileInfo;
+
+  if (remoteFileHash !== targetHash || remoteFileName !== expectedRemoteFileName) {
+    const errorMsg = `Remote file name "${remoteFileName}" must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}"`;
+    throw new Error(errorMsg);
+  }
+
+  return true;
 };

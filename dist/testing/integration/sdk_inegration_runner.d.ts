@@ -8,3 +8,4 @@ export declare const sendWithdrawAllRewardsTx: (hdPathIndex?: number, givenRecei
 export declare const sendUndelegateTx: (hdPathIndex?: number, givenReceiverMnemonic?: string, expectedDelegated?: string) => Promise<boolean>;
 export declare const sendSdsPrepayTx: (hdPathIndex?: number, givenReceiverMnemonic?: string, expectedToSend?: number) => Promise<boolean>;
 export declare const getAccountOzoneBalance: (hdPathIndex?: number, givenReceiverMnemonic?: string, minExpectedOzone?: string) => Promise<boolean>;
+export declare const uploadFileToRemote: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;

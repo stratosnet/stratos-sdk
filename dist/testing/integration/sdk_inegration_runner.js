@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const process_1 = require("process");
 const accounts = __importStar(require("../../accounts"));
@@ -34,6 +34,8 @@ const hdVault_1 = require("../../hdVault");
 const keyManager_1 = require("../../hdVault/keyManager");
 const Sdk_1 = __importDefault(require("../../Sdk"));
 const cosmos_1 = require("../../services/cosmos");
+const FilesystemService = __importStar(require("../../services/filesystem/filesystem"));
+const RemoteFilesystem = __importStar(require("../../services/filesystem/remoteFile"));
 const helpers_1 = require("../../services/helpers");
 const Network = __importStar(require("../../services/network"));
 const transactions = __importStar(require("../../transactions"));
@@ -70,6 +72,41 @@ function buildPpNodeUrl(givenUrl) {
     const ppPort = ppPortPostition ? givenUrl.slice(ppPortPostition + 1) : '';
     return [ppUrl, ppPort];
 }
+async function createLocalTestFile(fileReadPath, fileWritePath, randomPrefix) {
+    let readSize = 0;
+    const stats = fs.statSync(fileReadPath);
+    const fileSize = stats.size;
+    // log('stats', stats);
+    const step = 5000000;
+    let offsetStart = 0;
+    let offsetEnd = step;
+    const encodedFileChunks = [];
+    let completedProgress = 0;
+    const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+    while (readSize < fileSize) {
+        const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
+        if (!fileChunk) {
+            break;
+        }
+        const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+        readSize = readSize + fileChunk.length;
+        completedProgress = (100 * readSize) / fileSize;
+        (0, helpers_1.log)(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+        offsetStart = offsetEnd;
+        offsetEnd = offsetEnd + step;
+        encodedFileChunks.push(encodedFileChunk);
+    }
+    // that adds a given pseudo randon string from the current timestamp to created a pseudo random file
+    if (randomPrefix) {
+        encodedFileChunks.push(randomPrefix);
+    }
+    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+    FilesystemService.writeFile(fileWritePath, decodedFile);
+    (0, helpers_1.log)('write of the decoded file is done');
+    return true;
+}
+// /////
 let APP_ROOT_DIR = '';
 try {
     APP_ROOT_DIR = getAppRootDir();
@@ -528,4 +565,50 @@ const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '
     }
 };
 exports.getAccountOzoneBalance = getAccountOzoneBalance;
+const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// uploadFileToRemote //////////////// ');
+    const fileReadPath = `${APP_ROOT_DIR}/src/${fileReadName}`;
+    const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+    const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
+    // const fileWritePath = `testing/integration/${fileReadName}}`;
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    const { address } = keypair;
+    await main(receiverMnemonic, hdPathIndex);
+    const localTestFileCreated = await createLocalTestFile(fileReadPath, fileWritePath, randomTestPreffix);
+    if (!localTestFileCreated) {
+        const m = `could not create ${fileWritePath} from ${fileReadPath}`;
+        (0, helpers_1.log)(m);
+        throw new Error(m);
+    }
+    const sourceHash = await FilesystemService.calculateFileHash(fileReadPath);
+    const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
+    (0, helpers_1.log)('sourceHash', sourceHash);
+    (0, helpers_1.log)('targetHash', targetHash);
+    const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+    const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
+    if (+uploadReturn !== 0) {
+        throw new Error(`Upload did not return expected return code 0, and instead we have "${uploadReturn}"`);
+    }
+    if (calculatedFileHash !== targetHash) {
+        throw new Error(`Upload did not return expected filehash, ${sourceHash}`);
+    }
+    const userFileList = await RemoteFilesystem.getUploadedFileList(address, 0);
+    const { files } = userFileList;
+    if (!files.length) {
+        throw new Error(`The remote file list is empty for address "${address}"`);
+    }
+    const [firstUploadedFileInfo] = files;
+    const { filehash: remoteFileHash, filename: remoteFileName } = firstUploadedFileInfo;
+    if (remoteFileHash !== targetHash || remoteFileName !== expectedRemoteFileName) {
+        const errorMsg = `Remote file name "${remoteFileName}" must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}"`;
+        throw new Error(errorMsg);
+    }
+    return true;
+};
+exports.uploadFileToRemote = uploadFileToRemote;
 //# sourceMappingURL=sdk_inegration_runner.js.map

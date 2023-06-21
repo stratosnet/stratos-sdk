@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFileToPath = exports.writeFile = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
@@ -108,12 +108,15 @@ const getFileChunk = async (fileStream, readChunkSize) => {
 exports.getFileChunk = getFileChunk;
 async function encodeBuffer(chunk) {
     await (0, helpers_1.delay)(100);
+    //  Cannot create a string longer than 0x1fffffe8 characters
     const base64data = chunk.toString('base64');
+    console.log('good 1');
     return base64data;
 }
 exports.encodeBuffer = encodeBuffer;
 const encodeFile = async (fileBuffer) => {
     const encodedFile = await encodeBuffer(fileBuffer);
+    console.log('good 2');
     return encodedFile;
 };
 exports.encodeFile = encodeFile;
@@ -149,27 +152,26 @@ const getEncodedFileChunks = async (filePath, chunkSize = 10000) => {
     return encodedFileChunksList;
 };
 exports.getEncodedFileChunks = getEncodedFileChunks;
-// export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
-//   try {
-//     const fileStream = fs.createReadStream(filePath);
-//
-//     const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
-//       fileStream.on('readable', function () {
-//         resolve(fileStream);
-//       });
-//
-//       fileStream.on('error', function (error) {
-//         reject(error);
-//       });
-//     });
-//
-//     return myStream;
-//   } catch (error) {
-//     const errorMessage = `could not create file stream at path ${filePath}`;
-//     console.log(errorMessage, error);
-//     throw new Error(errorMessage);
-//   }
-// };
+const getLocalFileReadStream = async (filePath) => {
+    try {
+        const fileStream = fs_1.default.createReadStream(filePath);
+        const myStream = await new Promise((resolve, reject) => {
+            fileStream.on('readable', function () {
+                resolve(fileStream);
+            });
+            fileStream.on('error', function (error) {
+                reject(error);
+            });
+        });
+        return myStream;
+    }
+    catch (error) {
+        const errorMessage = `could not create file stream at path ${filePath}`;
+        console.log(errorMessage, error);
+        throw new Error(errorMessage);
+    }
+};
+exports.getLocalFileReadStream = getLocalFileReadStream;
 const writeFile = (filePath, fileBuffer) => {
     try {
         fs_1.default.writeFileSync(filePath, fileBuffer);
