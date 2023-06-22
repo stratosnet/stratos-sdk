@@ -169,7 +169,7 @@ export const downloadFile = async (
   keypair: wallet.KeyPairInfo,
   filePathToSave: string,
   filehash: string,
-): Promise<void> => {
+): Promise<{ filePathToSave: string }> => {
   const { address, publicKey } = keypair;
 
   const ozoneBalance = await accounts.getOtherBalanceCardMetrics(address);
@@ -185,7 +185,7 @@ export const downloadFile = async (
   const sdmAddress = address;
   const filehandle = `sdm://${sdmAddress}/${filehash}`;
 
-  log('filehandle', filehandle);
+  // log('filehandle', filehandle);
 
   const messageToSign = `${filehash}${address}${sequence}`;
 
@@ -206,7 +206,7 @@ export const downloadFile = async (
 
   if (!responseRequestDl) {
     dirLog('we dont have response for dl request. it might be an error', callResultRequestDl);
-    return;
+    throw new Error('we dont have response for dl request. it might be an error');
   }
 
   const { result: resultWithOffesets } = responseRequestDl;
@@ -237,12 +237,12 @@ export const downloadFile = async (
 
   if (offsetendInit === undefined) {
     dirLog('a we dont have an offest. could be an error. response is', responseRequestDl);
-    return;
+    throw new Error('a we dont have an offest. could be an error. response is');
   }
 
   if (offsetstartInit === undefined) {
     dirLog('b we dont have an offest. could be an error. response is', responseRequestDl);
-    return;
+    throw new Error('b we dont have an offest. could be an error. response is');
   }
 
   const decodedFile = await processUsedFileDownload<NetworkTypes.FileUserRequestDownloadResponse>(
@@ -259,6 +259,8 @@ export const downloadFile = async (
   log(`downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
 
   FilesystemService.writeFile(filePathToSave, decodedFile);
+
+  return { filePathToSave };
 };
 
 export const updloadFile = async (

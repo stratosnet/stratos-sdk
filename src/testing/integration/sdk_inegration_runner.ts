@@ -61,8 +61,6 @@ async function createLocalTestFile(
   const stats = fs.statSync(fileReadPath);
   const fileSize = stats.size;
 
-  // log('stats', stats);
-
   const step = 5000000;
   let offsetStart = 0;
   let offsetEnd = step;
@@ -788,11 +786,7 @@ export const uploadFileToRemote = async (
     throw new Error(m);
   }
 
-  // const sourceHash = await FilesystemService.calculateFileHash(fileReadPath);
   const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
-
-  // log('sourceHash', sourceHash);
-  // log('targetHash', targetHash);
 
   const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
 
@@ -824,6 +818,64 @@ export const uploadFileToRemote = async (
     const errorMsg = `Remote file name "${remoteFileName}" must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}"`;
     throw new Error(errorMsg);
   }
+
+  return true;
+};
+
+export const downloadFileFromRemote = async (
+  fileReadName: string,
+  randomTestPreffix: string,
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// downloadFileFromRemote //////////////// ');
+
+  const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+
+  const uploadedFileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keypair = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const uploadedLocalFileHash = await FilesystemService.calculateFileHash(uploadedFileWritePath);
+
+  const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
+
+  const downloadResult = await RemoteFilesystem.downloadFile(
+    keypair,
+    filePathToSaveDownloadedTo,
+    uploadedLocalFileHash,
+  );
+
+  const { filePathToSave } = downloadResult;
+
+  const downloadedFileHash = await FilesystemService.calculateFileHash(filePathToSave);
+
+  if (downloadedFileHash !== uploadedLocalFileHash) {
+    throw new Error(
+      `downloadedFileHash "${downloadedFileHash}" must be equal uploadedLocalFileHash "${uploadedLocalFileHash}" `,
+    );
+  }
+
+  fs.unlinkSync(filePathToSave, function (err: Error) {
+    if (err) {
+      throw err;
+    }
+  });
+
+  fs.unlinkSync(uploadedFileWritePath, function (err: Error) {
+    if (err) {
+      throw err;
+    }
+  });
 
   return true;
 };
