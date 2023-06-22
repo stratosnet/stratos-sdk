@@ -23,9 +23,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * @jest-environment node
- */
 const hdVault_1 = require("../../hdVault");
 const Integration = __importStar(require("./sdk_inegration_runner"));
 const extendedExecutionTimeout = 60000;
@@ -77,21 +74,33 @@ describe(`Stratos SDK integration (integration test)`, () => {
             });
         }, extendedExecutionTimeout);
     });
-    describe('Prepay and OZONE', () => {
+    describe('Prepay OZONE, upload and download', () => {
         const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
         const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
-        it('Sends an sds prepay tx', done => {
-            void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
-                expect(result).toBe(true);
-                done();
-            });
-        }, extendedExecutionTimeout);
-        it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.1 OZ', done => {
-            void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.1').then(result => {
-                expect(result).toBe(true);
-                done();
-            });
-        }, extendedExecutionTimeout);
+        describe('Prepay and OZONE', () => {
+            it('Sends an sds prepay tx', done => {
+                void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+            it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 98.1 OZ', done => {
+                void Integration.getAccountOzoneBalance(0, receiverMnemonic, '98.1').then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
+        describe('Remote File System', () => {
+            const randomPrefix = Date.now() + '';
+            const fileReadName = `file10_test`;
+            it('Uploads a local file to remote', done => {
+                void Integration.uploadFileToRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
     });
 });
 //# sourceMappingURL=sdk_integration.spec.js.map

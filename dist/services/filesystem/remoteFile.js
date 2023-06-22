@@ -210,13 +210,13 @@ const updloadFile = async (keypair, fileReadPath) => {
             signature,
         },
     ];
-    (0, helpers_1.log)('beginning init call');
+    // log('beginning init call');
     const callResultInit = await Network.sendUserRequestUpload(extraParams);
     const { response: responseInit } = callResultInit;
     (0, helpers_1.log)('call result init (end of init)', JSON.stringify(callResultInit));
     if (!responseInit) {
         (0, helpers_1.log)('we dont have response. it might be an error', callResultInit);
-        return;
+        throw new Error('we dont have response. it might be an error');
     }
     const { result: resultWithOffesets } = responseInit;
     (0, helpers_1.log)('result with offesets', resultWithOffesets);
@@ -226,32 +226,33 @@ const updloadFile = async (keypair, fileReadPath) => {
     const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
     if (offsetendInit === undefined) {
         (0, helpers_1.log)('we dont have an offest end for init. could be an error. response is', responseInit);
-        return;
+        throw new Error('we dont have an offest end for init. could be an error.');
     }
     if (offsetstartInit === undefined) {
         (0, helpers_1.log)('we dont have an offest start for init. could be an error. response is', responseInit);
-        return;
+        throw new Error('we dont have an offest start for init. could be an error.');
     }
     let readSize = 0;
     let completedProgress = 0;
     isContinueGlobal = +isContinueInit;
     offsetStartGlobal = +offsetstartInit;
     offsetEndGlobal = +offsetendInit;
-    (0, helpers_1.log)('starting to get file buffer');
+    // log('starting to get file buffer');
     const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
-    (0, helpers_1.log)('ended  get file buffer');
+    // log('ended  get file buffer');
+    let uploadReturn = '';
     while (isContinueGlobal === 1) {
-        (0, helpers_1.log)('!!! while start, starting getting a slice');
+        // log('!!! while start, starting getting a slice');
         const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-        (0, helpers_1.log)('slice is retrieved');
+        // log('slice is retrieved');
         if (!fileChunk) {
             (0, helpers_1.log)('fileChunk is missing, Exiting ', fileChunk);
-            break;
+            throw new Error('fileChunk is missing. Exiting');
         }
         if (fileChunk) {
-            (0, helpers_1.log)('encodeBuffer start');
+            // log('encodeBuffer start');
             const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-            (0, helpers_1.log)('encodeBuffer end');
+            // log('encodeBuffer end');
             readSize = readSize + fileChunk.length;
             completedProgress = (100 * readSize) / fileSize;
             (0, helpers_1.log)(`from run.ts - completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
@@ -267,29 +268,33 @@ const updloadFile = async (keypair, fileReadPath) => {
             (0, helpers_1.log)('call result upload (end)', JSON.stringify(callResultUpload));
             const { response: responseUpload } = callResultUpload;
             if (!responseUpload) {
-                (0, helpers_1.log)('we dont have response. it might be an error', callResultUpload);
-                return;
+                (0, helpers_1.log)('we dont have upload response. it might be an error', callResultUpload);
+                throw new Error('we dont have upload response. it might be an error');
             }
             const { result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload }, } = responseUpload;
+            uploadReturn = isContinueUpload;
+            isContinueGlobal = +isContinueUpload;
             if (offsetendUpload === undefined) {
                 (0, helpers_1.log)('1 we dont have an offest. could be an error. response is', responseUpload);
-                return;
+                break;
+                // throw new Error('1 we dont have an offest. could be an error. response is');
             }
             if (offsetstartUpload === undefined) {
                 (0, helpers_1.log)('2 we dont have an offest. could be an error. response is', responseUpload);
-                return;
+                break;
+                // throw new Error('2 we dont have an offest. could be an error. response is');
             }
-            isContinueGlobal = +isContinueUpload;
             offsetStartGlobal = +offsetstartUpload;
             offsetEndGlobal = +offsetendUpload;
-            (0, helpers_1.log)('while end ___');
+            // log('while end ___');
         }
     }
-    (0, helpers_1.log)(`The latest upload request return code is "${isContinueGlobal}"`);
+    (0, helpers_1.log)(`The latest upload request return code / value is "${uploadReturn}"`);
     if (isContinueGlobal !== 0) {
         const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}"`;
         throw new Error(errorMsg);
     }
+    return { uploadReturn, filehash: fileInfo.filehash };
 };
 exports.updloadFile = updloadFile;
 const shareFile = async (keypair, filehash) => {

@@ -44,6 +44,7 @@ const FilesystemService = __importStar(require("./services/filesystem"));
 const RemoteFilesystem = __importStar(require("./services/filesystem/remoteFile"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
+const integration = __importStar(require("./testing/integration/sdk_inegration_runner"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -605,11 +606,11 @@ const testReadAndWriteLocal = async (filename) => {
     const imageFileName = filename;
     const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
     const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
-    console.log('fileInfo', fileInfo);
+    (0, helpers_1.log)('fileInfo', fileInfo);
     let readSize = 0;
     const stats = fs_1.default.statSync(fileReadPath);
     const fileSize = stats.size;
-    console.log('stats', stats);
+    (0, helpers_1.log)('stats', stats);
     const step = 5000000;
     let offsetStart = 0;
     let offsetEnd = step;
@@ -624,131 +625,89 @@ const testReadAndWriteLocal = async (filename) => {
         const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
         readSize = readSize + fileChunk.length;
         completedProgress = (100 * readSize) / fileSize;
-        console.log(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+        (0, helpers_1.log)(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
         offsetStart = offsetEnd;
         offsetEnd = offsetEnd + step;
         encodedFileChunks.push(encodedFileChunk);
     }
-    const fileWritePath = path_1.default.resolve(SRC_ROOT, `my_new_${filename}`);
-    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
-    console.log('fileWritePath ', fileWritePath);
-    console.log('encoded file chunks length', encodedFileChunks.length);
     const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-    console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
     const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-    console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
+    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_decoded_${filename}`);
     FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
-    console.log('we should have an entire file written');
-    const encodedFile = await FilesystemService.encodeFile(decodedFile);
-    console.log('this is not be shown as the string is way too long');
-    await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+    (0, helpers_1.log)('write of the decoded file is done');
+    // const fileWritePath = path.resolve(SRC_ROOT, `my_new_encoded_from_decoded_${filename}`);
+    // const encodedFile = await FilesystemService.encodeFile(decodedFile);
+    // await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+    // log('writeFileToPath of the encodedFile from decoded file is done');
 };
 // read local file and write a new one (multiple IO)
-// const testReadAndWriteLocalWorking = async (filename: string) => {
-//   const PROJECT_ROOT = path.resolve(__dirname, '../');
-//   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
-//
-//   const imageFileName = filename;
-//   const fileReadPath = path.resolve(SRC_ROOT, imageFileName);
-//
-//   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
-//
-//   console.log('fileInfo', fileInfo);
-//
-//   const fileStream = await FilesystemService.getUploadFileStream(fileReadPath);
-//
-//   let readSize = 0;
-//
-//   const stats = fs.statSync(fileReadPath);
-//   const fileSize = stats.size;
-//
-//   console.log('stats', stats);
-//
-//   const step = 5000000;
-//   let offsetStart = 0;
-//   let offsetEnd = step;
-//
-//   const maxStep = 65536;
-//
-//   const readChunkSize = offsetEnd - offsetStart;
-//
-//   const encodedFileChunks = [];
-//
-//   let completedProgress = 0;
-//
-//   while (readSize < fileSize) {
-//     let fileChunk;
-//
-//     if (readChunkSize < maxStep) {
-//       fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
-//     } else {
-//       let remained = readChunkSize;
-//
-//       const subChunks = [];
-//
-//       while (remained > 0) {
-//         const currentStep = remained > maxStep ? maxStep : remained;
-//         subChunks.push(currentStep);
-//
-//         remained = remained - currentStep;
-//       }
-//
-//       const myList = [];
-//
-//       for (const chunkLength of subChunks) {
-//         const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
-//
-//         await delay(100);
-//         myList.push(chunkMini);
-//       }
-//
-//       const filteredList = myList.filter(Boolean);
-//
-//       const aggregatedBuf = Buffer.concat(filteredList);
-//       fileChunk = aggregatedBuf;
-//     }
-//
-//     if (!fileChunk) {
-//       break;
-//     }
-//
-//     if (fileChunk) {
-//       const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-//       readSize = readSize + fileChunk.length;
-//
-//       completedProgress = (100 * readSize) / fileSize;
-//
-//       console.log(
-//         `completed ${readSize} from ${fileSize} bytes, or ${(
-//           Math.round(completedProgress * 100) / 100
-//         ).toFixed(2)}%`,
-//       );
-//       offsetStart = offsetEnd;
-//       offsetEnd = offsetEnd + step;
-//       encodedFileChunks.push(encodedFileChunk);
-//     }
-//   }
-//
-//   const fileWritePath = path.resolve(SRC_ROOT, `my_new_${filename}`);
-//   const fileWritePathFromBuff = path.resolve(SRC_ROOT, `my_new_from_buff_${filename}`);
-//
-//   console.log('fileWritePath ', fileWritePath);
-//
-//   console.log('encoded file chunks length', encodedFileChunks.length);
-//
-//   const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-//   console.log('decodeFileChunks length - should be 576', decodedChunksList.length);
-//
-//   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-//   console.log('we should see decodedFile length (combined from decodedChunksList array)', decodedFile.length);
-//
-//   FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
-//   console.log('we should have an entire file written');
-//
-//   const encodedFile = await FilesystemService.encodeFile(decodedFile);
-//   console.log('this is not be shown as the string is way too long');
-//   await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
-// };
+const testReadAndWriteLocalMultipleIo = async (filename) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const imageFileName = filename;
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, imageFileName);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    (0, helpers_1.log)('fileInfo', fileInfo);
+    const fileStream = await FilesystemService.getLocalFileReadStream(fileReadPath);
+    let readSize = 0;
+    const stats = fs_1.default.statSync(fileReadPath);
+    const fileSize = stats.size;
+    (0, helpers_1.log)('stats', stats);
+    const step = 5000000;
+    let offsetStart = 0;
+    let offsetEnd = step;
+    const maxStep = 65536;
+    const readChunkSize = offsetEnd - offsetStart;
+    const encodedFileChunks = [];
+    let completedProgress = 0;
+    while (readSize < fileSize) {
+        let fileChunk;
+        if (readChunkSize < maxStep) {
+            fileChunk = await FilesystemService.getFileChunk(fileStream, readChunkSize);
+        }
+        else {
+            let remained = readChunkSize;
+            const subChunks = [];
+            while (remained > 0) {
+                const currentStep = remained > maxStep ? maxStep : remained;
+                subChunks.push(currentStep);
+                remained = remained - currentStep;
+            }
+            const myList = [];
+            for (const chunkLength of subChunks) {
+                const chunkMini = await FilesystemService.getFileChunk(fileStream, chunkLength);
+                await (0, helpers_1.delay)(1);
+                myList.push(chunkMini);
+            }
+            const filteredList = myList.filter(Boolean);
+            const aggregatedBuf = Buffer.concat(filteredList);
+            fileChunk = aggregatedBuf;
+        }
+        if (!fileChunk) {
+            break;
+        }
+        if (fileChunk) {
+            const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+            readSize = readSize + fileChunk.length;
+            completedProgress = (100 * readSize) / fileSize;
+            (0, helpers_1.log)(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+            offsetStart = offsetEnd;
+            offsetEnd = offsetEnd + step;
+            encodedFileChunks.push(encodedFileChunk);
+        }
+    }
+    // console.log('fileWritePath ', fileWritePath);
+    // console.log('encoded file chunks length', encodedFileChunks.length);
+    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
+    const fileWritePathFromBuff = path_1.default.resolve(SRC_ROOT, `my_new_from_decoded_io_${filename}`);
+    FilesystemService.writeFile(fileWritePathFromBuff, decodedFile);
+    (0, helpers_1.log)('write of the decoded file is done');
+    // const fileWritePath = path.resolve(SRC_ROOT, `my_new_encoded_from_decoded_io_${filename}`);
+    // const encodedFile = await FilesystemService.encodeFile(decodedFile);
+    // await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
+    // log('writeFileToPath of the encodedFile from decoded file is done');
+};
 const testFileDl = async (hdPathIndex, filename, filehash) => {
     console.log(`downloading file ${filename}`);
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
@@ -828,14 +787,15 @@ const main = async () => {
     // const filesize = 500000000;
     // const filename = 'file500_29_05';
     // 1a
-    // await testRequestUserFileList(0, hdPathIndex);
+    await testRequestUserFileList(0, hdPathIndex);
+    // const filename = 'file10_june_21_4';
     // 2a
     // await testItFileUp(filename, hdPathIndex);
     // 3a
-    const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
-    const filesize = 250000000;
-    const filename = 'file250_06_06';
-    await testFileDl(hdPathIndex, filename, filehash);
+    // const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
+    // const filesize = 250000000;
+    // const filename = 'file250_06_06';
+    // await testFileDl(hdPathIndex, filename, filehash);
     // 4a
     // await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a
@@ -850,8 +810,8 @@ const main = async () => {
     // linktimeexp: 1701794085,
     // shareid: 'd898cb2c8ca8635e',
     // sharelink: 'gObhyW_d898cb2c8ca8635e'
-    const sharelink = 'gObhyW_d898cb2c8ca8635e';
-    await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
+    // const sharelink = 'gObhyW_d898cb2c8ca8635e';
+    // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // await getBalanceCardMetrics(hdPathIndex);
     // 2 Add funds via faucet
@@ -864,6 +824,12 @@ const main = async () => {
     // const receiverMnemonic = zeroUserMnemonic;
     // const hdPathIndexReceiver = 10;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    const filename = 'file10_test';
+    // const filename = 'file1000_test';
+    // testReadAndWriteLocal(filename);
+    // testReadAndWriteLocalMultipleIo(filename);
+    const randomPrefix = Date.now() + '';
+    await integration.uploadFileToRemote(filename, randomPrefix);
 };
 main();
 //# sourceMappingURL=run.js.map

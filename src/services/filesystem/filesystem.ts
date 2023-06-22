@@ -126,12 +126,15 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
 
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
   await delay(100);
+  //  Cannot create a string longer than 0x1fffffe8 characters
   const base64data = chunk.toString('base64');
+  console.log('good 1');
   return base64data;
 }
 
 export const encodeFile = async (fileBuffer: Buffer) => {
   const encodedFile = await encodeBuffer(fileBuffer);
+  console.log('good 2');
   return encodedFile;
 };
 
@@ -169,27 +172,27 @@ export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000):
   return encodedFileChunksList;
 };
 
-// export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
-//   try {
-//     const fileStream = fs.createReadStream(filePath);
-//
-//     const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
-//       fileStream.on('readable', function () {
-//         resolve(fileStream);
-//       });
-//
-//       fileStream.on('error', function (error) {
-//         reject(error);
-//       });
-//     });
-//
-//     return myStream;
-//   } catch (error) {
-//     const errorMessage = `could not create file stream at path ${filePath}`;
-//     console.log(errorMessage, error);
-//     throw new Error(errorMessage);
-//   }
-// };
+export const getLocalFileReadStream = async (filePath: string): Promise<fs.ReadStream> => {
+  try {
+    const fileStream = fs.createReadStream(filePath);
+
+    const myStream: fs.ReadStream = await new Promise((resolve, reject) => {
+      fileStream.on('readable', function () {
+        resolve(fileStream);
+      });
+
+      fileStream.on('error', function (error) {
+        reject(error);
+      });
+    });
+
+    return myStream;
+  } catch (error) {
+    const errorMessage = `could not create file stream at path ${filePath}`;
+    console.log(errorMessage, error);
+    throw new Error(errorMessage);
+  }
+};
 
 export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   try {

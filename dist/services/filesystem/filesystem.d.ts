@@ -16,5 +16,6 @@ export declare const combineDecodedChunks: (fileChunksList: Buffer[]) => Buffer;
 export declare const encodeFileChunks: (chunksList: Buffer[]) => Promise<string[]>;
 export declare const decodeFileChunks: (encodedChunksList: string[]) => Promise<Buffer[]>;
 export declare const getEncodedFileChunks: (filePath: string, chunkSize?: number) => Promise<string[]>;
+export declare const getLocalFileReadStream: (filePath: string) => Promise<fs.ReadStream>;
 export declare const writeFile: (filePath: string, fileBuffer: Buffer) => void;
 export declare const writeFileToPath: (filePath: string, econdedFileContent: string) => Promise<void>;

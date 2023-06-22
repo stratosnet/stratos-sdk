@@ -169,7 +169,7 @@ export const downloadFile = async (
   keypair: wallet.KeyPairInfo,
   filePathToSave: string,
   filehash: string,
-): Promise<void> => {
+): Promise<{ filePathToSave: string }> => {
   const { address, publicKey } = keypair;
 
   const ozoneBalance = await accounts.getOtherBalanceCardMetrics(address);
@@ -185,7 +185,7 @@ export const downloadFile = async (
   const sdmAddress = address;
   const filehandle = `sdm://${sdmAddress}/${filehash}`;
 
-  log('filehandle', filehandle);
+  // log('filehandle', filehandle);
 
   const messageToSign = `${filehash}${address}${sequence}`;
 
@@ -206,7 +206,7 @@ export const downloadFile = async (
 
   if (!responseRequestDl) {
     dirLog('we dont have response for dl request. it might be an error', callResultRequestDl);
-    return;
+    throw new Error('we dont have response for dl request. it might be an error');
   }
 
   const { result: resultWithOffesets } = responseRequestDl;
@@ -237,12 +237,12 @@ export const downloadFile = async (
 
   if (offsetendInit === undefined) {
     dirLog('a we dont have an offest. could be an error. response is', responseRequestDl);
-    return;
+    throw new Error('a we dont have an offest. could be an error. response is');
   }
 
   if (offsetstartInit === undefined) {
     dirLog('b we dont have an offest. could be an error. response is', responseRequestDl);
-    return;
+    throw new Error('b we dont have an offest. could be an error. response is');
   }
 
   const decodedFile = await processUsedFileDownload<NetworkTypes.FileUserRequestDownloadResponse>(
@@ -259,9 +259,14 @@ export const downloadFile = async (
   log(`downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
 
   FilesystemService.writeFile(filePathToSave, decodedFile);
+
+  return { filePathToSave };
 };
 
-export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: string): Promise<void> => {
+export const updloadFile = async (
+  keypair: wallet.KeyPairInfo,
+  fileReadPath: string,
+): Promise<{ uploadReturn: string; filehash: string }> => {
   const imageFileName = path.basename(fileReadPath);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
@@ -296,7 +301,7 @@ export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: str
     },
   ];
 
-  log('beginning init call');
+  // log('beginning init call');
   const callResultInit = await Network.sendUserRequestUpload(extraParams);
 
   const { response: responseInit } = callResultInit;
@@ -305,7 +310,7 @@ export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: str
 
   if (!responseInit) {
     log('we dont have response. it might be an error', callResultInit);
-    return;
+    throw new Error('we dont have response. it might be an error');
   }
 
   const { result: resultWithOffesets } = responseInit;
@@ -324,12 +329,12 @@ export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: str
 
   if (offsetendInit === undefined) {
     log('we dont have an offest end for init. could be an error. response is', responseInit);
-    return;
+    throw new Error('we dont have an offest end for init. could be an error.');
   }
 
   if (offsetstartInit === undefined) {
     log('we dont have an offest start for init. could be an error. response is', responseInit);
-    return;
+    throw new Error('we dont have an offest start for init. could be an error.');
   }
 
   let readSize = 0;
@@ -339,25 +344,27 @@ export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: str
   offsetStartGlobal = +offsetstartInit;
   offsetEndGlobal = +offsetendInit;
 
-  log('starting to get file buffer');
+  // log('starting to get file buffer');
   const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
-  log('ended  get file buffer');
+  // log('ended  get file buffer');
+
+  let uploadReturn = '';
 
   while (isContinueGlobal === 1) {
-    log('!!! while start, starting getting a slice');
+    // log('!!! while start, starting getting a slice');
 
     const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-    log('slice is retrieved');
+    // log('slice is retrieved');
 
     if (!fileChunk) {
       log('fileChunk is missing, Exiting ', fileChunk);
-      break;
+      throw new Error('fileChunk is missing. Exiting');
     }
 
     if (fileChunk) {
-      log('encodeBuffer start');
+      // log('encodeBuffer start');
       const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-      log('encodeBuffer end');
+      // log('encodeBuffer end');
 
       readSize = readSize + fileChunk.length;
 
@@ -384,38 +391,43 @@ export const updloadFile = async (keypair: wallet.KeyPairInfo, fileReadPath: str
       const { response: responseUpload } = callResultUpload;
 
       if (!responseUpload) {
-        log('we dont have response. it might be an error', callResultUpload);
-
-        return;
+        log('we dont have upload response. it might be an error', callResultUpload);
+        throw new Error('we dont have upload response. it might be an error');
       }
 
       const {
         result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload },
       } = responseUpload;
+      uploadReturn = isContinueUpload;
+
+      isContinueGlobal = +isContinueUpload;
 
       if (offsetendUpload === undefined) {
         log('1 we dont have an offest. could be an error. response is', responseUpload);
-        return;
+        break;
+        // throw new Error('1 we dont have an offest. could be an error. response is');
       }
 
       if (offsetstartUpload === undefined) {
         log('2 we dont have an offest. could be an error. response is', responseUpload);
-        return;
+        break;
+        // throw new Error('2 we dont have an offest. could be an error. response is');
       }
 
-      isContinueGlobal = +isContinueUpload;
       offsetStartGlobal = +offsetstartUpload;
       offsetEndGlobal = +offsetendUpload;
-      log('while end ___');
+      // log('while end ___');
     }
   }
 
-  log(`The latest upload request return code is "${isContinueGlobal}"`);
+  log(`The latest upload request return code / value is "${uploadReturn}"`);
 
   if (isContinueGlobal !== 0) {
     const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}"`;
     throw new Error(errorMsg);
   }
+
+  return { uploadReturn, filehash: fileInfo.filehash };
 };
 
 export const shareFile = async (
