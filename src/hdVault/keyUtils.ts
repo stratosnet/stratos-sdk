@@ -9,10 +9,11 @@ import {
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 import CryptoJS from 'crypto-js';
 import createKeccakHash from 'keccak';
+import { fromHexString } from 'multihashes';
 import sjcl from 'sjcl';
 import {
   bip39Password,
@@ -147,6 +148,16 @@ export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
   const address = toBech32(prefix, addressChunkOfBytes);
   // console.log('kk bench32 address', address);
   return address;
+};
+
+export const convertNativeToEvmAddress = (nativeAddress: string): string => {
+  const evmAddress = '0x' + toHex(fromBech32(nativeAddress).data);
+  return evmAddress;
+};
+
+export const convertEvmToNativeToAddress = (evmAddress: string): string => {
+  const nativeAddress = toBech32(stratosAddressPrefix, fromHex(evmAddress.replace('0x', '')));
+  return nativeAddress;
 };
 
 export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<string> => {
