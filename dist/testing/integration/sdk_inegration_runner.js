@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
+exports.downloadFileFromRemote = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const process_1 = require("process");
 const accounts = __importStar(require("../../accounts"));
@@ -76,7 +76,6 @@ async function createLocalTestFile(fileReadPath, fileWritePath, randomPrefix) {
     let readSize = 0;
     const stats = fs.statSync(fileReadPath);
     const fileSize = stats.size;
-    // log('stats', stats);
     const step = 5000000;
     let offsetStart = 0;
     let offsetEnd = step;
@@ -567,10 +566,9 @@ const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '
 exports.getAccountOzoneBalance = getAccountOzoneBalance;
 const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
     (0, helpers_1.log)('//////////////// uploadFileToRemote //////////////// ');
-    const fileReadPath = `${APP_ROOT_DIR}/src/${fileReadName}`;
+    const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
     const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
     const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
-    // const fileWritePath = `testing/integration/${fileReadName}}`;
     await main(faucetMnemonic, hdPathIndex);
     const receiverPhrase = givenReceiverMnemonic
         ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
@@ -585,18 +583,16 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
         (0, helpers_1.log)(m);
         throw new Error(m);
     }
-    const sourceHash = await FilesystemService.calculateFileHash(fileReadPath);
     const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
-    (0, helpers_1.log)('sourceHash', sourceHash);
-    (0, helpers_1.log)('targetHash', targetHash);
     const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
     const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
     if (+uploadReturn !== 0) {
         throw new Error(`Upload did not return expected return code 0, and instead we have "${uploadReturn}"`);
     }
     if (calculatedFileHash !== targetHash) {
-        throw new Error(`Upload did not return expected filehash, ${sourceHash}`);
+        throw new Error(`Upload did not return expected filehash, ${targetHash}`);
     }
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
     const userFileList = await RemoteFilesystem.getUploadedFileList(address, 0);
     const { files } = userFileList;
     if (!files.length) {
@@ -611,4 +607,36 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
     return true;
 };
 exports.uploadFileToRemote = uploadFileToRemote;
+const downloadFileFromRemote = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// downloadFileFromRemote //////////////// ');
+    const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+    const uploadedFileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const uploadedLocalFileHash = await FilesystemService.calculateFileHash(uploadedFileWritePath);
+    const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
+    const downloadResult = await RemoteFilesystem.downloadFile(keypair, filePathToSaveDownloadedTo, uploadedLocalFileHash);
+    const { filePathToSave } = downloadResult;
+    const downloadedFileHash = await FilesystemService.calculateFileHash(filePathToSave);
+    if (downloadedFileHash !== uploadedLocalFileHash) {
+        throw new Error(`downloadedFileHash "${downloadedFileHash}" must be equal uploadedLocalFileHash "${uploadedLocalFileHash}" `);
+    }
+    fs.unlinkSync(filePathToSave, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
+    fs.unlinkSync(uploadedFileWritePath, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
+    return true;
+};
+exports.downloadFileFromRemote = downloadFileFromRemote;
 //# sourceMappingURL=sdk_inegration_runner.js.map

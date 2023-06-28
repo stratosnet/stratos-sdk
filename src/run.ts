@@ -998,6 +998,28 @@ const testItFileUp = async (filename: string, hdPathIndex: number) => {
   log('done!');
 };
 
+const testAddressConverstion = async (hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const keypair = await deriveKeyPair(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+
+  if (!keypair) {
+    return;
+  }
+
+  const { address } = keypair;
+  log('address to convert ', address);
+
+  const evmAddress = keyUtils.convertNativeToEvmAddress(address);
+  log('converted evmAddress', evmAddress);
+
+  const nativeAddress = keyUtils.convertEvmToNativeToAddress(evmAddress);
+
+  log('converted nativeAddress', nativeAddress);
+};
+
 const main = async () => {
   let resolvedChainID: string;
 
@@ -1070,9 +1092,9 @@ const main = async () => {
   // const filename = 'file500_29_05';
 
   // 1a
-  await testRequestUserFileList(0, hdPathIndex);
+  // await testRequestUserFileList(0, hdPathIndex);
 
-  // const filename = 'file10_june_21_4';
+  const filename = 'file500M_june_23_2';
   // 2a
   // await testItFileUp(filename, hdPathIndex);
 
@@ -1092,7 +1114,6 @@ const main = async () => {
   // await testRequestUserStopFileShare(shareid, hdPathIndex);
 
   // 7a
-
   // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
   // filesize: 250000000,
   // filename: 'file250_06_06',
@@ -1113,19 +1134,21 @@ const main = async () => {
   // await mainSdsPrepay(hdPathIndex);
   // await getOzoneBalance(hdPathIndex);
 
+  await testAddressConverstion(hdPathIndex);
+
   // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
   // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   // const receiverMnemonic = zeroUserMnemonic;
   // const hdPathIndexReceiver = 10;
   // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
 
-  const filename = 'file10_test';
+  // const filename = 'file10_test';
   // const filename = 'file1000_test';
   // testReadAndWriteLocal(filename);
   // testReadAndWriteLocalMultipleIo(filename);
 
-  const randomPrefix = Date.now() + '';
-  await integration.uploadFileToRemote(filename, randomPrefix);
+  // const randomPrefix = Date.now() + '';
+  // await integration.uploadFileToRemote(filename, randomPrefix);
 };
 
 main();

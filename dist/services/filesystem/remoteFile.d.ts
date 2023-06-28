@@ -8,7 +8,9 @@ interface UserFileListResponse {
     originalResponse: RequestUserFilesResponse;
 }
 export declare const getUploadedFileList: (address: string, page?: number) => Promise<UserFileListResponse>;
-export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string) => Promise<void>;
+export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string) => Promise<{
+    filePathToSave: string;
+}>;
 export declare const updloadFile: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<{
     uploadReturn: string;
     filehash: string;

@@ -94,8 +94,14 @@ describe(`Stratos SDK integration (integration test)`, () => {
         describe('Remote File System', () => {
             const randomPrefix = Date.now() + '';
             const fileReadName = `file10_test`;
-            it('Uploads a local file to remote', done => {
+            it('Uploads a local file to remote and verifies its existence on the remote side', done => {
                 void Integration.uploadFileToRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+            it('Downloads the remote file to local file and compares its hash', done => {
+                void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);
                     done();
                 });
