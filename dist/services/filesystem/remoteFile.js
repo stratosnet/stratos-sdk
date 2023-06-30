@@ -140,7 +140,7 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
     const { sequence } = detailedBalance;
     const sdmAddress = address;
     const filehandle = `sdm://${sdmAddress}/${filehash}`;
-    (0, helpers_1.log)('filehandle', filehandle);
+    // log('filehandle', filehandle);
     const messageToSign = `${filehash}${address}${sequence}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = [
@@ -155,7 +155,7 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
     const { response: responseRequestDl } = callResultRequestDl;
     if (!responseRequestDl) {
         (0, helpers_1.dirLog)('we dont have response for dl request. it might be an error', callResultRequestDl);
-        return;
+        throw new Error('we dont have response for dl request. it might be an error');
     }
     const { result: resultWithOffesets } = responseRequestDl;
     const { return: requestDownloadFileReturn, reqid: reqidDownloadFile, offsetstart: offsetstartInit, offsetend: offsetendInit, } = resultWithOffesets;
@@ -171,11 +171,11 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
     }
     if (offsetendInit === undefined) {
         (0, helpers_1.dirLog)('a we dont have an offest. could be an error. response is', responseRequestDl);
-        return;
+        throw new Error('a we dont have an offest. could be an error. response is');
     }
     if (offsetstartInit === undefined) {
         (0, helpers_1.dirLog)('b we dont have an offest. could be an error. response is', responseRequestDl);
-        return;
+        throw new Error('b we dont have an offest. could be an error. response is');
     }
     const decodedFile = await processUsedFileDownload(responseRequestDl, filehash);
     if (!decodedFile) {
@@ -183,6 +183,7 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
     }
     (0, helpers_1.log)(`downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
     FilesystemService.writeFile(filePathToSave, decodedFile);
+    return { filePathToSave };
 };
 exports.downloadFile = downloadFile;
 const updloadFile = async (keypair, fileReadPath) => {

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
+exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const crypto_js_1 = __importDefault(require("crypto-js"));
@@ -134,6 +134,16 @@ const getAddressFromPubKeyWithKeccak = (pubkey) => {
     return address;
 };
 exports.getAddressFromPubKeyWithKeccak = getAddressFromPubKeyWithKeccak;
+const convertNativeToEvmAddress = (nativeAddress) => {
+    const evmAddress = '0x' + (0, encoding_1.toHex)((0, encoding_1.fromBech32)(nativeAddress).data);
+    return evmAddress;
+};
+exports.convertNativeToEvmAddress = convertNativeToEvmAddress;
+const convertEvmToNativeToAddress = (evmAddress) => {
+    const nativeAddress = (0, encoding_1.toBech32)(hdVault_1.stratosAddressPrefix, (0, encoding_1.fromHex)(evmAddress.replace('0x', '')));
+    return nativeAddress;
+};
+exports.convertEvmToNativeToAddress = convertEvmToNativeToAddress;
 const getEncodedPublicKey = async (encodedAminoPub) => {
     const encodedPubKey = (0, encoding_1.toBech32)(hdVault_1.stratosPubkeyPrefix, encodedAminoPub);
     return encodedPubKey;

@@ -44,7 +44,6 @@ const FilesystemService = __importStar(require("./services/filesystem"));
 const RemoteFilesystem = __importStar(require("./services/filesystem/remoteFile"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
-const integration = __importStar(require("./testing/integration/sdk_inegration_runner"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -735,6 +734,20 @@ const testItFileUp = async (filename, hdPathIndex) => {
     await RemoteFilesystem.updloadFile(keypair, fileReadPath);
     (0, helpers_1.log)('done!');
 };
+const testAddressConverstion = async (hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const keypair = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+    if (!keypair) {
+        return;
+    }
+    const { address } = keypair;
+    (0, helpers_1.log)('address to convert ', address);
+    const evmAddress = keyUtils.convertNativeToEvmAddress(address);
+    (0, helpers_1.log)('converted evmAddress', evmAddress);
+    const nativeAddress = keyUtils.convertEvmToNativeToAddress(evmAddress);
+    (0, helpers_1.log)('converted nativeAddress', nativeAddress);
+};
 const main = async () => {
     let resolvedChainID;
     // const sdkEnv = sdkEnvTest;
@@ -787,8 +800,8 @@ const main = async () => {
     // const filesize = 500000000;
     // const filename = 'file500_29_05';
     // 1a
-    await testRequestUserFileList(0, hdPathIndex);
-    // const filename = 'file10_june_21_4';
+    // await testRequestUserFileList(0, hdPathIndex);
+    const filename = 'file500M_june_23_2';
     // 2a
     // await testItFileUp(filename, hdPathIndex);
     // 3a
@@ -819,17 +832,18 @@ const main = async () => {
     // await simulateSend(hdPathIndex, receiverMnemonic);
     // await mainSdsPrepay(hdPathIndex);
     // await getOzoneBalance(hdPathIndex);
+    await testAddressConverstion(hdPathIndex);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
     // const receiverMnemonic = zeroUserMnemonic;
     // const hdPathIndexReceiver = 10;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
-    const filename = 'file10_test';
+    // const filename = 'file10_test';
     // const filename = 'file1000_test';
     // testReadAndWriteLocal(filename);
     // testReadAndWriteLocalMultipleIo(filename);
-    const randomPrefix = Date.now() + '';
-    await integration.uploadFileToRemote(filename, randomPrefix);
+    // const randomPrefix = Date.now() + '';
+    // await integration.uploadFileToRemote(filename, randomPrefix);
 };
 main();
 //# sourceMappingURL=run.js.map
