@@ -102,7 +102,7 @@
     "@cosmjs/encoding": "0.28.9",
     "@cosmjs/proto-signing": "0.28.9",
     "@cosmjs/stargate": "0.28.9",
-    "@stratos-network/stratos-cosmosjs-types": "https://github.com/stratosnet/stratos-cosmosjs-types.git#develop",
+    "@stratos-network/stratos-cosmosjs-types": "https://github.com/stratosnet/stratos-cosmosjs-types.git#main",
     "@types/bn.js": "5.1.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
