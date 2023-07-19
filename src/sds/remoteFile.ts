@@ -679,8 +679,8 @@ export const downloadSharedFile = async (
     throw new Error('required fields "reqid" or "filehash" or "sequencenumber" are missing in the response');
   }
 
-  const timestamp = getTimestampInSeconds();
-  const messageToSign = `${filehash}${address}${sequencenumber}${timestamp}`;
+  // const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${sequencenumber}${timestampA}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 
@@ -692,7 +692,7 @@ export const downloadSharedFile = async (
       signature,
     },
     reqid,
-    req_time: timestamp,
+    req_time: timestampA,
   };
 
   const callResultRequestDownloadShared = await Network.sendUserRequestDownloadShared([

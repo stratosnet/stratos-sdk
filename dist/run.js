@@ -39,9 +39,9 @@ const keyManager_1 = require("./hdVault/keyManager");
 const keyUtils = __importStar(require("./hdVault/keyUtils"));
 const wallet_1 = require("./hdVault/wallet");
 const Sdk_1 = __importDefault(require("./Sdk"));
+const RemoteFilesystem = __importStar(require("./sds/remoteFile"));
 const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
-const RemoteFilesystem = __importStar(require("./sds/remoteFile"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
 const transactions = __importStar(require("./transactions"));
@@ -461,8 +461,8 @@ const formatBalanceFromWei = () => {
     const balanceTwo = accounts.formatBalanceFromWei(amount, 5, true);
     console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
-const runFaucet = async (hdPathIndex) => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+const runFaucet = async (hdPathIndex, givenMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
@@ -764,8 +764,8 @@ const testAddressConverstion = async (hdPathIndex) => {
 };
 const main = async () => {
     let resolvedChainID;
-    // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
@@ -784,7 +784,10 @@ const main = async () => {
         // devnet
         // ppNodeUrl: 'http://34.145.36.237',
         // ppNodePort: '8135',
-        ppNodeUrl: 'http://35.233.85.255', ppNodePort: '8142' }));
+        // ppNodeUrl: 'http://35.233.85.255',
+        // ppNodePort: '8142',
+        // mesos
+        ppNodeUrl: 'http://34.78.29.120', ppNodePort: '8142' }));
     console.log('sdkEnv', Sdk_1.default.environment);
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
@@ -792,8 +795,8 @@ const main = async () => {
     // await evmSend();
     const hdPathIndex = 0;
     const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
-    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
     // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
@@ -818,10 +821,11 @@ const main = async () => {
     // const sharelink = 'aLmkPI_83093b53a493ac74';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
-    // await runFaucet(hdPathIndex);
+    // await runFaucet(hdPathIndex, zeroUserMnemonic);
+    // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
