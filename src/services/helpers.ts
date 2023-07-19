@@ -25,3 +25,11 @@ export async function wait(fn: any, ms: number) {
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function getTimestampInSeconds() {
+  return Math.floor(Date.now() / 1000);
+}
+
+export function getCurrentTimestamp() {
+  return Date.now();
+}

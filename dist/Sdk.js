@@ -9,6 +9,7 @@ const SdkDefaultEnvironment = {
     // ppNodePort: '8153',
     ppNodeUrl: '',
     ppNodePort: '',
+    faucetUrl: '',
 };
 class Sdk {
     static init(sdkEnv) {

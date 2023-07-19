@@ -11,10 +11,10 @@ import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/ke
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
+import * as RemoteFilesystem from './sds/remoteFile';
 import { getCosmos, resetCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
-import * as RemoteFilesystem from './services/filesystem/remoteFile';
-import { log, delay, dirLog } from './services/helpers';
+import { delay, dirLog, getTimestampInSeconds, log } from './services/helpers';
 import * as Network from './services/network';
 import * as integration from './testing/integration/sdk_inegration_runner';
 import * as transactions from './transactions';
@@ -33,9 +33,10 @@ const sdkEnvDev = {
   rpcUrl: 'https://rpc-dev.thestratos.org',
   chainId: 'dev-chain-46',
   explorerUrl: 'https://explorer-dev.thestratos.org',
+  faucetUrl: 'https://faucet-dev.thestratos.org/credit',
 };
 
-const sdkEnvTest = {
+const sdkEnvTestOld = {
   key: 'testnet',
   name: 'Tropos-4',
   restUrl: 'https://rest-tropos.thestratos.org',
@@ -45,6 +46,15 @@ const sdkEnvTest = {
   faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 
+const sdkEnvTest = {
+  key: 'testnet',
+  name: 'Mesos',
+  restUrl: 'https://rest-mesos.thestratos.org',
+  rpcUrl: 'https://rpc-mesos.thestratos.org',
+  chainId: 'stratos-testnet-2',
+  explorerUrl: 'https://big-dipper-mesos.thestratos.org',
+  faucetUrl: 'https://faucet-mesos.thestratos.org/credit',
+};
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -504,8 +514,8 @@ const getRewardBalance = async () => {
   console.log('our reward balanace', response?.result.rewards); // an array ?
 };
 
-const getOzoneBalance = async (hdPathIndex: number) => {
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+const getOzoneBalance = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
@@ -520,8 +530,8 @@ const getOzoneBalance = async (hdPathIndex: number) => {
   console.log('other balanace card metrics ', b);
 };
 
-const getBalanceCardMetrics = async (hdPathIndex: number) => {
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
@@ -559,7 +569,10 @@ const runFaucet = async (hdPathIndex: number) => {
   const walletAddress = keyPairZero.address;
   console.log('walletAddress', walletAddress);
 
-  const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+  // const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+  const faucetUrl = Sdk.environment.faucetUrl;
+  log(`will be useing faucetUrl - "${faucetUrl}"`);
+
   const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosTopDenom);
   console.log('faucet result', result);
 };
@@ -725,9 +738,9 @@ const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) 
     return;
   }
 
-  const { address } = keyPairZeroA;
+  // const { address } = keyPairZeroA;
 
-  const userFileList = await RemoteFilesystem.getSharedFileList(address, page);
+  const userFileList = await RemoteFilesystem.getSharedFileList(keyPairZeroA, page);
 
   console.log('retrieved user shared file list', userFileList);
 };
@@ -749,7 +762,7 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink:
     log('Error. We dont have a keypair');
     return;
   }
-  const { address } = keyPairZeroA;
+  // const { address } = keyPairZeroA;
 
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
 
@@ -777,15 +790,16 @@ const testRequestUserFileList = async (page: number, hdPathIndex: number) => {
     return;
   }
 
-  const { address } = keyPairZeroA;
+  // const { address , publicKey } = keyPairZeroA;
 
   // const page = 4;
-  const userFileList = await RemoteFilesystem.getUploadedFileList(address, page);
+  const userFileList = await RemoteFilesystem.getUploadedFileList(keyPairZeroA, page);
 
   console.log('retrieved user file list', userFileList);
 };
 
 // read local file and write a new one
+// 33 sec for 1gb, 1m 1sec for 2 gb
 const testReadAndWriteLocal = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -850,6 +864,7 @@ const testReadAndWriteLocal = async (filename: string) => {
 };
 
 // read local file and write a new one (multiple IO)
+// 51 sec for 1gb, 1m 38sec for 2gb
 const testReadAndWriteLocalMultipleIo = async (filename: string) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -1046,11 +1061,17 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
-    // ppNodeUrl: 'http://35.233.85.255',
+    // devnet
+    // ppNodeUrl: 'http://34.145.36.237',
+    // ppNodePort: '8135',
+
+    ppNodeUrl: 'http://35.233.85.255',
+    ppNodePort: '8142',
+    // mesos
+    // ppNodeUrl: 'http://34.78.29.120',
     // ppNodePort: '8142',
-    ppNodeUrl: 'http://34.145.36.237',
-    ppNodePort: '8135',
   });
+  console.log('sdkEnv', Sdk.environment);
 
   // tropos
   // ppNodeUrl: 'http://35.233.251.112',
@@ -1059,82 +1080,56 @@ const main = async () => {
   // await evmSend();
 
   const hdPathIndex = 0;
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+
+  const testMnemonic =
+    'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+  const phrase = mnemonic.convertStringToArray(testMnemonic);
+
+  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
   const _cosmosClient = await getCosmos(serialized, password);
 
-  // 10M
-  // const filehash = 'v05ahm50fffve5i7oh69094ct0infbvk6rsojig0';
-  // const filename = 'file10_29_05_4';
-  // const filesize = 10000001;
-
-  // 200M
-  // const filehash = 'v05ahm50gdn2hf32tssmcea80kanv4n78scr03d0';
-  // const filesize = 200000000;
-  // const filename = 'file200_29_05';
-
-  // 1000M
-  // const filehash = 'v05ahm531j2qid25m8271loap55blqfi35vddv20';
-  // const filesize = 1000000000;
-  // const filename = 'file1000_29_05';
-
-  // 750M
-  // const filehash = 'v05ahm52ebav0nc5bb47u0kmr7iucgrf8lnqrluo';
-  // const filesize = 750000000;
-  // const filename = 'file750_29_05';
-
-  // 500M
-  // const filehash = 'v05ahm5742n3kcoanqk3ml9eqpkbgr1csh4g3jb8';
-  // const filesize = 500000000;
-  // const filename = 'file500_29_05';
-
   // 1a
   // await testRequestUserFileList(0, hdPathIndex);
 
-  const filename = 'file500M_june_23_2';
   // 2a
+  // const filename = 'file250_06_06';
   // await testItFileUp(filename, hdPathIndex);
 
   // 3a
-  // const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
-  // const filesize = 250000000;
-  // const filename = 'file250_06_06';
+  // const filename = 'file10_test_1689623710986';
+  // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
   // await testFileDl(hdPathIndex, filename, filehash);
 
   // 4a
   // await testRequestUserSharedFileList(0, hdPathIndex);
 
   // 5a
+  // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
   // await testRequestUserFileShare(filehash, hdPathIndex);
 
   // 6a
+  // const shareid= '433e2e936bc05679';
   // await testRequestUserStopFileShare(shareid, hdPathIndex);
 
   // 7a
-  // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
-  // filesize: 250000000,
-  // filename: 'file250_06_06',
-  // linktime: 1686242085,
-  // linktimeexp: 1701794085,
-  // shareid: 'd898cb2c8ca8635e',
-  // sharelink: 'gObhyW_d898cb2c8ca8635e'
-  // const sharelink = 'gObhyW_d898cb2c8ca8635e';
+  // const sharelink = 'aLmkPI_83093b53a493ac74';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet
   // await runFaucet(hdPathIndex);
 
-  // await simulateSend(hdPathIndex, receiverMnemonic);
-  // await mainSdsPrepay(hdPathIndex);
-  // await getOzoneBalance(hdPathIndex);
-
-  await testAddressConverstion(hdPathIndex);
+  // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await mainSdsPrepay(hdPathIndex, testMnemonic);
+  // await getOzoneBalance(hdPathIndex, testMnemonic);
 
   // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
   // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
@@ -1142,13 +1137,13 @@ const main = async () => {
   // const hdPathIndexReceiver = 10;
   // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
 
-  // const filename = 'file10_test';
-  // const filename = 'file1000_test';
+  // 33 sec, 1m 1sec
   // testReadAndWriteLocal(filename);
+  // 51 sec, 1m 38sec
   // testReadAndWriteLocalMultipleIo(filename);
 
   // const randomPrefix = Date.now() + '';
-  // await integration.uploadFileToRemote(filename, randomPrefix);
+  // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
 };
 
 main();

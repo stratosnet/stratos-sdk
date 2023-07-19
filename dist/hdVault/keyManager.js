@@ -24,7 +24,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
-const helpers_1 = require("../services/helpers");
 const cosmosWallet = __importStar(require("./cosmosWallet"));
 const keyUtils = __importStar(require("./keyUtils"));
 const mnemonic_1 = require("./mnemonic");
@@ -64,7 +63,7 @@ const createMasterKeySeed = async (phrase, password, hdPathIndex = 0) => {
     // log('Creating master key seed info from the seed');
     const legacyMasterKeyInfo = await (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password);
     const masterKeyInfo = Object.assign(Object.assign({}, legacyMasterKeyInfo), { encryptedWalletInfo });
-    (0, helpers_1.log)('Master key info (the wallet) is created and ready');
+    // log('Master key info (the wallet) is created and ready');
     return masterKeyInfo;
 };
 exports.createMasterKeySeed = createMasterKeySeed;

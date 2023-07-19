@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import * as accounts from '../../accounts';
-import { wallet } from '../../hdVault';
-import * as keyUtils from '../../hdVault/keyUtils';
-import * as FilesystemService from '../../services/filesystem';
-import { log, dirLog } from '../../services/helpers';
-import * as Network from '../../services/network';
-import * as NetworkTypes from '../../services/network/types';
-import { networkTypes, sendUserRequestList } from '../network';
-import { FileInfoItem } from '../network/types';
+import * as accounts from '../accounts';
+import { wallet } from '../hdVault';
+import * as keyUtils from '../hdVault/keyUtils';
+import * as FilesystemService from '../services/filesystem';
+import { log, dirLog, getTimestampInSeconds } from '../services/helpers';
+import * as Network from '../services/network';
+import { networkTypes, sendUserRequestList } from '../services/network';
+import * as NetworkTypes from '../services/network/types';
+import { FileInfoItem } from '../services/network/types';
 
 type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
 
@@ -46,7 +46,7 @@ const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDow
   fileInfoChunks.push(fileChunk);
 
   while (isContinueGlobal === 2) {
-    log('will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
+    // log('will call download confirmation for ', offsetStartGlobal, offsetEndGlobal);
 
     const extraParamsForUserDownload = [
       {
@@ -141,11 +141,26 @@ const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDow
   return decodedFile;
 };
 
-export const getUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
-  const extraParams = [
+export const getUploadedFileList = async (
+  keypair: wallet.KeyPairInfo,
+  page = 0,
+): Promise<UserFileListResponse> => {
+  const { address, publicKey } = keypair;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${address}${timestamp}`;
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const extraParams: NetworkTypes.FileUserRequestListParams[] = [
     {
       walletaddr: address,
       page,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
     },
   ];
 
@@ -185,18 +200,20 @@ export const downloadFile = async (
   const sdmAddress = address;
   const filehandle = `sdm://${sdmAddress}/${filehash}`;
 
-  // log('filehandle', filehandle);
-
-  const messageToSign = `${filehash}${address}${sequence}`;
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 
-  const extraParams = [
+  const extraParams: NetworkTypes.FileUserRequestDownloadParams[] = [
     {
       filehandle,
-      walletaddr: address,
-      walletpubkey: publicKey,
-      signature,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
     },
   ];
 
@@ -283,21 +300,26 @@ export const updloadFile = async (
 
   const { sequence } = detailedBalance;
 
-  const messageToSign = `${fileInfo.filehash}${address}${sequence}`;
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${fileInfo.filehash}${address}${sequence}${timestamp}`;
 
   const stats = fs.statSync(fileReadPath);
   const fileSize = stats.size;
   log('stats', stats);
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
-  const extraParams = [
+
+  const extraParams: NetworkTypes.FileUserRequestUploadParams[] = [
     {
       filename: imageFileName,
       filesize: fileInfo.size,
       filehash: fileInfo.filehash,
-      walletaddr: address,
-      walletpubkey: publicKey,
-      signature,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
     },
   ];
 
@@ -423,24 +445,38 @@ export const updloadFile = async (
   log(`The latest upload request return code / value is "${uploadReturn}"`);
 
   if (isContinueGlobal !== 0) {
+    log('oh no!!! isContinueGlobal', isContinueGlobal);
+
     const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}"`;
     throw new Error(errorMsg);
   }
 
-  return { uploadReturn, filehash: fileInfo.filehash };
+  const uploadResult = { uploadReturn, filehash: fileInfo.filehash };
+  // console.log('uploadResult to to return~', uploadResult);
+
+  return uploadResult;
 };
 
 export const shareFile = async (
   keypair: wallet.KeyPairInfo,
   filehash: string,
 ): Promise<{ filehash: string; sharelink: string; shareid: string }> => {
-  const { address } = keypair;
+  const { address, publicKey } = keypair;
 
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
   const extraParams: NetworkTypes.FileUserRequestShareParams = {
     filehash,
-    walletaddr: address,
     duration: 0,
     bool: false,
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature,
+    },
+    req_time: timestamp,
   };
 
   const callResultRequestShare = await Network.sendUserRequestShare([extraParams]);
@@ -482,11 +518,20 @@ export const shareFile = async (
 };
 
 export const stopFileSharing = async (keypair: wallet.KeyPairInfo, shareid: string): Promise<boolean> => {
-  const { address } = keypair;
+  const { address, publicKey } = keypair;
 
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${shareid}${address}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
   const extraParams: NetworkTypes.FileUserRequestStopShareParams = {
-    walletaddr: address,
     shareid,
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature,
+    },
+    req_time: timestamp,
   };
 
   const callResultRequestStopShare = await Network.sendUserRequestStopShare([extraParams]);
@@ -517,12 +562,24 @@ export const stopFileSharing = async (keypair: wallet.KeyPairInfo, shareid: stri
 };
 
 export const getSharedFileList = async (
-  address: string,
+  keypair: wallet.KeyPairInfo,
   page = 0,
 ): Promise<{ files: Network.networkTypes.SharedFileInfoItem[]; totalnumber: number }> => {
+  const { address, publicKey } = keypair;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${address}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
   const extraParams: NetworkTypes.FileUserRequestListShareParams = {
-    walletaddr: address,
     page,
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature,
+    },
+    req_time: timestamp,
   };
 
   const callResultRequestListShare = await Network.sendUserRequestListShare([extraParams]);
@@ -570,11 +627,30 @@ export const downloadSharedFile = async (
   log(filePathToSave);
   const { address, publicKey } = keypair;
 
+  const ozoneBalance = await accounts.getOtherBalanceCardMetrics(address);
+
+  const { detailedBalance } = ozoneBalance;
+
+  if (!detailedBalance) {
+    throw new Error('no sequence is presented in the ozone balance response');
+  }
+
+  const timestampA = getTimestampInSeconds();
+
+  const messageToSignA = `${sharelink}${address}${timestampA}`;
+
+  const signatureA = await keyUtils.signWithPrivateKey(messageToSignA, keypair.privateKey);
+
   const extraParams: NetworkTypes.FileUserRequestGetSharedParams = {
-    walletaddr: address,
-    walletpubkey: publicKey,
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature: signatureA,
+    },
+    req_time: timestampA,
     sharelink,
   };
+
   const callResultRequestGetShared = await Network.sendUserRequestGetShared([extraParams]);
 
   const { response: responseRequestGetShared } = callResultRequestGetShared;
@@ -603,16 +679,20 @@ export const downloadSharedFile = async (
     throw new Error('required fields "reqid" or "filehash" or "sequencenumber" are missing in the response');
   }
 
-  const messageToSign = `${filehash}${address}${sequencenumber}`;
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${sequencenumber}${timestamp}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 
   const extraParamsForDownload: NetworkTypes.FileUserRequestDownloadSharedParams = {
     filehash,
-    walletaddr: address,
-    walletpubkey: publicKey,
-    signature,
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature,
+    },
     reqid,
+    req_time: timestamp,
   };
 
   const callResultRequestDownloadShared = await Network.sendUserRequestDownloadShared([

@@ -116,7 +116,8 @@ const sendRpcCall = async (givenPayload, config) => {
     (0, helpers_1.log)('from network ~ rpc call url', url);
     // log('from network - calling rpc', payload);
     const dataResult = await (0, exports.apiPost)(url, payload, Object.assign({}, config));
-    // log('from network - rpc post result', payload);
+    // log('from network - rpc post result', dataResult);
+    // log('from network - rpc post result error', dataResult.response?.error);
     return dataResult;
 };
 exports.sendRpcCall = sendRpcCall;

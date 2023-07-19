@@ -5,6 +5,7 @@ export interface SdkEnvironmentConfig {
   explorerUrl: string;
   ppNodeUrl?: string;
   ppNodePort?: string;
+  faucetUrl?: string;
 }
 
 const SdkDefaultEnvironment = {
@@ -16,6 +17,7 @@ const SdkDefaultEnvironment = {
   // ppNodePort: '8153',
   ppNodeUrl: '',
   ppNodePort: '',
+  faucetUrl: '',
 };
 
 export default class Sdk {

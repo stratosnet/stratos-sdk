@@ -1,7 +1,7 @@
-import { wallet } from '../../hdVault';
-import * as Network from '../../services/network';
-import { networkTypes } from '../network';
-import { FileInfoItem } from '../network/types';
+import { wallet } from '../hdVault';
+import * as Network from '../services/network';
+import { networkTypes } from '../services/network';
+import { FileInfoItem } from '../services/network/types';
 type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
 interface UserFileListResponse {
     files: FileInfoItem[];

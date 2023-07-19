@@ -41,7 +41,7 @@ const wallet_1 = require("./hdVault/wallet");
 const Sdk_1 = __importDefault(require("./Sdk"));
 const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
-const RemoteFilesystem = __importStar(require("./services/filesystem/remoteFile"));
+const RemoteFilesystem = __importStar(require("./sds/remoteFile"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
 const transactions = __importStar(require("./transactions"));
@@ -56,8 +56,9 @@ const sdkEnvDev = {
     rpcUrl: 'https://rpc-dev.thestratos.org',
     chainId: 'dev-chain-46',
     explorerUrl: 'https://explorer-dev.thestratos.org',
+    faucetUrl: 'https://faucet-dev.thestratos.org/credit',
 };
-const sdkEnvTest = {
+const sdkEnvTestOld = {
     key: 'testnet',
     name: 'Tropos-4',
     restUrl: 'https://rest-tropos.thestratos.org',
@@ -65,6 +66,15 @@ const sdkEnvTest = {
     chainId: 'stratos-testnet-2',
     explorerUrl: 'https://big-dipper-tropos.thestratos.org',
     faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
+};
+const sdkEnvTest = {
+    key: 'testnet',
+    name: 'Mesos',
+    restUrl: 'https://rest-mesos.thestratos.org',
+    rpcUrl: 'https://rpc-mesos.thestratos.org',
+    chainId: 'stratos-testnet-2',
+    explorerUrl: 'https://big-dipper-mesos.thestratos.org',
+    faucetUrl: 'https://faucet-mesos.thestratos.org/credit',
 };
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
@@ -420,8 +430,8 @@ const getRewardBalance = async () => {
     const { response } = bResult;
     console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.result.rewards); // an array ?
 };
-const getOzoneBalance = async (hdPathIndex) => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
@@ -431,8 +441,8 @@ const getOzoneBalance = async (hdPathIndex) => {
     const b = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
     console.log('other balanace card metrics ', b);
 };
-const getBalanceCardMetrics = async (hdPathIndex) => {
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
@@ -461,7 +471,9 @@ const runFaucet = async (hdPathIndex) => {
     }
     const walletAddress = keyPairZero.address;
     console.log('walletAddress', walletAddress);
-    const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+    // const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
+    const faucetUrl = Sdk_1.default.environment.faucetUrl;
+    (0, helpers_1.log)(`will be useing faucetUrl - "${faucetUrl}"`);
     const result = await accounts.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
     console.log('faucet result', result);
 };
@@ -566,8 +578,8 @@ const testRequestUserSharedFileList = async (page, hdPathIndex) => {
         (0, helpers_1.log)('Error. We dont have a keypair');
         return;
     }
-    const { address } = keyPairZeroA;
-    const userFileList = await RemoteFilesystem.getSharedFileList(address, page);
+    // const { address } = keyPairZeroA;
+    const userFileList = await RemoteFilesystem.getSharedFileList(keyPairZeroA, page);
     console.log('retrieved user shared file list', userFileList);
 };
 const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink) => {
@@ -580,7 +592,7 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink) => {
         (0, helpers_1.log)('Error. We dont have a keypair');
         return;
     }
-    const { address } = keyPairZeroA;
+    // const { address } = keyPairZeroA;
     const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
     const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(keyPairZeroA, filePathToSave, sharelink);
     console.log('retrieved user shared file list', userDownloadSharedFileResult);
@@ -593,12 +605,13 @@ const testRequestUserFileList = async (page, hdPathIndex) => {
         (0, helpers_1.log)('Error. We dont have a keypair');
         return;
     }
-    const { address } = keyPairZeroA;
+    // const { address , publicKey } = keyPairZeroA;
     // const page = 4;
-    const userFileList = await RemoteFilesystem.getUploadedFileList(address, page);
+    const userFileList = await RemoteFilesystem.getUploadedFileList(keyPairZeroA, page);
     console.log('retrieved user file list', userFileList);
 };
 // read local file and write a new one
+// 33 sec for 1gb, 1m 1sec for 2 gb
 const testReadAndWriteLocal = async (filename) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
@@ -640,6 +653,7 @@ const testReadAndWriteLocal = async (filename) => {
     // log('writeFileToPath of the encodedFile from decoded file is done');
 };
 // read local file and write a new one (multiple IO)
+// 51 sec for 1gb, 1m 38sec for 2gb
 const testReadAndWriteLocalMultipleIo = async (filename) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
@@ -767,83 +781,62 @@ const main = async () => {
     }
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
-        // ppNodeUrl: 'http://35.233.85.255',
-        // ppNodePort: '8142',
-        ppNodeUrl: 'http://34.145.36.237', ppNodePort: '8135' }));
+        // devnet
+        // ppNodeUrl: 'http://34.145.36.237',
+        // ppNodePort: '8135',
+        ppNodeUrl: 'http://35.233.85.255', ppNodePort: '8142' }));
+    console.log('sdkEnv', Sdk_1.default.environment);
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
     //     ppNodePort: '8159',
     // await evmSend();
     const hdPathIndex = 0;
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
+    // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
-    // 10M
-    // const filehash = 'v05ahm50fffve5i7oh69094ct0infbvk6rsojig0';
-    // const filename = 'file10_29_05_4';
-    // const filesize = 10000001;
-    // 200M
-    // const filehash = 'v05ahm50gdn2hf32tssmcea80kanv4n78scr03d0';
-    // const filesize = 200000000;
-    // const filename = 'file200_29_05';
-    // 1000M
-    // const filehash = 'v05ahm531j2qid25m8271loap55blqfi35vddv20';
-    // const filesize = 1000000000;
-    // const filename = 'file1000_29_05';
-    // 750M
-    // const filehash = 'v05ahm52ebav0nc5bb47u0kmr7iucgrf8lnqrluo';
-    // const filesize = 750000000;
-    // const filename = 'file750_29_05';
-    // 500M
-    // const filehash = 'v05ahm5742n3kcoanqk3ml9eqpkbgr1csh4g3jb8';
-    // const filesize = 500000000;
-    // const filename = 'file500_29_05';
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
-    const filename = 'file500M_june_23_2';
     // 2a
+    // const filename = 'file250_06_06';
     // await testItFileUp(filename, hdPathIndex);
     // 3a
-    // const filehash = 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo';
-    // const filesize = 250000000;
-    // const filename = 'file250_06_06';
+    // const filename = 'file10_test_1689623710986';
+    // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
     // await testFileDl(hdPathIndex, filename, filehash);
     // 4a
     // await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a
+    // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
     // await testRequestUserFileShare(filehash, hdPathIndex);
     // 6a
+    // const shareid= '433e2e936bc05679';
     // await testRequestUserStopFileShare(shareid, hdPathIndex);
     // 7a
-    // filehash: 'v05ahm547ksp8qnsa3neguk67b39j3fu3m396juo',
-    // filesize: 250000000,
-    // filename: 'file250_06_06',
-    // linktime: 1686242085,
-    // linktimeexp: 1701794085,
-    // shareid: 'd898cb2c8ca8635e',
-    // sharelink: 'gObhyW_d898cb2c8ca8635e'
-    // const sharelink = 'gObhyW_d898cb2c8ca8635e';
+    // const sharelink = 'aLmkPI_83093b53a493ac74';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex);
-    // await simulateSend(hdPathIndex, receiverMnemonic);
-    // await mainSdsPrepay(hdPathIndex);
-    // await getOzoneBalance(hdPathIndex);
-    await testAddressConverstion(hdPathIndex);
+    // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
+    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    // await mainSdsPrepay(hdPathIndex, testMnemonic);
+    // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
     // const receiverMnemonic = zeroUserMnemonic;
     // const hdPathIndexReceiver = 10;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
-    // const filename = 'file10_test';
-    // const filename = 'file1000_test';
+    // 33 sec, 1m 1sec
     // testReadAndWriteLocal(filename);
+    // 51 sec, 1m 38sec
     // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
-    // await integration.uploadFileToRemote(filename, randomPrefix);
+    // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
 };
 main();
 //# sourceMappingURL=run.js.map

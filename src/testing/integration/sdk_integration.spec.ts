@@ -1,11 +1,12 @@
 /**
  * @jest-environment node
  */
-import path from 'path';
+// import path from 'path';
 import { mnemonic } from '../../hdVault';
+import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 import * as Integration from './sdk_inegration_runner';
 
-const extendedExecutionTimeout = 60000;
+const extendedExecutionTimeout = OZONE_BALANCE_CHECK_WAIT_TIME * 2;
 
 describe(`Stratos SDK integration (integration test)`, () => {
   describe('User Account', () => {
@@ -123,7 +124,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
             },
           );
         },
-        extendedExecutionTimeout,
+        extendedExecutionTimeout * 3,
       );
 
       it(

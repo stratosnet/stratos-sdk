@@ -424,6 +424,8 @@ export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
 export interface FileUserRequestListParams {
   walletaddr: string;
   page: number;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileInfoItem {
@@ -452,14 +454,19 @@ export interface FileUserRequestUploadParams {
   filename: string;
   filesize: number;
   filehash: string;
-  walletaddr: string;
-  walletpubkey: string;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileUserRequestDownloadParams {
   filehandle: string;
-  walletaddr: string;
-  walletpubkey: string;
+  signature: UserFileSignature;
+  req_time: number;
+}
+
+export interface UserFileSignature {
+  address: string;
+  pubkey: string;
   signature: string;
 }
 
@@ -480,7 +487,7 @@ export interface FileUserRequestDownloadParams {
     DOWNLOAD_OK     string = "2"
     DL_OK_ASK_INFO  string = "3"
     SHARED_DL_START string = "4"
-    SUCCESS         string = "0" 
+    SUCCESS         string = "0"
  * */
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
   result: {
@@ -719,9 +726,10 @@ export interface RestTxErrorResponse {
 
 export interface FileUserRequestShareParams {
   filehash: string;
-  walletaddr: string;
   duration: number;
   bool: boolean;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileUserRequestShareResponse extends MainRpcResponse {
@@ -733,8 +741,9 @@ export interface FileUserRequestShareResponse extends MainRpcResponse {
 }
 
 export interface FileUserRequestListShareParams {
-  walletaddr: string;
   page: number;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileUserRequestListShareResponse extends MainRpcResponse {
@@ -746,8 +755,9 @@ export interface FileUserRequestListShareResponse extends MainRpcResponse {
 }
 
 export interface FileUserRequestStopShareParams {
-  walletaddr: string;
   shareid: string;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileUserRequestStopShareResponse extends MainRpcResponse {
@@ -757,9 +767,9 @@ export interface FileUserRequestStopShareResponse extends MainRpcResponse {
 }
 
 export interface FileUserRequestGetSharedParams {
-  walletaddr: string;
-  walletpubkey: string;
   sharelink: string;
+  signature: UserFileSignature;
+  req_time: number;
 }
 
 export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
@@ -773,8 +783,7 @@ export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
 
 export interface FileUserRequestDownloadSharedParams {
   filehash: string;
-  walletaddr: string;
-  walletpubkey: string;
-  signature: string;
   reqid: string;
+  signature: UserFileSignature;
+  req_time: number;
 }

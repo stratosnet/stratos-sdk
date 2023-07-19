@@ -29,12 +29,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadSharedFile = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFile = exports.downloadFile = exports.getUploadedFileList = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const accounts = __importStar(require("../../accounts"));
-const keyUtils = __importStar(require("../../hdVault/keyUtils"));
-const FilesystemService = __importStar(require("../../services/filesystem"));
-const helpers_1 = require("../../services/helpers");
-const Network = __importStar(require("../../services/network"));
-const network_1 = require("../network");
+const accounts = __importStar(require("../accounts"));
+const keyUtils = __importStar(require("../hdVault/keyUtils"));
+const FilesystemService = __importStar(require("../services/filesystem"));
+const helpers_1 = require("../services/helpers");
+const Network = __importStar(require("../services/network"));
+const network_1 = require("../services/network");
 const processUsedFileDownload = async (responseRequestDownloadShared, filehash) => {
     var _a;
     const { result: resultWithOffesets } = responseRequestDownloadShared;
@@ -150,7 +150,6 @@ const downloadFile = async (keypair, filePathToSave, filehash) => {
     const { sequence } = detailedBalance;
     const sdmAddress = address;
     const filehandle = `sdm://${sdmAddress}/${filehash}`;
-    // log('filehandle', filehandle);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
@@ -315,19 +314,17 @@ const updloadFile = async (keypair, fileReadPath) => {
         throw new Error(errorMsg);
     }
     const uploadResult = { uploadReturn, filehash: fileInfo.filehash };
-    console.log('uploadResult to to return~', uploadResult);
+    // console.log('uploadResult to to return~', uploadResult);
     return uploadResult;
 };
 exports.updloadFile = updloadFile;
 const shareFile = async (keypair, filehash) => {
-    // const { address } = keypair;
     const { address, publicKey } = keypair;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = {
         filehash,
-        // walletaddr: address,
         duration: 0,
         bool: false,
         signature: {
@@ -363,13 +360,11 @@ const shareFile = async (keypair, filehash) => {
 };
 exports.shareFile = shareFile;
 const stopFileSharing = async (keypair, shareid) => {
-    // const { address } = keypair;
     const { address, publicKey } = keypair;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${shareid}${address}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = {
-        // walletaddr: address,
         shareid,
         signature: {
             address,
@@ -397,7 +392,6 @@ const stopFileSharing = async (keypair, shareid) => {
 exports.stopFileSharing = stopFileSharing;
 const getSharedFileList = async (keypair, page = 0) => {
     const { address, publicKey } = keypair;
-    // const { sequence } = detailedBalance;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${address}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
@@ -444,13 +438,10 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
     if (!detailedBalance) {
         throw new Error('no sequence is presented in the ozone balance response');
     }
-    const { sequence } = detailedBalance;
     const timestampA = (0, helpers_1.getTimestampInSeconds)();
     const messageToSignA = `${sharelink}${address}${timestampA}`;
     const signatureA = await keyUtils.signWithPrivateKey(messageToSignA, keypair.privateKey);
     const extraParams = {
-        // walletaddr: address,
-        // walletpubkey: publicKey,
         signature: {
             address,
             pubkey: publicKey,
@@ -461,7 +452,6 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
     };
     const callResultRequestGetShared = await Network.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
-    console.log('responseRequestGetShared!!! ', responseRequestGetShared);
     if (!responseRequestGetShared) {
         (0, helpers_1.dirLog)('we dont have response for dl request. it might be an error', callResultRequestGetShared);
         throw new Error('We dont have response to request get shared call');
@@ -494,7 +484,6 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
         extraParamsForDownload,
     ]);
     const { response: responseRequestDownloadShared } = callResultRequestDownloadShared;
-    console.log('aaaaa!!!', responseRequestDownloadShared);
     if (!responseRequestDownloadShared) {
         (0, helpers_1.dirLog)('we dont have response for download shared request. it might be an error', callResultRequestDownloadShared);
         throw new Error('We dont have response to request download shared call');
