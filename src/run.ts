@@ -11,9 +11,9 @@ import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/ke
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
+import * as RemoteFilesystem from './sds/remoteFile';
 import { getCosmos, resetCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
-import * as RemoteFilesystem from './services/filesystem/remoteFile';
 import { delay, dirLog, getTimestampInSeconds, log } from './services/helpers';
 import * as Network from './services/network';
 import * as integration from './testing/integration/sdk_inegration_runner';
@@ -1120,7 +1120,7 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet

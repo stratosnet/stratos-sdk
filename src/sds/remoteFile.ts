@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import * as accounts from '../../accounts';
-import { wallet } from '../../hdVault';
-import * as keyUtils from '../../hdVault/keyUtils';
-import * as FilesystemService from '../../services/filesystem';
-import { log, dirLog, getTimestampInSeconds } from '../../services/helpers';
-import * as Network from '../../services/network';
-import * as NetworkTypes from '../../services/network/types';
-import { networkTypes, sendUserRequestList } from '../network';
-import { FileInfoItem } from '../network/types';
+import * as accounts from '../accounts';
+import { wallet } from '../hdVault';
+import * as keyUtils from '../hdVault/keyUtils';
+import * as FilesystemService from '../services/filesystem';
+import { log, dirLog, getTimestampInSeconds } from '../services/helpers';
+import * as Network from '../services/network';
+import { networkTypes, sendUserRequestList } from '../services/network';
+import * as NetworkTypes from '../services/network/types';
+import { FileInfoItem } from '../services/network/types';
 
 type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
 
