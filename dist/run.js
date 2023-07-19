@@ -764,8 +764,8 @@ const testAddressConverstion = async (hdPathIndex) => {
 };
 const main = async () => {
     let resolvedChainID;
-    const sdkEnv = sdkEnvTest;
-    // const sdkEnv = sdkEnvDev;
+    // const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
@@ -782,12 +782,7 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
         // devnet
-        // ppNodeUrl: 'http://34.145.36.237',
-        // ppNodePort: '8135',
-        // ppNodeUrl: 'http://35.233.85.255',
-        // ppNodePort: '8142',
-        // mesos
-        ppNodeUrl: 'http://34.78.29.120', ppNodePort: '8142' }));
+        ppNodeUrl: 'http://34.145.36.237', ppNodePort: '8135' }));
     console.log('sdkEnv', Sdk_1.default.environment);
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
@@ -795,8 +790,8 @@ const main = async () => {
     // await evmSend();
     const hdPathIndex = 0;
     const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
-    // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    // const phrase = mnemonic.convertStringToArray(testMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
@@ -810,19 +805,19 @@ const main = async () => {
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
     // await testFileDl(hdPathIndex, filename, filehash);
     // 4a
-    // await testRequestUserSharedFileList(0, hdPathIndex);
+    await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
     // await testRequestUserFileShare(filehash, hdPathIndex);
     // 6a
-    // const shareid= '433e2e936bc05679';
+    // const shareid= '0755919d9815ea92';
     // await testRequestUserStopFileShare(shareid, hdPathIndex);
     // 7a
-    // const sharelink = 'aLmkPI_83093b53a493ac74';
+    // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);

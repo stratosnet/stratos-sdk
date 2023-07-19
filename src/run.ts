@@ -556,8 +556,8 @@ const formatBalanceFromWei = () => {
   console.log('🚀 ~ file: run.ts ~ line 466 ~ formatBalanceFromWei ~ balanceTwo', balanceTwo);
 };
 
-const runFaucet = async (hdPathIndex: number) => {
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+const runFaucet = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
@@ -566,6 +566,7 @@ const runFaucet = async (hdPathIndex: number) => {
   if (!keyPairZero) {
     return;
   }
+
   const walletAddress = keyPairZero.address;
   console.log('walletAddress', walletAddress);
 
@@ -1062,11 +1063,11 @@ const main = async () => {
     ...sdkEnv,
     chainId: resolvedChainID,
     // devnet
-    // ppNodeUrl: 'http://34.145.36.237',
-    // ppNodePort: '8135',
+    ppNodeUrl: 'http://34.145.36.237',
+    ppNodePort: '8135',
 
-    ppNodeUrl: 'http://35.233.85.255',
-    ppNodePort: '8142',
+    // ppNodeUrl: 'http://35.233.85.255',
+    // ppNodePort: '8142',
     // mesos
     // ppNodeUrl: 'http://34.78.29.120',
     // ppNodePort: '8142',
@@ -1083,9 +1084,10 @@ const main = async () => {
 
   const testMnemonic =
     'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
-  const phrase = mnemonic.convertStringToArray(testMnemonic);
 
-  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  // const phrase = mnemonic.convertStringToArray(testMnemonic);
+
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
@@ -1105,29 +1107,31 @@ const main = async () => {
   // await testFileDl(hdPathIndex, filename, filehash);
 
   // 4a
-  // await testRequestUserSharedFileList(0, hdPathIndex);
+  await testRequestUserSharedFileList(0, hdPathIndex);
 
   // 5a
   // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
   // await testRequestUserFileShare(filehash, hdPathIndex);
 
   // 6a
-  // const shareid= '433e2e936bc05679';
+  // const shareid= '0755919d9815ea92';
   // await testRequestUserStopFileShare(shareid, hdPathIndex);
 
   // 7a
-  // const sharelink = 'aLmkPI_83093b53a493ac74';
+  // const sharelink = 'VkAHq3_0755919d9815ea92';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet
-  // await runFaucet(hdPathIndex);
+  // await runFaucet(hdPathIndex, zeroUserMnemonic);
+  // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
 
