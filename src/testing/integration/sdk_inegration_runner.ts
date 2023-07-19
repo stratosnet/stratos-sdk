@@ -789,6 +789,7 @@ export const uploadFileToRemote = async (
   const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
 
   const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+  // console.log('!!! uploadResult from the uploadFile ', uploadResult);
 
   const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
 
@@ -799,10 +800,10 @@ export const uploadFileToRemote = async (
   if (calculatedFileHash !== targetHash) {
     throw new Error(`Upload did not return expected filehash, ${targetHash}`);
   }
-
   await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
 
-  const userFileList = await RemoteFilesystem.getUploadedFileList(address, 0);
+  const userFileList = await RemoteFilesystem.getUploadedFileList(keypair, 0);
+  // console.log('/// uploaded userFileList', userFileList);
 
   const { files } = userFileList;
 
