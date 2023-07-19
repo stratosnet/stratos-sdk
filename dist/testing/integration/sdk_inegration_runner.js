@@ -129,6 +129,7 @@ catch (err) {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const envConfig = require(envConfigFile);
 const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
+// console.log('FFFFF faucetMnemonic', faucetMnemonic);
 const { mainFaucet } = walletKeys;
 (0, helpers_1.log)('loaded config ', envConfig);
 (0, helpers_1.log)('faucet pkey from the config ', mainFaucet);
@@ -585,6 +586,7 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
     }
     const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
     const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+    console.log('!!! uploadResult from the uploadFile ', uploadResult);
     const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
     if (+uploadReturn !== 0) {
         throw new Error(`Upload did not return expected return code 0, and instead we have "${uploadReturn}"`);
@@ -592,8 +594,10 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
     if (calculatedFileHash !== targetHash) {
         throw new Error(`Upload did not return expected filehash, ${targetHash}`);
     }
+    // await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
     await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
-    const userFileList = await RemoteFilesystem.getUploadedFileList(address, 0);
+    const userFileList = await RemoteFilesystem.getUploadedFileList(keypair, 0);
+    console.log('/// uploaded userFileList', userFileList);
     const { files } = userFileList;
     if (!files.length) {
         throw new Error(`The remote file list is empty for address "${address}"`);

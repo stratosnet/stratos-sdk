@@ -23,9 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @jest-environment node
+ */
+// import path from 'path';
 const hdVault_1 = require("../../hdVault");
 const Integration = __importStar(require("./sdk_inegration_runner"));
-const extendedExecutionTimeout = 60000;
+const config_1 = require("../config");
+const extendedExecutionTimeout = config_1.OZONE_BALANCE_CHECK_WAIT_TIME * 2;
 describe(`Stratos SDK integration (integration test)`, () => {
     describe('User Account', () => {
         it('Creates a new account', async () => {
@@ -99,7 +104,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
                     expect(result).toBe(true);
                     done();
                 });
-            }, extendedExecutionTimeout);
+            }, extendedExecutionTimeout * 3);
             it('Downloads the remote file to local file and compares its hash', done => {
                 void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);
