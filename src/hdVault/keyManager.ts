@@ -73,7 +73,7 @@ export const createMasterKeySeed = async (
 
   const masterKeyInfo = { ...legacyMasterKeyInfo, encryptedWalletInfo };
 
-  log('Master key info (the wallet) is created and ready');
+  // log('Master key info (the wallet) is created and ready');
   return masterKeyInfo;
 };
 

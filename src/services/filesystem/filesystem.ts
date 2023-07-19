@@ -128,7 +128,7 @@ export async function encodeBuffer(chunk: Buffer): Promise<string> {
   await delay(100);
   //  Cannot create a string longer than 0x1fffffe8 characters
   const base64data = chunk.toString('base64');
-  console.log('good 1');
+  // console.log('good 1');
   return base64data;
 }
 
