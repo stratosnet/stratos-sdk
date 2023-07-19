@@ -41,7 +41,7 @@ const wallet_1 = require("./hdVault/wallet");
 const Sdk_1 = __importDefault(require("./Sdk"));
 const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
-const RemoteFilesystem = __importStar(require("./services/filesystem/remoteFile"));
+const RemoteFilesystem = __importStar(require("./sds/remoteFile"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
 const transactions = __importStar(require("./transactions"));
@@ -611,6 +611,7 @@ const testRequestUserFileList = async (page, hdPathIndex) => {
     console.log('retrieved user file list', userFileList);
 };
 // read local file and write a new one
+// 33 sec for 1gb, 1m 1sec for 2 gb
 const testReadAndWriteLocal = async (filename) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
@@ -652,6 +653,7 @@ const testReadAndWriteLocal = async (filename) => {
     // log('writeFileToPath of the encodedFile from decoded file is done');
 };
 // read local file and write a new one (multiple IO)
+// 51 sec for 1gb, 1m 38sec for 2gb
 const testReadAndWriteLocalMultipleIo = async (filename) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
@@ -816,7 +818,7 @@ const main = async () => {
     // const sharelink = 'aLmkPI_83093b53a493ac74';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex);
@@ -829,15 +831,12 @@ const main = async () => {
     // const receiverMnemonic = zeroUserMnemonic;
     // const hdPathIndexReceiver = 10;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
-    const filename = 'file2000_test';
-    // const filename = 'file1000_test';
     // 33 sec, 1m 1sec
     // testReadAndWriteLocal(filename);
-    // 51 sec
-    testReadAndWriteLocalMultipleIo(filename);
+    // 51 sec, 1m 38sec
+    // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-    // console.log('rr', rr)
 };
 main();
 //# sourceMappingURL=run.js.map

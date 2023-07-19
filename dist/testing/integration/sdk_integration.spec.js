@@ -28,8 +28,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 // import path from 'path';
 const hdVault_1 = require("../../hdVault");
-const Integration = __importStar(require("./sdk_inegration_runner"));
 const config_1 = require("../config");
+const Integration = __importStar(require("./sdk_inegration_runner"));
 const extendedExecutionTimeout = config_1.OZONE_BALANCE_CHECK_WAIT_TIME * 2;
 describe(`Stratos SDK integration (integration test)`, () => {
     describe('User Account', () => {
