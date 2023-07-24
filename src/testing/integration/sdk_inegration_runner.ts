@@ -133,7 +133,7 @@ try {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const envConfig = require(envConfigFile);
 
-const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic } = envConfig;
+const { keys: walletKeys, hostUrl: ppNodeAndPort, faucetMnemonic, sdkEnvTest } = envConfig;
 
 const { mainFaucet } = walletKeys;
 
@@ -141,15 +141,11 @@ log('loaded config ', envConfig);
 log('faucet pkey from the config ', mainFaucet);
 log('pp node url and port from the config', ppNodeAndPort);
 log('faucet mnemonic from the config', faucetMnemonic);
+log('sdkEnv from the config', sdkEnvTest);
 
 let GLOBAL_CHAIN_ID = '';
 
-const sdkEnvDev = {
-  restUrl: 'https://rest-dev.thestratos.org',
-  rpcUrl: 'https://rpc-dev.thestratos.org',
-  chainId: 'dev-chain-46',
-  explorerUrl: 'https://explorer-dev.thestratos.org',
-};
+const sdkEnvDev = sdkEnvTest;
 
 log('Using sdk config', sdkEnvDev);
 
