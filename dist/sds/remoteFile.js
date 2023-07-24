@@ -467,8 +467,8 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
         (0, helpers_1.dirLog)('we dont have required fields in the response ', responseRequestGetShared);
         throw new Error('required fields "reqid" or "filehash" or "sequencenumber" are missing in the response');
     }
-    const timestamp = (0, helpers_1.getTimestampInSeconds)();
-    const messageToSign = `${filehash}${address}${sequencenumber}${timestamp}`;
+    // const timestamp = getTimestampInSeconds();
+    const messageToSign = `${filehash}${address}${sequencenumber}${timestampA}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParamsForDownload = {
         filehash,
@@ -478,7 +478,7 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink) => {
             signature,
         },
         reqid,
-        req_time: timestamp,
+        req_time: timestampA,
     };
     const callResultRequestDownloadShared = await Network.sendUserRequestDownloadShared([
         extraParamsForDownload,
