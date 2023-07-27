@@ -1039,8 +1039,8 @@ const testAddressConverstion = async (hdPathIndex: number) => {
 const main = async () => {
   let resolvedChainID: string;
 
-  // const sdkEnv = sdkEnvTest;
-  const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvDev;
 
   Sdk.init({ ...sdkEnv });
 
@@ -1063,14 +1063,14 @@ const main = async () => {
     ...sdkEnv,
     chainId: resolvedChainID,
     // devnet
-    ppNodeUrl: 'http://34.145.36.237',
-    ppNodePort: '8135',
+    // ppNodeUrl: 'http://34.145.36.237',
+    // ppNodePort: '8135',
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
     // mesos
-    // ppNodeUrl: 'http://34.78.29.120',
-    // ppNodePort: '8142',
+    ppNodeUrl: 'http://34.78.29.120',
+    ppNodePort: '8142',
   });
   console.log('sdkEnv', Sdk.environment);
 
@@ -1098,8 +1098,8 @@ const main = async () => {
   // await testRequestUserFileList(0, hdPathIndex);
 
   // 2a
-  // const filename = 'file250_06_06';
-  // await testItFileUp(filename, hdPathIndex);
+  const filename = 'file10M_1';
+  await testItFileUp(filename, hdPathIndex);
 
   // 3a
   // const filename = 'file10_test_1689623710986';
@@ -1107,7 +1107,7 @@ const main = async () => {
   // await testFileDl(hdPathIndex, filename, filehash);
 
   // 4a
-  await testRequestUserSharedFileList(0, hdPathIndex);
+  // await testRequestUserSharedFileList(0, hdPathIndex);
 
   // 5a
   // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
@@ -1123,6 +1123,7 @@ const main = async () => {
 
   // 1 Check balance
   // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet
