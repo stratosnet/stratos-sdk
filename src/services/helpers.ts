@@ -1,9 +1,10 @@
 export const now = () => new Date().toLocaleString();
 
-// NOTE - did log for console output - use -> console.dir(result, { depth: null, colors: true, maxArrayLength: null });
+// NOTE - did log for console output -
+// use -> console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 export const log = (message: string, ...rest: any) => {
   console.log(
-    `"${now()}" - ${message}`,
+    `"${now()}" - ${message} `,
     (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '',
   );
 };
@@ -14,6 +15,7 @@ export const dirLog = (message: string, ...rest: any) => {
   const otherData = (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '';
 
   const data = { messageTime: `"${now()}" - ${message}`, message, otherData };
+  console.dir(data, opts);
 };
 
 export async function wait(fn: any, ms: number) {

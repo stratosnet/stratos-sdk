@@ -1,5 +1,7 @@
+import { fromBase64, toBase64 } from '@cosmjs/encoding';
+import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { TxRaw, AuthInfo, Tx, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import {
@@ -36,15 +38,40 @@ declare global {
   }
 }
 
+export const assembleTxRawFromHumanRead = (decoded: DecodedTxRaw): TxRaw => {
+  const txBytesAssembled = TxRaw.fromPartial({
+    bodyBytes: TxBody.encode(decoded.body).finish(),
+    authInfoBytes: AuthInfo.encode(decoded.authInfo).finish(),
+    signatures: [fromBase64(decoded.signatures.map(ss => toBase64(ss)).pop()!)],
+  });
+
+  return txBytesAssembled;
+};
+
+export const decodeTxRawToTx = (signedTx: TxRaw): Tx => {
+  const decoded = Tx.fromPartial({
+    authInfo: AuthInfo.decode(signedTx.authInfoBytes),
+    body: TxBody.decode(signedTx.bodyBytes),
+    signatures: signedTx.signatures.map(ss => ss),
+  });
+
+  return decoded;
+};
+
+export const decodeEncodedTxToHumanRead = (txBytes: Uint8Array): DecodedTxRaw => {
+  const decoded = decodeTxRaw(txBytes);
+  return decoded;
+};
+
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
     const client = await getCosmos();
 
-    dirLog('signedTx to be broadcasted', signedTx);
+    // log('signedTx to be broadcasted', signedTx);
     const txBytes = TxRaw.encode(signedTx).finish();
+    // log('encoded tx txBytes', txBytes);
 
     const result = await client.broadcastTx(txBytes);
-    dirLog('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
 
     return result;
   } catch (err) {
@@ -80,7 +107,7 @@ export const getStandardFee = async (
     return getStandardDefaultFee();
   }
 
-  dirLog('from getStandardFee txMessages', txMessages);
+  // dirLog('from getStandardFee txMessages', txMessages);
 
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(

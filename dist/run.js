@@ -165,16 +165,16 @@ const simulateSend = async (hdPathIndex, givenReceiverMnemonic) => {
 // cosmosjs send
 const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, hdPathIndexReceiver = 0) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    console.log('phrase', phrase);
+    // console.log('phrase', phrase);
     const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
-    console.log('mnemonicToUse', mnemonicToUse);
+    // console.log('mnemonicToUse', mnemonicToUse);
     const receiverPhrase = hdVault_1.mnemonic.convertStringToArray(mnemonicToUse);
-    console.log('receiverPhrase', receiverPhrase);
+    // console.log('receiverPhrase', receiverPhrase);
     const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
     const keyPairOne = await createKeypairFromMnemonic(receiverPhrase, hdPathIndexReceiver);
     // const keyPairTwo = await createKeypairFromMnemonic(receiverPhrase, 2);
     const fromAddress = keyPairZero.address;
-    const sendAmount = 0.4;
+    const sendAmount = 0.04;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
         { amount: sendAmount, toAddress: keyPairOne.address },
         // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
@@ -804,7 +804,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a
     const filename = 'file10M_1';
-    await testItFileUp(filename, hdPathIndex);
+    // await testItFileUp(filename, hdPathIndex);
     // 3a
     // const filename = 'file10_test_1689623710986';
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
@@ -832,9 +832,9 @@ const main = async () => {
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-    // const receiverMnemonic = zeroUserMnemonic;
-    // const hdPathIndexReceiver = 10;
-    // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    const receiverMnemonic = zeroUserMnemonic;
+    const hdPathIndexReceiver = 1;
+    await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
     // 33 sec, 1m 1sec
     // testReadAndWriteLocal(filename);
     // 51 sec, 1m 38sec

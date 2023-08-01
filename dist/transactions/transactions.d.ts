@@ -1,5 +1,6 @@
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { DecodedTxRaw } from '@cosmjs/proto-signing';
+import { TxRaw, Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import * as Types from './types';
 declare global {
     interface Window {
@@ -11,6 +12,9 @@ declare global {
         }
     }
 }
+export declare const assembleTxRawFromHumanRead: (decoded: DecodedTxRaw) => TxRaw;
+export declare const decodeTxRawToTx: (signedTx: TxRaw) => Tx;
+export declare const decodeEncodedTxToHumanRead: (txBytes: Uint8Array) => DecodedTxRaw;
 export declare const broadcast: (signedTx: TxRaw) => Promise<DeliverTxResponse>;
 export declare const getStandardDefaultFee: () => Types.TransactionFee;
 export declare const getStandardFee: (signerAddress?: string, txMessages?: Types.TxMessage[]) => Promise<Types.TransactionFee>;

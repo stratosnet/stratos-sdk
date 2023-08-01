@@ -23,7 +23,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.decodeEncodedTxToHumanRead = exports.decodeTxRawToTx = exports.assembleTxRawFromHumanRead = void 0;
+const encoding_1 = require("@cosmjs/encoding");
+const proto_signing_1 = require("@cosmjs/proto-signing");
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
@@ -38,13 +40,36 @@ function* payloadGenerator(dataList) {
         yield dataList.shift();
     }
 }
+const assembleTxRawFromHumanRead = (decoded) => {
+    const txBytesAssembled = tx_1.TxRaw.fromPartial({
+        bodyBytes: tx_1.TxBody.encode(decoded.body).finish(),
+        authInfoBytes: tx_1.AuthInfo.encode(decoded.authInfo).finish(),
+        signatures: [(0, encoding_1.fromBase64)(decoded.signatures.map(ss => (0, encoding_1.toBase64)(ss)).pop())],
+    });
+    return txBytesAssembled;
+};
+exports.assembleTxRawFromHumanRead = assembleTxRawFromHumanRead;
+const decodeTxRawToTx = (signedTx) => {
+    const decoded = tx_1.Tx.fromPartial({
+        authInfo: tx_1.AuthInfo.decode(signedTx.authInfoBytes),
+        body: tx_1.TxBody.decode(signedTx.bodyBytes),
+        signatures: signedTx.signatures.map(ss => ss),
+    });
+    return decoded;
+};
+exports.decodeTxRawToTx = decodeTxRawToTx;
+const decodeEncodedTxToHumanRead = (txBytes) => {
+    const decoded = (0, proto_signing_1.decodeTxRaw)(txBytes);
+    return decoded;
+};
+exports.decodeEncodedTxToHumanRead = decodeEncodedTxToHumanRead;
 const broadcast = async (signedTx) => {
     try {
         const client = await (0, cosmos_1.getCosmos)();
-        (0, helpers_1.dirLog)('signedTx to be broadcasted', signedTx);
+        // log('signedTx to be broadcasted', signedTx);
         const txBytes = tx_1.TxRaw.encode(signedTx).finish();
+        // log('encoded tx txBytes', txBytes);
         const result = await client.broadcastTx(txBytes);
-        (0, helpers_1.dirLog)('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
         return result;
     }
     catch (err) {
@@ -71,7 +96,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (!txMessages || !signerAddress) {
         return (0, exports.getStandardDefaultFee)();
     }
-    (0, helpers_1.dirLog)('from getStandardFee txMessages', txMessages);
+    // dirLog('from getStandardFee txMessages', txMessages);
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }

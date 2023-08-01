@@ -124,7 +124,16 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     //   signerData,
     // );
 
-    return this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
+    const directlySignedByStratos = this.signDirectStratos(
+      signerAddress,
+      messages,
+      fee,
+      memo,
+      signerData,
+      extensionOptions,
+    );
+
+    return directlySignedByStratos;
   }
 
   public async execEvm(
@@ -287,10 +296,13 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
 
     // const verificationResult = StratosPubKey.verify(signed);
-    return TxRaw.fromPartial({
+
+    const assembledTx = TxRaw.fromPartial({
       bodyBytes: signed.bodyBytes,
       authInfoBytes: signed.authInfoBytes,
       signatures: [fromBase64(signature.signature)],
     });
+
+    return assembledTx;
   }
 }

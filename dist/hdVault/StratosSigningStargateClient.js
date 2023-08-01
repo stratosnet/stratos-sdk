@@ -107,7 +107,8 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
         //   '0. YES sign from signing stargate client (next will be sign direct), signerData ',
         //   signerData,
         // );
-        return this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
+        const directlySignedByStratos = this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
+        return directlySignedByStratos;
     }
     async execEvm(payload, keyPair, simulate) {
         const chainId = +(payload.chainId || '0'); // NOTE: Should be retrieved from API but currently only available on web3 api
@@ -233,11 +234,12 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
         const signDoc = (0, proto_signing_1.makeSignDoc)(txBodyBytes, authInfoBytes, chainId, accountNumber);
         const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
         // const verificationResult = StratosPubKey.verify(signed);
-        return tx_1.TxRaw.fromPartial({
+        const assembledTx = tx_1.TxRaw.fromPartial({
             bodyBytes: signed.bodyBytes,
             authInfoBytes: signed.authInfoBytes,
             signatures: [(0, encoding_1.fromBase64)(signature.signature)],
         });
+        return assembledTx;
     }
 }
 exports.StratosSigningStargateClient = StratosSigningStargateClient;
