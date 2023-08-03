@@ -1,5 +1,5 @@
 import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -197,11 +197,47 @@ const mainSend = async (
     // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
 
+  // TxRaw
   const signedTx = await transactions.sign(fromAddress, sendTxMessages);
+  dirLog('signedTx run', signedTx);
 
-  if (signedTx) {
+  const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
+  dirLog('decodedToTest', decodedToTest);
+
+  const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
+  dirLog('encodedToTest', encodedToTest);
+
+  const assembled = transactions.assembleTxRawFromTx(encodedToTest);
+  // Uint8Array
+  // const encoded = transactions.encodeTxRawToEncodedTx(signedTx);
+  // dirLog('encoded run', encoded);
+
+  // DecodedTxRaw (human readable)
+  // const decodedTx2 = transactions.decodeEncodedTxToHumanRead(encoded);
+  // dirLog('decodedTx2 run', decodedTx2);
+  // const decodedTx1 = transactions.decodeTxRawToTx(signedTx);
+  // dirLog('decodedTx1 run', decodedTx1);
+
+  // String
+  // const jsTx = JSON.stringify(decodedTx2, null, 2);
+  // console.log('jsTx', jsTx);
+
+  // TxRaw to be broadcasted
+  // const assembled = transactions.assembleTxRawFromString(jsTx);
+  // dirLog('assembled', assembled);
+
+  // console.log('assembled', assembled);
+  // const assembled = transactions.assembleTxRawFromHumanRead(decodedFromString);
+  // console.log('assembled', assembled);
+
+  // const txBytesToBroadcase = transactions.encodeTxRawToEncodedTx(assembled);
+  // console.log('txBytesToBroadcase', txBytesToBroadcase);
+
+  // if (signedTx) {
+  if (assembled) {
     try {
-      const result = await transactions.broadcast(signedTx);
+      // const result = await transactions.broadcast(signedTx);
+      const result = await transactions.broadcast(assembled);
       console.log('broadcasting result!', result);
     } catch (error) {
       const err: Error = error as Error;
@@ -1141,7 +1177,9 @@ const main = async () => {
   // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
   // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   const receiverMnemonic = zeroUserMnemonic;
+
   const hdPathIndexReceiver = 1;
+
   await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
 
   // 33 sec, 1m 1sec
