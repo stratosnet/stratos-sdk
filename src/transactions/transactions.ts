@@ -1,20 +1,20 @@
-import { fromBase64, toBase64 } from '@cosmjs/encoding';
+import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
 import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import { TxRaw, AuthInfo, Tx, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import {
   baseGasAmount,
   decimalPrecision,
+  gasAdjustment,
+  minGasPrice,
   perMsgGasAmount,
   standardFeeAmount,
-  minGasPrice,
-  gasAdjustment,
 } from '../config/tokens';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
-import { log, dirLog } from '../services/helpers';
+import { dirLog, log } from '../services/helpers';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
 
@@ -48,14 +48,87 @@ export const assembleTxRawFromHumanRead = (decoded: DecodedTxRaw): TxRaw => {
   return txBytesAssembled;
 };
 
-export const decodeTxRawToTx = (signedTx: TxRaw): Tx => {
+export const assembleTxRawFromTx = (tx: Tx) => {
+  const txR = TxRaw.fromPartial({
+    bodyBytes: TxBody.encode(tx.body!).finish(),
+    authInfoBytes: AuthInfo.encode(tx.authInfo!).finish(),
+    signatures: tx.signatures.map(ss => ss),
+  });
+  // console.log('assembleTxRawFromTx txRaw', txR);
+
+  return txR;
+};
+
+export const assembleTxFromString = (txString: string) => {
+  const parsedObject = JSON.parse(txString);
+  // console.log('parsedObject', parsedObject);
+
+  const tx = Tx.fromJSON(parsedObject);
+
+  return tx;
+};
+
+export const assembleTxRawFromString = (txRawString: string) => {
+  // const parsedObject = JSON.parse(txRawString);
+  // console.log('parsedObject', parsedObject);
+  //
+  // const tx = Tx.fromJSON(parsedObject);
+  const tx = assembleTxFromString(txRawString);
+
+  const txR = assembleTxRawFromTx(tx);
+
+  return txR;
+};
+
+export const encodeTxHrToTx = async (txD: Tx) => {
+  const client = await getCosmos();
+  const txBodyObject = txD.body!;
+
+  const encodedMessages = await client.encodeMessagesFromTheTxBody(txBodyObject);
+
+  const myTx = { body: txBodyObject, authInfo: txD.authInfo, signatures: txD.signatures };
+
+  myTx.body['messages'] = encodedMessages;
+
+  const encoded = Tx.fromJSON(myTx);
+  dirLog('from encodeTxHrToTx encoded', encoded);
+
+  return encoded;
+};
+
+export const decodeTxRawToTx = (signedTx: TxRaw) => {
+  const txBodyObject = TxBody.decode(signedTx.bodyBytes);
+
+  const authInfo = AuthInfo.decode(signedTx.authInfoBytes);
+
   const decoded = Tx.fromPartial({
-    authInfo: AuthInfo.decode(signedTx.authInfoBytes),
-    body: TxBody.decode(signedTx.bodyBytes),
+    authInfo,
+    body: txBodyObject,
     signatures: signedTx.signatures.map(ss => ss),
   });
 
+  dirLog('from decodeTxRawToTx decoded', decoded);
+
   return decoded;
+};
+
+export const decodeTxRawToTxHr = async (signedTx: TxRaw) => {
+  const client = await getCosmos();
+
+  const decoded = decodeTxRawToTx(signedTx);
+
+  const txBodyObject = decoded.body!;
+
+  // hex string with the value
+  // const encodedTxBodyObject = TxBody.toJSON(txBodyObject) as TxBody;
+
+  const decodedMessages = await client.decodeMessagesFromTheTxBody(txBodyObject);
+
+  const txD = Tx.toJSON(decoded) as Tx;
+
+  txD.body!['messages'] = decodedMessages;
+
+  return txD;
 };
 
 export const decodeEncodedTxToHumanRead = (txBytes: Uint8Array): DecodedTxRaw => {
@@ -63,12 +136,18 @@ export const decodeEncodedTxToHumanRead = (txBytes: Uint8Array): DecodedTxRaw =>
   return decoded;
 };
 
+export const encodeTxRawToEncodedTx = (signedTx: TxRaw): Uint8Array => {
+  const txBytes = TxRaw.encode(signedTx).finish();
+  return txBytes;
+};
+
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
     const client = await getCosmos();
 
     // log('signedTx to be broadcasted', signedTx);
-    const txBytes = TxRaw.encode(signedTx).finish();
+    // const txBytes = TxRaw.encode(signedTx).finish();
+    const txBytes = encodeTxRawToEncodedTx(signedTx);
     // log('encoded tx txBytes', txBytes);
 
     const result = await client.broadcastTx(txBytes);
@@ -151,6 +230,9 @@ export const sign = async (
   const client = await getCosmos();
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
+
+  const txBytes = encodeTxRawToEncodedTx(signedTx);
+  // const a = await client.decodeIt(txBytes);
 
   return signedTx;
 };
@@ -322,7 +404,9 @@ export const getWithdrawalAllRewardTx = async (
   const { data: withdrawalPayload } = vListResult;
 
   const payloadToProcess = payloadGenerator(
-    withdrawalPayload.map((item: { address: string }) => ({ validatorAddress: item.address })),
+    withdrawalPayload.map((item: { address: string }) => ({
+      validatorAddress: item.address,
+    })),
   );
 
   let iteratedData = payloadToProcess.next();
