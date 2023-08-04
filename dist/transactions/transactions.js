@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromTx = void 0;
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
@@ -38,13 +38,59 @@ function* payloadGenerator(dataList) {
         yield dataList.shift();
     }
 }
+const assembleTxRawFromTx = (tx) => {
+    const txR = tx_1.TxRaw.fromPartial({
+        bodyBytes: tx_1.TxBody.encode(tx.body).finish(),
+        authInfoBytes: tx_1.AuthInfo.encode(tx.authInfo).finish(),
+        signatures: tx.signatures.map(ss => ss),
+    });
+    return txR;
+};
+exports.assembleTxRawFromTx = assembleTxRawFromTx;
+const encodeTxHrToTx = async (jsonizedTx) => {
+    const client = await (0, cosmos_1.getCosmos)();
+    const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
+    if (encodedMessages) {
+        jsonizedTx.body.messages = encodedMessages;
+    }
+    const encoded = tx_1.Tx.fromJSON(jsonizedTx);
+    return encoded;
+};
+exports.encodeTxHrToTx = encodeTxHrToTx;
+const decodeTxRawToTx = (signedTx) => {
+    const txBodyObject = tx_1.TxBody.decode(signedTx.bodyBytes);
+    const authInfo = tx_1.AuthInfo.decode(signedTx.authInfoBytes);
+    const decoded = tx_1.Tx.fromPartial({
+        authInfo,
+        body: txBodyObject,
+        signatures: signedTx.signatures.map(ss => ss),
+    });
+    return decoded;
+};
+exports.decodeTxRawToTx = decodeTxRawToTx;
+const decodeTxRawToTxHr = async (signedTx) => {
+    var _a;
+    const client = await (0, cosmos_1.getCosmos)();
+    const decoded = (0, exports.decodeTxRawToTx)(signedTx);
+    const jsonizedTx = tx_1.Tx.toJSON(decoded);
+    const decodedMessages = await client.decodeMessagesFromTheTxBody((_a = decoded.body) === null || _a === void 0 ? void 0 : _a.messages);
+    if (decodedMessages) {
+        jsonizedTx.body.messages = decodedMessages;
+    }
+    return jsonizedTx;
+};
+exports.decodeTxRawToTxHr = decodeTxRawToTxHr;
+const encodeTxRawToEncodedTx = (signedTx) => {
+    const txBytes = tx_1.TxRaw.encode(signedTx).finish();
+    return txBytes;
+};
+exports.encodeTxRawToEncodedTx = encodeTxRawToEncodedTx;
 const broadcast = async (signedTx) => {
     try {
         const client = await (0, cosmos_1.getCosmos)();
-        (0, helpers_1.dirLog)('signedTx to be broadcasted', signedTx);
-        const txBytes = tx_1.TxRaw.encode(signedTx).finish();
+        const txBytes = (0, exports.encodeTxRawToEncodedTx)(signedTx);
         const result = await client.broadcastTx(txBytes);
-        (0, helpers_1.dirLog)('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
+        (0, helpers_1.dirLog)('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
         return result;
     }
     catch (err) {
@@ -71,7 +117,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (!txMessages || !signerAddress) {
         return (0, exports.getStandardDefaultFee)();
     }
-    (0, helpers_1.dirLog)('from getStandardFee txMessages', txMessages);
+    // dirLog('from getStandardFee txMessages', txMessages);
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
@@ -99,6 +145,7 @@ const sign = async (address, txMessages, memo = '', givenFee) => {
     // const fee = givenFee ? givenFee : getStandardDefaultFee();
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
+    // const txBytes = encodeTxRawToEncodedTx(signedTx);
     return signedTx;
 };
 exports.sign = sign;
@@ -110,26 +157,6 @@ const getStandardAmount = (amounts) => {
     return result;
 };
 exports.getStandardAmount = getStandardAmount;
-// @depricated ?
-// export const getBaseTx = async (
-//   keyPairAddress: string,
-//   memo = '',
-//   numberOfMessages = 1,
-// ): Promise<Types.BaseTransaction> => {
-//   console.log('get base tx 1');
-//   const accountsData = await getAccountsData(keyPairAddress);
-//   const oldSequence = String(accountsData.account.sequence);
-//   const newSequence = parseInt(oldSequence);
-//   const { chainId } = Sdk.environment;
-//   const myTx = {
-//     chain_id: chainId,
-//     fee: getStandardFee(numberOfMessages),
-//     memo,
-//     account_number: String(accountsData.account.account_number),
-//     sequence: `${newSequence}`,
-//   };
-//   return myTx;
-// };
 const getSendTx = async (keyPairAddress, sendPayload) => {
     const payloadToProcess = payloadGenerator(sendPayload);
     let iteratedData = payloadToProcess.next();
@@ -218,7 +245,9 @@ exports.getWithdrawalRewardTx = getWithdrawalRewardTx;
 const getWithdrawalAllRewardTx = async (delegatorAddress) => {
     const vListResult = await (0, validators_1.getValidatorsBondedToDelegator)(delegatorAddress);
     const { data: withdrawalPayload } = vListResult;
-    const payloadToProcess = payloadGenerator(withdrawalPayload.map((item) => ({ validatorAddress: item.address })));
+    const payloadToProcess = payloadGenerator(withdrawalPayload.map((item) => ({
+        validatorAddress: item.address,
+    })));
     let iteratedData = payloadToProcess.next();
     const messagesList = [];
     while (iteratedData.value) {

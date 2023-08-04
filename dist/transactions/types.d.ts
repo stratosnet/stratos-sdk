@@ -1,3 +1,4 @@
+import { DecodedTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 export declare enum TxMsgTypes {
@@ -61,6 +62,8 @@ export interface EmptyObject {
 export interface BroadcastResult extends DeliverTxResponse {
 }
 export interface SignedTransaction extends TxRaw {
+}
+export interface DecodedSignedTransaction extends DecodedTxRaw {
 }
 export interface AmountType {
     amount: string;

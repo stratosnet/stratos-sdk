@@ -1,3 +1,4 @@
+import { DecodedTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
@@ -121,6 +122,7 @@ export interface BroadcastResult extends DeliverTxResponse {}
 // }
 
 export interface SignedTransaction extends TxRaw {}
+export interface DecodedSignedTransaction extends DecodedTxRaw {}
 
 // export interface SignedTransaction {
 //   tx: {

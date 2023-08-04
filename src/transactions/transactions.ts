@@ -1,22 +1,37 @@
+// import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
+// import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
 import {
   baseGasAmount,
   decimalPrecision,
+  gasAdjustment,
+  minGasPrice,
   perMsgGasAmount,
   standardFeeAmount,
-  minGasPrice,
-  gasAdjustment,
 } from '../config/tokens';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
-import { log, dirLog } from '../services/helpers';
+import { dirLog, log } from '../services/helpers';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
 
 const maxMessagesPerTx = 500;
+
+interface JsonizedMessage {
+  typeUrl: string;
+  value: string;
+}
+
+export interface JsonizedTx {
+  body: {
+    messages: JsonizedMessage[];
+  };
+  authInfo: any;
+  signatures: string[];
+}
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
@@ -36,16 +51,73 @@ declare global {
   }
 }
 
+export const assembleTxRawFromTx = (tx: Tx) => {
+  const txR = TxRaw.fromPartial({
+    bodyBytes: TxBody.encode(tx.body!).finish(),
+    authInfoBytes: AuthInfo.encode(tx.authInfo!).finish(),
+    signatures: tx.signatures.map(ss => ss),
+  });
+
+  return txR;
+};
+
+export const encodeTxHrToTx = async (jsonizedTx: JsonizedTx) => {
+  const client = await getCosmos();
+
+  const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
+
+  if (encodedMessages) {
+    jsonizedTx.body.messages = encodedMessages;
+  }
+
+  const encoded = Tx.fromJSON(jsonizedTx);
+
+  return encoded;
+};
+
+export const decodeTxRawToTx = (signedTx: TxRaw) => {
+  const txBodyObject = TxBody.decode(signedTx.bodyBytes);
+
+  const authInfo = AuthInfo.decode(signedTx.authInfoBytes);
+
+  const decoded = Tx.fromPartial({
+    authInfo,
+    body: txBodyObject,
+    signatures: signedTx.signatures.map(ss => ss),
+  });
+
+  return decoded;
+};
+
+export const decodeTxRawToTxHr = async (signedTx: TxRaw) => {
+  const client = await getCosmos();
+
+  const decoded = decodeTxRawToTx(signedTx);
+
+  const jsonizedTx: JsonizedTx = Tx.toJSON(decoded) as JsonizedTx;
+
+  const decodedMessages = await client.decodeMessagesFromTheTxBody(decoded.body?.messages);
+
+  if (decodedMessages) {
+    jsonizedTx.body.messages = decodedMessages;
+  }
+
+  return jsonizedTx;
+};
+
+export const encodeTxRawToEncodedTx = (signedTx: TxRaw): Uint8Array => {
+  const txBytes = TxRaw.encode(signedTx).finish();
+  return txBytes;
+};
+
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
     const client = await getCosmos();
 
-    dirLog('signedTx to be broadcasted', signedTx);
-    const txBytes = TxRaw.encode(signedTx).finish();
+    const txBytes = encodeTxRawToEncodedTx(signedTx);
 
     const result = await client.broadcastTx(txBytes);
-    dirLog('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
-
+    dirLog('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
     return result;
   } catch (err) {
     dirLog('Could not broadcast', (err as Error).message);
@@ -80,7 +152,7 @@ export const getStandardFee = async (
     return getStandardDefaultFee();
   }
 
-  dirLog('from getStandardFee txMessages', txMessages);
+  // dirLog('from getStandardFee txMessages', txMessages);
 
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(
@@ -125,6 +197,8 @@ export const sign = async (
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
 
+  // const txBytes = encodeTxRawToEncodedTx(signedTx);
+
   return signedTx;
 };
 
@@ -136,31 +210,6 @@ export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
 
   return result;
 };
-
-// @depricated ?
-// export const getBaseTx = async (
-//   keyPairAddress: string,
-//   memo = '',
-//   numberOfMessages = 1,
-// ): Promise<Types.BaseTransaction> => {
-//   console.log('get base tx 1');
-//   const accountsData = await getAccountsData(keyPairAddress);
-
-//   const oldSequence = String(accountsData.account.sequence);
-//   const newSequence = parseInt(oldSequence);
-
-//   const { chainId } = Sdk.environment;
-
-//   const myTx = {
-//     chain_id: chainId,
-//     fee: getStandardFee(numberOfMessages),
-//     memo,
-//     account_number: String(accountsData.account.account_number),
-//     sequence: `${newSequence}`,
-//   };
-
-//   return myTx;
-// };
 
 export const getSendTx = async (
   keyPairAddress: string,
@@ -295,7 +344,9 @@ export const getWithdrawalAllRewardTx = async (
   const { data: withdrawalPayload } = vListResult;
 
   const payloadToProcess = payloadGenerator(
-    withdrawalPayload.map((item: { address: string }) => ({ validatorAddress: item.address })),
+    withdrawalPayload.map((item: { address: string }) => ({
+      validatorAddress: item.address,
+    })),
   );
 
   let iteratedData = payloadToProcess.next();

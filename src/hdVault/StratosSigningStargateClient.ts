@@ -2,6 +2,7 @@ import { encodeSecp256k1Pubkey, StdFee } from '@cosmjs/amino';
 import { ExtendedSecp256k1Signature, Secp256k1 } from '@cosmjs/crypto';
 import { fromBase64, toBase64, fromHex } from '@cosmjs/encoding';
 import { Int53, Uint53 } from '@cosmjs/math';
+// import { decodeTxRaw } from '@cosmjs/proto-signing';
 import {
   EncodeObject,
   encodePubkey,
@@ -25,6 +26,7 @@ import { Any } from 'cosmjs-types/google/protobuf/any';
 import { ethers } from 'ethers';
 import { minGasPrice } from '../config/tokens';
 import { wallet } from '../hdVault';
+import { dirLog } from '../services/helpers';
 import * as evm from '../transactions/evm';
 
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
@@ -119,12 +121,47 @@ export class StratosSigningStargateClient extends SigningStargateClient {
       };
     }
 
-    // console.log(
-    //   '0. YES sign from signing stargate client (next will be sign direct), signerData ',
-    //   signerData,
-    // );
+    const directlySignedByStratos = this.signDirectStratos(
+      signerAddress,
+      messages,
+      fee,
+      memo,
+      signerData,
+      extensionOptions,
+    );
 
-    return this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
+    return directlySignedByStratos;
+  }
+
+  public async encodeMessagesFromTheTxBody(messages: any[] | undefined) {
+    if (!messages) {
+      return null;
+    }
+
+    const parsedData = [];
+
+    for (const message of messages) {
+      const encodedMessage = this.registry.encode({ typeUrl: message.typeUrl, value: message.value });
+
+      parsedData.push({ typeUrl: message.typeUrl, value: toBase64(encodedMessage) });
+    }
+
+    return parsedData;
+  }
+
+  public async decodeMessagesFromTheTxBody(messages: any[] | undefined) {
+    if (!messages) {
+      return null;
+    }
+    const parsedData = [];
+
+    for (const message of messages) {
+      const decodedMessage = this.registry.decode(message);
+
+      parsedData.push({ typeUrl: message.typeUrl, value: decodedMessage });
+    }
+
+    return parsedData;
   }
 
   public async execEvm(
@@ -281,16 +318,20 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     };
 
     const txBodyBytes = this.registry.encode(txBodyEncodeObject);
+
     const gasLimit = Int53.fromString(fee.gas).toNumber();
     const authInfoBytes = makeAuthInfoBytes([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
     const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, accountNumber);
     const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
 
     // const verificationResult = StratosPubKey.verify(signed);
-    return TxRaw.fromPartial({
+
+    const assembledTx = TxRaw.fromPartial({
       bodyBytes: signed.bodyBytes,
       authInfoBytes: signed.authInfoBytes,
       signatures: [fromBase64(signature.signature)],
     });
+
+    return assembledTx;
   }
 }
