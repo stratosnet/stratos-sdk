@@ -1,5 +1,4 @@
 import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
-import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -199,11 +198,11 @@ const mainSend = async (
 
   // TxRaw
   const signedTx = await transactions.sign(fromAddress, sendTxMessages);
-  dirLog('signedTx run', signedTx);
+  // dirLog('signedTx run', signedTx);
 
   // Tx with sibstituted message
   const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
-  dirLog('decodedToTest', decodedToTest);
+  // dirLog('decodedToTest', decodedToTest);
 
   // Tx with substituted as a string
   const decodedInString = JSON.stringify(decodedToTest, null, 2);
@@ -212,39 +211,11 @@ const mainSend = async (
 
   // Pure Tx (so value , signature and auth are bytes)
   const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
-
   // const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
-  dirLog('encodedToTest', encodedToTest);
 
-  // reassamble TxRaw from the Tx , this is the same as signedTx
+  // dirLog('encodedToTest', encodedToTest);
+
   const assembled = transactions.assembleTxRawFromTx(encodedToTest);
-  // const assembled = transactions.assembleTxFromString(jsTx);
-  // dirLog('assembled', assembled);
-
-  // Uint8Array
-  // const encoded = transactions.encodeTxRawToEncodedTx(signedTx);
-  // dirLog('encoded run', encoded);
-
-  // DecodedTxRaw (human readable)
-  // const decodedTx2 = transactions.decodeEncodedTxToHumanRead(encoded);
-  // dirLog('decodedTx2 run', decodedTx2);
-  // const decodedTx1 = transactions.decodeTxRawToTx(signedTx);
-  // dirLog('decodedTx1 run', decodedTx1);
-
-  // String
-  // const jsTx = JSON.stringify(decodedTx2, null, 2);
-  // console.log('jsTx', jsTx);
-
-  // TxRaw to be broadcasted
-  // const assembled = transactions.assembleTxRawFromString(jsTx);
-  // dirLog('assembled', assembled);
-
-  // console.log('assembled', assembled);
-  // const assembled = transactions.assembleTxRawFromHumanRead(decodedFromString);
-  // console.log('assembled', assembled);
-
-  // const txBytesToBroadcase = transactions.encodeTxRawToEncodedTx(assembled);
-  // console.log('txBytesToBroadcase', txBytesToBroadcase);
 
   // if (signedTx) {
   if (assembled) {
