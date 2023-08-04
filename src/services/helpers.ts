@@ -4,7 +4,7 @@ export const now = () => new Date().toLocaleString();
 // use -> console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 export const log = (message: string, ...rest: any) => {
   console.log(
-    `"${now()}" - ${message} `,
+    `"${now()}" - ${message}`,
     (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '',
   );
 };

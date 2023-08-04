@@ -1143,7 +1143,7 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
@@ -1159,11 +1159,11 @@ const main = async () => {
 
   // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
   // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-  const receiverMnemonic = zeroUserMnemonic;
+  // const receiverMnemonic = zeroUserMnemonic;
 
-  const hdPathIndexReceiver = 1;
+  // const hdPathIndexReceiver = 1;
 
-  await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+  // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
 
   // 33 sec, 1m 1sec
   // testReadAndWriteLocal(filename);

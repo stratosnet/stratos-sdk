@@ -90,6 +90,7 @@ const broadcast = async (signedTx) => {
         const client = await (0, cosmos_1.getCosmos)();
         const txBytes = (0, exports.encodeTxRawToEncodedTx)(signedTx);
         const result = await client.broadcastTx(txBytes);
+        (0, helpers_1.dirLog)('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
         return result;
     }
     catch (err) {

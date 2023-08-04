@@ -836,7 +836,7 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
@@ -847,9 +847,9 @@ const main = async () => {
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-    const receiverMnemonic = zeroUserMnemonic;
-    const hdPathIndexReceiver = 1;
-    await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    // const receiverMnemonic = zeroUserMnemonic;
+    // const hdPathIndexReceiver = 1;
+    // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
     // 33 sec, 1m 1sec
     // testReadAndWriteLocal(filename);
     // 51 sec, 1m 38sec

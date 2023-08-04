@@ -6,7 +6,7 @@ exports.now = now;
 // NOTE - did log for console output -
 // use -> console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 const log = (message, ...rest) => {
-    console.log(`"${(0, exports.now)()}" - ${message} `, (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '');
+    console.log(`"${(0, exports.now)()}" - ${message}`, (Array.isArray(rest) && rest.length) || Object.keys(rest).length ? rest : '');
 };
 exports.log = log;
 const dirLog = (message, ...rest) => {

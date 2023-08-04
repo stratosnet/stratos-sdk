@@ -1,5 +1,5 @@
-import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
-import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
+// import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
+// import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
@@ -117,7 +117,7 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
     const txBytes = encodeTxRawToEncodedTx(signedTx);
 
     const result = await client.broadcastTx(txBytes);
-
+    dirLog('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
     return result;
   } catch (err) {
     dirLog('Could not broadcast', (err as Error).message);
