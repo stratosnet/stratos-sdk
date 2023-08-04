@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.decodeEncodedTxToHumanRead = exports.decodeTxRawToTx = exports.assembleTxRawFromHumanRead = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeEncodedTxToHumanRead = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromString = exports.assembleTxFromString = exports.assembleTxRawFromTx = exports.assembleTxRawFromHumanRead = void 0;
 const encoding_1 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
@@ -49,25 +49,94 @@ const assembleTxRawFromHumanRead = (decoded) => {
     return txBytesAssembled;
 };
 exports.assembleTxRawFromHumanRead = assembleTxRawFromHumanRead;
+const assembleTxRawFromTx = (tx) => {
+    const txR = tx_1.TxRaw.fromPartial({
+        bodyBytes: tx_1.TxBody.encode(tx.body).finish(),
+        authInfoBytes: tx_1.AuthInfo.encode(tx.authInfo).finish(),
+        signatures: tx.signatures.map(ss => ss),
+    });
+    // console.log('assembleTxRawFromTx txRaw', txR);
+    return txR;
+};
+exports.assembleTxRawFromTx = assembleTxRawFromTx;
+const assembleTxFromString = (txString) => {
+    const parsedObject = JSON.parse(txString);
+    // console.log('parsedObject', parsedObject);
+    const tx = tx_1.Tx.fromJSON(parsedObject);
+    return tx;
+};
+exports.assembleTxFromString = assembleTxFromString;
+const assembleTxRawFromString = (txRawString) => {
+    const tx = (0, exports.assembleTxFromString)(txRawString);
+    const txR = (0, exports.assembleTxRawFromTx)(tx);
+    return txR;
+};
+exports.assembleTxRawFromString = assembleTxRawFromString;
+const encodeTxHrToTx = async (jsonizedTx) => {
+    const client = await (0, cosmos_1.getCosmos)();
+    // const txBodyObject = txD.body!;
+    const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
+    (0, helpers_1.dirLog)('from encodeTxHrToTx encodedMessages', encodedMessages);
+    if (encodedMessages) {
+        jsonizedTx.body.messages = encodedMessages;
+    }
+    // const myTx = { body: txBodyObject, authInfo: txD.authInfo, signatures: txD.signatures };
+    // myTx.body['messages'] = encodedMessages;
+    // dirLog('from encodeTxHrToTx myTx', myTx);
+    const encoded = tx_1.Tx.fromJSON(jsonizedTx);
+    (0, helpers_1.dirLog)('from encodeTxHrToTx encoded', encoded);
+    return encoded;
+};
+exports.encodeTxHrToTx = encodeTxHrToTx;
 const decodeTxRawToTx = (signedTx) => {
+    const txBodyObject = tx_1.TxBody.decode(signedTx.bodyBytes);
+    const authInfo = tx_1.AuthInfo.decode(signedTx.authInfoBytes);
     const decoded = tx_1.Tx.fromPartial({
-        authInfo: tx_1.AuthInfo.decode(signedTx.authInfoBytes),
-        body: tx_1.TxBody.decode(signedTx.bodyBytes),
+        authInfo,
+        body: txBodyObject,
         signatures: signedTx.signatures.map(ss => ss),
     });
+    (0, helpers_1.dirLog)('from decodeTxRawToTx decoded', decoded);
     return decoded;
 };
 exports.decodeTxRawToTx = decodeTxRawToTx;
+const decodeTxRawToTxHr = async (signedTx) => {
+    var _a;
+    const client = await (0, cosmos_1.getCosmos)();
+    const decoded = (0, exports.decodeTxRawToTx)(signedTx);
+    const jsonizedTx = tx_1.Tx.toJSON(decoded);
+    (0, helpers_1.dirLog)('from decodeTxRawToHr jsonizedTx ', jsonizedTx);
+    // const txBodyObject = decoded.body!;
+    // hex string with the value
+    // const encodedTxBodyObject = TxBody.toJSON(txBodyObject) as TxBody;
+    const decodedMessages = await client.decodeMessagesFromTheTxBody((_a = decoded.body) === null || _a === void 0 ? void 0 : _a.messages);
+    if (decodedMessages) {
+        jsonizedTx.body.messages = decodedMessages;
+    }
+    // const txD = Tx.toJSON(decoded) as Tx;
+    // if (decodedMessages) {
+    //   txD.body!['messages'] = decodedMessages;
+    // }
+    (0, helpers_1.dirLog)('from decodeTxRawToHr jsonizedTx modified ', jsonizedTx);
+    return jsonizedTx;
+};
+exports.decodeTxRawToTxHr = decodeTxRawToTxHr;
 const decodeEncodedTxToHumanRead = (txBytes) => {
     const decoded = (0, proto_signing_1.decodeTxRaw)(txBytes);
     return decoded;
 };
 exports.decodeEncodedTxToHumanRead = decodeEncodedTxToHumanRead;
+const encodeTxRawToEncodedTx = (signedTx) => {
+    const txBytes = tx_1.TxRaw.encode(signedTx).finish();
+    return txBytes;
+};
+exports.encodeTxRawToEncodedTx = encodeTxRawToEncodedTx;
 const broadcast = async (signedTx) => {
     try {
         const client = await (0, cosmos_1.getCosmos)();
         // log('signedTx to be broadcasted', signedTx);
-        const txBytes = tx_1.TxRaw.encode(signedTx).finish();
+        // const txBytes = TxRaw.encode(signedTx).finish();
+        const txBytes = (0, exports.encodeTxRawToEncodedTx)(signedTx);
         // log('encoded tx txBytes', txBytes);
         const result = await client.broadcastTx(txBytes);
         return result;
@@ -124,6 +193,7 @@ const sign = async (address, txMessages, memo = '', givenFee) => {
     // const fee = givenFee ? givenFee : getStandardDefaultFee();
     const client = await (0, cosmos_1.getCosmos)();
     const signedTx = await client.sign(address, txMessages, fee, memo);
+    // const txBytes = encodeTxRawToEncodedTx(signedTx);
     return signedTx;
 };
 exports.sign = sign;
@@ -243,7 +313,9 @@ exports.getWithdrawalRewardTx = getWithdrawalRewardTx;
 const getWithdrawalAllRewardTx = async (delegatorAddress) => {
     const vListResult = await (0, validators_1.getValidatorsBondedToDelegator)(delegatorAddress);
     const { data: withdrawalPayload } = vListResult;
-    const payloadToProcess = payloadGenerator(withdrawalPayload.map((item) => ({ validatorAddress: item.address })));
+    const payloadToProcess = payloadGenerator(withdrawalPayload.map((item) => ({
+        validatorAddress: item.address,
+    })));
     let iteratedData = payloadToProcess.next();
     const messagesList = [];
     while (iteratedData.value) {

@@ -179,10 +179,47 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
         { amount: sendAmount, toAddress: keyPairOne.address },
         // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
+    // TxRaw
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
-    if (signedTx) {
+    (0, helpers_1.dirLog)('signedTx run', signedTx);
+    // Tx with sibstituted message
+    const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
+    (0, helpers_1.dirLog)('decodedToTest', decodedToTest);
+    // Tx with substituted as a string
+    const decodedInString = JSON.stringify(decodedToTest, null, 2);
+    // Tx with substituted as a string parsed back to decodedToTest
+    const decodeReAssembled = JSON.parse(decodedInString);
+    // Pure Tx (so value , signature and auth are bytes)
+    const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
+    // const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
+    (0, helpers_1.dirLog)('encodedToTest', encodedToTest);
+    // reassamble TxRaw from the Tx , this is the same as signedTx
+    const assembled = transactions.assembleTxRawFromTx(encodedToTest);
+    // const assembled = transactions.assembleTxFromString(jsTx);
+    // dirLog('assembled', assembled);
+    // Uint8Array
+    // const encoded = transactions.encodeTxRawToEncodedTx(signedTx);
+    // dirLog('encoded run', encoded);
+    // DecodedTxRaw (human readable)
+    // const decodedTx2 = transactions.decodeEncodedTxToHumanRead(encoded);
+    // dirLog('decodedTx2 run', decodedTx2);
+    // const decodedTx1 = transactions.decodeTxRawToTx(signedTx);
+    // dirLog('decodedTx1 run', decodedTx1);
+    // String
+    // const jsTx = JSON.stringify(decodedTx2, null, 2);
+    // console.log('jsTx', jsTx);
+    // TxRaw to be broadcasted
+    // const assembled = transactions.assembleTxRawFromString(jsTx);
+    // dirLog('assembled', assembled);
+    // console.log('assembled', assembled);
+    // const assembled = transactions.assembleTxRawFromHumanRead(decodedFromString);
+    // console.log('assembled', assembled);
+    // const txBytesToBroadcase = transactions.encodeTxRawToEncodedTx(assembled);
+    // console.log('txBytesToBroadcase', txBytesToBroadcase);
+    // if (signedTx) {
+    if (assembled) {
         try {
-            const result = await transactions.broadcast(signedTx);
+            const result = await transactions.broadcast(assembled);
             console.log('broadcasting result!', result);
         }
         catch (error) {

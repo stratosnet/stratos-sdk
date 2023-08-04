@@ -18,6 +18,14 @@ export declare class StratosSigningStargateClient extends SigningStargateClient 
     ecdsaSignatures(raw: any, keyPair: wallet.KeyPairInfo, prefix?: number): Promise<ExtendedSecp256k1Signature>;
     private simulateEvm;
     sign(signerAddress: string, messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData, extensionOptions?: Any[]): Promise<TxRaw>;
+    encodeMessagesFromTheTxBody(messages: any[] | undefined): Promise<{
+        typeUrl: any;
+        value: string;
+    }[] | null>;
+    decodeMessagesFromTheTxBody(messages: any[] | undefined): Promise<{
+        typeUrl: any;
+        value: any;
+    }[] | null>;
     execEvm(payload: evm.DynamicFeeTx, keyPair: wallet.KeyPairInfo, simulate: boolean): Promise<TxRaw | number>;
     signForEvm(payload: evm.DynamicFeeTx, keyPair: wallet.KeyPairInfo): Promise<TxRaw>;
     private getEthSecpStratosEncodedPubkey;
