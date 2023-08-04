@@ -69,10 +69,6 @@ export const assembleTxFromString = (txString: string) => {
 };
 
 export const assembleTxRawFromString = (txRawString: string) => {
-  // const parsedObject = JSON.parse(txRawString);
-  // console.log('parsedObject', parsedObject);
-  //
-  // const tx = Tx.fromJSON(parsedObject);
   const tx = assembleTxFromString(txRawString);
 
   const txR = assembleTxRawFromTx(tx);
@@ -80,21 +76,49 @@ export const assembleTxRawFromString = (txRawString: string) => {
   return txR;
 };
 
-export const encodeTxHrToTx = async (txD: Tx) => {
+export const encodeTxHrToTx = async (jsonizedTx: JsonizedTx) => {
   const client = await getCosmos();
-  const txBodyObject = txD.body!;
+  // const txBodyObject = txD.body!;
 
-  const encodedMessages = await client.encodeMessagesFromTheTxBody(txBodyObject);
+  const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
 
-  const myTx = { body: txBodyObject, authInfo: txD.authInfo, signatures: txD.signatures };
+  dirLog('from encodeTxHrToTx encodedMessages', encodedMessages);
 
-  myTx.body['messages'] = encodedMessages;
+  if (encodedMessages) {
+    jsonizedTx.body.messages = encodedMessages;
+  }
+  // const myTx = { body: txBodyObject, authInfo: txD.authInfo, signatures: txD.signatures };
 
-  const encoded = Tx.fromJSON(myTx);
+  // myTx.body['messages'] = encodedMessages;
+  // dirLog('from encodeTxHrToTx myTx', myTx);
+
+  const encoded = Tx.fromJSON(jsonizedTx);
   dirLog('from encodeTxHrToTx encoded', encoded);
 
   return encoded;
 };
+
+interface EncodedMessage {
+  typeUrl: string;
+  value: Uint8Array;
+}
+
+interface DecodedMessage {
+  typeUrl: string;
+  value: any;
+}
+interface JsonizedMessage {
+  typeUrl: string;
+  value: string;
+}
+
+export interface JsonizedTx {
+  body: {
+    messages: JsonizedMessage[];
+  };
+  authInfo: any;
+  signatures: string[];
+}
 
 export const decodeTxRawToTx = (signedTx: TxRaw) => {
   const txBodyObject = TxBody.decode(signedTx.bodyBytes);
@@ -117,18 +141,28 @@ export const decodeTxRawToTxHr = async (signedTx: TxRaw) => {
 
   const decoded = decodeTxRawToTx(signedTx);
 
-  const txBodyObject = decoded.body!;
+  const jsonizedTx: JsonizedTx = Tx.toJSON(decoded) as JsonizedTx;
+
+  dirLog('from decodeTxRawToHr jsonizedTx ', jsonizedTx);
+
+  // const txBodyObject = decoded.body!;
 
   // hex string with the value
   // const encodedTxBodyObject = TxBody.toJSON(txBodyObject) as TxBody;
 
-  const decodedMessages = await client.decodeMessagesFromTheTxBody(txBodyObject);
+  const decodedMessages = await client.decodeMessagesFromTheTxBody(decoded.body?.messages);
 
-  const txD = Tx.toJSON(decoded) as Tx;
+  if (decodedMessages) {
+    jsonizedTx.body.messages = decodedMessages;
+  }
 
-  txD.body!['messages'] = decodedMessages;
+  // const txD = Tx.toJSON(decoded) as Tx;
+  // if (decodedMessages) {
+  //   txD.body!['messages'] = decodedMessages;
+  // }
 
-  return txD;
+  dirLog('from decodeTxRawToHr jsonizedTx modified ', jsonizedTx);
+  return jsonizedTx;
 };
 
 export const decodeEncodedTxToHumanRead = (txBytes: Uint8Array): DecodedTxRaw => {
@@ -231,8 +265,7 @@ export const sign = async (
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
 
-  const txBytes = encodeTxRawToEncodedTx(signedTx);
-  // const a = await client.decodeIt(txBytes);
+  // const txBytes = encodeTxRawToEncodedTx(signedTx);
 
   return signedTx;
 };

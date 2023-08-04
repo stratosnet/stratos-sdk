@@ -1,5 +1,5 @@
 import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
-import { TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -201,13 +201,26 @@ const mainSend = async (
   const signedTx = await transactions.sign(fromAddress, sendTxMessages);
   dirLog('signedTx run', signedTx);
 
+  // Tx with sibstituted message
   const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
   dirLog('decodedToTest', decodedToTest);
 
-  const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
+  // Tx with substituted as a string
+  const decodedInString = JSON.stringify(decodedToTest, null, 2);
+  // Tx with substituted as a string parsed back to decodedToTest
+  const decodeReAssembled = JSON.parse(decodedInString);
+
+  // Pure Tx (so value , signature and auth are bytes)
+  const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
+
+  // const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
   dirLog('encodedToTest', encodedToTest);
 
+  // reassamble TxRaw from the Tx , this is the same as signedTx
   const assembled = transactions.assembleTxRawFromTx(encodedToTest);
+  // const assembled = transactions.assembleTxFromString(jsTx);
+  // dirLog('assembled', assembled);
+
   // Uint8Array
   // const encoded = transactions.encodeTxRawToEncodedTx(signedTx);
   // dirLog('encoded run', encoded);
@@ -236,7 +249,6 @@ const mainSend = async (
   // if (signedTx) {
   if (assembled) {
     try {
-      // const result = await transactions.broadcast(signedTx);
       const result = await transactions.broadcast(assembled);
       console.log('broadcasting result!', result);
     } catch (error) {

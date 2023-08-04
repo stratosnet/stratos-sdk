@@ -2,6 +2,7 @@ import { encodeSecp256k1Pubkey, StdFee } from '@cosmjs/amino';
 import { ExtendedSecp256k1Signature, Secp256k1 } from '@cosmjs/crypto';
 import { fromBase64, toBase64, fromHex } from '@cosmjs/encoding';
 import { Int53, Uint53 } from '@cosmjs/math';
+import { decodeTxRaw } from '@cosmjs/proto-signing';
 import {
   EncodeObject,
   encodePubkey,
@@ -25,6 +26,7 @@ import { Any } from 'cosmjs-types/google/protobuf/any';
 import { ethers } from 'ethers';
 import { minGasPrice } from '../config/tokens';
 import { wallet } from '../hdVault';
+import { dirLog } from '../services/helpers';
 import * as evm from '../transactions/evm';
 
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
@@ -135,6 +137,54 @@ export class StratosSigningStargateClient extends SigningStargateClient {
 
     return directlySignedByStratos;
   }
+
+  // public async encodeMessagesFromTheTxBody(txBody: TxBody) {
+  public async encodeMessagesFromTheTxBody(messages: any[] | undefined) {
+    if (!messages) {
+      return null;
+    }
+
+    const parsedData = [];
+
+    // for (const message of txBody.messages) {
+    for (const message of messages) {
+      dirLog(' from encodeMessagesFromTheTxBody message', message);
+      const encodedMessage = this.registry.encode({ typeUrl: message.typeUrl, value: message.value });
+      // parsedData.push({ typeUrl: message.typeUrl, value: encodedMessage });
+      parsedData.push({ typeUrl: message.typeUrl, value: toBase64(encodedMessage) });
+    }
+
+    return parsedData;
+  }
+
+  // public async decodeMessagesFromTheTxBody(txBody: TxBody) {
+  public async decodeMessagesFromTheTxBody(messages: any[] | undefined) {
+    if (!messages) {
+      return null;
+    }
+    const parsedData = [];
+
+    for (const message of messages) {
+      const decodedMessage = this.registry.decode(message);
+      console.log('message from decodedMessage', message);
+      console.log('decodedMessage from decodedMessage', decodedMessage);
+      parsedData.push({ typeUrl: message.typeUrl, value: decodedMessage });
+    }
+    // dirLog('parsedData from decodeMessage', parsedData);
+
+    return parsedData;
+  }
+
+  // public async decodeIt(tx: Uint8Array) {
+  //   const decoded = decodeTxRaw(tx);
+  //   const parsedData = [];
+  //
+  //   for (const message of decoded.body.messages) {
+  //     const decodedMsg = this.registry.decode(message);
+  //     parsedData.push(decodedMsg);
+  //   }
+  //   return parsedData;
+  // }
 
   public async execEvm(
     payload: evm.DynamicFeeTx,
@@ -280,6 +330,8 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
     const pubkeyEncodedToUse = pubkeyEncodedStratos;
 
+    // console.log('given messages for the tx body', messages);
+
     const txBodyEncodeObject: TxBodyEncodeObject = {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: {
@@ -289,13 +341,41 @@ export class StratosSigningStargateClient extends SigningStargateClient {
       },
     };
 
+    dirLog('txBodyEncodeObject', txBodyEncodeObject);
+
     const txBodyBytes = this.registry.encode(txBodyEncodeObject);
+
+    // const txBodyDecodedObject = this.registry.decode({
+    //   typeUrl: '/cosmos.tx.v1beta1.TxBody',
+    //   value: txBodyBytes,
+    // });
+
+    // is wrong , doesnt have bytes in value
+    // dirLog('txBodyDecodedObject', txBodyDecodedObject);
+
+    const txBodyDecodedObject2 = TxBody.decode(txBodyBytes);
+    dirLog('txBodyDecodedObject2 TxBody', txBodyDecodedObject2);
+
+    // for (const message of txBodyDecodedObject2.messages) {
+    // const decodedMessage = this.registry.decode(message);
+    // console.log('decodedMessage from the txBodyDecodedObject2 ', decodedMessage);
+    // const encodedMessage = this.registry.encode({ typeUrl: message.typeUrl, value: decodedMessage });
+    // const originalMessageValue = message.value;
+
+    // console.log('originalMessageValue from the txBodyDecodedObject2', originalMessageValue);
+
+    // console.log('encodedMessage from the txBodyDecodedObject2', encodedMessage);
+    // const encodedValue = Uint8Array.from(encodedMessage);
+    // console.log('encodedValue from the txBodyDecodedObject2', encodedValue);
+    // }
     const gasLimit = Int53.fromString(fee.gas).toNumber();
     const authInfoBytes = makeAuthInfoBytes([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
     const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, accountNumber);
     const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
 
     // const verificationResult = StratosPubKey.verify(signed);
+    // console.log('signed.bodyBytes', signed.bodyBytes);
+    // console.log('txBodyBytes', txBodyBytes);
 
     const assembledTx = TxRaw.fromPartial({
       bodyBytes: signed.bodyBytes,
@@ -303,6 +383,8 @@ export class StratosSigningStargateClient extends SigningStargateClient {
       signatures: [fromBase64(signature.signature)],
     });
 
+    // const assembledInJson = TxRaw.toJSON(assembledTx);
+    // console.log('assembledInJson', assembledInJson);
     return assembledTx;
   }
 }
