@@ -1,22 +1,6 @@
-import { DecodedTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { Tx, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import * as Types from './types';
-declare global {
-    interface Window {
-        encoder: any;
-    }
-    namespace NodeJS {
-        interface Global {
-            encoder: any;
-        }
-    }
-}
-export declare const assembleTxRawFromHumanRead: (decoded: DecodedTxRaw) => TxRaw;
-export declare const assembleTxRawFromTx: (tx: Tx) => TxRaw;
-export declare const assembleTxFromString: (txString: string) => Tx;
-export declare const assembleTxRawFromString: (txRawString: string) => TxRaw;
-export declare const encodeTxHrToTx: (jsonizedTx: JsonizedTx) => Promise<Tx>;
 interface JsonizedMessage {
     typeUrl: string;
     value: string;
@@ -28,9 +12,20 @@ export interface JsonizedTx {
     authInfo: any;
     signatures: string[];
 }
+declare global {
+    interface Window {
+        encoder: any;
+    }
+    namespace NodeJS {
+        interface Global {
+            encoder: any;
+        }
+    }
+}
+export declare const assembleTxRawFromTx: (tx: Tx) => TxRaw;
+export declare const encodeTxHrToTx: (jsonizedTx: JsonizedTx) => Promise<Tx>;
 export declare const decodeTxRawToTx: (signedTx: TxRaw) => Tx;
 export declare const decodeTxRawToTxHr: (signedTx: TxRaw) => Promise<JsonizedTx>;
-export declare const decodeEncodedTxToHumanRead: (txBytes: Uint8Array) => DecodedTxRaw;
 export declare const encodeTxRawToEncodedTx: (signedTx: TxRaw) => Uint8Array;
 export declare const broadcast: (signedTx: TxRaw) => Promise<DeliverTxResponse>;
 export declare const getStandardDefaultFee: () => Types.TransactionFee;

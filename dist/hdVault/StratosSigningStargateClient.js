@@ -28,6 +28,7 @@ const amino_1 = require("@cosmjs/amino");
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const math_1 = require("@cosmjs/math");
+// import { decodeTxRaw } from '@cosmjs/proto-signing';
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const stargate_1 = require("@cosmjs/stargate");
 const queryclient_1 = require("@cosmjs/stargate/build/queryclient");
@@ -38,7 +39,6 @@ const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const any_1 = require("cosmjs-types/google/protobuf/any");
 const ethers_1 = require("ethers");
 const tokens_1 = require("../config/tokens");
-const helpers_1 = require("../services/helpers");
 const evm = __importStar(require("../transactions/evm"));
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
@@ -104,29 +104,20 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
                 chainId: chainId,
             };
         }
-        // console.log(
-        //   '0. YES sign from signing stargate client (next will be sign direct), signerData ',
-        //   signerData,
-        // );
         const directlySignedByStratos = this.signDirectStratos(signerAddress, messages, fee, memo, signerData, extensionOptions);
         return directlySignedByStratos;
     }
-    // public async encodeMessagesFromTheTxBody(txBody: TxBody) {
     async encodeMessagesFromTheTxBody(messages) {
         if (!messages) {
             return null;
         }
         const parsedData = [];
-        // for (const message of txBody.messages) {
         for (const message of messages) {
-            (0, helpers_1.dirLog)(' from encodeMessagesFromTheTxBody message', message);
             const encodedMessage = this.registry.encode({ typeUrl: message.typeUrl, value: message.value });
-            // parsedData.push({ typeUrl: message.typeUrl, value: encodedMessage });
             parsedData.push({ typeUrl: message.typeUrl, value: (0, encoding_1.toBase64)(encodedMessage) });
         }
         return parsedData;
     }
-    // public async decodeMessagesFromTheTxBody(txBody: TxBody) {
     async decodeMessagesFromTheTxBody(messages) {
         if (!messages) {
             return null;
@@ -134,23 +125,10 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
         const parsedData = [];
         for (const message of messages) {
             const decodedMessage = this.registry.decode(message);
-            console.log('message from decodedMessage', message);
-            console.log('decodedMessage from decodedMessage', decodedMessage);
             parsedData.push({ typeUrl: message.typeUrl, value: decodedMessage });
         }
-        // dirLog('parsedData from decodeMessage', parsedData);
         return parsedData;
     }
-    // public async decodeIt(tx: Uint8Array) {
-    //   const decoded = decodeTxRaw(tx);
-    //   const parsedData = [];
-    //
-    //   for (const message of decoded.body.messages) {
-    //     const decodedMsg = this.registry.decode(message);
-    //     parsedData.push(decodedMsg);
-    //   }
-    //   return parsedData;
-    // }
     async execEvm(payload, keyPair, simulate) {
         const chainId = +(payload.chainId || '0'); // NOTE: Should be retrieved from API but currently only available on web3 api
         const nonce = payload.nonce || (await this.getSequence(keyPair.address)).sequence;
@@ -261,7 +239,6 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
     async signDirectStratos(signerAddress, messages, fee, memo, { accountNumber, sequence, chainId }, extensionOptions) {
         const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
         const pubkeyEncodedToUse = pubkeyEncodedStratos;
-        // console.log('given messages for the tx body', messages);
         const txBodyEncodeObject = {
             typeUrl: '/cosmos.tx.v1beta1.TxBody',
             value: {
@@ -270,40 +247,17 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
                 extensionOptions,
             },
         };
-        (0, helpers_1.dirLog)('txBodyEncodeObject', txBodyEncodeObject);
         const txBodyBytes = this.registry.encode(txBodyEncodeObject);
-        // const txBodyDecodedObject = this.registry.decode({
-        //   typeUrl: '/cosmos.tx.v1beta1.TxBody',
-        //   value: txBodyBytes,
-        // });
-        // is wrong , doesnt have bytes in value
-        // dirLog('txBodyDecodedObject', txBodyDecodedObject);
-        const txBodyDecodedObject2 = tx_1.TxBody.decode(txBodyBytes);
-        (0, helpers_1.dirLog)('txBodyDecodedObject2 TxBody', txBodyDecodedObject2);
-        // for (const message of txBodyDecodedObject2.messages) {
-        // const decodedMessage = this.registry.decode(message);
-        // console.log('decodedMessage from the txBodyDecodedObject2 ', decodedMessage);
-        // const encodedMessage = this.registry.encode({ typeUrl: message.typeUrl, value: decodedMessage });
-        // const originalMessageValue = message.value;
-        // console.log('originalMessageValue from the txBodyDecodedObject2', originalMessageValue);
-        // console.log('encodedMessage from the txBodyDecodedObject2', encodedMessage);
-        // const encodedValue = Uint8Array.from(encodedMessage);
-        // console.log('encodedValue from the txBodyDecodedObject2', encodedValue);
-        // }
         const gasLimit = math_1.Int53.fromString(fee.gas).toNumber();
         const authInfoBytes = (0, proto_signing_1.makeAuthInfoBytes)([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
         const signDoc = (0, proto_signing_1.makeSignDoc)(txBodyBytes, authInfoBytes, chainId, accountNumber);
         const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
         // const verificationResult = StratosPubKey.verify(signed);
-        // console.log('signed.bodyBytes', signed.bodyBytes);
-        // console.log('txBodyBytes', txBodyBytes);
         const assembledTx = tx_1.TxRaw.fromPartial({
             bodyBytes: signed.bodyBytes,
             authInfoBytes: signed.authInfoBytes,
             signatures: [(0, encoding_1.fromBase64)(signature.signature)],
         });
-        // const assembledInJson = TxRaw.toJSON(assembledTx);
-        // console.log('assembledInJson', assembledInJson);
         return assembledTx;
     }
 }

@@ -23,9 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeEncodedTxToHumanRead = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromString = exports.assembleTxFromString = exports.assembleTxRawFromTx = exports.assembleTxRawFromHumanRead = void 0;
-const encoding_1 = require("@cosmjs/encoding");
-const proto_signing_1 = require("@cosmjs/proto-signing");
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromTx = void 0;
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
@@ -40,51 +38,22 @@ function* payloadGenerator(dataList) {
         yield dataList.shift();
     }
 }
-const assembleTxRawFromHumanRead = (decoded) => {
-    const txBytesAssembled = tx_1.TxRaw.fromPartial({
-        bodyBytes: tx_1.TxBody.encode(decoded.body).finish(),
-        authInfoBytes: tx_1.AuthInfo.encode(decoded.authInfo).finish(),
-        signatures: [(0, encoding_1.fromBase64)(decoded.signatures.map(ss => (0, encoding_1.toBase64)(ss)).pop())],
-    });
-    return txBytesAssembled;
-};
-exports.assembleTxRawFromHumanRead = assembleTxRawFromHumanRead;
 const assembleTxRawFromTx = (tx) => {
     const txR = tx_1.TxRaw.fromPartial({
         bodyBytes: tx_1.TxBody.encode(tx.body).finish(),
         authInfoBytes: tx_1.AuthInfo.encode(tx.authInfo).finish(),
         signatures: tx.signatures.map(ss => ss),
     });
-    // console.log('assembleTxRawFromTx txRaw', txR);
     return txR;
 };
 exports.assembleTxRawFromTx = assembleTxRawFromTx;
-const assembleTxFromString = (txString) => {
-    const parsedObject = JSON.parse(txString);
-    // console.log('parsedObject', parsedObject);
-    const tx = tx_1.Tx.fromJSON(parsedObject);
-    return tx;
-};
-exports.assembleTxFromString = assembleTxFromString;
-const assembleTxRawFromString = (txRawString) => {
-    const tx = (0, exports.assembleTxFromString)(txRawString);
-    const txR = (0, exports.assembleTxRawFromTx)(tx);
-    return txR;
-};
-exports.assembleTxRawFromString = assembleTxRawFromString;
 const encodeTxHrToTx = async (jsonizedTx) => {
     const client = await (0, cosmos_1.getCosmos)();
-    // const txBodyObject = txD.body!;
     const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
-    (0, helpers_1.dirLog)('from encodeTxHrToTx encodedMessages', encodedMessages);
     if (encodedMessages) {
         jsonizedTx.body.messages = encodedMessages;
     }
-    // const myTx = { body: txBodyObject, authInfo: txD.authInfo, signatures: txD.signatures };
-    // myTx.body['messages'] = encodedMessages;
-    // dirLog('from encodeTxHrToTx myTx', myTx);
     const encoded = tx_1.Tx.fromJSON(jsonizedTx);
-    (0, helpers_1.dirLog)('from encodeTxHrToTx encoded', encoded);
     return encoded;
 };
 exports.encodeTxHrToTx = encodeTxHrToTx;
@@ -96,7 +65,6 @@ const decodeTxRawToTx = (signedTx) => {
         body: txBodyObject,
         signatures: signedTx.signatures.map(ss => ss),
     });
-    (0, helpers_1.dirLog)('from decodeTxRawToTx decoded', decoded);
     return decoded;
 };
 exports.decodeTxRawToTx = decodeTxRawToTx;
@@ -105,27 +73,13 @@ const decodeTxRawToTxHr = async (signedTx) => {
     const client = await (0, cosmos_1.getCosmos)();
     const decoded = (0, exports.decodeTxRawToTx)(signedTx);
     const jsonizedTx = tx_1.Tx.toJSON(decoded);
-    (0, helpers_1.dirLog)('from decodeTxRawToHr jsonizedTx ', jsonizedTx);
-    // const txBodyObject = decoded.body!;
-    // hex string with the value
-    // const encodedTxBodyObject = TxBody.toJSON(txBodyObject) as TxBody;
     const decodedMessages = await client.decodeMessagesFromTheTxBody((_a = decoded.body) === null || _a === void 0 ? void 0 : _a.messages);
     if (decodedMessages) {
         jsonizedTx.body.messages = decodedMessages;
     }
-    // const txD = Tx.toJSON(decoded) as Tx;
-    // if (decodedMessages) {
-    //   txD.body!['messages'] = decodedMessages;
-    // }
-    (0, helpers_1.dirLog)('from decodeTxRawToHr jsonizedTx modified ', jsonizedTx);
     return jsonizedTx;
 };
 exports.decodeTxRawToTxHr = decodeTxRawToTxHr;
-const decodeEncodedTxToHumanRead = (txBytes) => {
-    const decoded = (0, proto_signing_1.decodeTxRaw)(txBytes);
-    return decoded;
-};
-exports.decodeEncodedTxToHumanRead = decodeEncodedTxToHumanRead;
 const encodeTxRawToEncodedTx = (signedTx) => {
     const txBytes = tx_1.TxRaw.encode(signedTx).finish();
     return txBytes;
@@ -134,10 +88,7 @@ exports.encodeTxRawToEncodedTx = encodeTxRawToEncodedTx;
 const broadcast = async (signedTx) => {
     try {
         const client = await (0, cosmos_1.getCosmos)();
-        // log('signedTx to be broadcasted', signedTx);
-        // const txBytes = TxRaw.encode(signedTx).finish();
         const txBytes = (0, exports.encodeTxRawToEncodedTx)(signedTx);
-        // log('encoded tx txBytes', txBytes);
         const result = await client.broadcastTx(txBytes);
         return result;
     }
@@ -205,26 +156,6 @@ const getStandardAmount = (amounts) => {
     return result;
 };
 exports.getStandardAmount = getStandardAmount;
-// @depricated ?
-// export const getBaseTx = async (
-//   keyPairAddress: string,
-//   memo = '',
-//   numberOfMessages = 1,
-// ): Promise<Types.BaseTransaction> => {
-//   console.log('get base tx 1');
-//   const accountsData = await getAccountsData(keyPairAddress);
-//   const oldSequence = String(accountsData.account.sequence);
-//   const newSequence = parseInt(oldSequence);
-//   const { chainId } = Sdk.environment;
-//   const myTx = {
-//     chain_id: chainId,
-//     fee: getStandardFee(numberOfMessages),
-//     memo,
-//     account_number: String(accountsData.account.account_number),
-//     sequence: `${newSequence}`,
-//   };
-//   return myTx;
-// };
 const getSendTx = async (keyPairAddress, sendPayload) => {
     const payloadToProcess = payloadGenerator(sendPayload);
     let iteratedData = payloadToProcess.next();
