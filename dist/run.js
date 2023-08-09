@@ -105,7 +105,7 @@ const evmSend = async () => {
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
     const { sequence } = await _cosmosClient.getSequence(fromAddress);
     const payload = evm.DynamicFeeTx.fromPartial({
-        chainId: '2048',
+        chainId: '2047',
         nonce: sequence,
         gasFeeCap: (1000000000).toString(),
         gas: 21000,

@@ -171,10 +171,10 @@ export class StratosSigningStargateClient extends SigningStargateClient {
   ): Promise<TxRaw | number> {
     const chainId = +(payload.chainId || '0'); // NOTE: Should be retrieved from API but currently only available on web3 api
     const nonce = payload.nonce || (await this.getSequence(keyPair.address)).sequence;
-    const gasTipCap = ethers.utils.bigNumberify(payload.gasTipCap || '0'); // NOTE: Useless but keeped for a london sync
-    const gasFeeCap = ethers.utils.bigNumberify(payload.gasFeeCap || minGasPrice.toString());
+    const gasTipCap = ethers.BigNumber.from(payload.gasTipCap || '0'); // NOTE: Useless but keeped for a london sync
+    const gasFeeCap = ethers.BigNumber.from(payload.gasFeeCap || minGasPrice.toString());
     const to = payload.to || '0x';
-    const value = ethers.utils.bigNumberify(payload.value || 0);
+    const value = ethers.BigNumber.from(payload.value || 0);
     const data = payload.data;
     const accesses = payload.accesses; // NOTE: Not supported on stratos yet, but required for signing
     const gas = simulate ? evm.maxGas : payload.gas || 0;
