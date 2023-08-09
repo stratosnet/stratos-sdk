@@ -105,7 +105,7 @@ const evmSend = async () => {
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
     const { sequence } = await _cosmosClient.getSequence(fromAddress);
     const payload = evm.DynamicFeeTx.fromPartial({
-        chainId: '2048',
+        chainId: '2047',
         nonce: sequence,
         gasFeeCap: (1000000000).toString(),
         gas: 21000,
@@ -836,8 +836,7 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await evmSend();
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
