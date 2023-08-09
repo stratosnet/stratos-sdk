@@ -836,7 +836,8 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await evmSend();
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);

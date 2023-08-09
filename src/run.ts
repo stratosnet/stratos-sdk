@@ -1143,7 +1143,8 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await evmSend();
 
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 

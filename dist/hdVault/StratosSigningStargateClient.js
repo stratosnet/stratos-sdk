@@ -132,10 +132,10 @@ class StratosSigningStargateClient extends stargate_1.SigningStargateClient {
     async execEvm(payload, keyPair, simulate) {
         const chainId = +(payload.chainId || '0'); // NOTE: Should be retrieved from API but currently only available on web3 api
         const nonce = payload.nonce || (await this.getSequence(keyPair.address)).sequence;
-        const gasTipCap = ethers_1.ethers.BigNumber(payload.gasTipCap || '0'); // NOTE: Useless but keeped for a london sync
-        const gasFeeCap = ethers_1.ethers.BigNumber(payload.gasFeeCap || tokens_1.minGasPrice.toString());
+        const gasTipCap = ethers_1.ethers.BigNumber.from(payload.gasTipCap || '0'); // NOTE: Useless but keeped for a london sync
+        const gasFeeCap = ethers_1.ethers.BigNumber.from(payload.gasFeeCap || tokens_1.minGasPrice.toString());
         const to = payload.to || '0x';
-        const value = ethers_1.ethers.BigNumber(payload.value || 0);
+        const value = ethers_1.ethers.BigNumber.from(payload.value || 0);
         const data = payload.data;
         const accesses = payload.accesses; // NOTE: Not supported on stratos yet, but required for signing
         const gas = simulate ? evm.maxGas : payload.gas || 0;
