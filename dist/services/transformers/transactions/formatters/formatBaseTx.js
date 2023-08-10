@@ -48,9 +48,9 @@ const formatBaseTx = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
     const sender = '';
     const msgTo = '';
     const txType = txResponseItemTxBodyMessage['@type'];
-    console.log('txType', txType);
+    // console.log('txType', txType);
     const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-    console.log('resolvedType', resolvedType);
+    // console.log('resolvedType', resolvedType);
     const res = {
         eventSender,
         sender,

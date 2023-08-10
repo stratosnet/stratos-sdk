@@ -76,6 +76,7 @@ const transformTx = (txResponseItem) => {
         txFee,
         memo,
         originalTransactionData: tx,
+        originalTxResponse: txResponseItem,
         txMessages: transformedTransactionMessages,
     };
 };
