@@ -23,6 +23,7 @@ export interface FormattedBlockChainTx {
   memo: string;
   statusCode: number;
   originalTransactionData: NetworkTypes.RestTxResponseTx;
+  originalTxResponse: NetworkTypes.RestTxResponse;
   txMessages: FormattedBlockChainTxMessage[];
 }
 

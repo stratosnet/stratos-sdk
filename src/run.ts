@@ -1143,7 +1143,7 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
@@ -1172,6 +1172,7 @@ const main = async () => {
 
   // const randomPrefix = Date.now() + '';
   // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
+  await getTxHistory();
 };
 
 main();

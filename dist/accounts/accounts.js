@@ -259,6 +259,7 @@ exports.getMaxAvailableBalance = getMaxAvailableBalance;
 const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
     const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
     const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit);
+    // console.log('txListResult', txListResult);
     const { response, error } = txListResult;
     if (error) {
         throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
@@ -268,9 +269,10 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     }
     const parsedData = [];
     const { tx_responses: data = [], pagination } = response;
-    console.log('getAccountTrasactions response', response);
+    // console.log('getAccountTrasactions response', response);
     const { total } = pagination;
     data.forEach(txResponseItem => {
+        // console.log('txResponseItem', txResponseItem);
         try {
             const parsed = (0, transactions_1.transformTx)(txResponseItem);
             parsedData.push(parsed);
@@ -282,7 +284,7 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     const totalUnformatted = parseInt(total) / pageLimit;
     const totalPages = Math.ceil(totalUnformatted);
     const result = { data: parsedData, total, page: page || 1, totalPages };
-    console.dir(result, { depth: null, colors: true, maxArrayLength: null });
+    // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;

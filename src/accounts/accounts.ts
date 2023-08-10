@@ -349,6 +349,7 @@ export const getAccountTrasactions = async (
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit);
+  // console.log('txListResult', txListResult);
 
   const { response, error } = txListResult;
 
@@ -363,10 +364,11 @@ export const getAccountTrasactions = async (
   const parsedData: FormattedBlockChainTx[] = [];
 
   const { tx_responses: data = [], pagination } = response;
-  console.log('getAccountTrasactions response', response);
+  // console.log('getAccountTrasactions response', response);
   const { total } = pagination;
 
   data.forEach(txResponseItem => {
+    // console.log('txResponseItem', txResponseItem);
     try {
       const parsed = transformTx(txResponseItem);
       parsedData.push(parsed);
@@ -380,7 +382,7 @@ export const getAccountTrasactions = async (
 
   const result = { data: parsedData, total, page: page || 1, totalPages };
 
-  console.dir(result, { depth: null, colors: true, maxArrayLength: null });
+  // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 
   return result;
 };

@@ -64,6 +64,7 @@ export const transformTx = (txResponseItem: NetworkTypes.RestTxResponse): Types.
     txFee,
     memo,
     originalTransactionData: tx,
+    originalTxResponse: txResponseItem,
     txMessages: transformedTransactionMessages,
   };
 };
