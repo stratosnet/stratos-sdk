@@ -30,6 +30,7 @@ exports.downloadSharedFile = exports.getSharedFileList = exports.stopFileSharing
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const accounts = __importStar(require("../accounts"));
+const remotefs_1 = require("../config/remotefs");
 const keyUtils = __importStar(require("../hdVault/keyUtils"));
 const FilesystemService = __importStar(require("../services/filesystem"));
 const helpers_1 = require("../services/helpers");
@@ -313,8 +314,67 @@ const updloadFile = async (keypair, fileReadPath) => {
         const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}"`;
         throw new Error(errorMsg);
     }
+    const messageForUploadStatusToSign = `${fileInfo.filehash}${address}${timestamp}`;
+    const signatureForUploadStatus = await keyUtils.signWithPrivateKey(messageForUploadStatusToSign, keypair.privateKey);
+    const extraParamsForGetFileStatus = [
+        {
+            filehash: fileInfo.filehash,
+            signature: {
+                address,
+                pubkey: publicKey,
+                signature: signatureForUploadStatus,
+            },
+            req_time: timestamp,
+        },
+    ];
+    let updloadedFileStateGlobal = 2; // failed
+    let attemptsCount = 0;
+    do {
+        attemptsCount += 1;
+        (0, helpers_1.log)(`attempt ${attemptsCount} of ${remotefs_1.FILE_STATUS_CHECK_MAX_ATTEMPTS}`);
+        // const messageForUploadStatusToSign = `${fileInfo.filehash}${address}${timestamp}`;
+        //
+        // const signatureForUploadStatus = await keyUtils.signWithPrivateKey(
+        //   messageForUploadStatusToSign,
+        //   keypair.privateKey,
+        // );
+        //
+        // const extraParamsForGetFileStatus = [
+        //   {
+        //     filehash: fileInfo.filehash,
+        //     signature: {
+        //       address,
+        //       pubkey: publicKey,
+        //       signature: signatureForUploadStatus,
+        //     },
+        //     req_time: timestamp,
+        //   },
+        // ];
+        (0, helpers_1.log)('will call get file status (start)');
+        const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
+        (0, helpers_1.log)('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
+        const { response: responseGetFileStatus } = callResultGetFileStatus;
+        if (!responseGetFileStatus) {
+            (0, helpers_1.dirLog)('we dont have response for get file status request. it might be an error', callResultGetFileStatus);
+            throw new Error('We dont have response to get file status request call');
+        }
+        const { result: updloadedFileStatusResult } = responseGetFileStatus;
+        const { return: requestGetFileStatusReturn, file_upload_state: fileUploadState } = updloadedFileStatusResult;
+        if (parseInt(requestGetFileStatusReturn, 10) !== 0) {
+            throw new Error(`return field in the request get file status response contains an error. Error code "${requestGetFileStatusReturn}"`);
+        }
+        updloadedFileStateGlobal = fileUploadState;
+        (0, helpers_1.log)(`current file state ${updloadedFileStateGlobal}`, typeof updloadedFileStateGlobal);
+        // log('get file status response ', responseGetFileStatus);
+        await (0, helpers_1.delay)(remotefs_1.FILE_STATUS_CHECK_WAIT_TIME);
+    } while (attemptsCount <= remotefs_1.FILE_STATUS_CHECK_MAX_ATTEMPTS && updloadedFileStateGlobal !== 3);
+    if (updloadedFileStateGlobal !== 3) {
+        // 3 === FINISHED
+        (0, helpers_1.log)('oh no!!! responseGetFileStateGlobal was not finished', updloadedFileStateGlobal);
+        const errorMsg = `There was an error during the get file status. "file_uploading_state" from the request result is "${updloadedFileStateGlobal}"`;
+        throw new Error(errorMsg);
+    }
     const uploadResult = { uploadReturn, filehash: fileInfo.filehash };
-    // console.log('uploadResult to to return~', uploadResult);
     return uploadResult;
 };
 exports.updloadFile = updloadFile;

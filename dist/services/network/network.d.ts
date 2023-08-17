@@ -46,4 +46,5 @@ export declare const sendUserRequestListShare: <T = Types.FileUserRequestListSha
 export declare const sendUserRequestStopShare: <T = Types.FileUserRequestStopShareParams>(extraParams: T[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestStopShareResponse>>;
 export declare const sendUserRequestGetShared: <T = Types.FileUserRequestGetSharedParams>(extraParams: T[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetSharedResponse>>;
 export declare const sendUserRequestDownloadShared: <T = Types.FileUserRequestDownloadSharedParams>(extraParams: T[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadSharedResponse>>;
+export declare const sendUserRequestGetFileStatus: <T = Types.FileUserRequestGetFileStatusParams>(extraParams: T[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetFileStatusResponse>>;
 export declare const getChainId: () => Promise<string | undefined>;
