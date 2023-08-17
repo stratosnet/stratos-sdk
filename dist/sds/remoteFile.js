@@ -332,24 +332,6 @@ const updloadFile = async (keypair, fileReadPath) => {
     do {
         attemptsCount += 1;
         (0, helpers_1.log)(`attempt ${attemptsCount} of ${remotefs_1.FILE_STATUS_CHECK_MAX_ATTEMPTS}`);
-        // const messageForUploadStatusToSign = `${fileInfo.filehash}${address}${timestamp}`;
-        //
-        // const signatureForUploadStatus = await keyUtils.signWithPrivateKey(
-        //   messageForUploadStatusToSign,
-        //   keypair.privateKey,
-        // );
-        //
-        // const extraParamsForGetFileStatus = [
-        //   {
-        //     filehash: fileInfo.filehash,
-        //     signature: {
-        //       address,
-        //       pubkey: publicKey,
-        //       signature: signatureForUploadStatus,
-        //     },
-        //     req_time: timestamp,
-        //   },
-        // ];
         (0, helpers_1.log)('will call get file status (start)');
         const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
         (0, helpers_1.log)('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
@@ -365,7 +347,6 @@ const updloadFile = async (keypair, fileReadPath) => {
         }
         updloadedFileStateGlobal = fileUploadState;
         (0, helpers_1.log)(`current file state ${updloadedFileStateGlobal}`, typeof updloadedFileStateGlobal);
-        // log('get file status response ', responseGetFileStatus);
         await (0, helpers_1.delay)(remotefs_1.FILE_STATUS_CHECK_WAIT_TIME);
     } while (attemptsCount <= remotefs_1.FILE_STATUS_CHECK_MAX_ATTEMPTS && updloadedFileStateGlobal !== 3);
     if (updloadedFileStateGlobal !== 3) {
