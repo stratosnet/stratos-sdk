@@ -18,6 +18,14 @@ interface UserFileListResponse {
   originalResponse: RequestUserFilesResponse;
 }
 
+export interface UploadedFileStatusInfo {
+  fileHash: string;
+  fileUploadState: number;
+  userHasFile: boolean;
+  replicas: number;
+  requestGetFileStatusReturn: string;
+}
+
 const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDownloadResponse>(
   responseRequestDownloadShared: T,
   filehash: string,
@@ -140,6 +148,72 @@ const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDow
 
   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
   return decodedFile;
+};
+
+export const getUploadedFilesStatus = async (
+  keypair: wallet.KeyPairInfo,
+  fileHash: string,
+): Promise<UploadedFileStatusInfo> => {
+  const { address, publicKey } = keypair;
+  const timestamp = getTimestampInSeconds();
+  const messageForUploadStatusToSign = `${fileHash}${address}${timestamp}`;
+
+  const signatureForUploadStatus = await keyUtils.signWithPrivateKey(
+    messageForUploadStatusToSign,
+    keypair.privateKey,
+  );
+
+  const extraParamsForGetFileStatus = [
+    {
+      filehash: fileHash,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature: signatureForUploadStatus,
+      },
+      req_time: timestamp,
+    },
+  ];
+
+  const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
+  log('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
+
+  const { response: responseGetFileStatus } = callResultGetFileStatus;
+
+  if (!responseGetFileStatus) {
+    dirLog(
+      'we dont have response for get file status request. it might be an error',
+      callResultGetFileStatus,
+    );
+    throw new Error('We dont have response to get file status request call');
+  }
+
+  const { result: updloadedFileStatusResult } = responseGetFileStatus;
+
+  const {
+    return: requestGetFileStatusReturn,
+    file_upload_state: fileUploadState,
+    user_has_file: userHasFile,
+    replicas,
+  } = updloadedFileStatusResult;
+
+  if (parseInt(requestGetFileStatusReturn, 10) !== 0) {
+    throw new Error(
+      `return field in the request get file status response contains an error. Error code "${requestGetFileStatusReturn}"`,
+    );
+  }
+
+  const fileStatusInfo = {
+    fileHash,
+    fileUploadState,
+    userHasFile,
+    replicas,
+    requestGetFileStatusReturn,
+  };
+
+  return fileStatusInfo;
+  // updloadedFileStateGlobal = fileUploadState;
+  // log(`current file state ${updloadedFileStateGlobal}`, typeof updloadedFileStateGlobal);
 };
 
 export const getUploadedFileList = async (
@@ -284,7 +358,7 @@ export const downloadFile = async (
 export const updloadFile = async (
   keypair: wallet.KeyPairInfo,
   fileReadPath: string,
-): Promise<{ uploadReturn: string; filehash: string }> => {
+): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: UploadedFileStatusInfo }> => {
   const imageFileName = path.basename(fileReadPath);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
@@ -452,74 +526,29 @@ export const updloadFile = async (
     throw new Error(errorMsg);
   }
 
-  const messageForUploadStatusToSign = `${fileInfo.filehash}${address}${timestamp}`;
-
-  const signatureForUploadStatus = await keyUtils.signWithPrivateKey(
-    messageForUploadStatusToSign,
-    keypair.privateKey,
-  );
-
-  const extraParamsForGetFileStatus = [
-    {
-      filehash: fileInfo.filehash,
-      signature: {
-        address,
-        pubkey: publicKey,
-        signature: signatureForUploadStatus,
-      },
-      req_time: timestamp,
-    },
-  ];
-
   let updloadedFileStateGlobal = 2; // failed
+
+  let fileStatusInfoGlobal: UploadedFileStatusInfo;
 
   let attemptsCount = 0;
 
   do {
     attemptsCount += 1;
 
-    log(`attempt ${attemptsCount} of ${FILE_STATUS_CHECK_MAX_ATTEMPTS}`);
-
-    log('will call get file status (start)');
-    const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
-    log('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
-
-    const { response: responseGetFileStatus } = callResultGetFileStatus;
-
-    if (!responseGetFileStatus) {
-      dirLog(
-        'we dont have response for get file status request. it might be an error',
-        callResultGetFileStatus,
-      );
-      throw new Error('We dont have response to get file status request call');
-    }
-
-    const { result: updloadedFileStatusResult } = responseGetFileStatus;
-
-    const { return: requestGetFileStatusReturn, file_upload_state: fileUploadState } =
-      updloadedFileStatusResult;
-
-    if (parseInt(requestGetFileStatusReturn, 10) !== 0) {
-      throw new Error(
-        `return field in the request get file status response contains an error. Error code "${requestGetFileStatusReturn}"`,
-      );
-    }
+    const fileStatusInfo = await getUploadedFilesStatus(keypair, fileInfo.filehash);
+    const { fileUploadState } = fileStatusInfo;
+    fileStatusInfoGlobal = fileStatusInfo;
 
     updloadedFileStateGlobal = fileUploadState;
-    log(`current file state ${updloadedFileStateGlobal}`, typeof updloadedFileStateGlobal);
 
     await delay(FILE_STATUS_CHECK_WAIT_TIME);
   } while (attemptsCount <= FILE_STATUS_CHECK_MAX_ATTEMPTS && updloadedFileStateGlobal !== 3);
 
-  if (updloadedFileStateGlobal !== 3) {
-    // 3 === FINISHED
-    log('oh no!!! responseGetFileStateGlobal was not finished', updloadedFileStateGlobal);
-
-    const errorMsg = `There was an error during the get file status. "file_uploading_state" from the request result is "${updloadedFileStateGlobal}"`;
-    throw new Error(errorMsg);
-  }
-
-  const uploadResult = { uploadReturn, filehash: fileInfo.filehash };
+  const uploadResult = {
+    uploadReturn,
+    filehash: fileInfo.filehash,
+    fileStatusInfo: fileStatusInfoGlobal,
+  };
 
   return uploadResult;
 };

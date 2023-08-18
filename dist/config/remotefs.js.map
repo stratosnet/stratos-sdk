@@ -1,1 +1,1 @@
-{"version":3,"file":"remotefs.js","sourceRoot":"","sources":["../../src/config/remotefs.ts"],"names":[],"mappings":";;;AAAa,QAAA,2BAA2B,GAAG,IAAI,CAAC,CAAC,UAAU;AAC9C,QAAA,8BAA8B,GAAG,EAAE,CAAC"}
+{"version":3,"file":"remotefs.js","sourceRoot":"","sources":["../../src/config/remotefs.ts"],"names":[],"mappings":";;;AAAa,QAAA,2BAA2B,GAAG,IAAI,CAAC,CAAC,UAAU;AAC9C,QAAA,8BAA8B,GAAG,CAAC,CAAC"}

@@ -818,8 +818,8 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a
-    const filename = 'file100M_aug17_12';
-    // await testItFileUp(filename, hdPathIndex);
+    const filename = 'file10M_Aug18_1';
+    await testItFileUp(filename, hdPathIndex);
     // 3a
     // const filename = 'file10_test_1689623710986';
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
@@ -836,7 +836,7 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);

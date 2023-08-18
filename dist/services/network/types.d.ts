@@ -659,6 +659,6 @@ export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
         return: '0' | '1' | '2' | '3';
         file_upload_state: number;
         user_has_file: boolean;
-        replicase: number;
+        replicas: number;
     };
 }

@@ -42,7 +42,8 @@
     "test:sdk:integration:local": " INTEGRATION_ENV_NAME=local yarn test:sdk:integration",
     "test:sdk:integration:mesos": " INTEGRATION_ENV_NAME=mesos yarn test:sdk:integration",
     "test:sdk:integration:devnet": " INTEGRATION_ENV_NAME=devnet yarn test:sdk:integration",
-    "integration": "yarn test:sdk:integration:local"
+    "integration": "yarn test:sdk:integration:local",
+    "integration:mesos": "yarn test:sdk:integration:mesos"
   },
   "lint-staged": {
     "./src/**/*.ts": [
