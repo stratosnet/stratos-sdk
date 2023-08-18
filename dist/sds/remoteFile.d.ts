@@ -7,6 +7,14 @@ interface UserFileListResponse {
     files: FileInfoItem[];
     originalResponse: RequestUserFilesResponse;
 }
+export interface UploadedFileStatusInfo {
+    fileHash: string;
+    fileUploadState: number;
+    userHasFile: boolean;
+    replicas: number;
+    requestGetFileStatusReturn: string;
+}
+export declare const getUploadedFilesStatus: (keypair: wallet.KeyPairInfo, fileHash: string) => Promise<UploadedFileStatusInfo>;
 export declare const getUploadedFileList: (keypair: wallet.KeyPairInfo, page?: number) => Promise<UserFileListResponse>;
 export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string) => Promise<{
     filePathToSave: string;
@@ -14,6 +22,7 @@ export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave:
 export declare const updloadFile: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<{
     uploadReturn: string;
     filehash: string;
+    fileStatusInfo: UploadedFileStatusInfo;
 }>;
 export declare const shareFile: (keypair: wallet.KeyPairInfo, filehash: string) => Promise<{
     filehash: string;

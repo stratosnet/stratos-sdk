@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import * as accounts from '../accounts';
+import { FILE_STATUS_CHECK_WAIT_TIME, FILE_STATUS_CHECK_MAX_ATTEMPTS } from '../config/remotefs';
 import { wallet } from '../hdVault';
 import * as keyUtils from '../hdVault/keyUtils';
 import * as FilesystemService from '../services/filesystem';
-import { log, dirLog, getTimestampInSeconds } from '../services/helpers';
+import { delay, log, dirLog, getTimestampInSeconds } from '../services/helpers';
 import * as Network from '../services/network';
 import { networkTypes, sendUserRequestList } from '../services/network';
 import * as NetworkTypes from '../services/network/types';
@@ -15,6 +16,14 @@ type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.
 interface UserFileListResponse {
   files: FileInfoItem[];
   originalResponse: RequestUserFilesResponse;
+}
+
+export interface UploadedFileStatusInfo {
+  fileHash: string;
+  fileUploadState: number;
+  userHasFile: boolean;
+  replicas: number;
+  requestGetFileStatusReturn: string;
 }
 
 const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDownloadResponse>(
@@ -139,6 +148,72 @@ const processUsedFileDownload = async <T extends NetworkTypes.FileUserRequestDow
 
   const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
   return decodedFile;
+};
+
+export const getUploadedFilesStatus = async (
+  keypair: wallet.KeyPairInfo,
+  fileHash: string,
+): Promise<UploadedFileStatusInfo> => {
+  const { address, publicKey } = keypair;
+  const timestamp = getTimestampInSeconds();
+  const messageForUploadStatusToSign = `${fileHash}${address}${timestamp}`;
+
+  const signatureForUploadStatus = await keyUtils.signWithPrivateKey(
+    messageForUploadStatusToSign,
+    keypair.privateKey,
+  );
+
+  const extraParamsForGetFileStatus = [
+    {
+      filehash: fileHash,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature: signatureForUploadStatus,
+      },
+      req_time: timestamp,
+    },
+  ];
+
+  const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
+  log('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
+
+  const { response: responseGetFileStatus } = callResultGetFileStatus;
+
+  if (!responseGetFileStatus) {
+    dirLog(
+      'we dont have response for get file status request. it might be an error',
+      callResultGetFileStatus,
+    );
+    throw new Error('We dont have response to get file status request call');
+  }
+
+  const { result: updloadedFileStatusResult } = responseGetFileStatus;
+
+  const {
+    return: requestGetFileStatusReturn,
+    file_upload_state: fileUploadState,
+    user_has_file: userHasFile,
+    replicas,
+  } = updloadedFileStatusResult;
+
+  if (parseInt(requestGetFileStatusReturn, 10) !== 0) {
+    throw new Error(
+      `return field in the request get file status response contains an error. Error code "${requestGetFileStatusReturn}"`,
+    );
+  }
+
+  const fileStatusInfo = {
+    fileHash,
+    fileUploadState,
+    userHasFile,
+    replicas,
+    requestGetFileStatusReturn,
+  };
+
+  return fileStatusInfo;
+  // updloadedFileStateGlobal = fileUploadState;
+  // log(`current file state ${updloadedFileStateGlobal}`, typeof updloadedFileStateGlobal);
 };
 
 export const getUploadedFileList = async (
@@ -283,7 +358,7 @@ export const downloadFile = async (
 export const updloadFile = async (
   keypair: wallet.KeyPairInfo,
   fileReadPath: string,
-): Promise<{ uploadReturn: string; filehash: string }> => {
+): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: UploadedFileStatusInfo }> => {
   const imageFileName = path.basename(fileReadPath);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
@@ -451,8 +526,29 @@ export const updloadFile = async (
     throw new Error(errorMsg);
   }
 
-  const uploadResult = { uploadReturn, filehash: fileInfo.filehash };
-  // console.log('uploadResult to to return~', uploadResult);
+  let updloadedFileStateGlobal = 2; // failed
+
+  let fileStatusInfoGlobal: UploadedFileStatusInfo;
+
+  let attemptsCount = 0;
+
+  do {
+    attemptsCount += 1;
+
+    const fileStatusInfo = await getUploadedFilesStatus(keypair, fileInfo.filehash);
+    const { fileUploadState } = fileStatusInfo;
+    fileStatusInfoGlobal = fileStatusInfo;
+
+    updloadedFileStateGlobal = fileUploadState;
+
+    await delay(FILE_STATUS_CHECK_WAIT_TIME);
+  } while (attemptsCount <= FILE_STATUS_CHECK_MAX_ATTEMPTS && updloadedFileStateGlobal !== 3);
+
+  const uploadResult = {
+    uploadReturn,
+    filehash: fileInfo.filehash,
+    fileStatusInfo: fileStatusInfoGlobal,
+  };
 
   return uploadResult;
 };

@@ -649,3 +649,16 @@ export interface FileUserRequestDownloadSharedParams {
     signature: UserFileSignature;
     req_time: number;
 }
+export interface FileUserRequestGetFileStatusParams {
+    filehash: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3';
+        file_upload_state: number;
+        user_has_file: boolean;
+        replicas: number;
+    };
+}

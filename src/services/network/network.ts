@@ -514,7 +514,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
+  // dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };
@@ -595,6 +595,20 @@ export const sendUserRequestDownloadShared = async <T = Types.FileUserRequestDow
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadSharedResponse>> => {
   const msgId = 1;
   const method = 'user_requestDownloadShared';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetFileStatusParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetFileStatusResponse>> => {
+  const msgId = 1;
+  const method = 'user_getFileStatus';
 
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 

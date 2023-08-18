@@ -27,6 +27,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @jest-environment node
  */
 // import path from 'path';
+const remotefs_1 = require("../../config/remotefs");
 const hdVault_1 = require("../../hdVault");
 const config_1 = require("../config");
 const Integration = __importStar(require("./sdk_inegration_runner"));
@@ -104,7 +105,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
                     expect(result).toBe(true);
                     done();
                 });
-            }, extendedExecutionTimeout * 3);
+            }, extendedExecutionTimeout * 3 + remotefs_1.FILE_STATUS_CHECK_WAIT_TIME);
             it('Downloads the remote file to local file and compares its hash', done => {
                 void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);

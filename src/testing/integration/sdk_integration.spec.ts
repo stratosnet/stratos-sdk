@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 // import path from 'path';
+import { FILE_STATUS_CHECK_WAIT_TIME } from '../../config/remotefs';
 import { mnemonic } from '../../hdVault';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 import * as Integration from './sdk_inegration_runner';
@@ -124,7 +125,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
             },
           );
         },
-        extendedExecutionTimeout * 3,
+        extendedExecutionTimeout * 3 + FILE_STATUS_CHECK_WAIT_TIME,
       );
 
       it(

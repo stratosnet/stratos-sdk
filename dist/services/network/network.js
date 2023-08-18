@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
+exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
@@ -343,7 +343,7 @@ const sendUserRequestGetOzone = async (extraParams, config) => {
     const method = 'user_requestGetOzone';
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
-    (0, helpers_1.dirLog)('🚀 sendUserRequestGetOzone dataResult', dataResult);
+    // dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
     return dataResult;
 };
 exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
@@ -395,6 +395,14 @@ const sendUserRequestDownloadShared = async (extraParams, config) => {
     return dataResult;
 };
 exports.sendUserRequestDownloadShared = sendUserRequestDownloadShared;
+const sendUserRequestGetFileStatus = async (extraParams, config) => {
+    const msgId = 1;
+    const method = 'user_getFileStatus';
+    const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
+    const dataResult = await (0, exports.sendRpcCall)(payload, config);
+    return dataResult;
+};
+exports.sendUserRequestGetFileStatus = sendUserRequestGetFileStatus;
 const getChainId = async () => {
     var _a, _b;
     const result = await (0, exports.getRpcStatus)();

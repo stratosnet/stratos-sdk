@@ -23,7 +23,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokens = exports.hdVault = void 0;
+exports.remotefs = exports.tokens = exports.hdVault = void 0;
 exports.hdVault = __importStar(require("./hdVault"));
 exports.tokens = __importStar(require("./tokens"));
+exports.remotefs = __importStar(require("./remotefs"));
 //# sourceMappingURL=index.js.map
