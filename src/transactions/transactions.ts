@@ -152,7 +152,7 @@ export const getStandardFee = async (
     return getStandardDefaultFee();
   }
 
-  // dirLog('from getStandardFee txMessages', txMessages);
+  dirLog('from getStandardFee txMessages', txMessages);
 
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(
@@ -167,11 +167,18 @@ export const getStandardFee = async (
 
     const amount = minGasPrice.mul(estimatedGas).toString();
 
-    const feeAmount = [{ amount, denom: stratosDenom }];
+    const feeAmount = [
+      {
+        amount,
+        denom: stratosDenom,
+      },
+    ];
+
     const fees = {
       amount: feeAmount,
       gas: `${estimatedGas}`,
     };
+
     return fees;
   } catch (error) {
     log('Full error from simutlate', error);
@@ -204,7 +211,7 @@ export const sign = async (
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
   const result = amounts.map(amount => ({
-    amount: toWei(amount, decimalPrecision).toString(),
+    amount: toWei(amount, decimalPrecision).toFixed(),
     denom: stratosDenom,
   }));
 
@@ -258,13 +265,15 @@ export const getDelegateTx = async (
       typeUrl: Types.TxMsgTypes.Delegate,
       value: {
         amount: {
-          amount: toWei(amount, decimalPrecision).toString(),
+          amount: toWei(amount, decimalPrecision).toFixed(),
           denom: stratosDenom,
         },
         delegatorAddress: delegatorAddress,
         validatorAddress: validatorAddress,
       },
     };
+
+    console.log('message to Delegate', message);
 
     messagesList.push(message);
 
@@ -291,7 +300,7 @@ export const getUnDelegateTx = async (
       typeUrl: Types.TxMsgTypes.Undelegate,
       value: {
         amount: {
-          amount: toWei(amount, decimalPrecision).toString(),
+          amount: toWei(amount, decimalPrecision).toFixed(),
           denom: stratosDenom,
         },
         delegatorAddress: delegatorAddress,

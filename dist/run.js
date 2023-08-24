@@ -208,19 +208,20 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
     }
 };
 // cosmosjs delegate
-const mainDelegate = async () => {
-    const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+const mainDelegate = async (hdPathIndex, givenMnemonic, validatorAddressToDelegate, amount) => {
+    // const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+    const validatorAddress = validatorAddressToDelegate;
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-    const keyPairZero = await (0, wallet_1.deriveKeyPair)(0, password, encryptedMasterKeySeedString);
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
     if (!keyPairZero) {
         return;
     }
     const delegatorAddress = keyPairZero.address;
     console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
     const sendTxMessages = await transactions.getDelegateTx(delegatorAddress, [
-        { amount: 1, validatorAddress },
+        { amount, validatorAddress },
         { amount: 2, validatorAddress },
     ]);
     // const signedTx = transactions.sign(sendTxMessage, keyPairZero.privateKey);
@@ -838,7 +839,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    const filename = 'file10M_Aug23_1';
+    const filename = 'file10M_Aug24_1';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
@@ -857,13 +858,13 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
@@ -871,6 +872,8 @@ const main = async () => {
     // const receiverMnemonic = zeroUserMnemonic;
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+    // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
     // 33 sec, 1m 1sec
     // testReadAndWriteLocal(filename);
     // 51 sec, 1m 38sec
