@@ -117,7 +117,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (!txMessages || !signerAddress) {
         return (0, exports.getStandardDefaultFee)();
     }
-    // dirLog('from getStandardFee txMessages', txMessages);
+    (0, helpers_1.dirLog)('from getStandardFee txMessages', txMessages);
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }
@@ -126,7 +126,12 @@ const getStandardFee = async (signerAddress, txMessages) => {
         const gas = await client.simulate(signerAddress, txMessages, '');
         const estimatedGas = Math.round(gas * tokens_1.gasAdjustment);
         const amount = tokens_1.minGasPrice.mul(estimatedGas).toString();
-        const feeAmount = [{ amount, denom: hdVault_1.stratosDenom }];
+        const feeAmount = [
+            {
+                amount,
+                denom: hdVault_1.stratosDenom,
+            },
+        ];
         const fees = {
             amount: feeAmount,
             gas: `${estimatedGas}`,
@@ -151,7 +156,7 @@ const sign = async (address, txMessages, memo = '', givenFee) => {
 exports.sign = sign;
 const getStandardAmount = (amounts) => {
     const result = amounts.map(amount => ({
-        amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
+        amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toFixed(),
         denom: hdVault_1.stratosDenom,
     }));
     return result;
@@ -187,13 +192,14 @@ const getDelegateTx = async (delegatorAddress, delegatePayload) => {
             typeUrl: Types.TxMsgTypes.Delegate,
             value: {
                 amount: {
-                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
+                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toFixed(),
                     denom: hdVault_1.stratosDenom,
                 },
                 delegatorAddress: delegatorAddress,
                 validatorAddress: validatorAddress,
             },
         };
+        console.log('message to Delegate', message);
         messagesList.push(message);
         iteratedData = payloadToProcess.next();
     }
@@ -210,7 +216,7 @@ const getUnDelegateTx = async (delegatorAddress, unDelegatePayload) => {
             typeUrl: Types.TxMsgTypes.Undelegate,
             value: {
                 amount: {
-                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toString(),
+                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toFixed(),
                     denom: hdVault_1.stratosDenom,
                 },
                 delegatorAddress: delegatorAddress,

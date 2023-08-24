@@ -231,14 +231,20 @@ const mainSend = async (
 };
 
 // cosmosjs delegate
-const mainDelegate = async () => {
-  const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+const mainDelegate = async (
+  hdPathIndex: number,
+  givenMnemonic: string,
+  validatorAddressToDelegate: string,
+  amount: number,
+) => {
+  // const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+  const validatorAddress = validatorAddressToDelegate;
 
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
   const masterKeySeed = await createMasterKeySeed(phrase, password);
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
-  const keyPairZero = await deriveKeyPair(0, password, encryptedMasterKeySeedString);
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
 
   if (!keyPairZero) {
     return;
@@ -248,7 +254,7 @@ const mainDelegate = async () => {
   console.log('🚀 ~ file: run.ts ~ line 138 ~ mainDelegate ~ delegatorAddress', delegatorAddress);
 
   const sendTxMessages = await transactions.getDelegateTx(delegatorAddress, [
-    { amount: 1, validatorAddress },
+    { amount, validatorAddress },
     { amount: 2, validatorAddress },
   ]);
 
@@ -1148,9 +1154,10 @@ const main = async () => {
 
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'text_test.txt';
-  const filename = 'file10M_Aug23_1';
+  const filename = 'file10M_Aug24_1';
 
   // await testItFileUp(filename, hdPathIndex);
+
   // await testFileHash(filename, hdPathIndex);
 
   // 3a
@@ -1174,7 +1181,7 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
@@ -1183,7 +1190,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
@@ -1195,6 +1202,9 @@ const main = async () => {
   // const hdPathIndexReceiver = 1;
 
   // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+
+  // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+  // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
 
   // 33 sec, 1m 1sec
   // testReadAndWriteLocal(filename);

@@ -30,8 +30,8 @@ exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = e
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
-const cid_1 = require("multiformats/cid");
 const base32_1 = require("multiformats/bases/base32");
+const cid_1 = require("multiformats/cid");
 const hasher = __importStar(require("multiformats/hashes/hasher"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
 const helpers_1 = require("../helpers");
@@ -49,7 +49,6 @@ const calculateFileHashOld = async (filePath) => {
     const fileBuffer = await (0, exports.getFileBuffer)(filePath);
     const md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
     const encodedHash = await (0, multihashing_async_1.default)(md5Digest, 'keccak-256', 20);
-    console.log('encodedHash', encodedHash);
     const cid = new cids_1.default(1, 'raw', encodedHash, 'base32hex');
     const realFileHash = cid.toString();
     return realFileHash;
@@ -59,23 +58,16 @@ const calculateFileHash = async (filePath) => {
     const fileBuffer = await (0, exports.getFileBuffer)(filePath);
     const firstKeccak = await (0, multihashing_async_1.default)(fileBuffer, 'keccak-256', 20);
     const secondKeccak = await (0, multihashing_async_1.default)(firstKeccak, 'keccak-256', 20);
-    console.log('firstKeccak', firstKeccak);
-    console.log('secondKeccak', secondKeccak);
     const keccak256Hasher = hasher.from({
         name: 'keccak-256',
         code: 0x1b,
         encode: input => input.slice(-20),
     });
     const encodedHashO = await keccak256Hasher.digest(secondKeccak);
-    console.log('encodedHashO', encodedHashO);
     const cid = cid_1.CID.create(1, 0x66, encodedHashO);
     const realFileHash = cid.toString(base32_1.base32hex);
-    // New fileHash: v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00
     const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
-    const isEqual = expectedHash === realFileHash;
-    console.log('is EQUal', isEqual);
     return realFileHash;
-    // return ''
 };
 exports.calculateFileHash = calculateFileHash;
 const getFileInfo = async (filePath) => {
