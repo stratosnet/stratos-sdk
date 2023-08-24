@@ -1,12 +1,38 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashOld = exports.getFileBuffer = void 0;
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
+const cid_1 = require("multiformats/cid");
+const base32_1 = require("multiformats/bases/base32");
+const hasher = __importStar(require("multiformats/hashes/hasher"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
 const helpers_1 = require("../helpers");
 const getFileBuffer = async (filePath) => {
@@ -19,13 +45,37 @@ const getFileBuffer = async (filePath) => {
     }
 };
 exports.getFileBuffer = getFileBuffer;
-const calculateFileHash = async (filePath) => {
+const calculateFileHashOld = async (filePath) => {
     const fileBuffer = await (0, exports.getFileBuffer)(filePath);
     const md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
     const encodedHash = await (0, multihashing_async_1.default)(md5Digest, 'keccak-256', 20);
+    console.log('encodedHash', encodedHash);
     const cid = new cids_1.default(1, 'raw', encodedHash, 'base32hex');
     const realFileHash = cid.toString();
     return realFileHash;
+};
+exports.calculateFileHashOld = calculateFileHashOld;
+const calculateFileHash = async (filePath) => {
+    const fileBuffer = await (0, exports.getFileBuffer)(filePath);
+    const firstKeccak = await (0, multihashing_async_1.default)(fileBuffer, 'keccak-256', 20);
+    const secondKeccak = await (0, multihashing_async_1.default)(firstKeccak, 'keccak-256', 20);
+    console.log('firstKeccak', firstKeccak);
+    console.log('secondKeccak', secondKeccak);
+    const keccak256Hasher = hasher.from({
+        name: 'keccak-256',
+        code: 0x1b,
+        encode: input => input.slice(-20),
+    });
+    const encodedHashO = await keccak256Hasher.digest(secondKeccak);
+    console.log('encodedHashO', encodedHashO);
+    const cid = cid_1.CID.create(1, 0x66, encodedHashO);
+    const realFileHash = cid.toString(base32_1.base32hex);
+    // New fileHash: v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00
+    const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
+    const isEqual = expectedHash === realFileHash;
+    console.log('is EQUal', isEqual);
+    return realFileHash;
+    // return ''
 };
 exports.calculateFileHash = calculateFileHash;
 const getFileInfo = async (filePath) => {

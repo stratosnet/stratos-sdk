@@ -406,7 +406,7 @@ exports.sendUserRequestGetFileStatus = sendUserRequestGetFileStatus;
 const getChainId = async () => {
     var _a, _b;
     const result = await (0, exports.getRpcStatus)();
-    (0, helpers_1.dirLog)('getChainId result', result);
+    // dirLog('getChainId result', result);
     const { response } = result;
     const chainId = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.network;
     return chainId;
