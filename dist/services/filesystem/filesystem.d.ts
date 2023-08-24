@@ -5,6 +5,7 @@ export interface OpenedFileInfo {
     filehash: string;
 }
 export declare const getFileBuffer: (filePath: string) => Promise<Buffer>;
+export declare const calculateFileHashOld: (filePath: string) => Promise<string>;
 export declare const calculateFileHash: (filePath: string) => Promise<string>;
 export declare const getFileInfo: (filePath: string) => Promise<OpenedFileInfo>;
 export declare const getFileChunks: (filePath: string, chunkSize?: number) => Promise<Buffer[]>;

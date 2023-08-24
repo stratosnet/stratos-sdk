@@ -1,11 +1,11 @@
-import CID from 'cids';
+import CIDM from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
+import { base32hex } from 'multiformats/bases/base32';
+import { CID } from 'multiformats/cid';
+import * as hasher from 'multiformats/hashes/hasher';
 import multihashing from 'multihashing-async';
 import { delay } from '../helpers';
-
-// import { networkTypes, sendUserRequestList } from '../network';
-// import { FileInfoItem } from '../network/types';
 
 export interface OpenedFileInfo {
   size: number;
@@ -21,15 +21,36 @@ export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   }
 };
 
-export const calculateFileHash = async (filePath: string): Promise<string> => {
+export const calculateFileHashOld = async (filePath: string): Promise<string> => {
   const fileBuffer = await getFileBuffer(filePath);
   const md5Digest = crypto.createHash('md5').update(fileBuffer).digest();
 
   const encodedHash = await multihashing(md5Digest, 'keccak-256', 20);
 
-  const cid = new CID(1, 'raw', encodedHash, 'base32hex');
+  const cid = new CIDM(1, 'raw', encodedHash, 'base32hex');
 
   const realFileHash = cid.toString();
+
+  return realFileHash;
+};
+
+export const calculateFileHash = async (filePath: string): Promise<string> => {
+  const fileBuffer = await getFileBuffer(filePath);
+  const firstKeccak = await multihashing(fileBuffer, 'keccak-256', 20);
+  const secondKeccak = await multihashing(firstKeccak, 'keccak-256', 20);
+
+  const keccak256Hasher = hasher.from({
+    name: 'keccak-256',
+    code: 0x1b,
+    encode: input => input.slice(-20),
+  });
+
+  const encodedHashO = await keccak256Hasher.digest(secondKeccak);
+
+  const cid = CID.create(1, 0x66, encodedHashO);
+  const realFileHash = cid.toString(base32hex);
+
+  const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
 
   return realFileHash;
 };

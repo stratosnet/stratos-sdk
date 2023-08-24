@@ -619,7 +619,7 @@ export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetF
 
 export const getChainId = async () => {
   const result = await getRpcStatus();
-  dirLog('getChainId result', result);
+  // dirLog('getChainId result', result);
 
   const { response } = result;
   const chainId = response?.result?.node_info?.network;

@@ -50,6 +50,7 @@ const transactionTypes = __importStar(require("./transactions/types"));
 const validators = __importStar(require("./validators"));
 dotenv_1.default.config();
 const password = 'XXXX';
+// that is the mnemonic from the .env file
 const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
@@ -750,6 +751,22 @@ const testFileDl = async (hdPathIndex, filename, filehash) => {
     await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
     (0, helpers_1.log)('done. filePathToSave', filePathToSave);
 };
+const testFileHash = async (filename, hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const keypair = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+    if (!keypair) {
+        return;
+    }
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, filename);
+    // await RemoteFilesystem.updloadFile(keypair, fileReadPath);
+    const oldFileHash = await FilesystemService.calculateFileHashOld(fileReadPath);
+    const newFileHash = await FilesystemService.calculateFileHash(fileReadPath);
+    console.log('oldFileHash', oldFileHash);
+    console.log('newFileHash', newFileHash);
+};
 const testItFileUp = async (filename, hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
@@ -779,6 +796,7 @@ const testAddressConverstion = async (hdPathIndex) => {
 };
 const main = async () => {
     let resolvedChainID;
+    // that is the mesos config
     const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvDev;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
@@ -801,7 +819,7 @@ const main = async () => {
         // ppNodePort: '8135',
         // ppNodeUrl: 'http://35.233.85.255',
         // ppNodePort: '8142',
-        // mesos
+        // mesos - we connect to mesos pp
         ppNodeUrl: 'http://34.78.29.120', ppNodePort: '8142' }));
     console.log('sdkEnv', Sdk_1.default.environment);
     // tropos
@@ -810,6 +828,7 @@ const main = async () => {
     // await evmSend();
     const hdPathIndex = 0;
     const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    // here is that mnemonic
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     // const phrase = mnemonic.convertStringToArray(testMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
@@ -817,9 +836,11 @@ const main = async () => {
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
-    // 2a
-    const filename = 'file10M_Aug18_1';
+    // 2a - that is the file name - it has to be in ./src
+    // const filename = 'text_test.txt';
+    const filename = 'file10M_Aug23_1';
     // await testItFileUp(filename, hdPathIndex);
+    // await testFileHash(filename, hdPathIndex);
     // 3a
     // const filename = 'file10_test_1689623710986';
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
@@ -836,13 +857,13 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);

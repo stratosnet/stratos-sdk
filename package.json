@@ -123,6 +123,7 @@
     "keccak": "^3.0.2",
     "lodash": "^4.17.21",
     "md5-file": "^5.0.0",
+    "multiformats": "9.9.0",
     "multihashes": "^4.0.3",
     "multihashing-async": "^2.1.4",
     "qs": "^6.11.1",
