@@ -26,6 +26,7 @@ dotenv.config();
 
 const password = 'XXXX';
 
+// that is the mnemonic from the .env file
 const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
 
 const sdkEnvDev = {
@@ -1014,6 +1015,31 @@ const testFileDl = async (hdPathIndex: number, filename: string, filehash: strin
   log('done. filePathToSave', filePathToSave);
 };
 
+const testFileHash = async (filename: string, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const keypair = await deriveKeyPair(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+
+  if (!keypair) {
+    return;
+  }
+
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const fileReadPath = path.resolve(SRC_ROOT, filename);
+
+  // await RemoteFilesystem.updloadFile(keypair, fileReadPath);
+
+  const oldFileHash = await FilesystemService.calculateFileHashOld(fileReadPath);
+  const newFileHash = await FilesystemService.calculateFileHash(fileReadPath);
+
+  console.log('oldFileHash', oldFileHash);
+  console.log('newFileHash', newFileHash);
+};
+
 const testItFileUp = async (filename: string, hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
 
@@ -1059,6 +1085,7 @@ const testAddressConverstion = async (hdPathIndex: number) => {
 const main = async () => {
   let resolvedChainID: string;
 
+  // that is the mesos config
   const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvDev;
 
@@ -1089,7 +1116,7 @@ const main = async () => {
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
 
-    // mesos
+    // mesos - we connect to mesos pp
     ppNodeUrl: 'http://34.78.29.120',
     ppNodePort: '8142',
   });
@@ -1106,6 +1133,7 @@ const main = async () => {
   const testMnemonic =
     'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
 
+  // here is that mnemonic
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
   // const phrase = mnemonic.convertStringToArray(testMnemonic);
 
@@ -1118,10 +1146,12 @@ const main = async () => {
   // 1a
   // await testRequestUserFileList(0, hdPathIndex);
 
-  // 2a
-  const filename = 'file10M_Aug18_1';
+  // 2a - that is the file name - it has to be in ./src
+  // const filename = 'text_test.txt';
+  const filename = 'file10M_Aug23_1';
 
   // await testItFileUp(filename, hdPathIndex);
+  // await testFileHash(filename, hdPathIndex);
 
   // 3a
   // const filename = 'file10_test_1689623710986';
@@ -1144,7 +1174,7 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
@@ -1153,7 +1183,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
