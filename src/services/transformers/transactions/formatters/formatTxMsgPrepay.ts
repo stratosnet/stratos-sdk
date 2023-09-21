@@ -1,16 +1,54 @@
-import * as Types from '../types';
-import { formatBaseTx } from './formatBaseTx';
 import * as NetworkTypes from '../../../network/types';
+import * as Types from '../types';
+import { isPrepayTxBodyMessage } from '../utils';
+import { formatBaseTx } from './formatBaseTx';
+import { formatTxMultipleAmounts } from './formatTxAmounts';
 
-export const formatTxMsgPrepay = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
-  const baseTx = formatBaseTx(txItem);
+const findPrepayReciever = (txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog): string => {
+  let receiver = '';
+  const eventWithReceivedCoins = txResponseItemLogEntry?.events?.find(logEvent => {
+    const { type: evetnType } = logEvent;
+    return evetnType === 'coin_received';
+  });
 
-  const msg = txItem.tx?.value?.msg[0];
+  if (!eventWithReceivedCoins) {
+    return receiver;
+  }
 
-  const msgFrom = msg?.value?.sender || baseTx.eventSender || '';
+  const { attributes } = eventWithReceivedCoins;
+
+  if (!Array.isArray(attributes)) {
+    return receiver;
+  }
+
+  attributes.forEach(element => {
+    if (!receiver && element.key === 'receiver') {
+      receiver = `${element.value.trim()}`;
+    }
+  });
+
+  return receiver;
+};
+
+export const formatTxMsgPrepay = (
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
+
+  if (!isPrepayTxBodyMessage(txResponseItemTxBodyMessage)) {
+    return baseTx;
+  }
+
+  const { sender, coins } = txResponseItemTxBodyMessage;
+
+  const amounts = formatTxMultipleAmounts(coins);
+  const toAddress = findPrepayReciever(txResponseItemLogEntry);
 
   return {
     ...baseTx,
-    sender: msgFrom,
+    sender,
+    to: toAddress,
+    amounts,
   };
 };

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
+exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const crypto_js_1 = __importDefault(require("crypto-js"));
@@ -34,7 +34,7 @@ const keccak_1 = __importDefault(require("keccak"));
 const sjcl_1 = __importDefault(require("sjcl"));
 const hdVault_1 = require("../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/StratosDirectSecp256k1HdWallet"));
-const helpers_1 = require("../services/helpers");
+// import { log } from '../services/helpers';
 const cosmosUtils_1 = require("./cosmosUtils");
 const mnemonic_1 = require("./mnemonic");
 /**
@@ -134,6 +134,16 @@ const getAddressFromPubKeyWithKeccak = (pubkey) => {
     return address;
 };
 exports.getAddressFromPubKeyWithKeccak = getAddressFromPubKeyWithKeccak;
+const convertNativeToEvmAddress = (nativeAddress) => {
+    const evmAddress = '0x' + (0, encoding_1.toHex)((0, encoding_1.fromBech32)(nativeAddress).data);
+    return evmAddress;
+};
+exports.convertNativeToEvmAddress = convertNativeToEvmAddress;
+const convertEvmToNativeToAddress = (evmAddress) => {
+    const nativeAddress = (0, encoding_1.toBech32)(hdVault_1.stratosAddressPrefix, (0, encoding_1.fromHex)(evmAddress.replace('0x', '')));
+    return nativeAddress;
+};
+exports.convertEvmToNativeToAddress = convertEvmToNativeToAddress;
 const getEncodedPublicKey = async (encodedAminoPub) => {
     const encodedPubKey = (0, encoding_1.toBech32)(hdVault_1.stratosPubkeyPrefix, encodedAminoPub);
     return encodedPubKey;
@@ -211,12 +221,12 @@ function makePathBuilder(pattern) {
 exports.makePathBuilder = makePathBuilder;
 // @todo clena up this function and extract different encryption methods into helper functions
 const serializeWallet = async (wallet, password) => {
-    (0, helpers_1.log)('Beginning serializing..');
+    // log('Beginning serializing..');
     let encryptedWalletInfoFour;
     try {
         // encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
         encryptedWalletInfoFour = (0, cosmosUtils_1.serializeWithEncryptionKey)(password, wallet);
-        (0, helpers_1.log)('Serialization with prepared cryptoJs data Uint8 is done. ');
+        // log('Serialization with prepared cryptoJs data Uint8 is done. ');
     }
     catch (error) {
         throw new Error(`Could not serialize a wallet with the encryption key. Error4 - ${error.message}`);

@@ -2,13 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatTxMsgCreateValidator = void 0;
 const formatBaseTx_1 = require("./formatBaseTx");
-const formatTxMsgCreateValidator = (txItem) => {
-    var _a, _b, _c, _d;
-    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txItem);
-    const msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
-    const msgFrom = ((_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.delegator_address) || baseTx.eventSender || '';
-    const msgTo = ((_d = msg === null || msg === void 0 ? void 0 : msg.value) === null || _d === void 0 ? void 0 : _d.validator_address) || baseTx.to;
-    return Object.assign(Object.assign({}, baseTx), { sender: msgFrom, to: msgTo });
+const formatTxMsgCreateValidator = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
+    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txResponseItemTxBodyMessage, txResponseItemLogEntry);
+    const toAddress = 'n/a';
+    const msgFrom = baseTx.eventSender || baseTx.sender || 'n/a';
+    return Object.assign(Object.assign({}, baseTx), { sender: msgFrom, to: toAddress });
+    // const msgFrom = msg?.value?.delegator_address || baseTx.eventSender || '';
+    // const msgTo = msg?.value?.validator_address || baseTx.to;
+    //
+    // return {
+    //   ...baseTx,
+    //   sender: msgFrom,
+    //   to: msgTo,
+    // };
 };
 exports.formatTxMsgCreateValidator = formatTxMsgCreateValidator;
 //# sourceMappingURL=formatTxMsgCreateValidator.js.map

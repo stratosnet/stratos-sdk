@@ -1,14 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatTxMsgUndelegate = void 0;
+const utils_1 = require("../utils");
 const formatBaseTx_1 = require("./formatBaseTx");
-const formatTxMsgUndelegate = (txItem) => {
-    var _a, _b, _c, _d;
-    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txItem);
-    const msg = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0];
-    const msgFrom = ((_c = msg === null || msg === void 0 ? void 0 : msg.value) === null || _c === void 0 ? void 0 : _c.validator_address) || baseTx.eventSender || '';
-    const msgTo = ((_d = msg === null || msg === void 0 ? void 0 : msg.value) === null || _d === void 0 ? void 0 : _d.delegator_address) || baseTx.to;
-    return Object.assign(Object.assign({}, baseTx), { sender: msgFrom, to: msgTo });
+const formatTxAmounts_1 = require("./formatTxAmounts");
+const formatTxMsgUndelegate = (txResponseItemTxBodyMessage, txResponseItemLogEntry) => {
+    const baseTx = (0, formatBaseTx_1.formatBaseTx)(txResponseItemTxBodyMessage, txResponseItemLogEntry);
+    if (!(0, utils_1.isUndelegateTxBodyMessage)(txResponseItemTxBodyMessage)) {
+        return baseTx;
+    }
+    const { delegator_address, validator_address, amount } = txResponseItemTxBodyMessage;
+    const amounts = (0, formatTxAmounts_1.formatTxSingleAmount)(amount);
+    return Object.assign(Object.assign({}, baseTx), { sender: validator_address, to: delegator_address, amounts });
 };
 exports.formatTxMsgUndelegate = formatTxMsgUndelegate;
 //# sourceMappingURL=formatTxMsgUndelegate.js.map

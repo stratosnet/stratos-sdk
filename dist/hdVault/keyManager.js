@@ -24,7 +24,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
-const helpers_1 = require("../services/helpers");
 const cosmosWallet = __importStar(require("./cosmosWallet"));
 const keyUtils = __importStar(require("./keyUtils"));
 const mnemonic_1 = require("./mnemonic");
@@ -49,11 +48,11 @@ const createMasterKeySeedFromGivenSeed = async (derivedMasterKeySeed, password) 
 exports.createMasterKeySeedFromGivenSeed = createMasterKeySeedFromGivenSeed;
 // exposed outside, used in the DesktopWallet to "create" a wallet
 const createMasterKeySeed = async (phrase, password, hdPathIndex = 0) => {
-    (0, helpers_1.log)('Generating master key seed');
+    // log('Generating master key seed');
     const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
-    (0, helpers_1.log)('Creating wallet');
+    // log('Creating wallet');
     const wallet = await keyUtils.createWalletAtPath(hdPathIndex, (0, mnemonic_1.convertArrayToString)(phrase));
-    (0, helpers_1.log)('Calling helper to serialize the wallet');
+    // log('Calling helper to serialize the wallet');
     let encryptedWalletInfo;
     try {
         encryptedWalletInfo = await keyUtils.serializeWallet(wallet, password);
@@ -61,10 +60,10 @@ const createMasterKeySeed = async (phrase, password, hdPathIndex = 0) => {
     catch (error) {
         throw new Error(`could not serialize wallet (sdk), ${error.message}`);
     }
-    (0, helpers_1.log)('Creating master key seed info from the seed');
+    // log('Creating master key seed info from the seed');
     const legacyMasterKeyInfo = await (0, exports.createMasterKeySeedFromGivenSeed)(derivedMasterKeySeed, password);
-    (0, helpers_1.log)('Master key info is ready');
     const masterKeyInfo = Object.assign(Object.assign({}, legacyMasterKeyInfo), { encryptedWalletInfo });
+    // log('Master key info (the wallet) is created and ready');
     return masterKeyInfo;
 };
 exports.createMasterKeySeed = createMasterKeySeed;

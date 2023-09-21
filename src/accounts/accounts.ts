@@ -1,3 +1,4 @@
+import { log } from 'console';
 import _get from 'lodash/get';
 import { hdVault } from '../config';
 import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
@@ -22,17 +23,19 @@ import {
   sendUserRequestGetOzone,
 } from '../services/network';
 import { transformTx } from '../services/transformers/transactions';
-import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
+import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
 
-// import * as Types from './types';
+export interface OtherBalanceCardMetrics {
+  ozone?: string;
+  detailedBalance?: any;
+}
 
 export interface BalanceCardMetrics {
   available: string;
   delegated: string;
   unbounding: string;
   reward: string;
-  ozone: string;
   detailedBalance?: any;
 }
 
@@ -90,6 +93,39 @@ export const formatBalanceFromWei = (amount: string, requiredPrecision: number, 
   return fullBalance;
 };
 
+export const getBalanceCardMetricDinamicValue = (denom?: string | undefined, amount?: string | undefined) => {
+  const isStratosDenom = denom === stratosDenom;
+
+  if (!isStratosDenom) {
+    return '0.0000 STOS';
+  }
+  if (!amount) {
+    return '0.0000 STOS';
+  }
+  const balanceInWei = createBigNumber(amount);
+
+  let dynamicPrecision = decimalShortPrecision;
+
+  let counter = 0;
+
+  let balance = '0';
+
+  const maxAdditionalDigits = 4;
+
+  let isStillZero = counter < maxAdditionalDigits;
+
+  do {
+    balance = fromWei(balanceInWei, decimalPrecision).toFormat(dynamicPrecision, ROUND_DOWN);
+    const parsetBalance = parseFloat(balance);
+    isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
+    dynamicPrecision++;
+    counter++;
+  } while (isStillZero);
+
+  const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
+  return balanceToReturn;
+};
+
 export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
   const isStratosDenom = denom === stratosDenom;
 
@@ -127,20 +163,55 @@ export const getOzoneMetricValue = (denom?: string | undefined, amount?: string 
   return balanceToReturn;
 };
 
+export const getOtherBalanceCardMetrics = async (
+  keyPairAddress: string,
+): Promise<OtherBalanceCardMetrics> => {
+  const cardMetricsResult = {
+    ozone: `0.0000 ${stratosTopDenom.toUpperCase()}`,
+    detailedBalance: {},
+  };
+
+  const detailedBalance: { [key: string]: any } = {
+    ozone: '',
+    sequence: '',
+  };
+
+  try {
+    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+
+    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+
+    if (!ozoneBalanceError) {
+      const amount = ozoneBalanceRespone?.result.ozone;
+      const sequence = ozoneBalanceRespone?.result.sequencynumber;
+
+      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
+
+      detailedBalance.ozone = amount;
+      detailedBalance.sequence = sequence;
+    }
+  } catch (error) {
+    console.log('could not get ozone balance , error', error);
+  }
+
+  cardMetricsResult.detailedBalance = detailedBalance;
+
+  return cardMetricsResult;
+};
+
 export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<BalanceCardMetrics> => {
   const cardMetricsResult = {
     available: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     delegated: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     unbounding: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     reward: `0.0000 ${stratosTopDenom.toUpperCase()}`,
-    ozone: `0.0000 ${stratosTopDenom.toUpperCase()}`,
     detailedBalance: {},
   };
 
   const detailedBalance: { [key: string]: any } = {
     delegated: {},
     reward: {},
-    ozone: '',
+    unbounding: {},
   };
 
   const availableBalanceResult = await getAvailableBalance(keyPairAddress);
@@ -166,12 +237,14 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       const validatorAddress = entry.delegation?.validator_address;
       const validatorBalance = getBalanceCardMetricValue(entry.balance.denom, entry.balance.amount);
 
+      // in stos
       detailedBalance.delegated[validatorAddress] = validatorBalance;
       return plusBigNumber(acc, balanceInWei);
     }, 0);
 
     const myDelegated = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
 
+    // in stos
     cardMetricsResult.delegated = myDelegated;
   }
 
@@ -180,19 +253,33 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
   const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
 
   if (!unboundingBalanceError) {
-    const entries = unboundingBalanceResponse?.result?.[0]?.entries;
+    const entries = unboundingBalanceResponse?.result;
 
-    const amountInWei = entries?.reduce((acc: BigNumberValue, entry: networkTypes.UnboundingEntry) => {
-      const balanceInWei = createBigNumber(entry.balance);
+    const amountInWeiA = entries?.reduce(
+      (acc: BigNumberValue, entry: networkTypes.UnboundingBalanceResult) => {
+        const balanceEntries = entry?.entries;
 
-      return plusBigNumber(acc, balanceInWei);
-    }, 0);
+        const validatorAddress = entry.validator_address;
 
-    cardMetricsResult.unbounding = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWei || ''}`);
+        const amountInWeiB = balanceEntries.reduce(
+          (accInternal: BigNumberValue, entryInternal: networkTypes.UnboundingEntry) => {
+            const balanceInWeiI = createBigNumber(entryInternal.balance);
+            return plusBigNumber(accInternal, balanceInWeiI);
+          },
+          0,
+        );
+
+        const validatorBalance = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWeiB}`);
+        detailedBalance.unbounding[validatorAddress] = validatorBalance;
+        return plusBigNumber(acc, amountInWeiB);
+      },
+      0,
+    );
+    const unboundingBalance = getBalanceCardMetricValue(hdVault.stratosDenom, `${amountInWeiA}`);
+    cardMetricsResult.unbounding = unboundingBalance;
   }
 
   const rewardBalanceResult = await getRewardBalance(keyPairAddress);
-
   const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
 
   if (!rewardBalanceError) {
@@ -203,28 +290,19 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
     entries?.forEach((entry: networkTypes.Rewards) => {
       const validatorAddress = entry.validator_address;
+      // in wei
       const validatorBalance = entry.reward?.[0]?.amount || '0';
 
+      // in stos
+      // const validatorBalanceInWei = entry.reward?.[0]?.amount || '0';
+      // const validatorBalance = getBalanceCardMetricDinamicValue(denom, validatorBalanceInWei);
+
+      // in wei
       detailedBalance.reward[validatorAddress] = validatorBalance;
     }, 0);
 
-    cardMetricsResult.reward = getBalanceCardMetricValue(denom, amount);
-  }
-
-  try {
-    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
-
-    const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
-
-    if (!ozoneBalanceError) {
-      const amount = ozoneBalanceRespone?.result.ozone;
-
-      cardMetricsResult.ozone = getOzoneMetricValue(stratosUozDenom, amount);
-
-      detailedBalance.ozone = amount;
-    }
-  } catch (error) {
-    console.log('could not get ozone balance , error', error);
+    // in stos
+    cardMetricsResult.reward = getBalanceCardMetricDinamicValue(denom, amount);
   }
 
   cardMetricsResult.detailedBalance = detailedBalance;
@@ -251,6 +329,7 @@ export const getMaxAvailableBalance = async (
   const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = createBigNumber(currentBalance);
 
+  // NOTE: Do we need this?
   if (balanceInWei.gt(0)) {
     const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
     return balance;
@@ -264,15 +343,13 @@ export const getMaxAvailableBalance = async (
 export const getAccountTrasactions = async (
   address: string,
   type = TxTypes.HistoryTxType.All,
-  page?: number,
-): Promise<TxTypes.ParsedTxData> => {
-  // const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
-
+  page = 1,
+  pageLimit = 5,
+): Promise<ParsedTxData> => {
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
-  // const txListResult = await getTxList(address, txType, page);
-  const txListResult = await getTxListBlockchain(address, txType, page);
-  // console.log('🚀 ~ file: accounts.ts ~ line 252 ~ txListResult', JSON.stringify(txListResult, null, 2));
+  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit);
+  // console.log('txListResult', txListResult);
 
   const { response, error } = txListResult;
 
@@ -286,19 +363,26 @@ export const getAccountTrasactions = async (
 
   const parsedData: FormattedBlockChainTx[] = [];
 
-  const { txs: data = [], total_count: total } = response;
-  console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
+  const { tx_responses: data = [], pagination } = response;
+  // console.log('getAccountTrasactions response', response);
+  const { total } = pagination;
 
-  data.forEach(txItem => {
+  data.forEach(txResponseItem => {
+    // console.log('txResponseItem', txResponseItem);
     try {
-      const parsed = transformTx(txItem);
+      const parsed = transformTx(txResponseItem);
       parsedData.push(parsed);
     } catch (err) {
       console.log(`Parsing error: ${(err as Error).message}`);
     }
   });
 
-  const result = { data: parsedData, total, page: page || 1 };
+  const totalUnformatted = parseInt(total) / pageLimit;
+  const totalPages = Math.ceil(totalUnformatted);
+
+  const result = { data: parsedData, total, page: page || 1, totalPages };
+
+  // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
 
   return result;
 };

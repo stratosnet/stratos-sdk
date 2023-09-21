@@ -1,40 +1,43 @@
-import { GeneratedType } from '@cosmjs/proto-signing';
-import { defaultRegistryTypes } from '@cosmjs/stargate';
+// import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
+// import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
 import { stratosDenom } from '../config/hdVault';
-import { baseGasAmount, decimalPrecision, perMsgGasAmount, standardFeeAmount } from '../config/tokens';
-// import Sdk from '../Sdk';
+import {
+  baseGasAmount,
+  decimalPrecision,
+  gasAdjustment,
+  minGasPrice,
+  perMsgGasAmount,
+  standardFeeAmount,
+} from '../config/tokens';
 import { toWei } from '../services/bigNumber';
 import { getCosmos } from '../services/cosmos';
+import { dirLog, log } from '../services/helpers';
 import { getValidatorsBondedToDelegator } from '../validators';
 import * as Types from './types';
+
+const maxMessagesPerTx = 500;
+
+interface JsonizedMessage {
+  typeUrl: string;
+  value: string;
+}
+
+export interface JsonizedTx {
+  body: {
+    messages: JsonizedMessage[];
+  };
+  authInfo: any;
+  signatures: string[];
+}
 
 function* payloadGenerator(dataList: Types.TxPayload[]) {
   while (dataList.length) {
     yield dataList.shift();
   }
 }
-
-export const getStratosTransactionRegistryTypes = () => {
-  const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
-  const stratosTxRegistryTypes: ReadonlyArray<[string, GeneratedType]> = [
-    ...defaultRegistryTypes,
-    [Types.TxMsgTypes.SdsPrepay, msgPrepayProto],
-
-    // [Types.TxMsgTypes.PotWithdraw, Coin],
-    // [Types.TxMsgTypes.PotFoundationDeposit, Coin],
-
-    // [Types.TxMsgTypes.RegisterCreateResourceNode, Coin],
-    // [Types.TxMsgTypes.RegisterRemoveResourceNode, Coin],
-    // [Types.TxMsgTypes.RegisterCreateIndexingNode, Coin],
-    // [Types.TxMsgTypes.RegisterRemoveIndexingNode, Coin],
-  ];
-
-  return stratosTxRegistryTypes;
-};
 
 declare global {
   interface Window {
@@ -48,30 +51,83 @@ declare global {
   }
 }
 
+export const assembleTxRawFromTx = (tx: Tx) => {
+  const txR = TxRaw.fromPartial({
+    bodyBytes: TxBody.encode(tx.body!).finish(),
+    authInfoBytes: AuthInfo.encode(tx.authInfo!).finish(),
+    signatures: tx.signatures.map(ss => ss),
+  });
+
+  return txR;
+};
+
+export const encodeTxHrToTx = async (jsonizedTx: JsonizedTx) => {
+  const client = await getCosmos();
+
+  const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
+
+  if (encodedMessages) {
+    jsonizedTx.body.messages = encodedMessages;
+  }
+
+  const encoded = Tx.fromJSON(jsonizedTx);
+
+  return encoded;
+};
+
+export const decodeTxRawToTx = (signedTx: TxRaw) => {
+  const txBodyObject = TxBody.decode(signedTx.bodyBytes);
+
+  const authInfo = AuthInfo.decode(signedTx.authInfoBytes);
+
+  const decoded = Tx.fromPartial({
+    authInfo,
+    body: txBodyObject,
+    signatures: signedTx.signatures.map(ss => ss),
+  });
+
+  return decoded;
+};
+
+export const decodeTxRawToTxHr = async (signedTx: TxRaw) => {
+  const client = await getCosmos();
+
+  const decoded = decodeTxRawToTx(signedTx);
+
+  const jsonizedTx: JsonizedTx = Tx.toJSON(decoded) as JsonizedTx;
+
+  const decodedMessages = await client.decodeMessagesFromTheTxBody(decoded.body?.messages);
+
+  if (decodedMessages) {
+    jsonizedTx.body.messages = decodedMessages;
+  }
+
+  return jsonizedTx;
+};
+
+export const encodeTxRawToEncodedTx = (signedTx: TxRaw): Uint8Array => {
+  const txBytes = TxRaw.encode(signedTx).finish();
+  return txBytes;
+};
+
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
     const client = await getCosmos();
 
-    const txBytes = TxRaw.encode(signedTx).finish();
-
-    console.log(
-      '🚀 ~ file: transactions.ts ~ line 28 ~ broadcast ~ txBytes to be broadcasted',
-      JSON.stringify(txBytes),
-    );
+    const txBytes = encodeTxRawToEncodedTx(signedTx);
 
     const result = await client.broadcastTx(txBytes);
-    console.log('🚀 ~ file: transactions.ts ~ line 52 ~ broadcast ~ result', result);
-
+    dirLog('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
     return result;
   } catch (err) {
-    console.log('Could not broadcast', (err as Error).message);
+    dirLog('Could not broadcast', (err as Error).message);
 
     throw err;
   }
 };
 
-export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
-  const gas = baseGasAmount + perMsgGasAmount * numberOfMessages; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+export const getStandardDefaultFee = (): Types.TransactionFee => {
+  const gas = baseGasAmount + perMsgGasAmount; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
 
   // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
   // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
@@ -83,9 +139,55 @@ export const getStandardFee = (numberOfMessages = 1): Types.TransactionFee => {
     amount: feeAmount,
     gas: `${gas}`,
   };
+  dirLog('standard default fee', fee);
 
-  console.log('fee', fee);
   return fee;
+};
+
+export const getStandardFee = async (
+  signerAddress?: string,
+  txMessages?: Types.TxMessage[],
+): Promise<Types.TransactionFee> => {
+  if (!txMessages || !signerAddress) {
+    return getStandardDefaultFee();
+  }
+
+  dirLog('from getStandardFee txMessages', txMessages);
+
+  if (txMessages.length > maxMessagesPerTx) {
+    throw new Error(
+      `Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`,
+    );
+  }
+
+  try {
+    const client = await getCosmos();
+    const gas = await client.simulate(signerAddress, txMessages, '');
+    const estimatedGas = Math.round(gas * gasAdjustment);
+
+    const amount = minGasPrice.mul(estimatedGas).toString();
+
+    const feeAmount = [
+      {
+        amount,
+        denom: stratosDenom,
+      },
+    ];
+
+    const fees = {
+      amount: feeAmount,
+      gas: `${estimatedGas}`,
+    };
+
+    return fees;
+  } catch (error) {
+    log('Full error from simutlate', error);
+    throw new Error(
+      `Could not simutlate the fee calculation. Error details: ${
+        (error as Error).message || JSON.stringify(error)
+      }`,
+    );
+  }
 };
 
 export const sign = async (
@@ -94,48 +196,27 @@ export const sign = async (
   memo = '',
   givenFee?: Types.TransactionFee,
 ): Promise<TxRaw> => {
-  const fee = givenFee ? givenFee : getStandardFee(txMessages.length);
+  // eslint-disable-next-line @typescript-eslint/await-thenable
+  const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
+  // const fee = givenFee ? givenFee : getStandardDefaultFee();
 
   const client = await getCosmos();
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
+
+  // const txBytes = encodeTxRawToEncodedTx(signedTx);
 
   return signedTx;
 };
 
 export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
   const result = amounts.map(amount => ({
-    amount: toWei(amount, decimalPrecision).toString(),
+    amount: toWei(amount, decimalPrecision).toFixed(),
     denom: stratosDenom,
   }));
 
   return result;
 };
-
-// @depricated ?
-// export const getBaseTx = async (
-//   keyPairAddress: string,
-//   memo = '',
-//   numberOfMessages = 1,
-// ): Promise<Types.BaseTransaction> => {
-//   console.log('get base tx 1');
-//   const accountsData = await getAccountsData(keyPairAddress);
-
-//   const oldSequence = String(accountsData.account.sequence);
-//   const newSequence = parseInt(oldSequence);
-
-//   const { chainId } = Sdk.environment;
-
-//   const myTx = {
-//     chain_id: chainId,
-//     fee: getStandardFee(numberOfMessages),
-//     memo,
-//     account_number: String(accountsData.account.account_number),
-//     sequence: `${newSequence}`,
-//   };
-
-//   return myTx;
-// };
 
 export const getSendTx = async (
   keyPairAddress: string,
@@ -184,13 +265,15 @@ export const getDelegateTx = async (
       typeUrl: Types.TxMsgTypes.Delegate,
       value: {
         amount: {
-          amount: toWei(amount, decimalPrecision).toString(),
+          amount: toWei(amount, decimalPrecision).toFixed(),
           denom: stratosDenom,
         },
         delegatorAddress: delegatorAddress,
         validatorAddress: validatorAddress,
       },
     };
+
+    console.log('message to Delegate', message);
 
     messagesList.push(message);
 
@@ -217,7 +300,7 @@ export const getUnDelegateTx = async (
       typeUrl: Types.TxMsgTypes.Undelegate,
       value: {
         amount: {
-          amount: toWei(amount, decimalPrecision).toString(),
+          amount: toWei(amount, decimalPrecision).toFixed(),
           denom: stratosDenom,
         },
         delegatorAddress: delegatorAddress,
@@ -270,7 +353,9 @@ export const getWithdrawalAllRewardTx = async (
   const { data: withdrawalPayload } = vListResult;
 
   const payloadToProcess = payloadGenerator(
-    withdrawalPayload.map((item: { address: string }) => ({ validatorAddress: item.address })),
+    withdrawalPayload.map((item: { address: string }) => ({
+      validatorAddress: item.address,
+    })),
   );
 
   let iteratedData = payloadToProcess.next();
@@ -313,11 +398,14 @@ export const getSdsPrepayTx = async (
       typeUrl: Types.TxMsgTypes.SdsPrepay,
       value: {
         sender: senderAddress,
-        coins: getStandardAmount([amount]),
+        beneficiary: senderAddress,
+        // NOTE: this is still coins on tropos and it is amount on devnet
+        // coins: getStandardAmount([amount]),
+        amount: getStandardAmount([amount]),
       },
     };
 
-    console.log('message to be signed', JSON.stringify(message));
+    dirLog('sds prepay message to be signed', message);
 
     messagesList.push(message);
 

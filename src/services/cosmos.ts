@@ -5,7 +5,7 @@ import { StratosSigningStargateClient } from '../hdVault/StratosSigningStargateC
 import { accountFromAnyStratos } from '../hdVault/StratosStargateAccounts';
 import { deserializeEncryptedWallet } from '../hdVault/wallet';
 import Sdk from '../Sdk';
-import { getStratosTransactionRegistryTypes } from '../transactions/transactions';
+import { getStratosTransactionRegistryTypes } from '../transactions/stratosRegistry';
 
 // @todo clean up this interface
 export interface CosmosInstance {

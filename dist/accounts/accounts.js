@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOzoneMetricValue = exports.getBalanceCardMetricValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
+exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.getOzoneMetricValue = exports.getBalanceCardMetricValue = exports.getBalanceCardMetricDinamicValue = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
 const get_1 = __importDefault(require("lodash/get"));
 const config_1 = require("../config");
 const hdVault_1 = require("../config/hdVault");
@@ -74,6 +74,31 @@ const formatBalanceFromWei = (amount, requiredPrecision, appendDenom = false) =>
     return fullBalance;
 };
 exports.formatBalanceFromWei = formatBalanceFromWei;
+const getBalanceCardMetricDinamicValue = (denom, amount) => {
+    const isStratosDenom = denom === hdVault_1.stratosDenom;
+    if (!isStratosDenom) {
+        return '0.0000 STOS';
+    }
+    if (!amount) {
+        return '0.0000 STOS';
+    }
+    const balanceInWei = (0, bigNumber_1.create)(amount);
+    let dynamicPrecision = tokens_1.decimalShortPrecision;
+    let counter = 0;
+    let balance = '0';
+    const maxAdditionalDigits = 4;
+    let isStillZero = counter < maxAdditionalDigits;
+    do {
+        balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(dynamicPrecision, bigNumber_1.ROUND_DOWN);
+        const parsetBalance = parseFloat(balance);
+        isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
+        dynamicPrecision++;
+        counter++;
+    } while (isStillZero);
+    const balanceToReturn = `${balance} ${hdVault_1.stratosTopDenom.toUpperCase()}`;
+    return balanceToReturn;
+};
+exports.getBalanceCardMetricDinamicValue = getBalanceCardMetricDinamicValue;
 const getBalanceCardMetricValue = (denom, amount) => {
     const isStratosDenom = denom === hdVault_1.stratosDenom;
     if (!isStratosDenom) {
@@ -105,20 +130,46 @@ const getOzoneMetricValue = (denom, amount) => {
     return balanceToReturn;
 };
 exports.getOzoneMetricValue = getOzoneMetricValue;
+const getOtherBalanceCardMetrics = async (keyPairAddress) => {
+    const cardMetricsResult = {
+        ozone: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
+        detailedBalance: {},
+    };
+    const detailedBalance = {
+        ozone: '',
+        sequence: '',
+    };
+    try {
+        const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
+        const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
+        if (!ozoneBalanceError) {
+            const amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
+            const sequence = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.sequencynumber;
+            cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
+            detailedBalance.ozone = amount;
+            detailedBalance.sequence = sequence;
+        }
+    }
+    catch (error) {
+        console.log('could not get ozone balance , error', error);
+    }
+    cardMetricsResult.detailedBalance = detailedBalance;
+    return cardMetricsResult;
+};
+exports.getOtherBalanceCardMetrics = getOtherBalanceCardMetrics;
 const getBalanceCardMetrics = async (keyPairAddress) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     const cardMetricsResult = {
         available: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         delegated: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         unbounding: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         reward: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
-        ozone: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         detailedBalance: {},
     };
     const detailedBalance = {
         delegated: {},
         reward: {},
-        ozone: '',
+        unbounding: {},
     };
     const availableBalanceResult = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
@@ -136,47 +187,51 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
             const balanceInWei = (0, bigNumber_1.create)(entry.balance.amount);
             const validatorAddress = (_a = entry.delegation) === null || _a === void 0 ? void 0 : _a.validator_address;
             const validatorBalance = (0, exports.getBalanceCardMetricValue)(entry.balance.denom, entry.balance.amount);
+            // in stos
             detailedBalance.delegated[validatorAddress] = validatorBalance;
             return (0, bigNumber_1.plus)(acc, balanceInWei);
         }, 0);
         const myDelegated = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWei || ''}`);
+        // in stos
         cardMetricsResult.delegated = myDelegated;
     }
     const unboundingBalanceResult = await (0, network_1.getUnboundingBalance)(keyPairAddress);
     const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
     if (!unboundingBalanceError) {
-        const entries = (_f = (_e = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.entries;
-        const amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
-            const balanceInWei = (0, bigNumber_1.create)(entry.balance);
-            return (0, bigNumber_1.plus)(acc, balanceInWei);
+        const entries = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result;
+        const amountInWeiA = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
+            const balanceEntries = entry === null || entry === void 0 ? void 0 : entry.entries;
+            const validatorAddress = entry.validator_address;
+            const amountInWeiB = balanceEntries.reduce((accInternal, entryInternal) => {
+                const balanceInWeiI = (0, bigNumber_1.create)(entryInternal.balance);
+                return (0, bigNumber_1.plus)(accInternal, balanceInWeiI);
+            }, 0);
+            const validatorBalance = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWeiB}`);
+            detailedBalance.unbounding[validatorAddress] = validatorBalance;
+            return (0, bigNumber_1.plus)(acc, amountInWeiB);
         }, 0);
-        cardMetricsResult.unbounding = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWei || ''}`);
+        const unboundingBalance = (0, exports.getBalanceCardMetricValue)(config_1.hdVault.stratosDenom, `${amountInWeiA}`);
+        cardMetricsResult.unbounding = unboundingBalance;
     }
     const rewardBalanceResult = await (0, network_1.getRewardBalance)(keyPairAddress);
     const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
     if (!rewardBalanceError) {
-        const entries = (_g = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _g === void 0 ? void 0 : _g.rewards;
-        const amount = (_k = (_j = (_h = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _h === void 0 ? void 0 : _h.total) === null || _j === void 0 ? void 0 : _j[0]) === null || _k === void 0 ? void 0 : _k.amount;
-        const denom = (_o = (_m = (_l = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _l === void 0 ? void 0 : _l.total) === null || _m === void 0 ? void 0 : _m[0]) === null || _o === void 0 ? void 0 : _o.denom;
+        const entries = (_e = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _e === void 0 ? void 0 : _e.rewards;
+        const amount = (_h = (_g = (_f = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _f === void 0 ? void 0 : _f.total) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.amount;
+        const denom = (_l = (_k = (_j = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _j === void 0 ? void 0 : _j.total) === null || _k === void 0 ? void 0 : _k[0]) === null || _l === void 0 ? void 0 : _l.denom;
         entries === null || entries === void 0 ? void 0 : entries.forEach((entry) => {
             var _a, _b;
             const validatorAddress = entry.validator_address;
+            // in wei
             const validatorBalance = ((_b = (_a = entry.reward) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount) || '0';
+            // in stos
+            // const validatorBalanceInWei = entry.reward?.[0]?.amount || '0';
+            // const validatorBalance = getBalanceCardMetricDinamicValue(denom, validatorBalanceInWei);
+            // in wei
             detailedBalance.reward[validatorAddress] = validatorBalance;
         }, 0);
-        cardMetricsResult.reward = (0, exports.getBalanceCardMetricValue)(denom, amount);
-    }
-    try {
-        const ozoneBalanceResult = await (0, network_1.sendUserRequestGetOzone)([{ walletaddr: keyPairAddress }]);
-        const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
-        if (!ozoneBalanceError) {
-            const amount = ozoneBalanceRespone === null || ozoneBalanceRespone === void 0 ? void 0 : ozoneBalanceRespone.result.ozone;
-            cardMetricsResult.ozone = (0, exports.getOzoneMetricValue)(hdVault_1.stratosUozDenom, amount);
-            detailedBalance.ozone = amount;
-        }
-    }
-    catch (error) {
-        console.log('could not get ozone balance , error', error);
+        // in stos
+        cardMetricsResult.reward = (0, exports.getBalanceCardMetricDinamicValue)(denom, amount);
     }
     cardMetricsResult.detailedBalance = detailedBalance;
     return cardMetricsResult;
@@ -192,6 +247,7 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     const currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
     const feeAmount = (0, bigNumber_1.create)((0, tokens_1.standardFeeAmount)());
     const balanceInWei = (0, bigNumber_1.create)(currentBalance);
+    // NOTE: Do we need this?
     if (balanceInWei.gt(0)) {
         const balance = (0, bigNumber_1.fromWei)(balanceInWei.minus(feeAmount), tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
         return balance;
@@ -200,12 +256,10 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     return balance;
 };
 exports.getMaxAvailableBalance = getMaxAvailableBalance;
-const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page) => {
-    // const txType = TxTypes.TxMsgTypesMap.get(type) || TxTypes.TxMsgTypes.SdsAll; //  cosmos-sdk/MsgSend
+const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
     const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-    // const txListResult = await getTxList(address, txType, page);
-    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page);
-    // console.log('🚀 ~ file: accounts.ts ~ line 252 ~ txListResult', JSON.stringify(txListResult, null, 2));
+    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit);
+    // console.log('txListResult', txListResult);
     const { response, error } = txListResult;
     if (error) {
         throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
@@ -214,18 +268,23 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
         throw new Error('Could not fetch tx history');
     }
     const parsedData = [];
-    const { txs: data = [], total_count: total } = response;
-    console.log('🚀 ~ file: accounts.ts ~ line 223 ~ response', response);
-    data.forEach(txItem => {
+    const { tx_responses: data = [], pagination } = response;
+    // console.log('getAccountTrasactions response', response);
+    const { total } = pagination;
+    data.forEach(txResponseItem => {
+        // console.log('txResponseItem', txResponseItem);
         try {
-            const parsed = (0, transactions_1.transformTx)(txItem);
+            const parsed = (0, transactions_1.transformTx)(txResponseItem);
             parsedData.push(parsed);
         }
         catch (err) {
             console.log(`Parsing error: ${err.message}`);
         }
     });
-    const result = { data: parsedData, total, page: page || 1 };
+    const totalUnformatted = parseInt(total) / pageLimit;
+    const totalPages = Math.ceil(totalUnformatted);
+    const result = { data: parsedData, total, page: page || 1, totalPages };
+    // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;

@@ -1,26 +1,40 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserUploadedFileList = exports.writeFile = exports.writeFileToPath = exports.getUploadFileStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.getFileBuffer = void 0;
+exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashOld = exports.getFileBuffer = void 0;
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
+const base32_1 = require("multiformats/bases/base32");
+const cid_1 = require("multiformats/cid");
+const hasher = __importStar(require("multiformats/hashes/hasher"));
 const multihashing_async_1 = __importDefault(require("multihashing-async"));
-const Sdk_1 = __importDefault(require("../../Sdk"));
 const helpers_1 = require("../helpers");
-const network_1 = require("../network");
-// import * as Types from './types';
-// async function wait(fn: any, ms: number) {
-//   while (!fn()) {
-//     await delay(ms);
-//   }
-// }
-//
-// function delay(ms: number) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
 const getFileBuffer = async (filePath) => {
     try {
         const fileBuffer = fs_1.default.readFileSync(filePath);
@@ -31,12 +45,28 @@ const getFileBuffer = async (filePath) => {
     }
 };
 exports.getFileBuffer = getFileBuffer;
-const calculateFileHash = async (filePath) => {
+const calculateFileHashOld = async (filePath) => {
     const fileBuffer = await (0, exports.getFileBuffer)(filePath);
     const md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
     const encodedHash = await (0, multihashing_async_1.default)(md5Digest, 'keccak-256', 20);
     const cid = new cids_1.default(1, 'raw', encodedHash, 'base32hex');
     const realFileHash = cid.toString();
+    return realFileHash;
+};
+exports.calculateFileHashOld = calculateFileHashOld;
+const calculateFileHash = async (filePath) => {
+    const fileBuffer = await (0, exports.getFileBuffer)(filePath);
+    const firstKeccak = await (0, multihashing_async_1.default)(fileBuffer, 'keccak-256', 20);
+    const secondKeccak = await (0, multihashing_async_1.default)(firstKeccak, 'keccak-256', 20);
+    const keccak256Hasher = hasher.from({
+        name: 'keccak-256',
+        code: 0x1b,
+        encode: input => input.slice(-20),
+    });
+    const encodedHashO = await keccak256Hasher.digest(secondKeccak);
+    const cid = cid_1.CID.create(1, 0x66, encodedHashO);
+    const realFileHash = cid.toString(base32_1.base32hex);
+    const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
     return realFileHash;
 };
 exports.calculateFileHash = calculateFileHash;
@@ -108,9 +138,6 @@ const getFileChunk = async (fileStream, readChunkSize) => {
     try {
         chunksList = await new Promise(resolve => {
             const chunk = fileStream.read(readChunkSize);
-            // if (chunk) {
-            // console.log('chunk a read size', chunk.length);
-            // }
             resolve(chunk);
         });
     }
@@ -123,13 +150,15 @@ const getFileChunk = async (fileStream, readChunkSize) => {
 exports.getFileChunk = getFileChunk;
 async function encodeBuffer(chunk) {
     await (0, helpers_1.delay)(100);
-    // await delay(2000);
+    //  Cannot create a string longer than 0x1fffffe8 characters
     const base64data = chunk.toString('base64');
+    // console.log('good 1');
     return base64data;
 }
 exports.encodeBuffer = encodeBuffer;
 const encodeFile = async (fileBuffer) => {
     const encodedFile = await encodeBuffer(fileBuffer);
+    console.log('good 2');
     return encodedFile;
 };
 exports.encodeFile = encodeFile;
@@ -165,17 +194,7 @@ const getEncodedFileChunks = async (filePath, chunkSize = 10000) => {
     return encodedFileChunksList;
 };
 exports.getEncodedFileChunks = getEncodedFileChunks;
-// export const getEncodedFileChunk = async (
-//   fileStream: fs.ReadStream,
-//   offsetStart: number,
-//   offsetEnd: number,
-// ): Promise<string> => {
-//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
-//
-//   const encodedChunk = await encodeBuffer(fileChunk);
-//   return encodedChunk;
-// };
-const getUploadFileStream = async (filePath) => {
+const getLocalFileReadStream = async (filePath) => {
     try {
         const fileStream = fs_1.default.createReadStream(filePath);
         const myStream = await new Promise((resolve, reject) => {
@@ -194,12 +213,7 @@ const getUploadFileStream = async (filePath) => {
         throw new Error(errorMessage);
     }
 };
-exports.getUploadFileStream = getUploadFileStream;
-const writeFileToPath = async (filePath, econdedFileContent) => {
-    const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
-    return (0, exports.writeFile)(filePath, decodedFileBuffer);
-};
-exports.writeFileToPath = writeFileToPath;
+exports.getLocalFileReadStream = getLocalFileReadStream;
 const writeFile = (filePath, fileBuffer) => {
     try {
         fs_1.default.writeFileSync(filePath, fileBuffer);
@@ -209,27 +223,9 @@ const writeFile = (filePath, fileBuffer) => {
     }
 };
 exports.writeFile = writeFile;
-const getUserUploadedFileList = async (address, page = 0) => {
-    const extraParams = [
-        {
-            walletaddr: address,
-            page,
-        },
-    ];
-    const connectedUrl = `${Sdk_1.default.environment.ppNodeUrl}:${Sdk_1.default.environment.ppNodePort}`;
-    const message = `connecting to ${connectedUrl}`;
-    console.log(message);
-    const callResult = await (0, network_1.sendUserRequestList)(extraParams);
-    const { response } = callResult;
-    // console.log('file list request result', JSON.stringify(callResult));
-    if (!response) {
-        throw 'Could not fetch a list of files. No response in the call result';
-    }
-    const userFiles = response.result.fileinfo;
-    return {
-        originalResponse: response,
-        files: userFiles,
-    };
+const writeFileToPath = async (filePath, econdedFileContent) => {
+    const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
+    return (0, exports.writeFile)(filePath, decodedFileBuffer);
 };
-exports.getUserUploadedFileList = getUserUploadedFileList;
+exports.writeFileToPath = writeFileToPath;
 //# sourceMappingURL=filesystem.js.map

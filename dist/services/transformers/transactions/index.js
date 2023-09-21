@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformTx = exports.getTransformer = exports.TxHistoryTypesMap = void 0;
 const TxTypes = __importStar(require("../../../transactions/types"));
 const Formatters = __importStar(require("./formatters"));
+const formatTxAmounts_1 = require("./formatters/formatTxAmounts");
 exports.TxHistoryTypesMap = new Map([
     [TxTypes.TxMsgTypes.SdsAll, Formatters.formatTxdDefault],
     [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault],
@@ -52,19 +53,32 @@ const getTransformer = (txType) => {
     return exports.TxHistoryTypesMap.get(txType) || Formatters.formatTxdDefault;
 };
 exports.getTransformer = getTransformer;
-const transformTx = (txItem) => {
-    var _a, _b, _c;
-    const transactionType = (_c = (_b = (_a = txItem.tx) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.msg[0]) === null || _c === void 0 ? void 0 : _c.type;
-    const transactionTransformer = (0, exports.getTransformer)(transactionType);
-    let transformedTransaction;
-    try {
-        transformedTransaction = transactionTransformer(txItem);
-    }
-    catch (err) {
-        console.log(`Could not parse txItem with hash "${txItem.txhash}"`, err.message);
-        throw new Error(`Could not parse txItem with hash "${txItem.txhash}"`);
-    }
-    return transformedTransaction;
+const transformTx = (txResponseItem) => {
+    const { code, tx, logs, height: block, txhash: hash, timestamp: time } = txResponseItem;
+    const { body, auth_info: { fee }, } = tx;
+    const { memo } = body;
+    const dateTimeString = new Date(time).toLocaleString();
+    const transformedTransactionMessages = body.messages.map((bodyMessage, messageIndex) => {
+        const transactionType = bodyMessage['@type'];
+        const transactionTransformer = (0, exports.getTransformer)(transactionType);
+        const messageLogEntry = logs.find(logEntry => {
+            return `${logEntry.msg_index}` === `${messageIndex}`;
+        });
+        const transformedTransactionMessage = transactionTransformer(bodyMessage, messageLogEntry);
+        return transformedTransactionMessage;
+    });
+    const txFee = (0, formatTxAmounts_1.formatTxFee)(fee);
+    return {
+        statusCode: code,
+        block,
+        time: dateTimeString,
+        hash,
+        txFee,
+        memo,
+        originalTransactionData: tx,
+        originalTxResponse: txResponseItem,
+        txMessages: transformedTransactionMessages,
+    };
 };
 exports.transformTx = transformTx;
 //# sourceMappingURL=index.js.map

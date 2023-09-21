@@ -5,6 +5,7 @@ export interface SdkEnvironmentConfig {
     explorerUrl: string;
     ppNodeUrl?: string;
     ppNodePort?: string;
+    faucetUrl?: string;
 }
 export default class Sdk {
     static environment: {
@@ -14,6 +15,7 @@ export default class Sdk {
         explorerUrl: string;
         ppNodeUrl: string;
         ppNodePort: string;
+        faucetUrl: string;
     };
     static init(sdkEnv: SdkEnvironmentConfig): void;
     static reset(): void;

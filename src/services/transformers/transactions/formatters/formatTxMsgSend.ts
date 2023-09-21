@@ -1,16 +1,27 @@
-import * as Types from '../types';
 import * as NetworkTypes from '../../../network/types';
+import * as Types from '../types';
+import { isSendTxBodyMessage } from '../utils';
 import { formatBaseTx } from './formatBaseTx';
+import { formatTxMultipleAmounts } from './formatTxAmounts';
 
-export const formatTxMsgSend = (txItem: NetworkTypes.BlockChainTx): Types.FormattedBlockChainTx => {
-  const baseTx = formatBaseTx(txItem);
+export const formatTxMsgSend = (
+  txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
+  txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
+): Types.FormattedBlockChainTxMessage => {
+  const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
 
-  const msg = txItem.tx?.value?.msg[0];
+  if (!isSendTxBodyMessage(txResponseItemTxBodyMessage)) {
+    return baseTx;
+  }
 
-  const msgFrom = msg?.value?.from_address || baseTx.eventSender || '';
+  const { from_address, to_address, amount } = txResponseItemTxBodyMessage;
+
+  const amounts = formatTxMultipleAmounts(amount);
 
   return {
     ...baseTx,
-    sender: msgFrom,
+    sender: from_address,
+    to: to_address,
+    amounts,
   };
 };

@@ -360,12 +360,20 @@ export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
 export interface FileUserRequestListParams {
     walletaddr: string;
     page: number;
+    signature: UserFileSignature;
+    req_time: number;
 }
 export interface FileInfoItem {
     filehash: string;
     filesize: number;
     filename: string;
     createtime: number;
+}
+export interface SharedFileInfoItem extends Omit<FileInfoItem, 'createtime>'> {
+    linktime: number;
+    linktimeexp: number;
+    shareid: string;
+    sharelink: string;
 }
 export interface FileUserRequestListResponse extends MainRpcResponse {
     result: {
@@ -377,23 +385,29 @@ export interface FileUserRequestUploadParams {
     filename: string;
     filesize: number;
     filehash: string;
-    walletaddr: string;
-    walletpubkey: string;
+    signature: UserFileSignature;
+    req_time: number;
 }
 export interface FileUserRequestDownloadParams {
     filehandle: string;
-    walletaddr: string;
-    walletpubkey: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface UserFileSignature {
+    address: string;
+    pubkey: string;
     signature: string;
 }
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: '0' | '1' | '2' | '3' | '4';
         reqid: string;
         offsetstart: string;
         offsetend: string;
         filedata: string;
     };
+}
+export interface FileUserRequestDownloadSharedResponse extends FileUserRequestDownloadResponse {
 }
 export interface FileUserDownloadDataParams {
     filehash: string;
@@ -410,7 +424,7 @@ export interface FileUserDownloadDataResponse extends MainRpcResponse {
 export interface FileUserDownloadedFileInfoParams {
     filehash: string;
     reqid: string;
-    filesize: number;
+    filesize?: number;
 }
 export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
     result: {
@@ -442,5 +456,209 @@ export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
     result: {
         return: '0' | '1';
         ozone?: string;
+        sequencynumber?: string;
+    };
+}
+export interface RestTxFeeInfo {
+    amount: Amount[];
+    gas_limit: string;
+    payer: string;
+    granter: string;
+}
+export interface RestTxAuthInfo {
+    signer_infos: RestTxSignerInfo[];
+    fee: RestTxFeeInfo;
+}
+export interface RestTxSignerInfo {
+    public_key: {
+        ['@type']: string;
+        key: string;
+    };
+    mode_info: {
+        single: {
+            mode: string;
+        };
+    };
+    sequence: string;
+}
+export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
+    response?: RestTxHistoryResponse;
+}
+export interface RestTxHistoryResponse {
+    pagination: {
+        next_key: string;
+        total: string;
+    };
+    txs: RestTx[];
+    tx_responses: RestTxResponse[];
+}
+export interface RestTx {
+    body: RestTxBody;
+    auth_info: RestTxAuthInfo;
+    signatures: string[];
+}
+export interface RestTxResponse {
+    height: string;
+    txhash: string;
+    codespace: string;
+    code: number;
+    data: string;
+    raw_log: string;
+    logs: RestTxResponseLog[];
+    info: string;
+    gas_wanted: string;
+    gas_used: string;
+    tx: RestTxResponseTx;
+    timestamp: string;
+    events: RestTxResponseEvent[];
+}
+export interface RestTxBody {
+    messages: RestTxBodyMessage[];
+    memo: string;
+    timeout_height: string;
+    extension_options: [];
+    non_critical_extension_options: [];
+}
+export interface RestSendTxBody extends RestTxBody {
+    messages: RestSendTxBodyMessage[];
+}
+export interface RestDelegateTxBody extends RestTxBody {
+    messages: RestDelegateTxBodyMessage[];
+}
+export interface RestUndelegateTxBody extends RestTxBody {
+    messages: RestUndelegateTxBodyMessage[];
+}
+export interface RestGetRewardsTxBody extends RestTxBody {
+    messages: RestGetRewardsTxBodyMessage[];
+}
+export interface RestSdsPrepayTxBody extends RestTxBody {
+    messages: RestSdsPrepayTxBodyMessage[];
+}
+export interface RestTxBodyMessage {
+    ['@type']: string;
+}
+export interface RestSendTxBodyMessage extends RestTxBodyMessage {
+    from_address: string;
+    to_address: string;
+    amount: Amount[];
+}
+export interface RestDelegateTxBodyMessage extends RestTxBodyMessage {
+    delegator_address: string;
+    validator_address: string;
+    amount: Amount;
+}
+export interface RestUndelegateTxBodyMessage extends RestDelegateTxBodyMessage {
+}
+export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {
+    delegator_address: string;
+    validator_address: string;
+}
+export interface RestSdsPrepayTxBodyMessage extends RestTxBodyMessage {
+    sender: string;
+    coins: Amount[];
+}
+export interface RestSendTx extends RestTx {
+    body: RestSendTxBody;
+}
+export interface RestDelegateTx {
+    body: RestDelegateTxBody;
+}
+export interface RestUndelegateTx {
+    body: RestUndelegateTxBody;
+}
+export interface RestGetRewardsTx {
+    body: RestGetRewardsTxBody;
+}
+export interface RestSdsPrepayTx {
+    body: RestSdsPrepayTxBody;
+}
+export interface RestTxResponseEventAttribute {
+    key: string;
+    value: string;
+    index: boolean;
+}
+export interface RestTxResponseEvent {
+    type: string;
+    attributes: RestTxResponseEventAttribute[];
+}
+export interface RestTxResponseLog {
+    msg_index: number;
+    log: string;
+    events: RestTxResponseEvent[];
+}
+export interface RestTxResponseTx extends RestTx {
+    ['@type']: string;
+}
+export interface RestTxErrorResponse {
+    code: number;
+    message: string;
+    details: string[];
+}
+export interface FileUserRequestShareParams {
+    filehash: string;
+    duration: number;
+    bool: boolean;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+        shareid: string;
+        sharelink: string;
+    };
+}
+export interface FileUserRequestListShareParams {
+    page: number;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestListShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+        fileinfo?: SharedFileInfoItem[];
+        totalnumber?: number;
+    };
+}
+export interface FileUserRequestStopShareParams {
+    shareid: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestStopShareResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2';
+    };
+}
+export interface FileUserRequestGetSharedParams {
+    sharelink: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3' | '4';
+        reqid: string;
+        filehash: string;
+        sequencenumber: string;
+    };
+}
+export interface FileUserRequestDownloadSharedParams {
+    filehash: string;
+    reqid: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestGetFileStatusParams {
+    filehash: string;
+    signature: UserFileSignature;
+    req_time: number;
+}
+export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
+    result: {
+        return: '0' | '1' | '2' | '3';
+        file_upload_state: number;
+        user_has_file: boolean;
+        replicas: number;
     };
 }

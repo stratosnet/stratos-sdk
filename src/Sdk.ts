@@ -5,6 +5,7 @@ export interface SdkEnvironmentConfig {
   explorerUrl: string;
   ppNodeUrl?: string;
   ppNodePort?: string;
+  faucetUrl?: string;
 }
 
 const SdkDefaultEnvironment = {
@@ -12,8 +13,11 @@ const SdkDefaultEnvironment = {
   rpcUrl: 'https://rpc-test.thestratos.org',
   chainId: 'test-chain-1',
   explorerUrl: 'https://explorer-test.thestratos.org',
-  ppNodeUrl: 'http://52.14.150.146',
-  ppNodePort: '8153',
+  // ppNodeUrl: 'http://52.14.150.146',
+  // ppNodePort: '8153',
+  ppNodeUrl: '',
+  ppNodePort: '',
+  faucetUrl: '',
 };
 
 export default class Sdk {

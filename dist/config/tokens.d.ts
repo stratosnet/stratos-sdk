@@ -1,5 +1,7 @@
+import { ethers } from 'ethers';
 export declare const decimalPrecision = 18;
-export declare const minGasPrice = 10000000000;
+export declare const minGasPrice: ethers.BigNumber;
+export declare const gasAdjustment = 2;
 export declare const decimalShortPrecision = 4;
 export declare const perMsgGasAmount = 100000;
 export declare const baseGasAmount = 500000;

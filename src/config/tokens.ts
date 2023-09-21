@@ -1,10 +1,13 @@
+import { ethers } from 'ethers';
+
 // 1 STOS = 10^18 wei = 10^9Gwei for new denom of stchain
 
 // WEI and GWEI
 export const decimalPrecision = 18;
 
-// export const minGasPrice = 10_000_000; // wei or 0.01gwei for chain itself
-export const minGasPrice = 10_000_000_000; // wei or 1gwei for tropos
+export const minGasPrice = ethers.utils.parseUnits('1', 9); // wei or 1gwei for tropos
+
+export const gasAdjustment = 2; // adjustment for gas mult as non deterministic simulate
 
 // ui
 export const decimalShortPrecision = 4;
@@ -14,5 +17,5 @@ export const baseGasAmount = 500_000;
 export const defaultGasAmount = baseGasAmount + perMsgGasAmount * 1;
 
 export const standardFeeAmount = (gas = defaultGasAmount): number => {
-  return minGasPrice * gas;
+  return minGasPrice.mul(gas).toNumber();
 };

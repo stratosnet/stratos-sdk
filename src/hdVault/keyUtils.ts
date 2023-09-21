@@ -9,10 +9,11 @@ import {
   Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
-import { fromBase64, fromHex, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 import CryptoJS from 'crypto-js';
 import createKeccakHash from 'keccak';
+import { fromHexString } from 'multihashes';
 import sjcl from 'sjcl';
 import {
   bip39Password,
@@ -24,7 +25,7 @@ import {
 import StratosDirectSecp256k1HdWallet, {
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
-import { log } from '../services/helpers';
+// import { log } from '../services/helpers';
 import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
@@ -149,6 +150,16 @@ export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
   return address;
 };
 
+export const convertNativeToEvmAddress = (nativeAddress: string): string => {
+  const evmAddress = '0x' + toHex(fromBech32(nativeAddress).data);
+  return evmAddress;
+};
+
+export const convertEvmToNativeToAddress = (evmAddress: string): string => {
+  const nativeAddress = toBech32(stratosAddressPrefix, fromHex(evmAddress.replace('0x', '')));
+  return nativeAddress;
+};
+
 export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<string> => {
   const encodedPubKey = toBech32(stratosPubkeyPrefix, encodedAminoPub);
 
@@ -246,14 +257,14 @@ export const serializeWallet = async (
   wallet: StratosDirectSecp256k1HdWallet,
   password: string,
 ): Promise<string> => {
-  log('Beginning serializing..');
+  // log('Beginning serializing..');
 
   let encryptedWalletInfoFour;
 
   try {
     // encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
     encryptedWalletInfoFour = serializeWithEncryptionKey(password, wallet);
-    log('Serialization with prepared cryptoJs data Uint8 is done. ');
+    // log('Serialization with prepared cryptoJs data Uint8 is done. ');
   } catch (error) {
     throw new Error(
       `Could not serialize a wallet with the encryption key. Error4 - ${(error as Error).message}`,

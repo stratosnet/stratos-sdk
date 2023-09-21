@@ -1,23 +1,16 @@
-import CID from 'cids';
+import CIDM from 'cids';
 import crypto from 'crypto';
 import fs from 'fs';
+import { base32hex } from 'multiformats/bases/base32';
+import { CID } from 'multiformats/cid';
+import * as hasher from 'multiformats/hashes/hasher';
 import multihashing from 'multihashing-async';
-import Sdk from '../../Sdk';
 import { delay } from '../helpers';
-import { networkTypes, sendUserRequestList } from '../network';
-import { FileInfoItem } from '../network/types';
 
-// import * as Types from './types';
-
-// async function wait(fn: any, ms: number) {
-//   while (!fn()) {
-//     await delay(ms);
-//   }
-// }
-//
-// function delay(ms: number) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
+export interface OpenedFileInfo {
+  size: number;
+  filehash: string;
+}
 
 export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   try {
@@ -28,25 +21,39 @@ export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   }
 };
 
-export const calculateFileHash = async (filePath: string): Promise<string> => {
+export const calculateFileHashOld = async (filePath: string): Promise<string> => {
   const fileBuffer = await getFileBuffer(filePath);
   const md5Digest = crypto.createHash('md5').update(fileBuffer).digest();
 
   const encodedHash = await multihashing(md5Digest, 'keccak-256', 20);
 
-  const cid = new CID(1, 'raw', encodedHash, 'base32hex');
+  const cid = new CIDM(1, 'raw', encodedHash, 'base32hex');
 
   const realFileHash = cid.toString();
 
   return realFileHash;
 };
 
-// const processFileChunk = async () => {};
+export const calculateFileHash = async (filePath: string): Promise<string> => {
+  const fileBuffer = await getFileBuffer(filePath);
+  const firstKeccak = await multihashing(fileBuffer, 'keccak-256', 20);
+  const secondKeccak = await multihashing(firstKeccak, 'keccak-256', 20);
 
-export interface OpenedFileInfo {
-  size: number;
-  filehash: string;
-}
+  const keccak256Hasher = hasher.from({
+    name: 'keccak-256',
+    code: 0x1b,
+    encode: input => input.slice(-20),
+  });
+
+  const encodedHashO = await keccak256Hasher.digest(secondKeccak);
+
+  const cid = CID.create(1, 0x66, encodedHashO);
+  const realFileHash = cid.toString(base32hex);
+
+  const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
+
+  return realFileHash;
+};
 
 export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => {
   let openedFileInfo: OpenedFileInfo = { size: 0, filehash: '' };
@@ -129,10 +136,6 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
     chunksList = await new Promise(resolve => {
       const chunk = fileStream.read(readChunkSize);
 
-      // if (chunk) {
-      // console.log('chunk a read size', chunk.length);
-      // }
-
       resolve(chunk);
     });
   } catch (error) {
@@ -144,13 +147,15 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
 
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
   await delay(100);
-  // await delay(2000);
+  //  Cannot create a string longer than 0x1fffffe8 characters
   const base64data = chunk.toString('base64');
+  // console.log('good 1');
   return base64data;
 }
 
 export const encodeFile = async (fileBuffer: Buffer) => {
   const encodedFile = await encodeBuffer(fileBuffer);
+  console.log('good 2');
   return encodedFile;
 };
 
@@ -188,18 +193,7 @@ export const getEncodedFileChunks = async (filePath: string, chunkSize = 10000):
   return encodedFileChunksList;
 };
 
-// export const getEncodedFileChunk = async (
-//   fileStream: fs.ReadStream,
-//   offsetStart: number,
-//   offsetEnd: number,
-// ): Promise<string> => {
-//   const fileChunk = await getFileChunk(fileStream, offsetStart, offsetEnd);
-//
-//   const encodedChunk = await encodeBuffer(fileChunk);
-//   return encodedChunk;
-// };
-
-export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStream> => {
+export const getLocalFileReadStream = async (filePath: string): Promise<fs.ReadStream> => {
   try {
     const fileStream = fs.createReadStream(filePath);
 
@@ -221,11 +215,6 @@ export const getUploadFileStream = async (filePath: string): Promise<fs.ReadStre
   }
 };
 
-export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
-  const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
-  return writeFile(filePath, decodedFileBuffer);
-};
-
 export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   try {
     fs.writeFileSync(filePath, fileBuffer);
@@ -234,40 +223,7 @@ export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   }
 };
 
-type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
-
-interface UserFileListResponse {
-  files: FileInfoItem[];
-  originalResponse: RequestUserFilesResponse;
-}
-
-export const getUserUploadedFileList = async (address: string, page = 0): Promise<UserFileListResponse> => {
-  const extraParams = [
-    {
-      walletaddr: address,
-      page,
-    },
-  ];
-
-  const connectedUrl = `${Sdk.environment.ppNodeUrl}:${Sdk.environment.ppNodePort}`;
-
-  const message = `connecting to ${connectedUrl}`;
-
-  console.log(message);
-  const callResult = await sendUserRequestList(extraParams);
-
-  const { response } = callResult;
-
-  // console.log('file list request result', JSON.stringify(callResult));
-
-  if (!response) {
-    throw 'Could not fetch a list of files. No response in the call result';
-  }
-
-  const userFiles = response.result.fileinfo;
-
-  return {
-    originalResponse: response,
-    files: userFiles,
-  };
+export const writeFileToPath = async (filePath: string, econdedFileContent: string) => {
+  const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
+  return writeFile(filePath, decodedFileBuffer);
 };

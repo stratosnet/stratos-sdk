@@ -1,6 +1,6 @@
+import { DecodedTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { FormattedBlockChainTx } from '../services/transformers/transactions/types';
 export declare enum TxMsgTypes {
     Account = "/cosmos.auth.v1beta1.BaseAccount",
     Send = "/cosmos.bank.v1beta1.MsgSend",
@@ -59,16 +59,11 @@ export declare const TxHistoryTypesMap: Map<string, number>;
 export interface EmptyObject {
     [key: string]: any;
 }
-export interface ParsedTxItem extends FormattedBlockChainTx {
-}
-export interface ParsedTxData {
-    data: FormattedBlockChainTx[];
-    total: string;
-    page: number;
-}
 export interface BroadcastResult extends DeliverTxResponse {
 }
 export interface SignedTransaction extends TxRaw {
+}
+export interface DecodedSignedTransaction extends DecodedTxRaw {
 }
 export interface AmountType {
     amount: string;
@@ -137,7 +132,7 @@ export interface SdsPrepayTxMessage {
     typeUrl: TxMsgTypes;
     value: {
         sender: string;
-        coins: AmountType[];
+        amount: AmountType[];
     };
 }
 export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;

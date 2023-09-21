@@ -1,8 +1,10 @@
+import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
+import qs from 'qs';
 import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
-import { log } from '../../services/helpers';
+import { log, dirLog } from '../../services/helpers';
 import * as Types from './types';
 
 const _axios = axios.create({});
@@ -31,6 +33,12 @@ const getRpcRoute = (): string => {
 
 const getPpNodeRoute = (): string => {
   const { ppNodeUrl, ppNodePort } = Sdk.environment;
+
+  if (!ppNodeUrl || !ppNodePort) {
+    throw new Error(
+      'SDK must be initialized with pp node url and port prior to use the getPpNodeRoute function',
+    );
+  }
 
   return `${ppNodeUrl}:${ppNodePort}`;
 };
@@ -72,7 +80,8 @@ export const apiPost = async (
   const myConfig = {
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
-    timeout: 30000,
+    // timeout: 31000,
+    // timeout: 31000,
   };
 
   let axiosResponse;
@@ -99,8 +108,14 @@ export const apiGet = async (
 ): Promise<Types.NetworkAxiosDataResult> => {
   let axiosResponse;
 
+  const myParamsSerializer = function (params: unknown[]) {
+    return qs.stringify(params, { arrayFormat: 'repeat' });
+  };
+
+  const myConfig = { ...config, paramsSerializer: myParamsSerializer };
+
   try {
-    axiosResponse = await _axios.get(url, config);
+    axiosResponse = await _axios.get(url, myConfig);
   } catch (err) {
     return { error: { message: (err as Error).message } };
   }
@@ -125,14 +140,14 @@ export const sendRpcCall = async <N>(
   };
   const url = `${getPpNodeRoute()}`;
 
-  log('from network ~ rpc call url', url);
-
   const payload = { ...defaultPayload, ...givenPayload };
 
+  log('from network ~ rpc call url', url);
   // log('from network - calling rpc', payload);
   const dataResult = await apiPost(url, payload, { ...config });
 
-  // log('from network - rpc post result', payload);
+  // log('from network - rpc post result', dataResult);
+  // log('from network - rpc post result error', dataResult.response?.error);
   return dataResult;
 };
 
@@ -208,22 +223,26 @@ export const submitTransaction = async <T extends Types.TransactionData>(
 export const getTxListBlockchain = async (
   address: string,
   type: string,
-  page = 1,
+  givenPage = 1,
+  pageLimit = 5,
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.RestTxListDataResult> => {
-  // const url = `${getRestRoute()}/txs?message.action=send&message.sender=${address}`;
+): Promise<Types.RestTxHistoryDataResult> => {
+  const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
 
-  const url = `${getRestRoute()}/txs`;
-
-  const params: { page: number; 'message.sender': string; 'message.action'?: string; limit: number } = {
-    page,
-    limit: 3,
-    'message.sender': address,
-  };
+  const givenEvents = [`message.sender='${address}'`];
 
   if (type) {
-    params['message.action'] = type;
+    const msgTypeActionParameter = `message.action='${type}'`;
+    givenEvents.push(msgTypeActionParameter);
   }
+
+  const params = {
+    events: givenEvents,
+    'pagination.limit': pageLimit,
+    'pagination.offset': givenPage,
+    'pagination.count_total': true,
+    order_by: 'ORDER_BY_DESC',
+  };
 
   const dataResult = await apiGet(url, {
     ...config,
@@ -251,6 +270,7 @@ export const getTxList = async (
   // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
   // const url = `${getExplorerRoute()}/api/cleanup`;
   const url = `${getExplorerRoute()}/api/getAccountHistory`;
+  console.log('url 1', url);
 
   const params: { page: number; account: string; limit: number; operation?: string } = {
     page,
@@ -387,7 +407,7 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  // console.log('uu', url);
+  log('rpc status url ', url);
 
   const dataResult = await apiGet(url, config);
 
@@ -410,13 +430,6 @@ export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T)
     method,
     params: extraParams,
   };
-
-  // console.log('network, rpc payload to be sent');
-  // const { id } = payload;
-  // const { filehash } = extraParams as unknown as Types.FileUserRequestUploadParams;
-  // const myData = { id, method, params: { filehash: filehash ? filehash : '' } };
-  // console.log(myData);
-  // console.log(payload);
 
   return payload;
 };
@@ -501,7 +514,7 @@ export const sendUserRequestGetOzone = async (
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
-  // console.log('🚀 ~ file: network.ts ~ line 476 ~ sendUserRequestGetOzone dataResult', dataResult);
+  // dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
 
   return dataResult;
 };
@@ -520,8 +533,93 @@ export const sendUserUploadData = async (
   return dataResult;
 };
 
+export const sendUserRequestShare = async <T = Types.FileUserRequestShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestListShare = async <T = Types.FileUserRequestListShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestListShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestListShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestStopShare = async <T = Types.FileUserRequestStopShareParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestStopShareResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestStopShare';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestGetShared = async <T = Types.FileUserRequestGetSharedParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetSharedResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestGetShared';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestDownloadShared = async <T = Types.FileUserRequestDownloadSharedParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadSharedResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestDownloadShared';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetFileStatusParams>(
+  extraParams: T[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetFileStatusResponse>> => {
+  const msgId = 1;
+  const method = 'user_getFileStatus';
+
+  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
 export const getChainId = async () => {
   const result = await getRpcStatus();
+  // dirLog('getChainId result', result);
 
   const { response } = result;
   const chainId = response?.result?.node_info?.network;
