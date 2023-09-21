@@ -56,6 +56,17 @@ const sdkEnvTest = {
   explorerUrl: 'https://big-dipper-mesos.thestratos.org',
   faucetUrl: 'https://faucet-mesos.thestratos.org/credit',
 };
+
+const sdkEnvMainNet = {
+  key: 'mainnet',
+  name: 'Mainnet',
+  stratosFaucetDenom: 'stos',
+  restUrl: 'https://rest.thestratos.org',
+  rpcUrl: 'https://rpc.thestratos.org',
+  chainId: 'stratos-1',
+  explorerUrl: 'https://big-dipper.thestratos.org',
+};
+
 // creates an account and derives 2 keypairs
 const mainFour = async () => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -1092,8 +1103,9 @@ const main = async () => {
   let resolvedChainID: string;
 
   // that is the mesos config
-  const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvMainNet;
 
   Sdk.init({ ...sdkEnv });
 
