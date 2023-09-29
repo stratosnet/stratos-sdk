@@ -547,6 +547,12 @@ export interface RestDelegateTxBodyMessage extends RestTxBodyMessage {
     validator_address: string;
     amount: Amount;
 }
+export interface RestBeginRedelegateTxBodyMessage extends RestTxBodyMessage {
+    delegator_address: string;
+    validator_src_address: string;
+    validator_dst_address: string;
+    amount: Amount;
+}
 export interface RestUndelegateTxBodyMessage extends RestDelegateTxBodyMessage {
 }
 export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {

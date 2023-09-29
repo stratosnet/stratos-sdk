@@ -7,7 +7,8 @@ export declare enum TxMsgTypes {
     Delegate = "/cosmos.staking.v1beta1.MsgDelegate",
     Undelegate = "/cosmos.staking.v1beta1.MsgUndelegate",
     WithdrawRewards = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-    CreateValidator = "/cosmos.staking.v1beta1.MsgCreateValidator"
+    CreateValidator = "/cosmos.staking.v1beta1.MsgCreateValidator",
+    BeginRedelegate = "/cosmos.staking.v1beta1.MsgBeginRedelegate"
 }
 export declare enum TxMsgTypes {
     SdsAll = "",
@@ -43,7 +44,8 @@ export declare enum HistoryTxType {
     RegisterCreateIndexingNode = 13,
     RegisterRemoveIndexingNode = 14,
     RegisterIndexingNodeRegistrationVote = 15,
-    PotFoundationDeposit = 16
+    PotFoundationDeposit = 16,
+    BeginRedelegate = 17
 }
 export declare enum TxHistoryTypes {
     SdsAll = "",
@@ -51,7 +53,8 @@ export declare enum TxHistoryTypes {
     Delegate = "cosmos-sdk/MsgDelegate",
     Undelegate = "cosmos-sdk/MsgUndelegate",
     GetReward = "cosmos-sdk/MsgWithdrawDelegationReward",
-    SdsPrepay = "sds/PrepayTx"
+    SdsPrepay = "sds/PrepayTx",
+    BeginRedelegate = "cosmos-sdk/MsgBeginRedelegate"
 }
 export declare const TxMsgTypesMap: Map<number, string>;
 export declare const BlockChainTxMsgTypesMap: Map<number, string>;
@@ -119,6 +122,15 @@ export interface DelegateTxMessage {
         validatorAddress: string;
     };
 }
+export interface BeginRedelegateTxMessage {
+    typeUrl: TxMsgTypes;
+    value: {
+        amount: AmountType;
+        delegatorAddress: string;
+        validatorSrcAddress: string;
+        validatorDstAddress: string;
+    };
+}
 export interface UnDelegateTxMessage extends DelegateTxMessage {
 }
 export interface WithdrawalRewardTxMessage {
@@ -135,7 +147,7 @@ export interface SdsPrepayTxMessage {
         amount: AmountType[];
     };
 }
-export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage;
+export type TxMessage = SendTxMessage | DelegateTxMessage | WithdrawalRewardTxMessage | SdsPrepayTxMessage | BeginRedelegateTxMessage;
 export interface SendTxPayload {
     amount: number;
     toAddress: string;
@@ -143,6 +155,11 @@ export interface SendTxPayload {
 export interface DelegateTxPayload {
     amount: number;
     validatorAddress: string;
+}
+export interface BeginRedelegateTxPayload {
+    amount: number;
+    validatorSrcAddress: string;
+    validatorDstAddress: string;
 }
 export interface UnDelegateTxPayload extends DelegateTxPayload {
 }
@@ -152,5 +169,5 @@ export interface WithdrawalRewardTxPayload {
 export interface SdsPrepayTxPayload {
     amount: number;
 }
-export type TxPayload = SendTxPayload | DelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload | SdsPrepayTxPayload;
+export type TxPayload = SendTxPayload | DelegateTxPayload | BeginRedelegateTxPayload | UnDelegateTxPayload | WithdrawalRewardTxPayload | SdsPrepayTxPayload;
 export {};
