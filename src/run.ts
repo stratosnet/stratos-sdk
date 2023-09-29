@@ -283,6 +283,56 @@ const mainDelegate = async (
   }
 };
 
+// cosmosjs redelegate
+const mainReDelegate = async (
+  hdPathIndex: number,
+  givenMnemonic: string,
+  validatorAddressDelegateFrom: string,
+  validatorAddressDelegateTo: string,
+  amount: number,
+) => {
+  // const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const delegatorAddress = keyPairZero.address;
+  console.log('🚀 ~ mainRedelegate ~ delegatorAddress', delegatorAddress);
+
+  const sendTxMessages = await transactions.getBeginRedelegateTx(delegatorAddress, [
+    {
+      amount,
+      validatorSrcAddress: validatorAddressDelegateFrom,
+      validatorDstAddress: validatorAddressDelegateTo,
+    },
+    // {
+    //   amount: 3,
+    //   validatorSrcAddress: 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh',
+    //   validatorDstAddress: validatorAddressDelegateTo,
+    // },
+  ]);
+
+  console.log('sendTxMessages ', sendTxMessages);
+
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
+
+  if (signedTx) {
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('redelegate broadcasting result!!! :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
 // cosmosjs undelegate
 const mainUndelegate = async () => {
   const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';

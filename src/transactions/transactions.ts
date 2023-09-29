@@ -283,6 +283,43 @@ export const getDelegateTx = async (
   return messagesList;
 };
 
+export const getBeginRedelegateTx = async (
+  delegatorAddress: string,
+  delegatePayload: Types.BeginRedelegateTxPayload[],
+): Promise<Types.BeginRedelegateTxMessage[]> => {
+  const payloadToProcess = payloadGenerator(delegatePayload);
+
+  let iteratedData = payloadToProcess.next();
+
+  const messagesList: Types.BeginRedelegateTxMessage[] = [];
+
+  while (iteratedData.value) {
+    const { amount, validatorSrcAddress, validatorDstAddress } =
+      iteratedData.value as Types.BeginRedelegateTxPayload;
+
+    const message = {
+      typeUrl: Types.TxMsgTypes.BeginRedelegate,
+      value: {
+        amount: {
+          amount: toWei(amount, decimalPrecision).toFixed(),
+          denom: stratosDenom,
+        },
+        delegatorAddress: delegatorAddress,
+        validatorSrcAddress: validatorSrcAddress,
+        validatorDstAddress: validatorDstAddress,
+      },
+    };
+
+    console.log('message to ReDelegate', message);
+
+    messagesList.push(message);
+
+    iteratedData = payloadToProcess.next();
+  }
+
+  return messagesList;
+};
+
 export const getUnDelegateTx = async (
   delegatorAddress: string,
   unDelegatePayload: Types.UnDelegateTxPayload[],
