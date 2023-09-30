@@ -34,6 +34,7 @@ export declare const sign: (address: string, txMessages: Types.TxMessage[], memo
 export declare const getStandardAmount: (amounts: number[]) => Types.AmountType[];
 export declare const getSendTx: (keyPairAddress: string, sendPayload: Types.SendTxPayload[]) => Promise<Types.SendTxMessage[]>;
 export declare const getDelegateTx: (delegatorAddress: string, delegatePayload: Types.DelegateTxPayload[]) => Promise<Types.DelegateTxMessage[]>;
+export declare const getBeginRedelegateTx: (delegatorAddress: string, delegatePayload: Types.BeginRedelegateTxPayload[]) => Promise<Types.BeginRedelegateTxMessage[]>;
 export declare const getUnDelegateTx: (delegatorAddress: string, unDelegatePayload: Types.UnDelegateTxPayload[]) => Promise<Types.UnDelegateTxMessage[]>;
 export declare const getWithdrawalRewardTx: (delegatorAddress: string, withdrawalPayload: Types.WithdrawalRewardTxPayload[]) => Promise<Types.WithdrawalRewardTxMessage[]>;
 export declare const getWithdrawalAllRewardTx: (delegatorAddress: string) => Promise<Types.WithdrawalRewardTxMessage[]>;

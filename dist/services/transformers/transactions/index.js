@@ -32,6 +32,7 @@ exports.TxHistoryTypesMap = new Map([
     [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault],
     [TxTypes.TxMsgTypes.Send, Formatters.formatTxMsgSend],
     [TxTypes.TxMsgTypes.Delegate, Formatters.formatTxMsgDelegate],
+    [TxTypes.TxMsgTypes.BeginRedelegate, Formatters.formatTxMsgBeginRedelegate],
     [TxTypes.TxMsgTypes.Undelegate, Formatters.formatTxMsgUndelegate],
     [TxTypes.TxMsgTypes.WithdrawRewards, Formatters.formatTxMsgWithdrawDelegationReward],
     [TxTypes.TxMsgTypes.CreateValidator, Formatters.formatTxMsgCreateValidator],

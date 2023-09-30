@@ -9,6 +9,7 @@ export const TxHistoryTypesMap = new Map<string, Types.TxFormatter>([
   [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault], // default.
   [TxTypes.TxMsgTypes.Send, Formatters.formatTxMsgSend],
   [TxTypes.TxMsgTypes.Delegate, Formatters.formatTxMsgDelegate],
+  [TxTypes.TxMsgTypes.BeginRedelegate, Formatters.formatTxMsgBeginRedelegate],
   [TxTypes.TxMsgTypes.Undelegate, Formatters.formatTxMsgUndelegate],
   [TxTypes.TxMsgTypes.WithdrawRewards, Formatters.formatTxMsgWithdrawDelegationReward],
   [TxTypes.TxMsgTypes.CreateValidator, Formatters.formatTxMsgCreateValidator],

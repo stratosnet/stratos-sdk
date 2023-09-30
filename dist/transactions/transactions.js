@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromTx = void 0;
+exports.getSdsPrepayTx = exports.getWithdrawalAllRewardTx = exports.getWithdrawalRewardTx = exports.getUnDelegateTx = exports.getBeginRedelegateTx = exports.getDelegateTx = exports.getSendTx = exports.getStandardAmount = exports.sign = exports.getStandardFee = exports.getStandardDefaultFee = exports.broadcast = exports.encodeTxRawToEncodedTx = exports.decodeTxRawToTxHr = exports.decodeTxRawToTx = exports.encodeTxHrToTx = exports.assembleTxRawFromTx = void 0;
 const tx_1 = require("cosmjs-types/cosmos/tx/v1beta1/tx");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
@@ -206,6 +206,31 @@ const getDelegateTx = async (delegatorAddress, delegatePayload) => {
     return messagesList;
 };
 exports.getDelegateTx = getDelegateTx;
+const getBeginRedelegateTx = async (delegatorAddress, delegatePayload) => {
+    const payloadToProcess = payloadGenerator(delegatePayload);
+    let iteratedData = payloadToProcess.next();
+    const messagesList = [];
+    while (iteratedData.value) {
+        const { amount, validatorSrcAddress, validatorDstAddress } = iteratedData.value;
+        const message = {
+            typeUrl: Types.TxMsgTypes.BeginRedelegate,
+            value: {
+                amount: {
+                    amount: (0, bigNumber_1.toWei)(amount, tokens_1.decimalPrecision).toFixed(),
+                    denom: hdVault_1.stratosDenom,
+                },
+                delegatorAddress: delegatorAddress,
+                validatorSrcAddress: validatorSrcAddress,
+                validatorDstAddress: validatorDstAddress,
+            },
+        };
+        console.log('message to ReDelegate', message);
+        messagesList.push(message);
+        iteratedData = payloadToProcess.next();
+    }
+    return messagesList;
+};
+exports.getBeginRedelegateTx = getBeginRedelegateTx;
 const getUnDelegateTx = async (delegatorAddress, unDelegatePayload) => {
     const payloadToProcess = payloadGenerator(unDelegatePayload);
     let iteratedData = payloadToProcess.next();

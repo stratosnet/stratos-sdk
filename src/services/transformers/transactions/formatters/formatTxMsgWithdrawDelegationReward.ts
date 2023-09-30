@@ -1,9 +1,8 @@
-import { getBalanceCardMetricDinamicValue } from '../../../../accounts/accounts';
 import * as NetworkTypes from '../../../network/types';
+import { getBalanceCardMetricDinamicValue } from '../../balanceValues';
 import * as Types from '../types';
 import { isGetRewardsTxBodyMessage } from '../utils';
 import { formatBaseTx } from './formatBaseTx';
-import { formatTxSingleAmount } from './formatTxAmounts';
 import { emptyAmounts } from './formatTxAmounts';
 
 const findReceivedAmounts = (
@@ -43,7 +42,6 @@ const findReceivedAmounts = (
 
   return [
     {
-      // amount: receivedCoinsAmount,
       amount: receivedCoinsAmountFormatted,
       denom: receivedDenom,
     },
