@@ -79,6 +79,16 @@ describe(`Stratos SDK integration (integration test)`, () => {
                 done();
             });
         }, extendedExecutionTimeout);
+        describe('Transactions (re-delegate)', () => {
+            const receiverPhraseRedelegate = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+            const receiverMnemonicRedelegate = hdVault_1.mnemonic.convertArrayToString(receiverPhraseRedelegate);
+            it('Sends a redelegation tx and checks that receiver balance was updated', done => {
+                void Integration.sendBeginRedelegateTx(0, receiverMnemonicRedelegate).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
     });
     describe('Prepay OZONE, upload and download', () => {
         const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);

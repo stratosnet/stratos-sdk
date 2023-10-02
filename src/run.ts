@@ -489,13 +489,15 @@ const uploadRequest = async () => {
 };
 
 const getAccountTrasactions = async () => {
-  const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
-  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 3, 2);
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
+  dirLog('r', r?.data[0]?.txMessages);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 
 const getValidators = async () => {
@@ -615,7 +617,7 @@ const getOzoneBalance = async (hdPathIndex: number, givenMnemonic: string) => {
 
   const b = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
 
-  console.log('other balanace card metrics ', b);
+  console.log(' new other balanace card metrics ', b);
 };
 
 const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
@@ -1245,6 +1247,7 @@ const main = async () => {
   // 1 Check balance
   await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
+  // await getAccountTrasactions();
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet
