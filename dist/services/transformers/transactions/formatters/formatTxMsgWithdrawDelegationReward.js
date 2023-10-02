@@ -28,8 +28,14 @@ const findReceivedAmounts = (txResponseItemLogEntry) => {
         if (!receivedCoinsAmount && element.key === 'amount') {
             const tmpReceivedCoinsAmount = `${element.value}`;
             receivedCoinsAmount = `${parseInt(tmpReceivedCoinsAmount)}`;
-            receivedDenom = tmpReceivedCoinsAmount.replace(`${receivedCoinsAmount}`, '');
-            receivedCoinsAmountFormatted = (0, balanceValues_1.getBalanceCardMetricDinamicValue)(receivedDenom, receivedCoinsAmount);
+            const zeroMatch = tmpReceivedCoinsAmount.match(/\D/);
+            if (zeroMatch) {
+                const [_firstNonNumeric] = zeroMatch;
+                const [amount] = tmpReceivedCoinsAmount.split(_firstNonNumeric);
+                receivedCoinsAmount = amount;
+                receivedDenom = tmpReceivedCoinsAmount.replace(`${receivedCoinsAmount}`, '');
+                receivedCoinsAmountFormatted = (0, balanceValues_1.getBalanceCardMetricDinamicValue)(receivedDenom, receivedCoinsAmount);
+            }
         }
     });
     return [
