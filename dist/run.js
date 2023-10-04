@@ -921,6 +921,13 @@ const main = async () => {
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
     // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
     // const receiverMnemonic = zeroUserMnemonic;
+    // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
+    // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
+    // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
+    const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+    const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
+    const redelegateAmount = 5;
+    // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
