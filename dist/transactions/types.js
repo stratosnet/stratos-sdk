@@ -9,6 +9,7 @@ var TxMsgTypes;
     TxMsgTypes["Undelegate"] = "/cosmos.staking.v1beta1.MsgUndelegate";
     TxMsgTypes["WithdrawRewards"] = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward";
     TxMsgTypes["CreateValidator"] = "/cosmos.staking.v1beta1.MsgCreateValidator";
+    TxMsgTypes["BeginRedelegate"] = "/cosmos.staking.v1beta1.MsgBeginRedelegate";
 })(TxMsgTypes = exports.TxMsgTypes || (exports.TxMsgTypes = {}));
 (function (TxMsgTypes) {
     TxMsgTypes["SdsAll"] = "";
@@ -46,6 +47,7 @@ var HistoryTxType;
     HistoryTxType[HistoryTxType["RegisterRemoveIndexingNode"] = 14] = "RegisterRemoveIndexingNode";
     HistoryTxType[HistoryTxType["RegisterIndexingNodeRegistrationVote"] = 15] = "RegisterIndexingNodeRegistrationVote";
     HistoryTxType[HistoryTxType["PotFoundationDeposit"] = 16] = "PotFoundationDeposit";
+    HistoryTxType[HistoryTxType["BeginRedelegate"] = 17] = "BeginRedelegate";
 })(HistoryTxType = exports.HistoryTxType || (exports.HistoryTxType = {}));
 var TxHistoryTypes;
 (function (TxHistoryTypes) {
@@ -55,12 +57,14 @@ var TxHistoryTypes;
     TxHistoryTypes["Undelegate"] = "cosmos-sdk/MsgUndelegate";
     TxHistoryTypes["GetReward"] = "cosmos-sdk/MsgWithdrawDelegationReward";
     TxHistoryTypes["SdsPrepay"] = "sds/PrepayTx";
+    TxHistoryTypes["BeginRedelegate"] = "cosmos-sdk/MsgBeginRedelegate";
 })(TxHistoryTypes = exports.TxHistoryTypes || (exports.TxHistoryTypes = {}));
 exports.TxMsgTypesMap = new Map([
     [HistoryTxType.All, TxMsgTypes.SdsAll],
     [HistoryTxType.Account, TxMsgTypes.Account],
     [HistoryTxType.Transfer, TxMsgTypes.Send],
     [HistoryTxType.Delegate, TxMsgTypes.Delegate],
+    [HistoryTxType.BeginRedelegate, TxMsgTypes.BeginRedelegate],
     [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
     [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
     [HistoryTxType.CreateValidator, TxMsgTypes.CreateValidator],
@@ -79,6 +83,7 @@ exports.BlockChainTxMsgTypesMap = new Map([
     [HistoryTxType.All, TxMsgTypes.SdsAll],
     [HistoryTxType.Transfer, TxMsgTypes.Send],
     [HistoryTxType.Delegate, TxMsgTypes.Delegate],
+    [HistoryTxType.BeginRedelegate, TxMsgTypes.BeginRedelegate],
     [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
     [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
     [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
@@ -87,6 +92,7 @@ exports.TxHistoryTypesMap = new Map([
     [TxMsgTypes.SdsAll, HistoryTxType.All],
     [TxMsgTypes.Send, HistoryTxType.Transfer],
     [TxMsgTypes.Delegate, HistoryTxType.Delegate],
+    [TxMsgTypes.BeginRedelegate, HistoryTxType.BeginRedelegate],
     [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
     [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
     [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],

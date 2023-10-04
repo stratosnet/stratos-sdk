@@ -7,11 +7,34 @@ import Sdk from '../../Sdk';
 import * as RemoteFilesystem from '../../sds/remoteFile';
 import { getCosmos, resetCosmos } from '../../services/cosmos';
 import * as FilesystemService from '../../services/filesystem/filesystem';
-import { log, delay } from '../../services/helpers';
+import { log, delay, dirLog } from '../../services/helpers';
 import * as Network from '../../services/network';
 import * as transactions from '../../transactions';
 import * as validators from '../../validators';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
+
+interface DetailedDelegationInfo {
+  [key: string]: string;
+}
+
+type SendDelegateTxDetailedResponse = {
+  validatorsToUse: Array<{ validatorAddress: string }>;
+  totalDelegated: string;
+  detailedBalance: { delegated: DetailedDelegationInfo };
+};
+
+type SendDelegateTxResponse = true | SendDelegateTxDetailedResponse;
+
+export const isDetailedDelegateTxResponse = (
+  delegateTxResponse: SendDelegateTxResponse,
+): delegateTxResponse is SendDelegateTxDetailedResponse => {
+  return (
+    typeof delegateTxResponse !== 'boolean' &&
+    'validatorsToUse' in delegateTxResponse &&
+    'totalDelegated' in delegateTxResponse &&
+    'detailedBalance' in delegateTxResponse
+  );
+};
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
@@ -382,7 +405,8 @@ export const sendDelegateTx = async (
   hdPathIndex = 0,
   givenReceiverMnemonic = '',
   expectedDelegated = '0.2',
-): Promise<boolean> => {
+  isCalledAsAHelper = false,
+): Promise<SendDelegateTxResponse> => {
   log('//////////////// sendDelegateTx //////////////// ');
 
   await main(faucetMnemonic, hdPathIndex);
@@ -415,6 +439,7 @@ export const sendDelegateTx = async (
   if (!validatorAddresses.length) {
     throw new Error('validatorsList is empty');
   }
+
   const validatorsToUse = validatorAddresses.slice(0, 2);
 
   log('validatorsToUse', validatorsToUse);
@@ -427,6 +452,7 @@ export const sendDelegateTx = async (
   if (!signedTx) {
     throw new Error('Could not sign the delegate transaction');
   }
+
   try {
     const result = await transactions.broadcast(signedTx);
     log('result', result);
@@ -436,9 +462,10 @@ export const sendDelegateTx = async (
   }
 
   const b = await accounts.getBalanceCardMetrics(address);
-  log('balance from delegated', b);
 
-  const { delegated } = b;
+  dirLog('balance from delegated', b);
+
+  const { delegated, detailedBalance } = b;
 
   if (!delegated) {
     log('Balances', b);
@@ -446,6 +473,8 @@ export const sendDelegateTx = async (
       `receiver account "${keyPairReceiver.address}" have not received delegation transaction or balance was not updated `,
     );
   }
+
+  let totalDelegated;
 
   try {
     const [balanceValue] = delegated.split(' ');
@@ -455,11 +484,152 @@ export const sendDelegateTx = async (
         `account "${keyPairReceiver.address}" must have available delegate balance, but its balance is ${balanceValue}`,
       );
     }
+    totalDelegated = a;
   } catch (error) {
     log('Error', error);
     log('Balances', b);
     throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
   }
+
+  if (!isCalledAsAHelper) {
+    return true;
+  }
+
+  // from here it is returning the list of validators and delegations for the redelegate tx
+  return {
+    validatorsToUse,
+    totalDelegated,
+    detailedBalance,
+  };
+};
+
+export const sendBeginRedelegateTx = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+  expectedDelegated = '0.2',
+): Promise<boolean> => {
+  log('//////////////// sendBeginRedelegateTx  //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
+
+  await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const { address } = keyPairReceiver;
+
+  const sendDelegateTxInfo = await sendDelegateTx(
+    hdPathIndex,
+    givenReceiverMnemonic,
+    expectedDelegated,
+    true,
+  );
+
+  if (!isDetailedDelegateTxResponse(sendDelegateTxInfo)) {
+    return false;
+  }
+
+  const { validatorsToUse, detailedBalance, totalDelegated } = sendDelegateTxInfo;
+
+  const validatorAddresses = validatorsToUse.map(validator => validator.validatorAddress);
+
+  const { delegated } = detailedBalance;
+
+  const vBalances = validatorAddresses.map(validatorAddress => {
+    const vAmount = delegated[validatorAddress];
+    const [parsedAmount] = vAmount.split(' ');
+    const a = parseFloat(parsedAmount);
+    return a;
+  });
+
+  const reDelegationInfo = [
+    {
+      amount: vBalances[0],
+      validatorSrcAddress: validatorAddresses[0],
+      validatorDstAddress: validatorAddresses[1],
+    },
+  ];
+
+  const sendTxMessages = await transactions.getBeginRedelegateTx(address, reDelegationInfo);
+  const signedTx = await transactions.sign(address, sendTxMessages);
+
+  if (!signedTx) {
+    throw new Error('Could not sign the redelegate transaction');
+  }
+  try {
+    const result = await transactions.broadcast(signedTx);
+    log('result', result);
+  } catch (error) {
+    log('Error', error);
+    throw new Error('Could not broadcast the redelegate transaction');
+  }
+
+  const b = await accounts.getBalanceCardMetrics(address);
+
+  dirLog('balance from re-delegated', b);
+
+  const { delegated: delegatedAfter, detailedBalance: detailedBalanceAfter } = b;
+
+  if (!delegatedAfter) {
+    log('Balances', b);
+    throw new Error(
+      `receiver account "${keyPairReceiver.address}" have not received delegation transaction or balance was not updated `,
+    );
+  }
+
+  try {
+    const [balanceValue] = delegatedAfter.split(' ');
+    const a = parseFloat(balanceValue).toFixed(1);
+    console.log('a after and totalDelegated', a, totalDelegated);
+    if (!(a === expectedDelegated)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have available delegate balance after redelegation, but its balance is ${balanceValue}`,
+      );
+    }
+    if (!(a === totalDelegated)) {
+      throw new Error(
+        `account "${keyPairReceiver.address}" must have equal delegate balance after redelegation, but its delegated balance ${totalDelegated} is different from the redelegate balance of ${a}`,
+      );
+    }
+
+    const { delegated: delegatedDetailedAfter } = detailedBalanceAfter;
+
+    const vBalancesAfter = validatorAddresses.map(validatorAddress => {
+      const vAmount = delegatedDetailedAfter[validatorAddress];
+      if (!vAmount) return 0;
+      const [parsedAmount] = vAmount.split(' ');
+      const aAfter = parseFloat(parsedAmount);
+      return aAfter;
+    });
+
+    const isFirstValidatorHasNoBalance = vBalancesAfter[0] === 0;
+
+    if (!isFirstValidatorHasNoBalance) {
+      throw new Error(
+        `validatorAddress "${validatorAddresses[0]}" still has balance of ${vBalancesAfter[0]} but it has to be 0`,
+      );
+    }
+
+    const isSecondValidatorHasAllBalance = `${vBalancesAfter[1]}` === expectedDelegated;
+
+    if (!isSecondValidatorHasAllBalance) {
+      throw new Error(
+        `validatorAddress "${validatorAddresses[1]}" must have balance of ${expectedDelegated} but it has ${vBalancesAfter[1]}`,
+      );
+    }
+  } catch (error) {
+    log('Error', error);
+    log('Balances after redelegation', b);
+    throw new Error(`could not check account "${keyPairReceiver.address}" balance`);
+  }
+
   return true;
 };
 
@@ -785,7 +955,6 @@ export const uploadFileToRemote = async (
   const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
 
   const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
-  // console.log('!!! uploadResult from the uploadFile ', uploadResult);
 
   const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
 
@@ -799,7 +968,6 @@ export const uploadFileToRemote = async (
   await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
 
   const userFileList = await RemoteFilesystem.getUploadedFileList(keypair, 0);
-  // console.log('/// uploaded userFileList', userFileList);
 
   const { files } = userFileList;
 

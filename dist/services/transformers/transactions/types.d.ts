@@ -5,6 +5,7 @@ export interface FormattedBlockChainTxMessage {
     eventSender?: string;
     sender: string;
     to: string;
+    from?: string;
     type: TxTypes.HistoryTxType;
     txType: string;
     amounts: NetworkTypes.Amount[];

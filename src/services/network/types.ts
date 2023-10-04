@@ -71,11 +71,6 @@ export interface DelegatedBalanceResult {
   balance: Amount;
 }
 
-// export interface Reward {
-//   validator_address: string;
-//   reward: Amount[];
-// }
-
 export interface Rewards {
   validator_address: string;
   reward: Amount[];
@@ -663,6 +658,13 @@ export interface RestSendTxBodyMessage extends RestTxBodyMessage {
 export interface RestDelegateTxBodyMessage extends RestTxBodyMessage {
   delegator_address: string;
   validator_address: string;
+  amount: Amount;
+}
+
+export interface RestBeginRedelegateTxBodyMessage extends RestTxBodyMessage {
+  delegator_address: string;
+  validator_src_address: string;
+  validator_dst_address: string;
   amount: Amount;
 }
 

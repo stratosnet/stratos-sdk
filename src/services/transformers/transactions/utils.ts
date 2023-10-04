@@ -14,6 +14,12 @@ export const isDelegateTxBodyMessage = (
   return bodyMessage['@type'] === TxTypes.TxMsgTypes.Delegate;
 };
 
+export const isBeginRedelegateTxBodyMessage = (
+  bodyMessage: NetworkTypes.RestTxBodyMessage,
+): bodyMessage is NetworkTypes.RestBeginRedelegateTxBodyMessage => {
+  return bodyMessage['@type'] === TxTypes.TxMsgTypes.BeginRedelegate;
+};
+
 export const isUndelegateTxBodyMessage = (
   bodyMessage: NetworkTypes.RestTxBodyMessage,
 ): bodyMessage is NetworkTypes.RestUndelegateTxBodyMessage => {

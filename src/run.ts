@@ -283,6 +283,56 @@ const mainDelegate = async (
   }
 };
 
+// cosmosjs redelegate
+const mainReDelegate = async (
+  hdPathIndex: number,
+  givenMnemonic: string,
+  validatorAddressDelegateFrom: string,
+  validatorAddressDelegateTo: string,
+  amount: number,
+) => {
+  // const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const delegatorAddress = keyPairZero.address;
+  console.log('🚀 ~ mainRedelegate ~ delegatorAddress', delegatorAddress);
+
+  const sendTxMessages = await transactions.getBeginRedelegateTx(delegatorAddress, [
+    {
+      amount,
+      validatorSrcAddress: validatorAddressDelegateFrom,
+      validatorDstAddress: validatorAddressDelegateTo,
+    },
+    // {
+    //   amount: 3,
+    //   validatorSrcAddress: 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh',
+    //   validatorDstAddress: validatorAddressDelegateTo,
+    // },
+  ]);
+
+  console.log('sendTxMessages ', sendTxMessages);
+
+  const signedTx = await transactions.sign(delegatorAddress, sendTxMessages);
+
+  if (signedTx) {
+    try {
+      const result = await transactions.broadcast(signedTx);
+      console.log('redelegate broadcasting result!!! :)', result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
+};
+
 // cosmosjs undelegate
 const mainUndelegate = async () => {
   const validatorAddress = 'stvaloper1hxrrqfpnddjcfk55tu5420rw8ta94032z3dm76';
@@ -439,13 +489,15 @@ const uploadRequest = async () => {
 };
 
 const getAccountTrasactions = async () => {
-  const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
+  const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
-  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 3, 2);
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
+  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
+  dirLog('r', r?.data[0]?.txMessages);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 
 const getValidators = async () => {
@@ -565,7 +617,7 @@ const getOzoneBalance = async (hdPathIndex: number, givenMnemonic: string) => {
 
   const b = await accounts.getOtherBalanceCardMetrics(keyPairZero.address);
 
-  console.log('other balanace card metrics ', b);
+  console.log(' new other balanace card metrics ', b);
 };
 
 const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
@@ -1195,6 +1247,7 @@ const main = async () => {
   // 1 Check balance
   await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
+  // await getAccountTrasactions();
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet
@@ -1211,6 +1264,14 @@ const main = async () => {
   // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   // const receiverMnemonic = zeroUserMnemonic;
 
+  // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
+  // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
+  // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
+  const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+  const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
+  const redelegateAmount = 5;
+
+  // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
   // const hdPathIndexReceiver = 1;
 
   // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);

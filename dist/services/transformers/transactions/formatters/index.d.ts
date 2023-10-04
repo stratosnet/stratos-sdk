@@ -10,6 +10,7 @@ export { formatTxMsgRemoveIndexingNode } from './formatTxMsgRemoveIndexingNode';
 export { formatTxMsgIndexingNodeRegistrationVote } from './formatTxMsgIndexingNodeRegistrationVote';
 export { formatTxdDefault } from './formatTxdDefault';
 export { formatTxMsgDelegate } from './formatTxMsgDelegate';
+export { formatTxMsgBeginRedelegate } from './formatTxMsgBeginRedelegate';
 export { formatTxMsgWithdrawDelegationReward } from './formatTxMsgWithdrawDelegationReward';
 export { formatTxMsgUndelegate } from './formatTxMsgUndelegate';
 export { formatTxMsgFoundationDeposit } from './formatTxMsgFoundationDeposit';

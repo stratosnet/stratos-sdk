@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isPrepayTxBodyMessage = exports.isGetRewardsTxBodyMessage = exports.isUndelegateTxBodyMessage = exports.isDelegateTxBodyMessage = exports.isSendTxBodyMessage = void 0;
+exports.isPrepayTxBodyMessage = exports.isGetRewardsTxBodyMessage = exports.isUndelegateTxBodyMessage = exports.isBeginRedelegateTxBodyMessage = exports.isDelegateTxBodyMessage = exports.isSendTxBodyMessage = void 0;
 const TxTypes = __importStar(require("../../../transactions/types"));
 const isSendTxBodyMessage = (bodyMessage) => {
     // return 'from_address' in bodyMessage;
@@ -34,6 +34,10 @@ const isDelegateTxBodyMessage = (bodyMessage) => {
     return bodyMessage['@type'] === TxTypes.TxMsgTypes.Delegate;
 };
 exports.isDelegateTxBodyMessage = isDelegateTxBodyMessage;
+const isBeginRedelegateTxBodyMessage = (bodyMessage) => {
+    return bodyMessage['@type'] === TxTypes.TxMsgTypes.BeginRedelegate;
+};
+exports.isBeginRedelegateTxBodyMessage = isBeginRedelegateTxBodyMessage;
 const isUndelegateTxBodyMessage = (bodyMessage) => {
     return bodyMessage['@type'] === TxTypes.TxMsgTypes.Undelegate;
 };

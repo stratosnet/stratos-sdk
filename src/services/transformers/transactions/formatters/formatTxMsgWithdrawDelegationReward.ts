@@ -1,9 +1,9 @@
-import { getBalanceCardMetricDinamicValue } from '../../../../accounts/accounts';
+import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../../../../config/hdVault';
 import * as NetworkTypes from '../../../network/types';
+import { getBalanceCardMetricDinamicValue } from '../../balanceValues';
 import * as Types from '../types';
 import { isGetRewardsTxBodyMessage } from '../utils';
 import { formatBaseTx } from './formatBaseTx';
-import { formatTxSingleAmount } from './formatTxAmounts';
 import { emptyAmounts } from './formatTxAmounts';
 
 const findReceivedAmounts = (
@@ -36,14 +36,24 @@ const findReceivedAmounts = (
     if (!receivedCoinsAmount && element.key === 'amount') {
       const tmpReceivedCoinsAmount = `${element.value}`;
       receivedCoinsAmount = `${parseInt(tmpReceivedCoinsAmount)}`;
-      receivedDenom = tmpReceivedCoinsAmount.replace(`${receivedCoinsAmount}`, '');
-      receivedCoinsAmountFormatted = getBalanceCardMetricDinamicValue(receivedDenom, receivedCoinsAmount);
+
+      const zeroMatch = tmpReceivedCoinsAmount.match(/\D/);
+
+      if (zeroMatch) {
+        const [_firstNonNumeric] = zeroMatch;
+
+        const [amount] = tmpReceivedCoinsAmount.split(_firstNonNumeric);
+
+        receivedCoinsAmount = amount;
+
+        receivedDenom = tmpReceivedCoinsAmount.replace(`${receivedCoinsAmount}`, '');
+        receivedCoinsAmountFormatted = getBalanceCardMetricDinamicValue(receivedDenom, receivedCoinsAmount);
+      }
     }
   });
 
   return [
     {
-      // amount: receivedCoinsAmount,
       amount: receivedCoinsAmountFormatted,
       denom: receivedDenom,
     },

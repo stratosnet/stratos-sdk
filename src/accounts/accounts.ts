@@ -1,7 +1,6 @@
-import { log } from 'console';
 import _get from 'lodash/get';
 import { hdVault } from '../config';
-import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
+import { stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
 import {
   BigNumberValue,
@@ -11,8 +10,7 @@ import {
   ROUND_DOWN,
 } from '../services/bigNumber';
 import {
-  getAccountBalance as getBalancesDataFromNetwork,
-  getAccountsData as getAccountsDataFromNetwork,
+  getAccountBalance as getBalancesDataFromNetwork, // getAccountsData as getAccountsDataFromNetwork,
   getAvailableBalance,
   getDelegatedBalance,
   getRewardBalance,
@@ -22,6 +20,11 @@ import {
   requestBalanceIncrease,
   sendUserRequestGetOzone,
 } from '../services/network';
+import {
+  getBalanceCardMetricDinamicValue,
+  getBalanceCardMetricValue,
+  getOzoneMetricValue,
+} from '../services/transformers/balanceValues';
 import { transformTx } from '../services/transformers/transactions';
 import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
@@ -91,76 +94,6 @@ export const formatBalanceFromWei = (amount: string, requiredPrecision: number, 
   const fullBalance = `${balance} ${stratosTopDenom.toUpperCase()}`;
 
   return fullBalance;
-};
-
-export const getBalanceCardMetricDinamicValue = (denom?: string | undefined, amount?: string | undefined) => {
-  const isStratosDenom = denom === stratosDenom;
-
-  if (!isStratosDenom) {
-    return '0.0000 STOS';
-  }
-  if (!amount) {
-    return '0.0000 STOS';
-  }
-  const balanceInWei = createBigNumber(amount);
-
-  let dynamicPrecision = decimalShortPrecision;
-
-  let counter = 0;
-
-  let balance = '0';
-
-  const maxAdditionalDigits = 4;
-
-  let isStillZero = counter < maxAdditionalDigits;
-
-  do {
-    balance = fromWei(balanceInWei, decimalPrecision).toFormat(dynamicPrecision, ROUND_DOWN);
-    const parsetBalance = parseFloat(balance);
-    isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
-    dynamicPrecision++;
-    counter++;
-  } while (isStillZero);
-
-  const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
-  return balanceToReturn;
-};
-
-export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
-  const isStratosDenom = denom === stratosDenom;
-
-  if (!isStratosDenom) {
-    return '0.0000 STOS';
-  }
-  if (!amount) {
-    return '0.0000 STOS';
-  }
-  const balanceInWei = createBigNumber(amount);
-
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
-  const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
-  return balanceToReturn;
-};
-
-// @todo merge with get balance card value
-export const getOzoneMetricValue = (denom?: string | undefined, amount?: string | undefined) => {
-  const isStratosDenom = denom === stratosUozDenom;
-
-  const printableDenome = stratosOzDenom.toUpperCase();
-
-  if (!isStratosDenom) {
-    return `0.0000 ${printableDenome}`;
-  }
-  if (!amount) {
-    return `0.0000 ${printableDenome}`;
-  }
-
-  const balanceInWei = createBigNumber(amount);
-
-  const balance = fromWei(balanceInWei, 9).toFormat(decimalShortPrecision, ROUND_DOWN);
-  console.log('balance', balance);
-  const balanceToReturn = `${balance} ${printableDenome}`;
-  return balanceToReturn;
 };
 
 export const getOtherBalanceCardMetrics = async (
@@ -293,10 +226,6 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
       // in wei
       const validatorBalance = entry.reward?.[0]?.amount || '0';
 
-      // in stos
-      // const validatorBalanceInWei = entry.reward?.[0]?.amount || '0';
-      // const validatorBalance = getBalanceCardMetricDinamicValue(denom, validatorBalanceInWei);
-
       // in wei
       detailedBalance.reward[validatorAddress] = validatorBalance;
     }, 0);
@@ -349,7 +278,6 @@ export const getAccountTrasactions = async (
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit);
-  // console.log('txListResult', txListResult);
 
   const { response, error } = txListResult;
 
@@ -364,11 +292,9 @@ export const getAccountTrasactions = async (
   const parsedData: FormattedBlockChainTx[] = [];
 
   const { tx_responses: data = [], pagination } = response;
-  // console.log('getAccountTrasactions response', response);
   const { total } = pagination;
 
   data.forEach(txResponseItem => {
-    // console.log('txResponseItem', txResponseItem);
     try {
       const parsed = transformTx(txResponseItem);
       parsedData.push(parsed);
