@@ -20,6 +20,7 @@ import {
 import BN from 'bn.js';
 import CryptoJS from 'crypto-js';
 import sjcl from 'sjcl';
+
 import {
   bip39Password,
   encryptionIterations,
@@ -295,6 +296,19 @@ export function makePathBuilder(pattern: string): PathBuilder {
   return builder;
 }
 
+export const deserializeWallet = async (encryptedWalletInfoFour: string, password: string) => {
+  log('Beginning deserializing..');
+
+  const encryptionKey = await getEncryptionKey(password);
+  //
+  const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+    encryptedWalletInfoFour,
+    encryptionKey,
+  );
+  log('🚀 ~ ~ deserializedWalletTwo (enkKdf)', deserializedWalletTwo);
+  return deserializedWalletTwo;
+};
+
 // @todo clena up this function and extract different encryption methods into helper functions
 export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password: string) => {
   log('Beginning serializing..');
@@ -337,14 +351,14 @@ export const serializeWallet = async (wallet: DirectSecp256k1HdWallet, password:
   const encryptedWalletInfoFour = await wallet.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
   log('Serialization with prepared cryptoJs data Uint8 is done. ');
 
-  // const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
-  //   encryptedWalletInfoTwo,
-  //   encryptionKeyN,
-  // );
-  // log(
-  //   '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
-  //   deserializedWalletTwo,
-  // );
+  const deserializedWalletTwo = await DirectSecp256k1HdWallet.deserializeWithEncryptionKey(
+    encryptedWalletInfoFour,
+    encryptionKey,
+  );
+  log(
+    '🚀 ~ file: keyUtils.ts ~ line 312 ~ serializeWal ~ deserializedWalletTwo (enkKdf)',
+    deserializedWalletTwo,
+  );
   // const [firstAccountDesTwo] = await deserializedWalletTwo.getAccounts();
   // log('🚀 ~ file: keyUtils.ts firstAccount des two', firstAccountDesTwo);
 
@@ -389,6 +403,8 @@ export async function createWalletAtPath(
   };
 
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
+  console.log('wallet from keyUtils', wallet);
+  console.log('wallet mnemonic  keyUtils', wallet.mnemonic);
 
   // const accounts = await wallet.getAccounts();
   // console.log('🚀 ~ file: keyUtils.ts ~ line 279 ~ hdPathIndex', hdPathIndex);
