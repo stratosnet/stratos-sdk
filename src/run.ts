@@ -490,13 +490,18 @@ const uploadRequest = async () => {
 
 const getAccountTrasactions = async () => {
   // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
-  const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
-  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+  // const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
+  const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
+  const r1 = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1, 2);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
-  const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
-  dirLog('r', r?.data[0]?.txMessages);
+  // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
+  // dirLog('r', r?.data[0]?.txMessages);
+  // dirLog('r1.d',r1);
+  const a = r1.data.map(element => element.txMessages);
+  dirLog('a', a);
+
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 
@@ -1156,8 +1161,8 @@ const main = async () => {
 
   // that is the mesos config
   // const sdkEnv = sdkEnvDev;
-  const sdkEnv = sdkEnvTest;
-  // const sdkEnv = sdkEnvMainNet;
+  // const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvMainNet;
 
   Sdk.init({ ...sdkEnv });
 
@@ -1245,9 +1250,10 @@ const main = async () => {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
 
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
-  // await getAccountTrasactions();
+  await getAccountTrasactions();
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
 
   // 2 Add funds via faucet

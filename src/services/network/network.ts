@@ -228,6 +228,7 @@ export const getTxListBlockchain = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.RestTxHistoryDataResult> => {
   const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+  console.log('given page', givenPage, pageLimit);
 
   const givenEvents = [`message.sender='${address}'`];
 
@@ -236,10 +237,12 @@ export const getTxListBlockchain = async (
     givenEvents.push(msgTypeActionParameter);
   }
 
+  const offset = (givenPage - 1) * pageLimit + 1;
+
   const params = {
     events: givenEvents,
     'pagination.limit': pageLimit,
-    'pagination.offset': givenPage,
+    'pagination.offset': offset,
     'pagination.count_total': true,
     order_by: 'ORDER_BY_DESC',
   };

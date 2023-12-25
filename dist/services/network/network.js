@@ -168,15 +168,17 @@ const submitTransaction = async (delegatorAddr, data, config) => {
 exports.submitTransaction = submitTransaction;
 const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+    console.log('given page', givenPage, pageLimit);
     const givenEvents = [`message.sender='${address}'`];
     if (type) {
         const msgTypeActionParameter = `message.action='${type}'`;
         givenEvents.push(msgTypeActionParameter);
     }
+    const offset = (givenPage - 1) * pageLimit + 1;
     const params = {
         events: givenEvents,
         'pagination.limit': pageLimit,
-        'pagination.offset': givenPage,
+        'pagination.offset': offset,
         'pagination.count_total': true,
         order_by: 'ORDER_BY_DESC',
     };
