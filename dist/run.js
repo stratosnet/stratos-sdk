@@ -413,15 +413,18 @@ const uploadRequest = async () => {
     console.log('🚀 ~ file: run.ts ~ line 349 ~ uploadRequest ~ valid', valid);
 };
 const getAccountTrasactions = async () => {
-    var _a;
     // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
-    const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
-    // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1);
+    // const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
+    const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
+    const r1 = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1, 2);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Undelegate, 1);
-    const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
-    (0, helpers_1.dirLog)('r', (_a = r === null || r === void 0 ? void 0 : r.data[0]) === null || _a === void 0 ? void 0 : _a.txMessages);
+    // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.GetReward, 1);
+    // dirLog('r', r?.data[0]?.txMessages);
+    // dirLog('r1.d',r1);
+    const a = r1.data.map(element => element.txMessages);
+    (0, helpers_1.dirLog)('a', a);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, 1);
 };
 const getValidators = async () => {
@@ -848,8 +851,8 @@ const main = async () => {
     let resolvedChainID;
     // that is the mesos config
     // const sdkEnv = sdkEnvDev;
-    const sdkEnv = sdkEnvTest;
-    // const sdkEnv = sdkEnvMainNet;
+    // const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
@@ -908,8 +911,9 @@ const main = async () => {
     // const sharelink = 'VkAHq3_0755919d9815ea92';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    // await getAccountTrasactions();
+    // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getAccountTrasactions();
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
