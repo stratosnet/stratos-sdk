@@ -1,4 +1,4 @@
-import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+// import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
 import qs from 'qs';
@@ -6,6 +6,7 @@ import { hdVault } from '../../config';
 import Sdk from '../../Sdk';
 import { log, dirLog } from '../../services/helpers';
 import * as Types from './types';
+import { TxHistoryUser } from './types';
 
 const _axios = axios.create({});
 
@@ -225,12 +226,19 @@ export const getTxListBlockchain = async (
   type: string,
   givenPage = 1,
   pageLimit = 5,
+  userType: Types.TxHistoryUserType = TxHistoryUser.TxHistorySenderUser,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.RestTxHistoryDataResult> => {
   const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+  console.log('url', url);
   console.log('given page', givenPage, pageLimit);
 
-  const givenEvents = [`message.sender='${address}'`];
+  const userQueryType =
+    userType === TxHistoryUser.TxHistorySenderUser
+      ? `message.sender='${address}'`
+      : `transfer.recipient='${address}'`;
+
+  const givenEvents = [userQueryType];
 
   if (type) {
     const msgTypeActionParameter = `message.action='${type}'`;
@@ -251,6 +259,7 @@ export const getTxListBlockchain = async (
     ...config,
     params,
   });
+  console.log('aa', dataResult.response);
 
   return dataResult;
 };

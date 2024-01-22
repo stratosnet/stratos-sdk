@@ -1,6 +1,6 @@
 import _get from 'lodash/get';
 import { hdVault } from '../config';
-import { stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../config/hdVault';
+import { stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
 import {
   BigNumberValue,
@@ -20,6 +20,7 @@ import {
   requestBalanceIncrease,
   sendUserRequestGetOzone,
 } from '../services/network';
+import { type TxHistoryUserType, TxHistoryUser } from '../services/network/types';
 import {
   getBalanceCardMetricDinamicValue,
   getBalanceCardMetricValue,
@@ -269,7 +270,7 @@ export const getMaxAvailableBalance = async (
   return balance;
 };
 
-export const getAccountTrasactions = async (
+export const getAccountSenderTrasactions = async (
   address: string,
   type = TxTypes.HistoryTxType.All,
   page = 1,
@@ -277,7 +278,7 @@ export const getAccountTrasactions = async (
 ): Promise<ParsedTxData> => {
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
-  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit);
+  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 1);
 
   const { response, error } = txListResult;
 
@@ -309,6 +310,91 @@ export const getAccountTrasactions = async (
   const result = { data: parsedData, total, page: page || 1, totalPages };
 
   // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
+
+  return result;
+};
+
+export const getAccountReceiverTrasactions = async (
+  address: string,
+  type = TxTypes.HistoryTxType.All,
+  page = 1,
+  pageLimit = 5,
+): Promise<ParsedTxData> => {
+  const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+
+  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 2);
+
+  const { response, error } = txListResult;
+
+  if (error) {
+    throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+  }
+
+  if (!response) {
+    throw new Error('Could not fetch tx history');
+  }
+
+  const parsedData: FormattedBlockChainTx[] = [];
+
+  const { tx_responses: data = [], pagination } = response;
+  const { total } = pagination;
+
+  data.forEach(txResponseItem => {
+    try {
+      const parsed = transformTx(txResponseItem);
+      parsedData.push(parsed);
+    } catch (err) {
+      console.log(`Parsing error: ${(err as Error).message}`);
+    }
+  });
+
+  const totalUnformatted = parseInt(total) / pageLimit;
+  const totalPages = Math.ceil(totalUnformatted);
+
+  const result = { data: parsedData, total, page: page || 1, totalPages };
+
+  return result;
+};
+
+export const getAccountTrasactions = async (
+  address: string,
+  type = TxTypes.HistoryTxType.All,
+  page = 1,
+  pageLimit = 5,
+  userType: TxHistoryUserType = TxHistoryUser.TxHistorySenderUser,
+): Promise<ParsedTxData> => {
+  const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+
+  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, userType);
+
+  const { response, error } = txListResult;
+
+  if (error) {
+    throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+  }
+
+  if (!response) {
+    throw new Error('Could not fetch tx history');
+  }
+
+  const parsedData: FormattedBlockChainTx[] = [];
+
+  const { tx_responses: data = [], pagination } = response;
+  const { total } = pagination;
+
+  data.forEach(txResponseItem => {
+    try {
+      const parsed = transformTx(txResponseItem);
+      parsedData.push(parsed);
+    } catch (err) {
+      console.log(`Parsing error: ${(err as Error).message}`);
+    }
+  });
+
+  const totalUnformatted = parseInt(total) / pageLimit;
+  const totalPages = Math.ceil(totalUnformatted);
+
+  const result = { data: parsedData, total, page: page || 1, totalPages };
 
   return result;
 };

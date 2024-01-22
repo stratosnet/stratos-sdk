@@ -1,3 +1,4 @@
+import { type TxHistoryUserType } from '../services/network/types';
 import { ParsedTxData } from '../services/transformers/transactions/types';
 import * as TxTypes from '../transactions/types';
 export interface OtherBalanceCardMetrics {
@@ -23,4 +24,6 @@ export declare const formatBalanceFromWei: (amount: string, requiredPrecision: n
 export declare const getOtherBalanceCardMetrics: (keyPairAddress: string) => Promise<OtherBalanceCardMetrics>;
 export declare const getBalanceCardMetrics: (keyPairAddress: string) => Promise<BalanceCardMetrics>;
 export declare const getMaxAvailableBalance: (keyPairAddress: string, requestedDenom: string, decimals?: number) => Promise<string>;
-export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number) => Promise<ParsedTxData>;
+export declare const getAccountSenderTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number) => Promise<ParsedTxData>;
+export declare const getAccountReceiverTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number) => Promise<ParsedTxData>;
+export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number, userType?: TxHistoryUserType) => Promise<ParsedTxData>;

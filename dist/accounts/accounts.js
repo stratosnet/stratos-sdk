@@ -26,13 +26,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
+exports.getAccountTrasactions = exports.getAccountReceiverTrasactions = exports.getAccountSenderTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
 const get_1 = __importDefault(require("lodash/get"));
 const config_1 = require("../config");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
 const bigNumber_1 = require("../services/bigNumber");
 const network_1 = require("../services/network");
+const types_1 = require("../services/network/types");
 const balanceValues_1 = require("../services/transformers/balanceValues");
 const transactions_1 = require("../services/transformers/transactions");
 const TxTypes = __importStar(require("../transactions/types"));
@@ -198,9 +199,9 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     return balance;
 };
 exports.getMaxAvailableBalance = getMaxAvailableBalance;
-const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
+const getAccountSenderTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
     const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit);
+    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, 1);
     const { response, error } = txListResult;
     if (error) {
         throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
@@ -224,6 +225,62 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     const totalPages = Math.ceil(totalUnformatted);
     const result = { data: parsedData, total, page: page || 1, totalPages };
     // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
+    return result;
+};
+exports.getAccountSenderTrasactions = getAccountSenderTrasactions;
+const getAccountReceiverTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
+    const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, 2);
+    const { response, error } = txListResult;
+    if (error) {
+        throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+    }
+    if (!response) {
+        throw new Error('Could not fetch tx history');
+    }
+    const parsedData = [];
+    const { tx_responses: data = [], pagination } = response;
+    const { total } = pagination;
+    data.forEach(txResponseItem => {
+        try {
+            const parsed = (0, transactions_1.transformTx)(txResponseItem);
+            parsedData.push(parsed);
+        }
+        catch (err) {
+            console.log(`Parsing error: ${err.message}`);
+        }
+    });
+    const totalUnformatted = parseInt(total) / pageLimit;
+    const totalPages = Math.ceil(totalUnformatted);
+    const result = { data: parsedData, total, page: page || 1, totalPages };
+    return result;
+};
+exports.getAccountReceiverTrasactions = getAccountReceiverTrasactions;
+const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5, userType = types_1.TxHistoryUser.TxHistorySenderUser) => {
+    const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, userType);
+    const { response, error } = txListResult;
+    if (error) {
+        throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+    }
+    if (!response) {
+        throw new Error('Could not fetch tx history');
+    }
+    const parsedData = [];
+    const { tx_responses: data = [], pagination } = response;
+    const { total } = pagination;
+    data.forEach(txResponseItem => {
+        try {
+            const parsed = (0, transactions_1.transformTx)(txResponseItem);
+            parsedData.push(parsed);
+        }
+        catch (err) {
+            console.log(`Parsing error: ${err.message}`);
+        }
+    });
+    const totalUnformatted = parseInt(total) / pageLimit;
+    const totalPages = Math.ceil(totalUnformatted);
+    const result = { data: parsedData, total, page: page || 1, totalPages };
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;
