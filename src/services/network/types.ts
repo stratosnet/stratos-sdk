@@ -811,3 +811,14 @@ export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
     replicas: number;
   };
 }
+
+// export const TxHistorySenderUser = 1;
+// export const TxHistoryReceiverUser = 2;
+
+export type TxHistoryUserTypes = typeof TxHistoryUser;
+export type TxHistoryUserType = typeof TxHistoryUser[keyof TxHistoryUserTypes];
+
+export const TxHistoryUser = {
+  TxHistorySenderUser: 1,
+  TxHistoryReceiverUser: 2,
+} as const;

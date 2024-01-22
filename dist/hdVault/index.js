@@ -23,8 +23,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mnemonic = exports.wallet = exports.keyManager = void 0;
+exports.mnemonic = exports.wallet = exports.keyUtils = exports.keyManager = void 0;
 exports.keyManager = __importStar(require("./keyManager"));
+exports.keyUtils = __importStar(require("./keyUtils"));
 exports.wallet = __importStar(require("./wallet"));
 exports.mnemonic = __importStar(require("./mnemonic"));
 //# sourceMappingURL=index.js.map

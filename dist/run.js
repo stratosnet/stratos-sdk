@@ -44,6 +44,7 @@ const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
+const NetworkTypes = __importStar(require("./services/network/types"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -55,18 +56,9 @@ const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
-    chainId: 'dev-chain-46',
+    chainId: 'dev-0',
     explorerUrl: 'https://explorer-dev.thestratos.org',
     faucetUrl: 'https://faucet-dev.thestratos.org/credit',
-};
-const sdkEnvTestOld = {
-    key: 'testnet',
-    name: 'Tropos-4',
-    restUrl: 'https://rest-tropos.thestratos.org',
-    rpcUrl: 'https://rpc-tropos.thestratos.org',
-    chainId: 'stratos-testnet-2',
-    explorerUrl: 'https://big-dipper-tropos.thestratos.org',
-    faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 const sdkEnvTest = {
     key: 'testnet',
@@ -361,7 +353,6 @@ const mainWithdrawAllRewards = async () => {
         }
     }
 };
-// cosmosjs withdraw rewards
 const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic) => {
     // console.log('mnemonic ', zeroUserMnemonic);
     const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
@@ -373,7 +364,7 @@ const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic) => {
     if (!keyPairZero) {
         return;
     }
-    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.1 }]);
+    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 10 }]);
     (0, helpers_1.dirLog)('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
     let attempts = 0;
@@ -546,12 +537,16 @@ const runFaucet = async (hdPathIndex, givenMnemonic) => {
     const result = await accounts.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
     console.log('faucet result', result);
 };
-const getTxHistory = async () => {
-    const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+const getTxHistory = async (userMnemonic, hdPathIndex) => {
+    const wallet = await keyUtils.createWalletAtPath(hdPathIndex, userMnemonic);
     console.log('running getTxHistory');
     const [firstAccount] = await wallet.getAccounts();
     const zeroAddress = firstAccount.address;
-    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+    const pageNumber = 1;
+    const pageLimit = 100;
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, 
+    // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
+    NetworkTypes.TxHistoryUser.TxHistorySenderUser);
     console.log('hist result!! !', result);
     return true;
 };
@@ -869,12 +864,7 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
         // devnet
-        // ppNodeUrl: 'http://34.145.36.237',
-        // ppNodePort: '8135',
-        // ppNodeUrl: 'http://35.233.85.255',
-        // ppNodePort: '8142',
-        // mesos - we connect to mesos pp
-        ppNodeUrl: 'http://34.78.29.120', ppNodePort: '8142' }));
+        ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
     console.log('sdkEnv', Sdk_1.default.environment);
     // tropos
     // ppNodeUrl: 'http://35.233.251.112',
@@ -892,7 +882,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    const filename = 'file10M_Aug24_1';
+    const filename = 'file1G_Jan_9_v1';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
@@ -913,7 +903,7 @@ const main = async () => {
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await getAccountTrasactions();
+    // await getAccountTrasactions();
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
@@ -942,7 +932,9 @@ const main = async () => {
     // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-    // await getTxHistory();
+    const mainnetDev = 'group sustain bracket dinner wrong forest dash honey farm bitter planet swift suspect radar reveal loyal boring renew edge fetch unlock path rule push';
+    // await getTxHistory(zeroUserMnemonic, 0);
+    await getTxHistory(mainnetDev, 0);
 };
 main();
 //# sourceMappingURL=run.js.map

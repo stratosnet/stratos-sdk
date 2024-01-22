@@ -4,12 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
+// import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
 const config_1 = require("../../config");
 const Sdk_1 = __importDefault(require("../../Sdk"));
 const helpers_1 = require("../../services/helpers");
+const types_1 = require("./types");
 const _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
     data => {
@@ -166,10 +168,14 @@ const submitTransaction = async (delegatorAddr, data, config) => {
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;
-const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, config) => {
+const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = types_1.TxHistoryUser.TxHistorySenderUser, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+    console.log('url', url);
     console.log('given page', givenPage, pageLimit);
-    const givenEvents = [`message.sender='${address}'`];
+    const userQueryType = userType === types_1.TxHistoryUser.TxHistorySenderUser
+        ? `message.sender='${address}'`
+        : `transfer.recipient='${address}'`;
+    const givenEvents = [userQueryType];
     if (type) {
         const msgTypeActionParameter = `message.action='${type}'`;
         givenEvents.push(msgTypeActionParameter);
@@ -183,6 +189,7 @@ const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, 
         order_by: 'ORDER_BY_DESC',
     };
     const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
+    console.log('aa', dataResult.response);
     return dataResult;
 };
 exports.getTxListBlockchain = getTxListBlockchain;
