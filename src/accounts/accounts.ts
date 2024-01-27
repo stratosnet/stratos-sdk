@@ -2,6 +2,7 @@ import _get from 'lodash/get';
 import { hdVault } from '../config';
 import { stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
+import * as ApiUtils from '../services/apiUtils';
 import {
   BigNumberValue,
   create as createBigNumber,
@@ -152,11 +153,18 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
 
   const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
 
-  if (!availableBalanceError) {
-    const amount = availableBalanceResponse?.result?.[0]?.amount;
-    const denom = availableBalanceResponse?.result?.[0]?.denom;
+  if (!availableBalanceError && availableBalanceResponse) {
+    if (ApiUtils.isNewBalanceVersion(availableBalanceResponse)) {
+      const amount = availableBalanceResponse.balances?.[0]?.amount;
+      const denom = availableBalanceResponse.balances?.[0]?.denom;
+      cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
+    }
 
-    cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
+    if (ApiUtils.isOldBalanceVersion(availableBalanceResponse)) {
+      const amount = availableBalanceResponse.result?.[0]?.amount;
+      const denom = availableBalanceResponse.result?.[0]?.denom;
+      cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
+    }
   }
 
   const delegatedBalanceResult = await getDelegatedBalance(keyPairAddress);

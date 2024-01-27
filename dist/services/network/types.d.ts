@@ -88,8 +88,18 @@ export interface AvailableBalanceResponse {
     height: number;
     result: Amount[];
 }
+export interface AvailableBalanceResponseN {
+    balances: Amount[];
+    pagination: {
+        next_key: null | number;
+        page: number;
+    };
+}
 export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
     response?: AvailableBalanceResponse;
+}
+export interface AvailableBalanceDataResultN extends NetworkAxiosDataResult {
+    response?: AvailableBalanceResponseN;
 }
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
     response?: {

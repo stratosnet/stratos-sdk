@@ -1,8 +1,9 @@
 // import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
 import qs from 'qs';
-import { hdVault } from '../../config';
+import { hdVault, options } from '../../config';
 import Sdk from '../../Sdk';
 import { log, dirLog } from '../../services/helpers';
 import * as Types from './types';
@@ -352,11 +353,12 @@ export const getStakingPool = async (
   return dataResult;
 };
 
-export const getAvailableBalance = async (
+export const getAvailableBalance_o = async (
   address: string,
   config?: Types.NetworkAxiosConfig,
-): Promise<Types.AvailableBalanceDataResult> => {
+): Promise<Types.AvailableBalanceDataResultO> => {
   const url = `${getRestRoute()}/bank/balances/${address}`;
+  console.log('url', url);
 
   const dataResult = await apiGet(url, config);
   console.log(
@@ -365,6 +367,34 @@ export const getAvailableBalance = async (
   );
 
   return dataResult;
+};
+
+export const getAvailableBalance_n = async (
+  address: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.AvailableBalanceDataResultN> => {
+  const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
+  console.log('url', url);
+  const dataResult = await apiGet(url, config);
+  console.log(
+    '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+    JSON.stringify(dataResult.response),
+  );
+
+  return dataResult;
+};
+
+export const getAvailableBalance = async (
+  address: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.AvailableBalanceDataResult> => {
+  const isNewProtocol = !!Sdk.environment.isNewProtocol;
+
+  if (isNewProtocol) {
+    return getAvailableBalance_n(address, config);
+  }
+
+  return getAvailableBalance_o(address, config);
 };
 
 export const getDelegatedBalance = async (
@@ -631,10 +661,19 @@ export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetF
 
 export const getChainId = async () => {
   const result = await getRpcStatus();
-  // dirLog('getChainId result', result);
+  dirLog('getChainId result', result);
 
   const { response } = result;
   const chainId = response?.result?.node_info?.network;
 
   return chainId;
+};
+
+export const getNodeProtocolVersion = async () => {
+  const result = await getRpcStatus();
+
+  const { response } = result;
+  const version = response?.result?.node_info?.version;
+
+  return version;
 };

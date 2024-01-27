@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import * as accounts from './accounts';
-import { hdVault, tokens } from './config';
+import { hdVault, tokens, options } from './config';
 import { mnemonic, wallet } from './hdVault';
 import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 import * as cosmosWallet from './hdVault/cosmosWallet';
@@ -656,7 +656,7 @@ const runFaucet = async (hdPathIndex: number, givenMnemonic: string) => {
   console.log('walletAddress', walletAddress);
 
   // const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
-  const faucetUrl = Sdk.environment.faucetUrl;
+  const faucetUrl = Sdk.environment.faucetUrl || '';
   log(`will be useing faucetUrl - "${faucetUrl}"`);
 
   const result = await accounts.increaseBalance(walletAddress, faucetUrl, hdVault.stratosTopDenom);
@@ -679,8 +679,8 @@ const getTxHistory = async (userMnemonic: string, hdPathIndex: number) => {
     transactionTypes.HistoryTxType.All,
     pageNumber,
     pageLimit,
-    // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
-    NetworkTypes.TxHistoryUser.TxHistorySenderUser,
+    NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
+    // NetworkTypes.TxHistoryUser.TxHistorySenderUser,
   );
 
   console.log('hist result!! !', result);
@@ -1154,11 +1154,15 @@ const testAddressConverstion = async (hdPathIndex: number) => {
 
 const main = async () => {
   let resolvedChainID: string;
+  let resolvedChainVersion: string;
+  let isNewProtocol = false;
+
+  const sdkEnv = sdkEnvDev;
 
   // that is the mesos config
-  // const sdkEnv = sdkEnvDev;
   // const sdkEnv = sdkEnvTest;
-  const sdkEnv = sdkEnvMainNet;
+
+  // const sdkEnv = sdkEnvMainNet;
 
   Sdk.init({ ...sdkEnv });
 
@@ -1169,8 +1173,25 @@ const main = async () => {
       throw new Error('Chain id is empty. Exiting');
     }
 
-    console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
     resolvedChainID = resolvedChainIDToTest;
+
+    const resolvedChainVersionToTest = await Network.getNodeProtocolVersion();
+
+    if (!resolvedChainVersionToTest) {
+      throw new Error('Protocol version id is empty. Exiting');
+    }
+
+    resolvedChainVersion = resolvedChainVersionToTest;
+
+    console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
+    console.log(
+      '🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainVersionToTest',
+      resolvedChainVersionToTest,
+    );
+
+    const { MIN_NEW_PROTOCOL_VERSION } = options;
+
+    isNewProtocol = Sdk.getNewProtocolFlag(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
   } catch (error) {
     console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
     throw new Error('Could not resolve chain id');
@@ -1180,6 +1201,8 @@ const main = async () => {
   Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
+    nodeProtocolVersion: resolvedChainVersion,
+    isNewProtocol,
     // devnet
     ppNodeUrl: 'http://35.187.47.46',
     ppNodePort: '8142',
@@ -1191,6 +1214,7 @@ const main = async () => {
     // ppNodeUrl: 'http://34.78.29.120',
     // ppNodePort: '8142',
   });
+
   console.log('sdkEnv', Sdk.environment);
 
   // tropos
@@ -1247,10 +1271,14 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
   // await getAccountTrasactions();
-  // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+
+  // const faucetMnemonic =
+  //   'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+  //
+  // await getBalanceCardMetrics(hdPathIndex, faucetMnemonic);
 
   // 2 Add funds via faucet
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
@@ -1269,9 +1297,9 @@ const main = async () => {
   // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
   // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
   // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
-  const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
-  const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
-  const redelegateAmount = 5;
+  // const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+  // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
+  // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
   // const hdPathIndexReceiver = 1;
@@ -1291,7 +1319,7 @@ const main = async () => {
   const mainnetDev =
     'group sustain bracket dinner wrong forest dash honey farm bitter planet swift suspect radar reveal loyal boring renew edge fetch unlock path rule push';
   // await getTxHistory(zeroUserMnemonic, 0);
-  await getTxHistory(mainnetDev, 0);
+  // await getTxHistory(mainnetDev, 0);
 };
 
 main();

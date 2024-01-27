@@ -120,8 +120,10 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     const availableBalanceResult = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
     if (!availableBalanceError) {
-        const amount = (_b = (_a = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.result) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount;
-        const denom = (_d = (_c = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.result) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.denom;
+        // const amount = availableBalanceResponse?.result?.[0]?.amount;
+        // const denom = availableBalanceResponse?.result?.[0]?.denom;
+        const amount = (_b = (_a = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.balances) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount;
+        const denom = (_d = (_c = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.balances) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.denom;
         cardMetricsResult.available = (0, balanceValues_1.getBalanceCardMetricValue)(denom, amount);
     }
     const delegatedBalanceResult = await (0, network_1.getDelegatedBalance)(keyPairAddress);

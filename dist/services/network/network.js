@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
-// import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_o = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
@@ -248,10 +247,35 @@ const getStakingPool = async (config) => {
     return dataResult;
 };
 exports.getStakingPool = getStakingPool;
-const getAvailableBalance = async (address, config) => {
+const getAvailableBalance_o = async (address, config) => {
     const url = `${getRestRoute()}/bank/balances/${address}`;
+    console.log('url', url);
     const dataResult = await (0, exports.apiGet)(url, config);
     console.log('🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult', JSON.stringify(dataResult));
+    return dataResult;
+};
+exports.getAvailableBalance_o = getAvailableBalance_o;
+const getAvailableBalance = async (address, config) => {
+    // /cosmos.bank.v1beta1.Query/AllBalances"&data="%5Cn-cosmos186y4suz4z87v6s6ecd6552alnef4fdmulcqrn0"'
+    // const fAddress = fromBech32(address);
+    // const addressInHex = Buffer.from(fAddress.data).toString('hex');
+    // const params = { path: `/cosmos.bank.v1beta1.Query/AllBalances`, data: `${addressInHex}` };
+    // const params = [`/cosmos.bank.v1beta1.Query/AllBalances`, `${addressInHex}`, '0', true];
+    const payload = {
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'abci_query',
+        params: [address],
+    };
+    // const url = `${getRpcRoute()}/cosmos/bank/v1beta1/balances/${address}`;
+    const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
+    // const url = `${getRpcRoute()}`;
+    console.log('url', url);
+    // console.log('params', params);
+    const dataResult = await (0, exports.apiGet)(url, config);
+    // const dataResult = await apiGet(url, { ...config, params });
+    // const dataResult = await apiPost(url, payload, config);
+    console.log('🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult', JSON.stringify(dataResult.response));
     return dataResult;
 };
 exports.getAvailableBalance = getAvailableBalance;
@@ -415,7 +439,7 @@ exports.sendUserRequestGetFileStatus = sendUserRequestGetFileStatus;
 const getChainId = async () => {
     var _a, _b;
     const result = await (0, exports.getRpcStatus)();
-    // dirLog('getChainId result', result);
+    (0, helpers_1.dirLog)('getChainId result', result);
     const { response } = result;
     const chainId = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.network;
     return chainId;

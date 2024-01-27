@@ -141,12 +141,15 @@ export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
   const prefix = stratosAddressPrefix;
 
   const addressChunkOfBytes = pubkeyToRawAddressWithKeccak(pubkey);
+  // console.log('addressChunkOfBytes', addressChunkOfBytes);
 
   // const hexAddress = toHex(addressChunkOfBytes);
   // console.log('kk hex address', hexAddress);
 
   const address = toBech32(prefix, addressChunkOfBytes);
   // console.log('kk bench32 address', address);
+  // const fAddress = fromBech32(address);
+  // console.log('fAddress', fAddress);
   return address;
 };
 

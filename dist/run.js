@@ -544,9 +544,7 @@ const getTxHistory = async (userMnemonic, hdPathIndex) => {
     const zeroAddress = firstAccount.address;
     const pageNumber = 1;
     const pageLimit = 100;
-    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, 
-    // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
-    NetworkTypes.TxHistoryUser.TxHistorySenderUser);
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, NetworkTypes.TxHistoryUser.TxHistoryReceiverUser);
     console.log('hist result!! !', result);
     return true;
 };
@@ -844,13 +842,14 @@ const testAddressConverstion = async (hdPathIndex) => {
 };
 const main = async () => {
     let resolvedChainID;
+    const sdkEnv = sdkEnvDev;
     // that is the mesos config
-    // const sdkEnv = sdkEnvDev;
     // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvMainNet;
+    // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
         const resolvedChainIDToTest = await Network.getChainId();
+        console.log('resolvedChainID', resolvedChainIDToTest);
         if (!resolvedChainIDToTest) {
             throw new Error('Chain id is empty. Exiting');
         }
@@ -902,9 +901,12 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getAccountTrasactions();
-    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    // const faucetMnemonic =
+    //   'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    //
+    // await getBalanceCardMetrics(hdPathIndex, faucetMnemonic);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
@@ -918,9 +920,9 @@ const main = async () => {
     // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
     // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
     // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
-    const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
-    const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
-    const redelegateAmount = 5;
+    // const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+    // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
+    // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
@@ -934,7 +936,7 @@ const main = async () => {
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
     const mainnetDev = 'group sustain bracket dinner wrong forest dash honey farm bitter planet swift suspect radar reveal loyal boring renew edge fetch unlock path rule push';
     // await getTxHistory(zeroUserMnemonic, 0);
-    await getTxHistory(mainnetDev, 0);
+    // await getTxHistory(mainnetDev, 0);
 };
 main();
 //# sourceMappingURL=run.js.map

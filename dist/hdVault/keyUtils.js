@@ -127,10 +127,13 @@ exports.getAddressFromPubKey = getAddressFromPubKey;
 const getAddressFromPubKeyWithKeccak = (pubkey) => {
     const prefix = hdVault_1.stratosAddressPrefix;
     const addressChunkOfBytes = (0, StratosDirectSecp256k1HdWallet_1.pubkeyToRawAddressWithKeccak)(pubkey);
+    // console.log('addressChunkOfBytes', addressChunkOfBytes);
     // const hexAddress = toHex(addressChunkOfBytes);
     // console.log('kk hex address', hexAddress);
     const address = (0, encoding_1.toBech32)(prefix, addressChunkOfBytes);
     // console.log('kk bench32 address', address);
+    // const fAddress = fromBech32(address);
+    // console.log('fAddress', fAddress);
     return address;
 };
 exports.getAddressFromPubKeyWithKeccak = getAddressFromPubKeyWithKeccak;

@@ -99,14 +99,27 @@ export interface UnboundingBalanceResult {
   entries: UnboundingEntry[];
 }
 
-export interface AvailableBalanceResponse {
+export interface AvailableBalanceResponseO {
   height: number;
   result: Amount[];
 }
 
-export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
-  response?: AvailableBalanceResponse;
+export interface AvailableBalanceResponseN {
+  balances: Amount[];
+  pagination: { next_key: null | number; page: number };
 }
+
+export type AvailableBalanceResponse = AvailableBalanceResponseN | AvailableBalanceResponseO;
+
+export interface AvailableBalanceDataResultO extends NetworkAxiosDataResult {
+  response?: AvailableBalanceResponseO;
+}
+
+export interface AvailableBalanceDataResultN extends NetworkAxiosDataResult {
+  response?: AvailableBalanceResponseN;
+}
+
+export type AvailableBalanceDataResult = AvailableBalanceDataResultO | AvailableBalanceDataResultN;
 
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
   response?: {

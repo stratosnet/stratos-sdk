@@ -6,9 +6,11 @@ export interface SdkEnvironmentConfig {
   ppNodeUrl?: string;
   ppNodePort?: string;
   faucetUrl?: string;
+  nodeProtocolVersion?: string;
+  isNewProtocol?: boolean;
 }
 
-const SdkDefaultEnvironment = {
+const SdkDefaultEnvironment: SdkEnvironmentConfig = {
   restUrl: 'https://rest-test.thestratos.org',
   rpcUrl: 'https://rpc-test.thestratos.org',
   chainId: 'test-chain-1',
@@ -18,6 +20,7 @@ const SdkDefaultEnvironment = {
   ppNodeUrl: '',
   ppNodePort: '',
   faucetUrl: '',
+  // isNewProtocol: false,
 };
 
 export default class Sdk {
@@ -29,5 +32,18 @@ export default class Sdk {
 
   public static reset(): void {
     Sdk.environment = { ...SdkDefaultEnvironment };
+  }
+
+  public static getNewProtocolFlag(currentVersion: string, minRequiredNewVersion: string) {
+    const [pVer, pSubVer, pPatch] = currentVersion.split('.');
+    const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
+
+    const isVerOld = +pVer < +minVer;
+    const isSubVerOld = +pSubVer < +minSubVer;
+    const isPatchOld = +pPatch < +minPatch;
+
+    const isOldProtocol = isVerOld && isSubVerOld && isPatchOld;
+
+    return !isOldProtocol;
   }
 }
