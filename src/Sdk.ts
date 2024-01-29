@@ -15,12 +15,9 @@ const SdkDefaultEnvironment: SdkEnvironmentConfig = {
   rpcUrl: 'https://rpc-test.thestratos.org',
   chainId: 'test-chain-1',
   explorerUrl: 'https://explorer-test.thestratos.org',
-  // ppNodeUrl: 'http://52.14.150.146',
-  // ppNodePort: '8153',
   ppNodeUrl: '',
   ppNodePort: '',
   faucetUrl: '',
-  // isNewProtocol: false,
 };
 
 export default class Sdk {
@@ -35,6 +32,7 @@ export default class Sdk {
   }
 
   public static getNewProtocolFlag(currentVersion: string, minRequiredNewVersion: string) {
+    console.log('current protocol version ', currentVersion);
     const [pVer, pSubVer, pPatch] = currentVersion.split('.');
     const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
 

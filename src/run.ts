@@ -478,10 +478,23 @@ const uploadRequest = async () => {
   console.log('🚀 ~ file: run.ts ~ line 349 ~ uploadRequest ~ valid', valid);
 };
 
-const getAccountTrasactions = async () => {
+const getAccountTransactions = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+  console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const zeroAddress = keyPairZero.address;
+
   // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
   // const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
-  const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
+  // const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
   const r1 = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1, 2);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
   // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
@@ -554,7 +567,7 @@ const getDelegatedBalance = async () => {
 
   const { response } = bResult;
 
-  console.log('our delegated balanace', response?.result[0].balance);
+  console.log('our delegated balanace', response?.delegation_responses[0].balance);
 };
 
 const getUnboundingBalance = async () => {
@@ -575,7 +588,7 @@ const getUnboundingBalance = async () => {
 
   const { response } = bResult;
 
-  console.log('our unbounding balanace', response?.result); // an array ?
+  console.log('our unbounding balanace', response?.unbonding_responses); // an array ?
 };
 
 const getRewardBalance = async () => {
@@ -596,7 +609,7 @@ const getRewardBalance = async () => {
 
   const { response } = bResult;
 
-  console.log('our reward balanace', response?.result.rewards); // an array ?
+  console.log('our reward balanace', response?.rewards); // an array ?
 };
 
 const getOzoneBalance = async (hdPathIndex: number, givenMnemonic: string) => {
@@ -1152,6 +1165,35 @@ const testAddressConverstion = async (hdPathIndex: number) => {
   log('converted nativeAddress', nativeAddress);
 };
 
+const tmpTest = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = mnemonic.convertStringToArray(givenMnemonic);
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+  const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
+  console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  console.log('keyPairZero from test', keyPairZero);
+  const testAddress = keyPairZero.address;
+  // const d = await Network.getStakingValidators(testAddress);
+
+  // const d = await validators.getValidators();
+  const vAddress = 'stvaloper1zk4et8h0a92jtefz8ywu4xp88y93xd98x2w5hu';
+  // mesos
+  // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+
+  // const d = await Network.getValidatorsBondedToDelegatorList(vAddress, testAddress);
+  // const d = await Network.getDelegatedBalance(testAddress);
+  const d = await Network.getUnboundingBalance(testAddress);
+  // const d = await Network.getRewardBalance(testAddress);
+  // console.log('network result d', d);
+  console.log('network result d.response', d.response);
+};
+
 const main = async () => {
   let resolvedChainID: string;
   let resolvedChainVersion: string;
@@ -1159,7 +1201,6 @@ const main = async () => {
 
   const sdkEnv = sdkEnvDev;
 
-  // that is the mesos config
   // const sdkEnv = sdkEnvTest;
 
   // const sdkEnv = sdkEnvMainNet;
@@ -1215,7 +1256,7 @@ const main = async () => {
     // ppNodePort: '8142',
   });
 
-  console.log('sdkEnv', Sdk.environment);
+  // console.log('sdkEnv', Sdk.environment);
 
   // tropos
   // ppNodeUrl: 'http://35.233.251.112',
@@ -1243,8 +1284,9 @@ const main = async () => {
 
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'text_test.txt';
-  const filename = 'file1G_Jan_9_v1';
+  // const filename = 'file1G_Jan_9_v1';
 
+  const mainnetDev = '';
   // await testItFileUp(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
@@ -1272,13 +1314,14 @@ const main = async () => {
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
   await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
-  // await getAccountTrasactions();
+  // await getAccountTransactions(0, mainnetDev);
 
   // const faucetMnemonic =
   //   'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
   //
-  // await getBalanceCardMetrics(hdPathIndex, faucetMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // 2 Add funds via faucet
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
@@ -1304,7 +1347,7 @@ const main = async () => {
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
   // const hdPathIndexReceiver = 1;
 
-  // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+  // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
   // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
   // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
@@ -1316,10 +1359,10 @@ const main = async () => {
 
   // const randomPrefix = Date.now() + '';
   // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-  const mainnetDev =
-    'group sustain bracket dinner wrong forest dash honey farm bitter planet swift suspect radar reveal loyal boring renew edge fetch unlock path rule push';
   // await getTxHistory(zeroUserMnemonic, 0);
   // await getTxHistory(mainnetDev, 0);
+  // await tmpTest(0, zeroUserMnemonic);
+  // await tmpTest(0, mainnetDev);
 };
 
 main();

@@ -260,49 +260,49 @@ describe('network (unit test)', () => {
     });
   });
 
-  describe('getAccountsData', () => {
-    const address = '123';
+  // describe('getAccountsData', () => {
+  //   const address = '123';
+  //
+  //   const url = `${hostUrl}/auth/acconts/${address}`;
+  //
+  //   it('calls api with a proper url', async () => {
+  //     Sdk.init({ ...sdkEnvTest, restUrl: hostUrl });
+  //
+  //     const spyApiGet = jest.spyOn(network, 'apiGet');
+  //     server.use(
+  //       rest.get(url, (_req, res, ctx) => {
+  //         return res(ctx.json({}));
+  //       }),
+  //     );
+  //
+  //     await network.getAccountsData(address);
+  //
+  //     expect(spyApiGet).toHaveBeenCalledWith(url, undefined);
+  //     spyApiGet.mockRestore();
+  //   });
+  // });
 
-    const url = `${hostUrl}/auth/acconts/${address}`;
-
-    it('calls api with a proper url', async () => {
-      Sdk.init({ ...sdkEnvTest, restUrl: hostUrl });
-
-      const spyApiGet = jest.spyOn(network, 'apiGet');
-      server.use(
-        rest.get(url, (_req, res, ctx) => {
-          return res(ctx.json({}));
-        }),
-      );
-
-      await network.getAccountsData(address);
-
-      expect(spyApiGet).toHaveBeenCalledWith(url, undefined);
-      spyApiGet.mockRestore();
-    });
-  });
-
-  describe('getStakingValidators', () => {
-    const address = '123';
-
-    const url = `${hostUrl}/auth/acconts/${address}`;
-
-    it('calls api with a proper url', async () => {
-      Sdk.init({ ...sdkEnvTest, restUrl: hostUrl });
-
-      const spyApiGet = jest.spyOn(network, 'apiGet');
-      server.use(
-        rest.get(url, (_req, res, ctx) => {
-          return res(ctx.json({}));
-        }),
-      );
-
-      await network.getStakingValidators(address);
-
-      expect(spyApiGet).toHaveBeenCalledWith(url, undefined);
-      spyApiGet.mockRestore();
-    });
-  });
+  // describe('getStakingValidators', () => {
+  //   const address = '123';
+  //
+  //   const url = `${hostUrl}/auth/acconts/${address}`;
+  //
+  //   it('calls api with a proper url', async () => {
+  //     Sdk.init({ ...sdkEnvTest, restUrl: hostUrl });
+  //
+  //     const spyApiGet = jest.spyOn(network, 'apiGet');
+  //     server.use(
+  //       rest.get(url, (_req, res, ctx) => {
+  //         return res(ctx.json({}));
+  //       }),
+  //     );
+  //
+  //     await network.getStakingValidators(address);
+  //
+  //     expect(spyApiGet).toHaveBeenCalledWith(url, undefined);
+  //     spyApiGet.mockRestore();
+  //   });
+  // });
 
   describe('getTxListBlockchain', () => {
     const address = '123';

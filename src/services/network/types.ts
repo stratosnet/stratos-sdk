@@ -50,17 +50,24 @@ export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
   };
 }
 
-export interface CosmosAccountBalanceResponse {
-  balances: Amount[];
-  pagination: {
-    next_key: string;
-    total: string;
-  };
-}
+export type RestPagination = {
+  next_key: null | number;
+  // page: number;
+  total: string;
+};
 
-export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
-  response?: CosmosAccountBalanceResponse;
-}
+// replaced with new api account balance
+// export interface CosmosAccountBalanceResponse {
+//   balances: Amount[];
+//   pagination: {
+//     next_key: string;
+//     total: string;
+//   };
+// }
+//
+// export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
+//   response?: CosmosAccountBalanceResponse;
+// }
 
 export interface DelegatedBalanceResult {
   delegation: {
@@ -106,7 +113,7 @@ export interface AvailableBalanceResponseO {
 
 export interface AvailableBalanceResponseN {
   balances: Amount[];
-  pagination: { next_key: null | number; page: number };
+  pagination: RestPagination | null;
 }
 
 export type AvailableBalanceResponse = AvailableBalanceResponseN | AvailableBalanceResponseO;
@@ -123,21 +130,27 @@ export type AvailableBalanceDataResult = AvailableBalanceDataResultO | Available
 
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    height: number;
-    result: DelegatedBalanceResult[];
+    // height: number;
+    // result: DelegatedBalanceResult[];
+    delegation_responses: DelegatedBalanceResult[];
+    pagination: RestPagination | null;
   };
 }
 export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    height: number;
-    result: RewardBalanceResult;
+    // height: number;
+    // result: RewardBalanceResult;
+    rewards: Rewards[];
+    total: Amount[];
   };
 }
 
 export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    height: number;
-    result: UnboundingBalanceResult[];
+    // height: number;
+    // result: UnboundingBalanceResult[];
+    unbonding_responses: UnboundingBalanceResult[];
+    pagination: RestPagination | null;
   };
 }
 
@@ -204,32 +217,32 @@ export interface TxOrigin {
   };
 }
 
-export interface ExplorerTxData {
-  txType: string;
-  txData: TxData;
-  fee: TxFee;
-  hash: string;
-  memo: string;
-}
+// export interface ExplorerTxData {
+//   txType: string;
+//   txData: TxData;
+//   fee: TxFee;
+//   hash: string;
+//   memo: string;
+// }
+//
+// export interface ExplorerTxItem {
+//   account: string;
+//   block_height: number;
+//   tx_type: string;
+//   tx_info: {
+//     tx_hash: string;
+//     tx_type: string;
+//     time: string;
+//     transaction_data: ExplorerTxData;
+//   };
+// }
 
-export interface ExplorerTxItem {
-  account: string;
-  block_height: number;
-  tx_type: string;
-  tx_info: {
-    tx_hash: string;
-    tx_type: string;
-    time: string;
-    transaction_data: ExplorerTxData;
-  };
-}
-
-export interface ExplorerTxListResponse {
-  msg: string;
-  code: number;
-  data: ExplorerTxItem[];
-  total: number;
-}
+// export interface ExplorerTxListResponse {
+//   msg: string;
+//   code: number;
+//   data: ExplorerTxItem[];
+//   total: number;
+// }
 
 export interface ValidatorItem {
   operator_address: string;
@@ -259,10 +272,11 @@ export interface ValidatorItem {
 
 export interface ValidatorListResponse {
   validators: ValidatorItem[];
-  pagination: {
-    next_key: string;
-    total: string;
-  };
+  pagination: RestPagination | null;
+  // pagination: {
+  //   next_key: string;
+  //   total: string;
+  // };
 }
 
 export interface ValidatorResponse {
@@ -380,9 +394,9 @@ export interface RpcStatusResponse {
   };
 }
 
-export interface ExplorerTxListDataResult extends NetworkAxiosDataResult {
-  response?: ExplorerTxListResponse;
-}
+// export interface ExplorerTxListDataResult extends NetworkAxiosDataResult {
+//   response?: ExplorerTxListResponse;
+// }
 
 export interface ValidatorListDataResult extends NetworkAxiosDataResult {
   response?: ValidatorListResponse;
@@ -601,10 +615,11 @@ export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
 }
 
 export interface RestTxHistoryResponse {
-  pagination: {
-    next_key: string;
-    total: string;
-  };
+  pagination: RestPagination | null;
+  // pagination: {
+  //   next_key: string;
+  //   total: string;
+  // } | null;
   txs: RestTx[];
   tx_responses: RestTxResponse[];
 }

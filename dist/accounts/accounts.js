@@ -26,11 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getAccountReceiverTrasactions = exports.getAccountSenderTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.increaseBalance = void 0;
+exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.getBalanceInWei = exports.increaseBalance = void 0;
 const get_1 = __importDefault(require("lodash/get"));
 const config_1 = require("../config");
 const hdVault_1 = require("../config/hdVault");
 const tokens_1 = require("../config/tokens");
+const ApiUtils = __importStar(require("../services/apiUtils"));
 const bigNumber_1 = require("../services/bigNumber");
 const network_1 = require("../services/network");
 const types_1 = require("../services/network/types");
@@ -56,12 +57,17 @@ const increaseBalance = async (walletAddress, faucetUrl, denom) => {
     return { result: true };
 };
 exports.increaseBalance = increaseBalance;
-const getBalance = async (keyPairAddress, requestedDenom, decimals = tokens_1.decimalShortPrecision) => {
-    const accountBalanceData = await (0, network_1.getAccountBalance)(keyPairAddress);
+const getBalanceInWei = async (keyPairAddress, requestedDenom) => {
+    const accountBalanceData = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const coins = (0, get_1.default)(accountBalanceData, 'response.balances', []);
     const coin = coins.find(item => item.denom === requestedDenom);
     const currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
     const balanceInWei = (0, bigNumber_1.create)(currentBalance);
+    return balanceInWei;
+};
+exports.getBalanceInWei = getBalanceInWei;
+const getBalance = async (keyPairAddress, requestedDenom, decimals = tokens_1.decimalShortPrecision) => {
+    const balanceInWei = await (0, exports.getBalanceInWei)(keyPairAddress, requestedDenom);
     const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
     return balance;
 };
@@ -104,7 +110,7 @@ const getOtherBalanceCardMetrics = async (keyPairAddress) => {
 };
 exports.getOtherBalanceCardMetrics = getOtherBalanceCardMetrics;
 const getBalanceCardMetrics = async (keyPairAddress) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     const cardMetricsResult = {
         available: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
         delegated: `0.0000 ${hdVault_1.stratosTopDenom.toUpperCase()}`,
@@ -119,17 +125,22 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     };
     const availableBalanceResult = await (0, network_1.getAvailableBalance)(keyPairAddress);
     const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
-    if (!availableBalanceError) {
-        // const amount = availableBalanceResponse?.result?.[0]?.amount;
-        // const denom = availableBalanceResponse?.result?.[0]?.denom;
-        const amount = (_b = (_a = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.balances) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount;
-        const denom = (_d = (_c = availableBalanceResponse === null || availableBalanceResponse === void 0 ? void 0 : availableBalanceResponse.balances) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.denom;
-        cardMetricsResult.available = (0, balanceValues_1.getBalanceCardMetricValue)(denom, amount);
+    if (!availableBalanceError && availableBalanceResponse) {
+        if (ApiUtils.isNewBalanceVersion(availableBalanceResponse)) {
+            const amount = (_b = (_a = availableBalanceResponse.balances) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.amount;
+            const denom = (_d = (_c = availableBalanceResponse.balances) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.denom;
+            cardMetricsResult.available = (0, balanceValues_1.getBalanceCardMetricValue)(denom, amount);
+        }
+        if (ApiUtils.isOldBalanceVersion(availableBalanceResponse)) {
+            const amount = (_f = (_e = availableBalanceResponse.result) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.amount;
+            const denom = (_h = (_g = availableBalanceResponse.result) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.denom;
+            cardMetricsResult.available = (0, balanceValues_1.getBalanceCardMetricValue)(denom, amount);
+        }
     }
     const delegatedBalanceResult = await (0, network_1.getDelegatedBalance)(keyPairAddress);
     const { response: delegatedBalanceResponse, error: delegatedBalanceError } = delegatedBalanceResult;
     if (!delegatedBalanceError) {
-        const entries = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.result;
+        const entries = delegatedBalanceResponse === null || delegatedBalanceResponse === void 0 ? void 0 : delegatedBalanceResponse.delegation_responses;
         const amountInWei = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
             var _a;
             const balanceInWei = (0, bigNumber_1.create)(entry.balance.amount);
@@ -146,7 +157,7 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     const unboundingBalanceResult = await (0, network_1.getUnboundingBalance)(keyPairAddress);
     const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
     if (!unboundingBalanceError) {
-        const entries = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.result;
+        const entries = unboundingBalanceResponse === null || unboundingBalanceResponse === void 0 ? void 0 : unboundingBalanceResponse.unbonding_responses;
         const amountInWeiA = entries === null || entries === void 0 ? void 0 : entries.reduce((acc, entry) => {
             const balanceEntries = entry === null || entry === void 0 ? void 0 : entry.entries;
             const validatorAddress = entry.validator_address;
@@ -164,9 +175,9 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     const rewardBalanceResult = await (0, network_1.getRewardBalance)(keyPairAddress);
     const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
     if (!rewardBalanceError) {
-        const entries = (_e = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _e === void 0 ? void 0 : _e.rewards;
-        const amount = (_h = (_g = (_f = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _f === void 0 ? void 0 : _f.total) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.amount;
-        const denom = (_l = (_k = (_j = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.result) === null || _j === void 0 ? void 0 : _j.total) === null || _k === void 0 ? void 0 : _k[0]) === null || _l === void 0 ? void 0 : _l.denom;
+        const entries = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.rewards;
+        const amount = (_k = (_j = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.total) === null || _j === void 0 ? void 0 : _j[0]) === null || _k === void 0 ? void 0 : _k.amount;
+        const denom = (_m = (_l = rewardBalanceResponse === null || rewardBalanceResponse === void 0 ? void 0 : rewardBalanceResponse.total) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.denom;
         entries === null || entries === void 0 ? void 0 : entries.forEach((entry) => {
             var _a, _b;
             const validatorAddress = entry.validator_address;
@@ -182,16 +193,10 @@ const getBalanceCardMetrics = async (keyPairAddress) => {
     return cardMetricsResult;
 };
 exports.getBalanceCardMetrics = getBalanceCardMetrics;
+// it is used to handle MaxBtn click
 const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals = 4) => {
-    console.log('from max av balance');
-    // const accountsData = await getAccountsData(keyPairAddress);
-    const accountBalanceData = await (0, network_1.getAccountBalance)(keyPairAddress);
-    // const coins = _get(accountsData, 'result.value.coins', []) as TxTypes.AmountType[];
-    const coins = (0, get_1.default)(accountBalanceData, 'response.balances', []);
-    const coin = coins.find(item => item.denom === requestedDenom);
-    const currentBalance = (coin === null || coin === void 0 ? void 0 : coin.amount) || '0';
     const feeAmount = (0, bigNumber_1.create)((0, tokens_1.standardFeeAmount)());
-    const balanceInWei = (0, bigNumber_1.create)(currentBalance);
+    const balanceInWei = await (0, exports.getBalanceInWei)(keyPairAddress, requestedDenom);
     // NOTE: Do we need this?
     if (balanceInWei.gt(0)) {
         const balance = (0, bigNumber_1.fromWei)(balanceInWei.minus(feeAmount), tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
@@ -201,63 +206,6 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     return balance;
 };
 exports.getMaxAvailableBalance = getMaxAvailableBalance;
-const getAccountSenderTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
-    const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, 1);
-    const { response, error } = txListResult;
-    if (error) {
-        throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
-    }
-    if (!response) {
-        throw new Error('Could not fetch tx history');
-    }
-    const parsedData = [];
-    const { tx_responses: data = [], pagination } = response;
-    const { total } = pagination;
-    data.forEach(txResponseItem => {
-        try {
-            const parsed = (0, transactions_1.transformTx)(txResponseItem);
-            parsedData.push(parsed);
-        }
-        catch (err) {
-            console.log(`Parsing error: ${err.message}`);
-        }
-    });
-    const totalUnformatted = parseInt(total) / pageLimit;
-    const totalPages = Math.ceil(totalUnformatted);
-    const result = { data: parsedData, total, page: page || 1, totalPages };
-    // console.dir(result, { depth: null, colors: true, maxArrayLength: null });
-    return result;
-};
-exports.getAccountSenderTrasactions = getAccountSenderTrasactions;
-const getAccountReceiverTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5) => {
-    const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-    const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, 2);
-    const { response, error } = txListResult;
-    if (error) {
-        throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
-    }
-    if (!response) {
-        throw new Error('Could not fetch tx history');
-    }
-    const parsedData = [];
-    const { tx_responses: data = [], pagination } = response;
-    const { total } = pagination;
-    data.forEach(txResponseItem => {
-        try {
-            const parsed = (0, transactions_1.transformTx)(txResponseItem);
-            parsedData.push(parsed);
-        }
-        catch (err) {
-            console.log(`Parsing error: ${err.message}`);
-        }
-    });
-    const totalUnformatted = parseInt(total) / pageLimit;
-    const totalPages = Math.ceil(totalUnformatted);
-    const result = { data: parsedData, total, page: page || 1, totalPages };
-    return result;
-};
-exports.getAccountReceiverTrasactions = getAccountReceiverTrasactions;
 const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, page = 1, pageLimit = 5, userType = types_1.TxHistoryUser.TxHistorySenderUser) => {
     const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
     const txListResult = await (0, network_1.getTxListBlockchain)(address, txType, page, pageLimit, userType);
@@ -270,7 +218,11 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     }
     const parsedData = [];
     const { tx_responses: data = [], pagination } = response;
-    const { total } = pagination;
+    let total = '0';
+    if (ApiUtils.isValidPagination(pagination)) {
+        const { total: totalPages } = pagination;
+        total = totalPages;
+    }
     data.forEach(txResponseItem => {
         try {
             const parsed = (0, transactions_1.transformTx)(txResponseItem);
@@ -286,4 +238,92 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;
+/**
+ * @deprecated
+ */
+// export const getAccountSenderTrasactions = async (
+//   address: string,
+//   type = TxTypes.HistoryTxType.All,
+//   page = 1,
+//   pageLimit = 5,
+// ): Promise<ParsedTxData> => {
+//   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+//
+//   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 1);
+//
+//   const { response, error } = txListResult;
+//
+//   if (error) {
+//     throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+//   }
+//
+//   if (!response) {
+//     throw new Error('Could not fetch tx history');
+//   }
+//
+//   const parsedData: FormattedBlockChainTx[] = [];
+//
+//   const { tx_responses: data = [], pagination } = response;
+//   const { total } = pagination;
+//
+//   data.forEach(txResponseItem => {
+//     try {
+//       const parsed = transformTx(txResponseItem);
+//       parsedData.push(parsed);
+//     } catch (err) {
+//       console.log(`Parsing error: ${(err as Error).message}`);
+//     }
+//   });
+//
+//   const totalUnformatted = parseInt(total) / pageLimit;
+//   const totalPages = Math.ceil(totalUnformatted);
+//
+//   const result = { data: parsedData, total, page: page || 1, totalPages };
+//
+//   return result;
+// };
+/**
+ * @deprecated
+ */
+// export const getAccountReceiverTrasactions = async (
+//   address: string,
+//   type = TxTypes.HistoryTxType.All,
+//   page = 1,
+//   pageLimit = 5,
+// ): Promise<ParsedTxData> => {
+//   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
+//
+//   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 2);
+//
+//   const { response, error } = txListResult;
+//
+//   if (error) {
+//     throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
+//   }
+//
+//   if (!response) {
+//     throw new Error('Could not fetch tx history');
+//   }
+//
+//   const parsedData: FormattedBlockChainTx[] = [];
+//
+//   const { tx_responses: data = [], pagination } = response;
+//   const { total } = pagination;
+//
+//   data.forEach(txResponseItem => {
+//     try {
+//       const parsed = transformTx(txResponseItem);
+//       parsedData.push(parsed);
+//     } catch (err) {
+//       console.log(`Parsing error: ${(err as Error).message}`);
+//     }
+//   });
+//
+//   const totalUnformatted = parseInt(total) / pageLimit;
+//   const totalPages = Math.ceil(totalUnformatted);
+//
+//   const result = { data: parsedData, total, page: page || 1, totalPages };
+//
+//   return result;
+// };
 //# sourceMappingURL=accounts.js.map

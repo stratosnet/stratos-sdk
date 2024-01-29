@@ -5,8 +5,6 @@ const SdkDefaultEnvironment = {
     rpcUrl: 'https://rpc-test.thestratos.org',
     chainId: 'test-chain-1',
     explorerUrl: 'https://explorer-test.thestratos.org',
-    // ppNodeUrl: 'http://52.14.150.146',
-    // ppNodePort: '8153',
     ppNodeUrl: '',
     ppNodePort: '',
     faucetUrl: '',
@@ -17,6 +15,16 @@ class Sdk {
     }
     static reset() {
         Sdk.environment = Object.assign({}, SdkDefaultEnvironment);
+    }
+    static getNewProtocolFlag(currentVersion, minRequiredNewVersion) {
+        console.log('current protocol version ', currentVersion);
+        const [pVer, pSubVer, pPatch] = currentVersion.split('.');
+        const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
+        const isVerOld = +pVer < +minVer;
+        const isSubVerOld = +pSubVer < +minSubVer;
+        const isPatchOld = +pPatch < +minPatch;
+        const isOldProtocol = isVerOld && isSubVerOld && isPatchOld;
+        return !isOldProtocol;
     }
 }
 exports.default = Sdk;

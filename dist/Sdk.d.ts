@@ -6,6 +6,8 @@ export interface SdkEnvironmentConfig {
     ppNodeUrl?: string;
     ppNodePort?: string;
     faucetUrl?: string;
+    nodeProtocolVersion?: string;
+    isNewProtocol?: boolean;
 }
 export default class Sdk {
     static environment: {
@@ -13,10 +15,13 @@ export default class Sdk {
         rpcUrl: string;
         chainId: string;
         explorerUrl: string;
-        ppNodeUrl: string;
-        ppNodePort: string;
-        faucetUrl: string;
+        ppNodeUrl?: string | undefined;
+        ppNodePort?: string | undefined;
+        faucetUrl?: string | undefined;
+        nodeProtocolVersion?: string | undefined;
+        isNewProtocol?: boolean | undefined;
     };
     static init(sdkEnv: SdkEnvironmentConfig): void;
     static reset(): void;
+    static getNewProtocolFlag(currentVersion: string, minRequiredNewVersion: string): boolean;
 }
