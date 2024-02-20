@@ -5,15 +5,14 @@ import {
   ripemd160,
   Secp256k1,
   Secp256k1Signature,
-  sha256,
-  Slip10RawIndex,
+  sha256, // Slip10RawIndex,
   stringToPath,
 } from '@cosmjs/crypto';
 import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 import CryptoJS from 'crypto-js';
 import createKeccakHash from 'keccak';
-import { fromHexString } from 'multihashes';
+// import { fromHexString } from 'multihashes';
 import sjcl from 'sjcl';
 import {
   bip39Password,
@@ -23,6 +22,7 @@ import {
   stratosPubkeyPrefix,
 } from '../config/hdVault';
 import StratosDirectSecp256k1HdWallet, {
+  makeStratosHubPath,
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
 // import { log } from '../services/helpers';
@@ -30,20 +30,22 @@ import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
 import { convertArrayToString, MnemonicPhrase } from './mnemonic';
 
+// const crypto_1 = require('@cosmjs/crypto');
+
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
  */
-export function makeStratosHubPath(a: number): HdPath {
-  return [
-    Slip10RawIndex.hardened(44),
-    Slip10RawIndex.hardened(606),
-    Slip10RawIndex.hardened(0),
-    Slip10RawIndex.normal(0),
-    Slip10RawIndex.normal(a),
-  ];
-}
+// export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
+//   return [
+//     Slip10RawIndex.hardened(44),
+//     Slip10RawIndex.hardened(606),
+//     Slip10RawIndex.hardened(0),
+//     Slip10RawIndex.normal(0),
+//     Slip10RawIndex.normal(a),
+//   ];
+// }
 
 export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uint8Array> => {
   const stringMnemonic = convertArrayToString(phrase);
