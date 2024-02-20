@@ -7,6 +7,9 @@ import { deserializeEncryptedWallet } from '../hdVault/wallet';
 import Sdk from '../Sdk';
 import { getStratosTransactionRegistryTypes } from '../transactions/stratosRegistry';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const proto_signing_1 = require('@cosmjs/proto-signing');
+
 // @todo clean up this interface
 export interface CosmosInstance {
   url: string;
@@ -27,7 +30,7 @@ const getCosmosClient = async (
 
   const clientRegistry = new Registry(clientRegistryTypes);
 
-  const options = {
+  const options: typeof proto_signing_1.SigningStargateClientOptions = {
     registry: clientRegistry,
     // in order to be able to decode `ethSecp256k1` pubkey
     accountParser: accountFromAnyStratos,

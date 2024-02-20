@@ -153,6 +153,7 @@ export const submitTransaction = async <T extends Types.TransactionData>(
 ): Promise<Types.SubmitTransactionDataResult> => {
   // @todo - move it to submitDelegate
   const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+  console.log('url to broadcast the tx (POST)');
 
   const { response: txData, error } = getSubmitTransactionData(data);
 
@@ -160,7 +161,10 @@ export const submitTransaction = async <T extends Types.TransactionData>(
     return { error };
   }
 
+  console.log('tx data to broadcast', txData);
+
   const dataResult = await apiPost(url, txData, config);
+  console.log('dataResult after the broadcast', dataResult);
 
   return dataResult;
 };

@@ -110,8 +110,8 @@ const evmSend = async () => {
   const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
   if (signedTx) {
     try {
-      const result = await transactions.broadcast(signedTx);
-      console.log('broadcasting result!', result);
+      const _result = await transactions.broadcast(signedTx);
+      console.log('broadcasting result!', _result);
     } catch (error) {
       const err: Error = error as Error;
       console.log('error broadcasting', err.message);
@@ -198,6 +198,7 @@ const mainSend = async (
     { amount: sendAmount, toAddress: keyPairOne.address },
     // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
   ]);
+  // console.log('run sendTxMessages ', sendTxMessages);
 
   // TxRaw
   const signedTx = await transactions.sign(fromAddress, sendTxMessages);
@@ -223,8 +224,8 @@ const mainSend = async (
   // if (signedTx) {
   if (assembled) {
     try {
-      const result = await transactions.broadcast(assembled);
-      console.log('broadcasting result!', result);
+      const _result = await transactions.broadcast(assembled);
+      console.log('broadcasting result!', _result);
     } catch (error) {
       const err: Error = error as Error;
       console.log('error broadcasting', err.message);
@@ -1313,7 +1314,7 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);
@@ -1345,9 +1346,9 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  // const hdPathIndexReceiver = 1;
+  const hdPathIndexReceiver = 1;
 
-  // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+  await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
   // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
   // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
