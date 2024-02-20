@@ -877,8 +877,8 @@ const main = async () => {
     let resolvedChainID;
     let resolvedChainVersion;
     let isNewProtocol = false;
-    const sdkEnv = sdkEnvDev;
-    // const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     try {
@@ -943,7 +943,7 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
     // const faucetMnemonic =''
@@ -967,7 +967,7 @@ const main = async () => {
     // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
     const hdPathIndexReceiver = 1;
-    await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+    // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
     // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
     // 33 sec, 1m 1sec

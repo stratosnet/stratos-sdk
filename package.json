@@ -101,10 +101,9 @@
     "webpack-cli": "^4.3.0"
   },
   "dependencies": {
-    "@cosmjs/crypto": "0.28.9",
-    "@cosmjs/encoding": "0.28.9",
+    "@cosmjs/crypto": "0.31.1",
+    "@cosmjs/encoding": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
-    "@cosmjs/tendermint-rpc": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
     "@stratos-network/stratos-cosmosjs-types": "https://github.com/stratosnet/stratos-cosmosjs-types.git#main",
     "@types/bn.js": "5.1.0",

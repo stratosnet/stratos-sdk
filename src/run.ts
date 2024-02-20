@@ -1200,9 +1200,9 @@ const main = async () => {
   let resolvedChainVersion: string;
   let isNewProtocol = false;
 
-  const sdkEnv = sdkEnvDev;
+  // const sdkEnv = sdkEnvDev;
 
-  // const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvTest;
 
   // const sdkEnv = sdkEnvMainNet;
 
@@ -1314,7 +1314,7 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);
@@ -1347,7 +1347,7 @@ const main = async () => {
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
   const hdPathIndexReceiver = 1;
 
-  await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+  // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
   // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
   // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
