@@ -26,32 +26,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = exports.makeStratosHubPath = void 0;
+exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.createWalletAtPath = exports.serializeWallet = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.encryptMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAddressFromPubKey = exports.getAminoPublicKey = exports.getEncryptionKey = exports.generateMasterKeySeed = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const keccak_1 = __importDefault(require("keccak"));
+// import { fromHexString } from 'multihashes';
 const sjcl_1 = __importDefault(require("sjcl"));
 const hdVault_1 = require("../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/StratosDirectSecp256k1HdWallet"));
 // import { log } from '../services/helpers';
 const cosmosUtils_1 = require("./cosmosUtils");
 const mnemonic_1 = require("./mnemonic");
+// const crypto_1 = require('@cosmjs/crypto');
 /**
  * const keyPath =                            "m/44'/606'/0'/0/1";
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
  */
-function makeStratosHubPath(a) {
-    return [
-        crypto_1.Slip10RawIndex.hardened(44),
-        crypto_1.Slip10RawIndex.hardened(606),
-        crypto_1.Slip10RawIndex.hardened(0),
-        crypto_1.Slip10RawIndex.normal(0),
-        crypto_1.Slip10RawIndex.normal(a),
-    ];
-}
-exports.makeStratosHubPath = makeStratosHubPath;
+// export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
+//   return [
+//     Slip10RawIndex.hardened(44),
+//     Slip10RawIndex.hardened(606),
+//     Slip10RawIndex.hardened(0),
+//     Slip10RawIndex.normal(0),
+//     Slip10RawIndex.normal(a),
+//   ];
+// }
 const generateMasterKeySeed = async (phrase) => {
     const stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
     const mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
@@ -240,7 +241,7 @@ exports.serializeWallet = serializeWallet;
 async function createWalletAtPath(hdPathIndex, mnemonic) {
     const addressPrefix = hdVault_1.stratosAddressPrefix;
     // works - way 1
-    const hdPaths = [makeStratosHubPath(hdPathIndex)];
+    const hdPaths = [(0, StratosDirectSecp256k1HdWallet_1.makeStratosHubPath)(hdPathIndex)];
     const options = {
         bip39Password: '',
         prefix: addressPrefix,

@@ -123,11 +123,14 @@ exports.getSubmitTransactionData = getSubmitTransactionData;
 const submitTransaction = async (delegatorAddr, data, config) => {
     // @todo - move it to submitDelegate
     const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+    console.log('url to broadcast the tx (POST)');
     const { response: txData, error } = (0, exports.getSubmitTransactionData)(data);
     if (error) {
         return { error };
     }
+    console.log('tx data to broadcast', txData);
     const dataResult = await (0, exports.apiPost)(url, txData, config);
+    console.log('dataResult after the broadcast', dataResult);
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;

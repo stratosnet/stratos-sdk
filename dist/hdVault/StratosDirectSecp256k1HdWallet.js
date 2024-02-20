@@ -4,12 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
-const crypto_1 = require("@cosmjs/crypto");
+const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const keccak_1 = __importDefault(require("keccak"));
 const hdVault_1 = require("../config/hdVault");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const crypto_1 = require('@cosmjs/crypto');
 function pubkeyToRawAddressWithKeccak(pubkey) {
     const pubkeyBuffer = Buffer.from(pubkey.slice(-64));
     const keccak256HashOfPubkeyBuffer = (0, keccak_1.default)('keccak256').update(pubkeyBuffer).digest();
@@ -23,13 +25,18 @@ function pubkeyToRawAddressWithKeccak(pubkey) {
     return addressChunkOfBytes;
 }
 exports.pubkeyToRawAddressWithKeccak = pubkeyToRawAddressWithKeccak;
+/**
+ * const keyPath =                            "m/44'/606'/0'/0/1";
+ * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
+ * with 0-based account index `a`.
+ */
 function makeStratosHubPath(a) {
     return [
-        crypto_1.Slip10RawIndex.hardened(44),
-        crypto_1.Slip10RawIndex.hardened(606),
-        crypto_1.Slip10RawIndex.hardened(0),
-        crypto_1.Slip10RawIndex.normal(0),
-        crypto_1.Slip10RawIndex.normal(a),
+        crypto_2.Slip10RawIndex.hardened(44),
+        crypto_2.Slip10RawIndex.hardened(606),
+        crypto_2.Slip10RawIndex.hardened(0),
+        crypto_2.Slip10RawIndex.normal(0),
+        crypto_2.Slip10RawIndex.normal(a),
     ];
 }
 exports.makeStratosHubPath = makeStratosHubPath;
@@ -48,8 +55,8 @@ const defaultOptions = {
 };
 class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWallet {
     static async fromMnemonic(mnemonic, options = {}) {
-        const mnemonicChecked = new crypto_1.EnglishMnemonic(mnemonic);
-        const seed = await crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, options.bip39Password);
+        const mnemonicChecked = new crypto_2.EnglishMnemonic(mnemonic);
+        const seed = await crypto_2.Bip39.mnemonicToSeed(mnemonicChecked, options.bip39Password);
         return new StratosDirectSecp256k1HdWallet(mnemonicChecked, Object.assign(Object.assign({}, options), { seed: seed }));
     }
     constructor(mnemonic, options) {
@@ -59,10 +66,11 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         super(mnemonic, options);
         this.mySecret = mnemonic;
         this.mySeed = options.seed;
-        this.myAccounts = hdPaths.map(hdPath => ({
+        const a = hdPaths.map(hdPath => ({
             hdPath: hdPath,
             prefix: prefix,
         }));
+        this.myAccounts = a;
     }
     get mnemonic() {
         return this.mySecret.toString();
@@ -90,7 +98,7 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes);
         const hashedMessage = signBytesWithKeccak;
         // const hashedMessage = sha256(signBytes);
-        const signature = await crypto_1.Secp256k1.createSignature(hashedMessage, privkey);
+        const signature = await crypto_2.Secp256k1.createSignature(hashedMessage, privkey);
         const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
         const stdSignature = this.encodeSecp256k1Signature(pubkey, signatureBytes);
         return {
@@ -122,11 +130,11 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         return this.serializeWithEncryptionKey(encryptionKey, kdfConfiguration);
     }
     async getMyKeyPair(hdPath) {
-        const { privkey } = crypto_1.Slip10.derivePath(crypto_1.Slip10Curve.Secp256k1, this.mySeed, hdPath);
-        const { pubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
+        const { privkey } = crypto_2.Slip10.derivePath(crypto_2.Slip10Curve.Secp256k1, this.mySeed, hdPath);
+        const { pubkey } = await crypto_2.Secp256k1.makeKeypair(privkey);
         const myKeypair = {
             privkey: privkey,
-            pubkey: crypto_1.Secp256k1.compressPubkey(pubkey),
+            pubkey: crypto_2.Secp256k1.compressPubkey(pubkey),
         };
         return myKeypair;
     }
@@ -134,7 +142,7 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         return Promise.all(this.myAccounts.map(async ({ hdPath, prefix }) => {
             const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
             // console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
-            const { pubkey: fullPubkey } = await crypto_1.Secp256k1.makeKeypair(privkey);
+            const { pubkey: fullPubkey } = await crypto_2.Secp256k1.makeKeypair(privkey);
             // const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
             // const compressedPub = Secp256k1.compressPubkey(fullPubkey);
             // const compressedPubHex = Buffer.from(compressedPub).toString('hex');

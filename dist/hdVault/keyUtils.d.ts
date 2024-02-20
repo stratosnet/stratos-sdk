@@ -8,7 +8,6 @@ import { MnemonicPhrase } from './mnemonic';
  * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
  * with 0-based account index `a`.
  */
-export declare function makeStratosHubPath(a: number): HdPath;
 export declare const generateMasterKeySeed: (phrase: MnemonicPhrase) => Promise<Uint8Array>;
 export declare const getEncryptionKey: (password: string) => Promise<Uint8Array>;
 export declare const getAminoPublicKey: (pubkey: PubKey) => Promise<Uint8Array>;

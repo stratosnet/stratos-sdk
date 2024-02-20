@@ -94,7 +94,7 @@ const broadcast = async (signedTx) => {
         return result;
     }
     catch (err) {
-        (0, helpers_1.dirLog)('Could not broadcast', err.message);
+        (0, helpers_1.dirLog)('transactions.broadcastTx Could not broadcast', err.message);
         throw err;
     }
 };
@@ -117,7 +117,7 @@ const getStandardFee = async (signerAddress, txMessages) => {
     if (!txMessages || !signerAddress) {
         return (0, exports.getStandardDefaultFee)();
     }
-    (0, helpers_1.dirLog)('from getStandardFee txMessages', txMessages);
+    // dirLog('from getStandardFee txMessages', txMessages);
     if (txMessages.length > maxMessagesPerTx) {
         throw new Error(`Exceed max messages for fee calculation (got: ${txMessages.length}, limit: ${maxMessagesPerTx})`);
     }

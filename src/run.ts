@@ -1319,8 +1319,7 @@ const main = async () => {
 
   // await getAccountTransactions(0, mainnetDev);
 
-  // const faucetMnemonic =
-  //   'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+  // const faucetMnemonic =''
   //
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 

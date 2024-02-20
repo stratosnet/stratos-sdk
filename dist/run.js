@@ -118,8 +118,8 @@ const evmSend = async () => {
     const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
     if (signedTx) {
         try {
-            const result = await transactions.broadcast(signedTx);
-            console.log('broadcasting result!', result);
+            const _result = await transactions.broadcast(signedTx);
+            console.log('broadcasting result!', _result);
         }
         catch (error) {
             const err = error;
@@ -181,6 +181,7 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
         { amount: sendAmount, toAddress: keyPairOne.address },
         // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
+    // console.log('run sendTxMessages ', sendTxMessages);
     // TxRaw
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
     // dirLog('signedTx run', signedTx);
@@ -199,8 +200,8 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
     // if (signedTx) {
     if (assembled) {
         try {
-            const result = await transactions.broadcast(assembled);
-            console.log('broadcasting result!', result);
+            const _result = await transactions.broadcast(assembled);
+            console.log('broadcasting result!', _result);
         }
         catch (error) {
             const err = error;
@@ -942,11 +943,10 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
-    // const faucetMnemonic =
-    //   'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    // const faucetMnemonic =''
     //
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // 2 Add funds via faucet
@@ -966,8 +966,8 @@ const main = async () => {
     // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
     // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-    // const hdPathIndexReceiver = 1;
-    // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+    const hdPathIndexReceiver = 1;
+    await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
     // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
     // 33 sec, 1m 1sec
