@@ -1,19 +1,24 @@
 import { StdFee } from '@cosmjs/amino';
 import { ExtendedSecp256k1Signature } from '@cosmjs/crypto';
-import { EncodeObject, // OfflineSigner,
-OfflineDirectSigner } from '@cosmjs/proto-signing';
+import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import { SigningStargateClient, SignerData, // AccountParser,
 SigningStargateClientOptions } from '@cosmjs/stargate';
-import { HttpEndpoint, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import { HttpEndpoint } from '@cosmjs/tendermint-rpc';
 import { ServiceClientImpl } from 'cosmjs-types/cosmos/tx/v1beta1/service';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { wallet } from '../hdVault';
 import * as evm from '../transactions/evm';
+declare const tendermint_rpc_1: any;
 export declare class StratosSigningStargateClient extends SigningStargateClient {
-    protected readonly mySigner: OfflineDirectSigner;
-    static connectWithSigner(endpoint: string | HttpEndpoint, signer: OfflineDirectSigner, options?: SigningStargateClientOptions): Promise<StratosSigningStargateClient>;
-    protected constructor(tmClient: Tendermint34Client | undefined, signer: OfflineDirectSigner, options: SigningStargateClientOptions);
+    protected readonly mySigner: OfflineSigner;
+    static connectWithSigner(endpoint: string | HttpEndpoint, signer: OfflineSigner, options?: SigningStargateClientOptions): Promise<StratosSigningStargateClient>;
+    /**
+     * Creates an instance from a manually created Tendermint client.
+     * Use this to use `Tendermint37Client` instead of `Tendermint34Client`.
+     */
+    static createWithSigner(tmClient: typeof tendermint_rpc_1.TendermintClient, signer: OfflineSigner, options?: SigningStargateClientOptions): Promise<StratosSigningStargateClient>;
+    protected constructor(tmClient: typeof tendermint_rpc_1.TendermintClient | undefined, signer: OfflineSigner, options: SigningStargateClientOptions);
     getQueryService(): ServiceClientImpl | undefined;
     ecdsaSignatures(raw: any, keyPair: wallet.KeyPairInfo, prefix?: number): Promise<ExtendedSecp256k1Signature>;
     private simulateEvm;
@@ -32,3 +37,4 @@ export declare class StratosSigningStargateClient extends SigningStargateClient 
     private getCosmosEncodedPubkey;
     private signDirectStratos;
 }
+export {};

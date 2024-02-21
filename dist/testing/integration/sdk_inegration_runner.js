@@ -143,6 +143,8 @@ const { mainFaucet } = walletKeys;
 (0, helpers_1.log)('faucet mnemonic from the config', faucetMnemonic);
 (0, helpers_1.log)('sdkEnv from the config', sdkEnvTest);
 let GLOBAL_CHAIN_ID = '';
+let GLOBAL_CHAIN_VERSION = '';
+let GLOBAL_IS_NEW_PROTOCOL = false;
 const sdkEnvDev = sdkEnvTest;
 (0, helpers_1.log)('Using sdk config', sdkEnvDev);
 const password = 'yourSecretPassword';
@@ -151,23 +153,15 @@ const main = async (zeroUserMnemonic, hdPathIndex = 0) => {
     (0, cosmos_1.resetCosmos)();
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     if (!GLOBAL_CHAIN_ID) {
-        try {
-            const resolvedChainIDToTest = await Network.getChainId();
-            if (!resolvedChainIDToTest) {
-                throw new Error('Chain id is empty. Exiting');
-            }
-            (0, helpers_1.log)('main - resolvedChainIDToTest', resolvedChainIDToTest);
-            GLOBAL_CHAIN_ID = resolvedChainIDToTest;
-        }
-        catch (error) {
-            (0, helpers_1.log)('main - resolvedChainID error', error);
-            throw new Error('Could not resolve chain id');
-        }
+        const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
+        GLOBAL_CHAIN_ID = resolvedChainID;
+        GLOBAL_CHAIN_VERSION = resolvedChainVersion;
+        GLOBAL_IS_NEW_PROTOCOL = isNewProtocol;
     }
     const ppNodeAndPortToUse = buildPpNodeUrl(ppNodeAndPort);
     const [ppUrl, ppPort] = ppNodeAndPortToUse;
     (0, helpers_1.log)('main - will be using ppNodeAndPortToUse', ppNodeAndPortToUse);
-    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: GLOBAL_CHAIN_ID, ppNodeUrl: ppUrl, ppNodePort: ppPort }));
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: GLOBAL_CHAIN_ID, nodeProtocolVersion: GLOBAL_CHAIN_VERSION, isNewProtocol: GLOBAL_IS_NEW_PROTOCOL, ppNodeUrl: ppUrl, ppNodePort: ppPort }));
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     (0, helpers_1.log)('main - sdk initialized user mnemonic', zeroUserMnemonic);

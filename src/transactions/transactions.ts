@@ -120,7 +120,7 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
     dirLog('🚀 ~ file: transactions.ts ~  broadcast ~ result', result);
     return result;
   } catch (err) {
-    dirLog('Could not broadcast', (err as Error).message);
+    dirLog('transactions.broadcastTx Could not broadcast', (err as Error).message);
 
     throw err;
   }
@@ -152,7 +152,7 @@ export const getStandardFee = async (
     return getStandardDefaultFee();
   }
 
-  dirLog('from getStandardFee txMessages', txMessages);
+  // dirLog('from getStandardFee txMessages', txMessages);
 
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(

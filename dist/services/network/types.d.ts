@@ -41,16 +41,10 @@ export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
         account: CosmosAccount;
     };
 }
-export interface CosmosAccountBalanceResponse {
-    balances: Amount[];
-    pagination: {
-        next_key: string;
-        total: string;
-    };
-}
-export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
-    response?: CosmosAccountBalanceResponse;
-}
+export type RestPagination = {
+    next_key: null | number;
+    total: string;
+};
 export interface DelegatedBalanceResult {
     delegation: {
         delegator_address: string;
@@ -84,29 +78,38 @@ export interface UnboundingBalanceResult {
     validator_address: string;
     entries: UnboundingEntry[];
 }
-export interface AvailableBalanceResponse {
+export interface AvailableBalanceResponseO {
     height: number;
     result: Amount[];
 }
-export interface AvailableBalanceDataResult extends NetworkAxiosDataResult {
-    response?: AvailableBalanceResponse;
+export interface AvailableBalanceResponseN {
+    balances: Amount[];
+    pagination: RestPagination | null;
 }
+export type AvailableBalanceResponse = AvailableBalanceResponseN | AvailableBalanceResponseO;
+export interface AvailableBalanceDataResultO extends NetworkAxiosDataResult {
+    response?: AvailableBalanceResponseO;
+}
+export interface AvailableBalanceDataResultN extends NetworkAxiosDataResult {
+    response?: AvailableBalanceResponseN;
+}
+export type AvailableBalanceDataResult = AvailableBalanceDataResultO | AvailableBalanceDataResultN;
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
     response?: {
-        height: number;
-        result: DelegatedBalanceResult[];
+        delegation_responses: DelegatedBalanceResult[];
+        pagination: RestPagination | null;
     };
 }
 export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
     response?: {
-        height: number;
-        result: RewardBalanceResult;
+        rewards: Rewards[];
+        total: Amount[];
     };
 }
 export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
     response?: {
-        height: number;
-        result: UnboundingBalanceResult[];
+        unbonding_responses: UnboundingBalanceResult[];
+        pagination: RestPagination | null;
     };
 }
 export type TransactionData = string;
@@ -161,30 +164,6 @@ export interface TxOrigin {
         signatures: TxSignature[];
     };
 }
-export interface ExplorerTxData {
-    txType: string;
-    txData: TxData;
-    fee: TxFee;
-    hash: string;
-    memo: string;
-}
-export interface ExplorerTxItem {
-    account: string;
-    block_height: number;
-    tx_type: string;
-    tx_info: {
-        tx_hash: string;
-        tx_type: string;
-        time: string;
-        transaction_data: ExplorerTxData;
-    };
-}
-export interface ExplorerTxListResponse {
-    msg: string;
-    code: number;
-    data: ExplorerTxItem[];
-    total: number;
-}
 export interface ValidatorItem {
     operator_address: string;
     consensus_pubkey: string;
@@ -212,10 +191,7 @@ export interface ValidatorItem {
 }
 export interface ValidatorListResponse {
     validators: ValidatorItem[];
-    pagination: {
-        next_key: string;
-        total: string;
-    };
+    pagination: RestPagination | null;
 }
 export interface ValidatorResponse {
     validator: ValidatorItem;
@@ -320,9 +296,6 @@ export interface RpcStatusResponse {
             voting_power: string;
         };
     };
-}
-export interface ExplorerTxListDataResult extends NetworkAxiosDataResult {
-    response?: ExplorerTxListResponse;
 }
 export interface ValidatorListDataResult extends NetworkAxiosDataResult {
     response?: ValidatorListResponse;
@@ -485,10 +458,7 @@ export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
     response?: RestTxHistoryResponse;
 }
 export interface RestTxHistoryResponse {
-    pagination: {
-        next_key: string;
-        total: string;
-    };
+    pagination: RestPagination | null;
     txs: RestTx[];
     tx_responses: RestTxResponse[];
 }

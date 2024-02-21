@@ -8,8 +8,10 @@ import {
   encodePubkey,
   makeAuthInfoBytes,
   makeSignDoc, // OfflineSigner,
-  OfflineDirectSigner,
+  // OfflineDirectSigner,
   TxBodyEncodeObject,
+  OfflineSigner,
+  isOfflineDirectSigner,
 } from '@cosmjs/proto-signing';
 import {
   SigningStargateClient,
@@ -17,7 +19,12 @@ import {
   SigningStargateClientOptions,
 } from '@cosmjs/stargate';
 import { createProtobufRpcClient } from '@cosmjs/stargate/build/queryclient';
-import { HttpEndpoint, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import {
+  HttpEndpoint, // Tendermint34Client,
+  // Tendermint37Client,
+  TendermintClient,
+} from '@cosmjs/tendermint-rpc';
+import { assert, assertDefined } from '@cosmjs/utils';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import { SimulateRequest, ServiceClientImpl } from 'cosmjs-types/cosmos/tx/v1beta1/service';
@@ -26,30 +33,73 @@ import { Any } from 'cosmjs-types/google/protobuf/any';
 import { ethers } from 'ethers';
 import { minGasPrice } from '../config/tokens';
 import { wallet } from '../hdVault';
-import { dirLog } from '../services/helpers';
+// import { dirLog } from '../services/helpers';
 import * as evm from '../transactions/evm';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const tendermint_rpc_1 = require('@cosmjs/tendermint-rpc');
 
 const StratosPubKey = stratosTypes.stratos.crypto.v1.ethsecp256k1.PubKey;
 
 export class StratosSigningStargateClient extends SigningStargateClient {
-  protected readonly mySigner: OfflineDirectSigner;
+  // protected readonly mySigner: OfflineDirectSigner;
+  protected readonly mySigner: OfflineSigner;
 
   public static async connectWithSigner(
     endpoint: string | HttpEndpoint,
-    signer: OfflineDirectSigner,
+    signer: OfflineSigner,
     options: SigningStargateClientOptions = {},
   ): Promise<StratosSigningStargateClient> {
-    const tmClient = await Tendermint34Client.connect(endpoint);
+    // Tendermint/CometBFT 0.34/0.37 auto-detection. Starting with 0.37 we seem to get reliable versions again 🎉
+    // Using 0.34 as the fallback.
+    let tmClient: TendermintClient;
+    // const tm37Client = await Tendermint37Client.connect(endpoint);
+    const tm37Client = await tendermint_rpc_1.Tendermint37Client.connect(endpoint);
+    const version = (await tm37Client.status()).nodeInfo.version;
+    if (version.startsWith('0.37.')) {
+      tmClient = tm37Client;
+    } else {
+      tm37Client.disconnect();
+      // tmClient = await Tendermint34Client.connect(endpoint);
+      tmClient = await tendermint_rpc_1.Tendermint34Client.connect(endpoint);
+    }
+
+    return StratosSigningStargateClient.createWithSigner(tmClient, signer, options);
+  }
+
+  /**
+   * Creates an instance from a manually created Tendermint client.
+   * Use this to use `Tendermint37Client` instead of `Tendermint34Client`.
+   */
+  public static async createWithSigner(
+    // tmClient: TendermintClient,
+    tmClient: typeof tendermint_rpc_1.TendermintClient,
+    signer: OfflineSigner,
+    options: SigningStargateClientOptions = {},
+  ): Promise<StratosSigningStargateClient> {
     return new StratosSigningStargateClient(tmClient, signer, options);
   }
 
   protected constructor(
-    tmClient: Tendermint34Client | undefined,
-    signer: OfflineDirectSigner,
+    // tmClient: TendermintClient | undefined,
+    tmClient: typeof tendermint_rpc_1.TendermintClient | undefined,
+    signer: OfflineSigner,
     options: SigningStargateClientOptions,
   ) {
     super(tmClient, signer, options);
+
     this.mySigner = signer;
+
+    // const {
+    // registry = new Registry(defaultRegistryTypes),
+    // aminoTypes = new AminoTypes(createDefaultAminoConverters()),
+    // } = options;
+    // this.registry = registry;
+    // this.aminoTypes = aminoTypes;
+    // this.signer = signer;
+    // this.broadcastTimeoutMs = options.broadcastTimeoutMs;
+    // this.broadcastPollIntervalMs = options.broadcastPollIntervalMs;
+    // this.gasPrice = options.gasPrice;
   }
 
   public getQueryService(): ServiceClientImpl | undefined {
@@ -246,7 +296,11 @@ export class StratosSigningStargateClient extends SigningStargateClient {
       },
     };
     const bodyBytes = this.registry.encode(txBodyEncodeObject);
-    const authInfoBytes = makeAuthInfoBytes([], fee.amount, +fee.gas);
+
+    // const authInfoBytes = makeAuthInfoBytes([], fee.amount, +fee.gas);
+
+    const authInfoBytes = makeAuthInfoBytes([], fee.amount, +fee.gas, fee.granter, fee.payer);
+
     return TxRaw.fromPartial({
       bodyBytes,
       authInfoBytes,
@@ -305,6 +359,8 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     { accountNumber, sequence, chainId }: SignerData,
     extensionOptions?: Any[],
   ): Promise<TxRaw> {
+    assert(isOfflineDirectSigner(this.mySigner));
+
     const pubkeyEncodedStratos = await this.getEthSecpStratosEncodedPubkey(signerAddress);
     const pubkeyEncodedToUse = pubkeyEncodedStratos;
 
@@ -320,7 +376,17 @@ export class StratosSigningStargateClient extends SigningStargateClient {
     const txBodyBytes = this.registry.encode(txBodyEncodeObject);
 
     const gasLimit = Int53.fromString(fee.gas).toNumber();
-    const authInfoBytes = makeAuthInfoBytes([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
+
+    // const authInfoBytes = makeAuthInfoBytes([{ pubkey: pubkeyEncodedToUse, sequence }], fee.amount, gasLimit);
+
+    const authInfoBytes = makeAuthInfoBytes(
+      [{ pubkey: pubkeyEncodedToUse, sequence }],
+      fee.amount,
+      gasLimit,
+      fee.granter,
+      fee.payer,
+    );
+
     const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, accountNumber);
     const { signature, signed } = await this.mySigner.signDirect(signerAddress, signDoc);
 
