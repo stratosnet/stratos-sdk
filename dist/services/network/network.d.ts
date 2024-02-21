@@ -37,6 +37,11 @@ export declare const sendUserRequestDownloadShared: <T = Types.FileUserRequestDo
 export declare const sendUserRequestGetFileStatus: <T = Types.FileUserRequestGetFileStatusParams>(extraParams: T[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetFileStatusResponse>>;
 export declare const getChainId: () => Promise<string | undefined>;
 export declare const getNodeProtocolVersion: () => Promise<string | undefined>;
+export declare const getChainAndProtocolDetails: () => Promise<{
+    resolvedChainID: string;
+    resolvedChainVersion: string;
+    isNewProtocol: boolean;
+}>;
 /**
  * @deprecated
  */
@@ -50,7 +55,6 @@ export declare const getNodeProtocolVersion: () => Promise<string | undefined>;
  * @deprecated
  * but still in use
  */
-export declare const getAvailableBalance_o: (address: string, config?: Types.NetworkAxiosConfig) => Promise<Types.AvailableBalanceDataResultO>;
 /**
  * @deprecated
  */

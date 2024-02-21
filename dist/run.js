@@ -874,41 +874,16 @@ const tmpTest = async (hdPathIndex, givenMnemonic) => {
     console.log('network result d.response', d.response);
 };
 const main = async () => {
-    let resolvedChainID;
-    let resolvedChainVersion;
-    let isNewProtocol = false;
-    // const sdkEnv = sdkEnvDev;
-    const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
+    // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
-    try {
-        const resolvedChainIDToTest = await Network.getChainId();
-        if (!resolvedChainIDToTest) {
-            throw new Error('Chain id is empty. Exiting');
-        }
-        resolvedChainID = resolvedChainIDToTest;
-        const resolvedChainVersionToTest = await Network.getNodeProtocolVersion();
-        if (!resolvedChainVersionToTest) {
-            throw new Error('Protocol version id is empty. Exiting');
-        }
-        resolvedChainVersion = resolvedChainVersionToTest;
-        console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-        console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainVersionToTest', resolvedChainVersionToTest);
-        const { MIN_NEW_PROTOCOL_VERSION } = config_1.options;
-        isNewProtocol = Sdk_1.default.getNewProtocolFlag(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
-    }
-    catch (error) {
-        console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
-        throw new Error('Could not resolve chain id');
-    }
+    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
         ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
     // console.log('sdkEnv', Sdk.environment);
-    // tropos
-    // ppNodeUrl: 'http://35.233.251.112',
-    //     ppNodePort: '8159',
     // await evmSend();
     const hdPathIndex = 0;
     const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
@@ -943,7 +918,8 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
     // const faucetMnemonic =''

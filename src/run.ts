@@ -1196,48 +1196,15 @@ const tmpTest = async (hdPathIndex: number, givenMnemonic: string) => {
 };
 
 const main = async () => {
-  let resolvedChainID: string;
-  let resolvedChainVersion: string;
-  let isNewProtocol = false;
+  const sdkEnv = sdkEnvDev;
 
-  // const sdkEnv = sdkEnvDev;
-
-  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvTest;
 
   // const sdkEnv = sdkEnvMainNet;
 
   Sdk.init({ ...sdkEnv });
 
-  try {
-    const resolvedChainIDToTest = await Network.getChainId();
-
-    if (!resolvedChainIDToTest) {
-      throw new Error('Chain id is empty. Exiting');
-    }
-
-    resolvedChainID = resolvedChainIDToTest;
-
-    const resolvedChainVersionToTest = await Network.getNodeProtocolVersion();
-
-    if (!resolvedChainVersionToTest) {
-      throw new Error('Protocol version id is empty. Exiting');
-    }
-
-    resolvedChainVersion = resolvedChainVersionToTest;
-
-    console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-    console.log(
-      '🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainVersionToTest',
-      resolvedChainVersionToTest,
-    );
-
-    const { MIN_NEW_PROTOCOL_VERSION } = options;
-
-    isNewProtocol = Sdk.getNewProtocolFlag(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
-  } catch (error) {
-    console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
-    throw new Error('Could not resolve chain id');
-  }
+  const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
 
   // 2
   Sdk.init({
@@ -1258,10 +1225,6 @@ const main = async () => {
   });
 
   // console.log('sdkEnv', Sdk.environment);
-
-  // tropos
-  // ppNodeUrl: 'http://35.233.251.112',
-  //     ppNodePort: '8159',
 
   // await evmSend();
 
@@ -1314,7 +1277,8 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);

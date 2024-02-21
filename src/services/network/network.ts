@@ -5,7 +5,7 @@ import JSONbig from 'json-bigint';
 import qs from 'qs';
 import { hdVault, options } from '../../config';
 import Sdk from '../../Sdk';
-import { log, dirLog } from '../../services/helpers';
+import { log, dirLog, getNewProtocolFlag } from '../../services/helpers';
 import * as Types from './types';
 import { TxHistoryUser } from './types';
 
@@ -277,13 +277,18 @@ export const getAvailableBalance = async (
   address: string,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.AvailableBalanceDataResult> => {
-  const isNewProtocol = !!Sdk.environment.isNewProtocol;
+  // we can support different variations of methods which depend on isNewProtocol flag
+  // see getChainAndProtocolDetails methods for more details
+  // const isNewProtocol = !!Sdk.environment.isNewProtocol;
+  // console.log('getAvailableBalance  isNewProtocol', isNewProtocol);
 
-  if (isNewProtocol) {
-    return getAvailableBalance_n(address, config);
-  }
+  // if (isNewProtocol) {
+  // return getAvailableBalance_n(address, config);
+  // }
 
-  return getAvailableBalance_o(address, config);
+  // return getAvailableBalance_o(address, config);
+
+  return getAvailableBalance_n(address, config);
 };
 
 // done
@@ -570,6 +575,44 @@ export const getNodeProtocolVersion = async () => {
   return version;
 };
 
+export const getChainAndProtocolDetails = async () => {
+  let resolvedChainID: string;
+  let resolvedChainVersion: string;
+  let isNewProtocol = false;
+  try {
+    const resolvedChainIDToTest = await getChainId();
+
+    if (!resolvedChainIDToTest) {
+      throw new Error('Chain id is empty. Exiting');
+    }
+
+    resolvedChainID = resolvedChainIDToTest;
+
+    const resolvedChainVersionToTest = await getNodeProtocolVersion();
+
+    if (!resolvedChainVersionToTest) {
+      throw new Error('Protocol version id is empty. Exiting');
+    }
+
+    resolvedChainVersion = resolvedChainVersionToTest;
+
+    console.log('🚀 ~ file: network ~ resolvedChainIDToTest', resolvedChainIDToTest);
+
+    const { MIN_NEW_PROTOCOL_VERSION } = options;
+
+    isNewProtocol = getNewProtocolFlag(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
+  } catch (error) {
+    console.log('🚀 ~ file: network ~ resolvedChainID error', error);
+    throw new Error('Could not resolve chain id');
+  }
+
+  return {
+    resolvedChainID,
+    resolvedChainVersion,
+    isNewProtocol,
+  };
+};
+
 /**
  * @deprecated
  */
@@ -626,21 +669,21 @@ export const getNodeProtocolVersion = async () => {
  * @deprecated
  * but still in use
  */
-export const getAvailableBalance_o = async (
-  address: string,
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.AvailableBalanceDataResultO> => {
-  const url = `${getRestRoute()}/bank/balances/${address}`;
-  console.log('url', url);
-
-  const dataResult = await apiGet(url, config);
-  console.log(
-    '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
-    JSON.stringify(dataResult),
-  );
-
-  return dataResult;
-};
+// export const getAvailableBalance_o = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.AvailableBalanceDataResultO> => {
+//   const url = `${getRestRoute()}/bank/balances/${address}`;
+//   console.log('url', url);
+//
+//   const dataResult = await apiGet(url, config);
+//   console.log(
+//     '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+//     JSON.stringify(dataResult),
+//   );
+//
+//   return dataResult;
+// };
 
 // export const getAccountBalance = async (
 //   address: string,

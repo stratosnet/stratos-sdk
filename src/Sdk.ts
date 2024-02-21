@@ -30,18 +30,4 @@ export default class Sdk {
   public static reset(): void {
     Sdk.environment = { ...SdkDefaultEnvironment };
   }
-
-  public static getNewProtocolFlag(currentVersion: string, minRequiredNewVersion: string) {
-    console.log('current protocol version ', currentVersion);
-    const [pVer, pSubVer, pPatch] = currentVersion.split('.');
-    const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
-
-    const isVerOld = +pVer < +minVer;
-    const isSubVerOld = +pSubVer < +minSubVer;
-    const isPatchOld = +pPatch < +minPatch;
-
-    const isOldProtocol = isVerOld && isSubVerOld && isPatchOld;
-
-    return !isOldProtocol;
-  }
 }

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAvailableBalance_o = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
+exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
 // import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 // import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 const axios_1 = __importDefault(require("axios"));
@@ -196,11 +196,15 @@ const getAvailableBalance_n = async (address, config) => {
 };
 exports.getAvailableBalance_n = getAvailableBalance_n;
 const getAvailableBalance = async (address, config) => {
-    const isNewProtocol = !!Sdk_1.default.environment.isNewProtocol;
-    if (isNewProtocol) {
-        return (0, exports.getAvailableBalance_n)(address, config);
-    }
-    return (0, exports.getAvailableBalance_o)(address, config);
+    // we can support different variations of methods which depend on isNewProtocol flag
+    // see getChainAndProtocolDetails methods for more details
+    // const isNewProtocol = !!Sdk.environment.isNewProtocol;
+    // console.log('getAvailableBalance  isNewProtocol', isNewProtocol);
+    // if (isNewProtocol) {
+    // return getAvailableBalance_n(address, config);
+    // }
+    // return getAvailableBalance_o(address, config);
+    return (0, exports.getAvailableBalance_n)(address, config);
 };
 exports.getAvailableBalance = getAvailableBalance;
 // done
@@ -380,6 +384,36 @@ const getNodeProtocolVersion = async () => {
     return version;
 };
 exports.getNodeProtocolVersion = getNodeProtocolVersion;
+const getChainAndProtocolDetails = async () => {
+    let resolvedChainID;
+    let resolvedChainVersion;
+    let isNewProtocol = false;
+    try {
+        const resolvedChainIDToTest = await (0, exports.getChainId)();
+        if (!resolvedChainIDToTest) {
+            throw new Error('Chain id is empty. Exiting');
+        }
+        resolvedChainID = resolvedChainIDToTest;
+        const resolvedChainVersionToTest = await (0, exports.getNodeProtocolVersion)();
+        if (!resolvedChainVersionToTest) {
+            throw new Error('Protocol version id is empty. Exiting');
+        }
+        resolvedChainVersion = resolvedChainVersionToTest;
+        console.log('🚀 ~ file: network ~ resolvedChainIDToTest', resolvedChainIDToTest);
+        const { MIN_NEW_PROTOCOL_VERSION } = config_1.options;
+        isNewProtocol = (0, helpers_1.getNewProtocolFlag)(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
+    }
+    catch (error) {
+        console.log('🚀 ~ file: network ~ resolvedChainID error', error);
+        throw new Error('Could not resolve chain id');
+    }
+    return {
+        resolvedChainID,
+        resolvedChainVersion,
+        isNewProtocol,
+    };
+};
+exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
 /**
  * @deprecated
  */
@@ -433,14 +467,21 @@ exports.getNodeProtocolVersion = getNodeProtocolVersion;
  * @deprecated
  * but still in use
  */
-const getAvailableBalance_o = async (address, config) => {
-    const url = `${getRestRoute()}/bank/balances/${address}`;
-    console.log('url', url);
-    const dataResult = await (0, exports.apiGet)(url, config);
-    console.log('🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult', JSON.stringify(dataResult));
-    return dataResult;
-};
-exports.getAvailableBalance_o = getAvailableBalance_o;
+// export const getAvailableBalance_o = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.AvailableBalanceDataResultO> => {
+//   const url = `${getRestRoute()}/bank/balances/${address}`;
+//   console.log('url', url);
+//
+//   const dataResult = await apiGet(url, config);
+//   console.log(
+//     '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+//     JSON.stringify(dataResult),
+//   );
+//
+//   return dataResult;
+// };
 // export const getAccountBalance = async (
 //   address: string,
 //   config?: Types.NetworkAxiosConfig,

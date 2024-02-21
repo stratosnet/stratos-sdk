@@ -23,5 +23,4 @@ export default class Sdk {
     };
     static init(sdkEnv: SdkEnvironmentConfig): void;
     static reset(): void;
-    static getNewProtocolFlag(currentVersion: string, minRequiredNewVersion: string): boolean;
 }
