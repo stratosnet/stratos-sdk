@@ -23,6 +23,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @jest-environment node
+ */
+// import path from 'path';
+const remotefs_1 = require("../../config/remotefs");
+const hdVault_1 = require("../../hdVault");
 const config_1 = require("../config");
 const Integration = __importStar(require("./sdk_inegration_runner"));
 const extendedExecutionTimeout = config_1.OZONE_BALANCE_CHECK_WAIT_TIME * 2;
@@ -46,122 +52,77 @@ describe(`Stratos SDK integration (integration test)`, () => {
             });
         }, extendedExecutionTimeout);
     });
-    // describe('Transactions', () => {
-    //   const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-    //   const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-    //
-    //   it(
-    //     'Sends a transfer tx and checks that receiver balance was updated',
-    //     done => {
-    //       void Integration.sendTransferTx(0, receiverMnemonic).then(result => {
-    //         expect(result).toBe(true);
-    //         done();
-    //       });
-    //     },
-    //     extendedExecutionTimeout,
-    //   );
-    //   it(
-    //     'Sends a delegation tx and checks that receiver balance was updated',
-    //     done => {
-    //       void Integration.sendDelegateTx(0, receiverMnemonic).then(result => {
-    //         expect(result).toBe(true);
-    //         done();
-    //       });
-    //     },
-    //     extendedExecutionTimeout,
-    //   );
-    //   it(
-    //     'Sends a withdraw rewards tx ',
-    //     done => {
-    //       void Integration.sendWithdrawRewardsTx(0, receiverMnemonic).then(result => {
-    //         expect(result).toBe(true);
-    //         done();
-    //       });
-    //     },
-    //     extendedExecutionTimeout,
-    //   );
-    //   it(
-    //     'Sends a withdraw all rewards tx ',
-    //     done => {
-    //       void Integration.sendWithdrawAllRewardsTx(0, receiverMnemonic).then(result => {
-    //         expect(result).toBe(true);
-    //         done();
-    //       });
-    //     },
-    //     extendedExecutionTimeout,
-    //   );
-    //
-    //   describe('Transactions (re-delegate)', () => {
-    //     const receiverPhraseRedelegate = mnemonic.generateMnemonicPhrase(24);
-    //     const receiverMnemonicRedelegate = mnemonic.convertArrayToString(receiverPhraseRedelegate);
-    //
-    //     it(
-    //       'Sends a redelegation tx and checks that receiver balance was updated',
-    //       done => {
-    //         void Integration.sendBeginRedelegateTx(0, receiverMnemonicRedelegate).then(result => {
-    //           expect(result).toBe(true);
-    //           done();
-    //         });
-    //       },
-    //       extendedExecutionTimeout,
-    //     );
-    //   });
-    // });
-    // describe('Prepay OZONE, upload and download', () => {
-    //   const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-    //   const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
-    //
-    //   describe('Prepay and OZONE', () => {
-    //     it(
-    //       'Sends an sds prepay tx',
-    //       done => {
-    //         void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
-    //           expect(result).toBe(true);
-    //           done();
-    //         });
-    //       },
-    //       extendedExecutionTimeout,
-    //     );
-    //     it(
-    //       'Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 95 OZ',
-    //       done => {
-    //         void Integration.getAccountOzoneBalance(0, receiverMnemonic, '95').then(result => {
-    //           expect(result).toBe(true);
-    //           done();
-    //         });
-    //       },
-    //       extendedExecutionTimeout,
-    //     );
-    //   });
-    //   describe('Remote File System', () => {
-    //     const randomPrefix = Date.now() + '';
-    //     const fileReadName = `file10_test`;
-    //     it(
-    //       'Uploads a local file to remote and verifies its existence on the remote side',
-    //       done => {
-    //         void Integration.uploadFileToRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(
-    //           result => {
-    //             expect(result).toBe(true);
-    //             done();
-    //           },
-    //         );
-    //       },
-    //       extendedExecutionTimeout * 3 + FILE_STATUS_CHECK_WAIT_TIME,
-    //     );
-    //
-    //     it(
-    //       'Downloads the remote file to local file and compares its hash',
-    //       done => {
-    //         void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(
-    //           result => {
-    //             expect(result).toBe(true);
-    //             done();
-    //           },
-    //         );
-    //       },
-    //       extendedExecutionTimeout,
-    //     );
-    // });
-    // });
+    describe('Transactions', () => {
+        const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+        const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+        it('Sends a transfer tx and checks that receiver balance was updated', done => {
+            void Integration.sendTransferTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a delegation tx and checks that receiver balance was updated', done => {
+            void Integration.sendDelegateTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a withdraw rewards tx ', done => {
+            void Integration.sendWithdrawRewardsTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        it('Sends a withdraw all rewards tx ', done => {
+            void Integration.sendWithdrawAllRewardsTx(0, receiverMnemonic).then(result => {
+                expect(result).toBe(true);
+                done();
+            });
+        }, extendedExecutionTimeout);
+        describe('Transactions (re-delegate)', () => {
+            const receiverPhraseRedelegate = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+            const receiverMnemonicRedelegate = hdVault_1.mnemonic.convertArrayToString(receiverPhraseRedelegate);
+            it('Sends a redelegation tx and checks that receiver balance was updated', done => {
+                void Integration.sendBeginRedelegateTx(0, receiverMnemonicRedelegate).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
+    });
+    describe('Prepay OZONE, upload and download', () => {
+        const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+        const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+        describe('Prepay and OZONE', () => {
+            it('Sends an sds prepay tx', done => {
+                void Integration.sendSdsPrepayTx(0, receiverMnemonic, 0.1).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+            it('Check that account has ozone balance, assuming that for 0.1 STOS account should have at least 95 OZ', done => {
+                void Integration.getAccountOzoneBalance(0, receiverMnemonic, '95').then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
+        describe('Remote File System', () => {
+            const randomPrefix = Date.now() + '';
+            const fileReadName = `file10_test`;
+            it('Uploads a local file to remote and verifies its existence on the remote side', done => {
+                void Integration.uploadFileToRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout * 3 + remotefs_1.FILE_STATUS_CHECK_WAIT_TIME);
+            it('Downloads the remote file to local file and compares its hash', done => {
+                void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+        });
+    });
 });
 //# sourceMappingURL=sdk_integration.spec.js.map
