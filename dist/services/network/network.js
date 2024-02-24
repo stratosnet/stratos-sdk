@@ -3,13 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.getStakingValidators = exports.getAccountBalance = exports.getAccountsData = exports.sendRpcCall = exports.apiGet = exports.apiPost = exports.apiPostLegacy = void 0;
+exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestDownloadShared = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
+// import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs/encoding';
+// import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
 const config_1 = require("../../config");
 const Sdk_1 = __importDefault(require("../../Sdk"));
 const helpers_1 = require("../../services/helpers");
+const types_1 = require("./types");
 const _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
     data => {
@@ -41,23 +44,6 @@ const getExplorerRoute = () => {
     const url = `${explorerUrl}`;
     return url;
 };
-const apiPostLegacy = async (url, data, config) => {
-    let axiosResponse;
-    try {
-        axiosResponse = await _axios.post(url, data, config);
-    }
-    catch (err) {
-        return { error: { message: err.message } };
-    }
-    try {
-        const myResponse = axiosResponse.data;
-        return { response: myResponse };
-    }
-    catch (_) {
-        return { response: axiosResponse.data };
-    }
-};
-exports.apiPostLegacy = apiPostLegacy;
 const apiPost = async (url, data, config) => {
     const myConfig = {
         maxContentLength: Infinity,
@@ -114,31 +100,10 @@ const sendRpcCall = async (givenPayload, config) => {
     const url = `${getPpNodeRoute()}`;
     const payload = Object.assign(Object.assign({}, defaultPayload), givenPayload);
     (0, helpers_1.log)('from network ~ rpc call url', url);
-    // log('from network - calling rpc', payload);
     const dataResult = await (0, exports.apiPost)(url, payload, Object.assign({}, config));
-    // log('from network - rpc post result', dataResult);
-    // log('from network - rpc post result error', dataResult.response?.error);
     return dataResult;
 };
 exports.sendRpcCall = sendRpcCall;
-const getAccountsData = async (address, config) => {
-    const url = `${getRestRoute()}/cosmos/auth/v1beta1/accounts/${address}`;
-    const dataResult = await (0, exports.apiGet)(url, config);
-    return dataResult;
-};
-exports.getAccountsData = getAccountsData;
-const getAccountBalance = async (address, config) => {
-    const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
-    const dataResult = await (0, exports.apiGet)(url, config);
-    return dataResult;
-};
-exports.getAccountBalance = getAccountBalance;
-const getStakingValidators = async (address, config) => {
-    const url = `${getRestRoute()}/auth/acconts/${address}`;
-    const dataResult = await (0, exports.apiGet)(url, config);
-    return dataResult;
-};
-exports.getStakingValidators = getStakingValidators;
 const getSubmitTransactionData = (data) => {
     let txData;
     if (!data) {
@@ -158,18 +123,26 @@ exports.getSubmitTransactionData = getSubmitTransactionData;
 const submitTransaction = async (delegatorAddr, data, config) => {
     // @todo - move it to submitDelegate
     const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+    console.log('url to broadcast the tx (POST)');
     const { response: txData, error } = (0, exports.getSubmitTransactionData)(data);
     if (error) {
         return { error };
     }
+    console.log('tx data to broadcast', txData);
     const dataResult = await (0, exports.apiPost)(url, txData, config);
+    console.log('dataResult after the broadcast', dataResult);
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;
-const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, config) => {
+// done
+const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = types_1.TxHistoryUser.TxHistorySenderUser, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
+    console.log('url', url);
     console.log('given page', givenPage, pageLimit);
-    const givenEvents = [`message.sender='${address}'`];
+    const userQueryType = userType === types_1.TxHistoryUser.TxHistorySenderUser
+        ? `message.sender='${address}'`
+        : `transfer.recipient='${address}'`;
+    const givenEvents = [userQueryType];
     if (type) {
         const msgTypeActionParameter = `message.action='${type}'`;
         givenEvents.push(msgTypeActionParameter);
@@ -183,36 +156,10 @@ const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, 
         order_by: 'ORDER_BY_DESC',
     };
     const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
+    console.log('TxHistory data result ', dataResult);
     return dataResult;
 };
 exports.getTxListBlockchain = getTxListBlockchain;
-/**
- * @param address
- * @deprecated
- * @param type
- * @param page
- * @param config
- * @returns
- */
-const getTxList = async (address, type, page = 1, config) => {
-    // const url = `${getExplorerRoute()}/api/activeAccont/`; // page 1
-    // const url = `${getExplorerRoute()}/api/queryBlock/rand=9.56503971&height=1`;
-    // const url = `${getExplorerRoute()}/api/cleanup`;
-    const url = `${getExplorerRoute()}/api/getAccountHistory`;
-    console.log('url 1', url);
-    const params = {
-        page,
-        account: address,
-        limit: 5,
-    };
-    if (type) {
-        params.operation = type;
-    }
-    const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
-    // https://explorer-test.thestratos.org/api/getAccountHistory?account=st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6&limit=2&operation=cosmos-sdk/MsgSend
-    return dataResult;
-};
-exports.getTxList = getTxList;
 // done
 const getValidatorsList = async (status, page = 1, config) => {
     const url = `${getRestRoute()}/cosmos/staking/v1beta1/validators`;
@@ -241,27 +188,44 @@ const getStakingPool = async (config) => {
     return dataResult;
 };
 exports.getStakingPool = getStakingPool;
-const getAvailableBalance = async (address, config) => {
-    const url = `${getRestRoute()}/bank/balances/${address}`;
+// done
+const getAvailableBalance_n = async (address, config) => {
+    const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
     const dataResult = await (0, exports.apiGet)(url, config);
-    console.log('🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult', JSON.stringify(dataResult));
     return dataResult;
 };
+exports.getAvailableBalance_n = getAvailableBalance_n;
+const getAvailableBalance = async (address, config) => {
+    // we can support different variations of methods which depend on isNewProtocol flag
+    // see getChainAndProtocolDetails methods for more details
+    // const isNewProtocol = !!Sdk.environment.isNewProtocol;
+    // console.log('getAvailableBalance  isNewProtocol', isNewProtocol);
+    // if (isNewProtocol) {
+    // return getAvailableBalance_n(address, config);
+    // }
+    // return getAvailableBalance_o(address, config);
+    return (0, exports.getAvailableBalance_n)(address, config);
+};
 exports.getAvailableBalance = getAvailableBalance;
+// done
 const getDelegatedBalance = async (delegatorAddr, config) => {
-    const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+    // const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
+    const url = `${getRestRoute()}/cosmos/staking/v1beta1/delegations/${delegatorAddr}`;
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
 exports.getDelegatedBalance = getDelegatedBalance;
+// done
 const getUnboundingBalance = async (delegatorAddr, config) => {
-    const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/unbonding_delegations`;
+    // const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/unbonding_delegations`;
+    const url = `${getRestRoute()}/cosmos/staking/v1beta1/delegators/${delegatorAddr}/unbonding_delegations`;
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
 exports.getUnboundingBalance = getUnboundingBalance;
+// done
 const getRewardBalance = async (delegatorAddr, config) => {
-    const url = `${getRestRoute()}/distribution/delegators/${delegatorAddr}/rewards`;
+    const url = `${getRestRoute()}/cosmos/distribution/v1beta1/delegators/${delegatorAddr}/rewards`;
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
@@ -345,7 +309,6 @@ const sendUserRequestGetOzone = async (extraParams, config) => {
     const method = 'user_requestGetOzone';
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
-    // dirLog('🚀 sendUserRequestGetOzone dataResult', dataResult);
     return dataResult;
 };
 exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
@@ -408,10 +371,155 @@ exports.sendUserRequestGetFileStatus = sendUserRequestGetFileStatus;
 const getChainId = async () => {
     var _a, _b;
     const result = await (0, exports.getRpcStatus)();
-    // dirLog('getChainId result', result);
     const { response } = result;
     const chainId = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.network;
     return chainId;
 };
 exports.getChainId = getChainId;
+const getNodeProtocolVersion = async () => {
+    var _a, _b;
+    const result = await (0, exports.getRpcStatus)();
+    const { response } = result;
+    const version = (_b = (_a = response === null || response === void 0 ? void 0 : response.result) === null || _a === void 0 ? void 0 : _a.node_info) === null || _b === void 0 ? void 0 : _b.version;
+    return version;
+};
+exports.getNodeProtocolVersion = getNodeProtocolVersion;
+const getChainAndProtocolDetails = async () => {
+    let resolvedChainID;
+    let resolvedChainVersion;
+    let isNewProtocol = false;
+    try {
+        const resolvedChainIDToTest = await (0, exports.getChainId)();
+        if (!resolvedChainIDToTest) {
+            throw new Error('Chain id is empty. Exiting');
+        }
+        resolvedChainID = resolvedChainIDToTest;
+        const resolvedChainVersionToTest = await (0, exports.getNodeProtocolVersion)();
+        if (!resolvedChainVersionToTest) {
+            throw new Error('Protocol version id is empty. Exiting');
+        }
+        resolvedChainVersion = resolvedChainVersionToTest;
+        console.log('🚀 ~ file: network ~ resolvedChainIDToTest', resolvedChainIDToTest);
+        const { MIN_NEW_PROTOCOL_VERSION } = config_1.options;
+        isNewProtocol = (0, helpers_1.getNewProtocolFlag)(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
+    }
+    catch (error) {
+        console.log('🚀 ~ file: network ~ resolvedChainID error', error);
+        throw new Error('Could not resolve chain id');
+    }
+    return {
+        resolvedChainID,
+        resolvedChainVersion,
+        isNewProtocol,
+    };
+};
+exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
+/**
+ * @deprecated
+ */
+// export const apiPostLegacy = async (
+//   url: string,
+//   data?: Types.ParsedTransactionData,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.NetworkAxiosDataResult> => {
+//   let axiosResponse;
+//
+//   try {
+//     axiosResponse = await _axios.post(url, data, config);
+//   } catch (err) {
+//     return { error: { message: (err as Error).message } };
+//   }
+//
+//   try {
+//     const myResponse = axiosResponse.data;
+//     return { response: myResponse };
+//   } catch (_) {
+//     return { response: axiosResponse.data };
+//   }
+// };
+/**
+ * @deprecated
+ */
+// export const getAccountsData = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.CosmosAccountsDataResult> => {
+//   const url = `${getRestRoute()}/cosmos/auth/v1beta1/accounts/${address}`;
+//
+//   const dataResult = await apiGet(url, config);
+//
+//   return dataResult;
+// };
+/**
+ * @deprecated
+ */
+// export const getStakingValidators = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.AccountsDataResult> => {
+//   const url = `${getRestRoute()}/auth/acconts/${address}`;
+//
+//   const dataResult = await apiGet(url, config);
+//
+//   return dataResult;
+// };
+/**
+ * @deprecated
+ * but still in use
+ */
+// export const getAvailableBalance_o = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.AvailableBalanceDataResultO> => {
+//   const url = `${getRestRoute()}/bank/balances/${address}`;
+//   console.log('url', url);
+//
+//   const dataResult = await apiGet(url, config);
+//   console.log(
+//     '🚀 ~ file: network.ts ~ line 356 ~ getAvailableBalance dataResult',
+//     JSON.stringify(dataResult),
+//   );
+//
+//   return dataResult;
+// };
+// export const getAccountBalance = async (
+//   address: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.CosmosAccountBalanceDataResult> => {
+//   const url = `${getRestRoute()}/cosmos/bank/v1beta1/balances/${address}`;
+//
+//   const dataResult = await apiGet(url, config);
+//
+//   return dataResult;
+// };
+/**
+ * @deprecated
+ */
+// export const getTxList = async (
+//   address: string,
+//   type: string,
+//   page = 1,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.ExplorerTxListDataResult> => {
+//   const url = `${getExplorerRoute()}/api/getAccountHistory`;
+//   console.log('url 1', url);
+//
+//   const params: { page: number; account: string; limit: number; operation?: string } = {
+//     page,
+//     account: address,
+//     limit: 5,
+//   };
+//
+//   if (type) {
+//     params.operation = type;
+//   }
+//
+//   const dataResult = await apiGet(url, {
+//     ...config,
+//     params,
+//   });
+//
+//   // https://explorer-test.thestratos.org/api/getAccountHistory?account=st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6&limit=2&operation=cosmos-sdk/MsgSend
+//   return dataResult;
+// };
 //# sourceMappingURL=network.js.map

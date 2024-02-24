@@ -44,6 +44,7 @@ const cosmos_1 = require("./services/cosmos");
 const FilesystemService = __importStar(require("./services/filesystem"));
 const helpers_1 = require("./services/helpers");
 const Network = __importStar(require("./services/network"));
+const NetworkTypes = __importStar(require("./services/network/types"));
 const transactions = __importStar(require("./transactions"));
 const evm = __importStar(require("./transactions/evm"));
 const transactionTypes = __importStar(require("./transactions/types"));
@@ -55,18 +56,9 @@ const { ZERO_MNEMONIC: zeroUserMnemonic = '' } = process.env;
 const sdkEnvDev = {
     restUrl: 'https://rest-dev.thestratos.org',
     rpcUrl: 'https://rpc-dev.thestratos.org',
-    chainId: 'dev-chain-46',
+    chainId: 'dev-0',
     explorerUrl: 'https://explorer-dev.thestratos.org',
     faucetUrl: 'https://faucet-dev.thestratos.org/credit',
-};
-const sdkEnvTestOld = {
-    key: 'testnet',
-    name: 'Tropos-4',
-    restUrl: 'https://rest-tropos.thestratos.org',
-    rpcUrl: 'https://rpc-tropos.thestratos.org',
-    chainId: 'stratos-testnet-2',
-    explorerUrl: 'https://big-dipper-tropos.thestratos.org',
-    faucetUrl: 'https://faucet-tropos.thestratos.org/credit',
 };
 const sdkEnvTest = {
     key: 'testnet',
@@ -126,8 +118,8 @@ const evmSend = async () => {
     const signedTx = await _cosmosClient.signForEvm(payload, keyPairZero);
     if (signedTx) {
         try {
-            const result = await transactions.broadcast(signedTx);
-            console.log('broadcasting result!', result);
+            const _result = await transactions.broadcast(signedTx);
+            console.log('broadcasting result!', _result);
         }
         catch (error) {
             const err = error;
@@ -189,6 +181,7 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
         { amount: sendAmount, toAddress: keyPairOne.address },
         // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
     ]);
+    // console.log('run sendTxMessages ', sendTxMessages);
     // TxRaw
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
     // dirLog('signedTx run', signedTx);
@@ -207,8 +200,8 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
     // if (signedTx) {
     if (assembled) {
         try {
-            const result = await transactions.broadcast(assembled);
-            console.log('broadcasting result!', result);
+            const _result = await transactions.broadcast(assembled);
+            console.log('broadcasting result!', _result);
         }
         catch (error) {
             const err = error;
@@ -361,7 +354,6 @@ const mainWithdrawAllRewards = async () => {
         }
     }
 };
-// cosmosjs withdraw rewards
 const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic) => {
     // console.log('mnemonic ', zeroUserMnemonic);
     const mnemonicToUse = givenReceiverMnemonic ? givenReceiverMnemonic : zeroUserMnemonic;
@@ -373,7 +365,7 @@ const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic) => {
     if (!keyPairZero) {
         return;
     }
-    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 0.1 }]);
+    const sendTxMessages = await transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 10 }]);
     (0, helpers_1.dirLog)('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
     const signedTx = await transactions.sign(keyPairZero.address, sendTxMessages);
     let attempts = 0;
@@ -412,10 +404,19 @@ const uploadRequest = async () => {
     const valid = await keyUtils.verifySignature(messageToSign, signature, pubkeyMine.value);
     console.log('🚀 ~ file: run.ts ~ line 349 ~ uploadRequest ~ valid', valid);
 };
-const getAccountTrasactions = async () => {
+const getAccountTransactions = async (hdPathIndex, givenMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+    if (!keyPairZero) {
+        return;
+    }
+    const zeroAddress = keyPairZero.address;
     // const zeroAddress = 'st19nn9fnlzkpm3hah3pstz0wq496cehclpru8m3u';
     // const zeroAddress = 'st1ztngz8zmdl3tzz9xjf86tjtvkup0tc04q5h6vm';
-    const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
+    // const zeroAddress = 'st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g';
     const r1 = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, 1, 2);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
     // const r = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Delegate, 1);
@@ -469,7 +470,7 @@ const getDelegatedBalance = async () => {
     const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
     const bResult = await Network.getDelegatedBalance(address);
     const { response } = bResult;
-    console.log('our delegated balanace', response === null || response === void 0 ? void 0 : response.result[0].balance);
+    console.log('our delegated balanace', response === null || response === void 0 ? void 0 : response.delegation_responses[0].balance);
 };
 const getUnboundingBalance = async () => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -483,7 +484,7 @@ const getUnboundingBalance = async () => {
     const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
     const bResult = await Network.getUnboundingBalance(address);
     const { response } = bResult;
-    console.log('our unbounding balanace', response === null || response === void 0 ? void 0 : response.result); // an array ?
+    console.log('our unbounding balanace', response === null || response === void 0 ? void 0 : response.unbonding_responses); // an array ?
 };
 const getRewardBalance = async () => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -497,7 +498,7 @@ const getRewardBalance = async () => {
     const address = 'st1k4ach36c8qwuckefz94vy83y308h5uzyrsllx6';
     const bResult = await Network.getRewardBalance(address);
     const { response } = bResult;
-    console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.result.rewards); // an array ?
+    console.log('our reward balanace', response === null || response === void 0 ? void 0 : response.rewards); // an array ?
 };
 const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
@@ -541,17 +542,19 @@ const runFaucet = async (hdPathIndex, givenMnemonic) => {
     const walletAddress = keyPairZero.address;
     console.log('walletAddress', walletAddress);
     // const faucetUrl = 'https://faucet-dev.thestratos.org/credit';
-    const faucetUrl = Sdk_1.default.environment.faucetUrl;
+    const faucetUrl = Sdk_1.default.environment.faucetUrl || '';
     (0, helpers_1.log)(`will be useing faucetUrl - "${faucetUrl}"`);
     const result = await accounts.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
     console.log('faucet result', result);
 };
-const getTxHistory = async () => {
-    const wallet = await keyUtils.createWalletAtPath(0, zeroUserMnemonic);
+const getTxHistory = async (userMnemonic, hdPathIndex) => {
+    const wallet = await keyUtils.createWalletAtPath(hdPathIndex, userMnemonic);
     console.log('running getTxHistory');
     const [firstAccount] = await wallet.getAccounts();
     const zeroAddress = firstAccount.address;
-    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.Transfer, 1);
+    const pageNumber = 1;
+    const pageLimit = 100;
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, NetworkTypes.TxHistoryUser.TxHistoryReceiverUser);
     console.log('hist result!! !', result);
     return true;
 };
@@ -847,38 +850,40 @@ const testAddressConverstion = async (hdPathIndex) => {
     const nativeAddress = keyUtils.convertEvmToNativeToAddress(evmAddress);
     (0, helpers_1.log)('converted nativeAddress', nativeAddress);
 };
+const tmpTest = async (hdPathIndex, givenMnemonic) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(givenMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
+    const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
+    console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+    if (!keyPairZero) {
+        return;
+    }
+    console.log('keyPairZero from test', keyPairZero);
+    const testAddress = keyPairZero.address;
+    // const d = await Network.getStakingValidators(testAddress);
+    // const d = await validators.getValidators();
+    const vAddress = 'stvaloper1zk4et8h0a92jtefz8ywu4xp88y93xd98x2w5hu';
+    // mesos
+    // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+    // const d = await Network.getValidatorsBondedToDelegatorList(vAddress, testAddress);
+    // const d = await Network.getDelegatedBalance(testAddress);
+    const d = await Network.getUnboundingBalance(testAddress);
+    // const d = await Network.getRewardBalance(testAddress);
+    // console.log('network result d', d);
+    console.log('network result d.response', d.response);
+};
 const main = async () => {
-    let resolvedChainID;
-    // that is the mesos config
-    // const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvDev;
     // const sdkEnv = sdkEnvTest;
-    const sdkEnv = sdkEnvMainNet;
+    // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
-    try {
-        const resolvedChainIDToTest = await Network.getChainId();
-        if (!resolvedChainIDToTest) {
-            throw new Error('Chain id is empty. Exiting');
-        }
-        console.log('🚀 ~ file: run.ts ~ line 817 ~ main ~ resolvedChainIDToTest', resolvedChainIDToTest);
-        resolvedChainID = resolvedChainIDToTest;
-    }
-    catch (error) {
-        console.log('🚀 ~ file: 494 ~ init ~ resolvedChainID error', error);
-        throw new Error('Could not resolve chain id');
-    }
+    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
     // 2
-    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, 
+    Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
-        // ppNodeUrl: 'http://34.145.36.237',
-        // ppNodePort: '8135',
-        // ppNodeUrl: 'http://35.233.85.255',
-        // ppNodePort: '8142',
-        // mesos - we connect to mesos pp
-        ppNodeUrl: 'http://34.78.29.120', ppNodePort: '8142' }));
-    console.log('sdkEnv', Sdk_1.default.environment);
-    // tropos
-    // ppNodeUrl: 'http://35.233.251.112',
-    //     ppNodePort: '8159',
+        ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
+    // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
     const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
@@ -892,7 +897,8 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    const filename = 'file10M_Aug24_1';
+    // const filename = 'file1G_Jan_9_v1';
+    const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
@@ -913,8 +919,12 @@ const main = async () => {
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await getAccountTrasactions();
-    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
+    // await getAccountTransactions(0, mainnetDev);
+    // const faucetMnemonic =''
+    //
+    // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // 2 Add funds via faucet
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
@@ -928,12 +938,12 @@ const main = async () => {
     // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
     // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
     // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
-    const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
-    const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
-    const redelegateAmount = 5;
+    // const validatorSrcAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
+    // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
+    // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-    // const hdPathIndexReceiver = 1;
-    // await mainSend(hdPathIndex, receiverMnemonic, hdPathIndexReceiver);
+    const hdPathIndexReceiver = 1;
+    // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
     // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
     // 33 sec, 1m 1sec
@@ -942,7 +952,10 @@ const main = async () => {
     // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-    // await getTxHistory();
+    // await getTxHistory(zeroUserMnemonic, 0);
+    // await getTxHistory(mainnetDev, 0);
+    // await tmpTest(0, zeroUserMnemonic);
+    // await tmpTest(0, mainnetDev);
 };
 main();
 //# sourceMappingURL=run.js.map

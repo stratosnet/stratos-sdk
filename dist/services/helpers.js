@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
+exports.getNewProtocolFlag = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
 const now = () => new Date().toLocaleString();
 exports.now = now;
 // NOTE - did log for console output -
@@ -34,4 +34,15 @@ function getCurrentTimestamp() {
     return Date.now();
 }
 exports.getCurrentTimestamp = getCurrentTimestamp;
+const getNewProtocolFlag = (currentVersion, minRequiredNewVersion) => {
+    console.log('current protocol version ', currentVersion);
+    const [pVer, pSubVer, pPatch] = currentVersion.split('.');
+    const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
+    const isVerOld = +pVer < +minVer;
+    const isSubVerOld = +pSubVer < +minSubVer;
+    const isPatchOld = +pPatch < +minPatch;
+    const isOldProtocol = isVerOld && isSubVerOld && isPatchOld;
+    return !isOldProtocol;
+};
+exports.getNewProtocolFlag = getNewProtocolFlag;
 //# sourceMappingURL=helpers.js.map

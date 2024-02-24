@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { exit } from 'process';
 import * as accounts from '../../accounts';
+import { options } from '../../config';
 import { mnemonic, wallet } from '../../hdVault';
 import { createMasterKeySeed } from '../../hdVault/keyManager';
 import Sdk from '../../Sdk';
@@ -167,6 +168,8 @@ log('faucet mnemonic from the config', faucetMnemonic);
 log('sdkEnv from the config', sdkEnvTest);
 
 let GLOBAL_CHAIN_ID = '';
+let GLOBAL_CHAIN_VERSION = '';
+let GLOBAL_IS_NEW_PROTOCOL = false;
 
 const sdkEnvDev = sdkEnvTest;
 
@@ -182,19 +185,12 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
   Sdk.init({ ...sdkEnv });
 
   if (!GLOBAL_CHAIN_ID) {
-    try {
-      const resolvedChainIDToTest = await Network.getChainId();
+    const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
+      await Network.getChainAndProtocolDetails();
 
-      if (!resolvedChainIDToTest) {
-        throw new Error('Chain id is empty. Exiting');
-      }
-
-      log('main - resolvedChainIDToTest', resolvedChainIDToTest);
-      GLOBAL_CHAIN_ID = resolvedChainIDToTest;
-    } catch (error) {
-      log('main - resolvedChainID error', error);
-      throw new Error('Could not resolve chain id');
-    }
+    GLOBAL_CHAIN_ID = resolvedChainID;
+    GLOBAL_CHAIN_VERSION = resolvedChainVersion;
+    GLOBAL_IS_NEW_PROTOCOL = isNewProtocol;
   }
 
   const ppNodeAndPortToUse = buildPpNodeUrl(ppNodeAndPort);
@@ -205,6 +201,8 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
   Sdk.init({
     ...sdkEnv,
     chainId: GLOBAL_CHAIN_ID,
+    nodeProtocolVersion: GLOBAL_CHAIN_VERSION,
+    isNewProtocol: GLOBAL_IS_NEW_PROTOCOL,
     ppNodeUrl: ppUrl,
     ppNodePort: ppPort,
   });

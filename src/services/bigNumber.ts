@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { tokens } from '../config';
 
 export type BigNumberValue = BigNumber.Value;
+export type BigNumberType = BigNumber;
 
 export const ROUND_UP = BigNumber.ROUND_UP;
 export const ROUND_DOWN = BigNumber.ROUND_DOWN;

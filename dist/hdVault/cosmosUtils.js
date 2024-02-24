@@ -4,12 +4,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deserializeWithEncryptionKey = exports.serializeWithEncryptionKey = void 0;
-const crypto_1 = require("@cosmjs/crypto");
+const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
+// import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 // import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 const utils_1 = require("@cosmjs/utils");
 const StratosDirectSecp256k1HdWallet_1 = __importDefault(require("../hdVault/StratosDirectSecp256k1HdWallet"));
 const cosmosWallet_1 = require("./cosmosWallet");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const crypto_1 = require('@cosmjs/crypto');
+/**
+ * Derivation information required to derive a keypair and an address from a mnemonic.
+ */
+// interface Secp256k1Derivation {
+//   readonly hdPath: HdPath;
+//   readonly prefix: string;
+// }
 // const serializationTypeV1 = 'directsecp256k1hdwallet-v1';
 const serializeWithEncryptionKey = (password, wallet) => {
     // const walletAccounts = wallet['accounts'] as Secp256k1Derivation[];
@@ -17,7 +27,7 @@ const serializeWithEncryptionKey = (password, wallet) => {
     const dataToEncrypt = {
         mnemonic: wallet.mnemonic,
         accounts: walletAccounts.map(({ hdPath, prefix }) => ({
-            hdPath: (0, crypto_1.pathToString)(hdPath),
+            hdPath: (0, crypto_2.pathToString)(hdPath),
             prefix: prefix,
         })),
     };
@@ -57,10 +67,16 @@ const deserializeWithEncryptionKey = async (password, serialization) => {
     if (!accounts.every(({ prefix }) => prefix === firstPrefix)) {
         throw new Error('Accounts do not all have the same prefix');
     }
-    const hdPaths = accounts.map(({ hdPath }) => (0, crypto_1.stringToPath)(hdPath));
+    const hdPaths = accounts.map(({ hdPath }) => (0, crypto_2.stringToPath)(hdPath));
+    // const options = {
+    //   hdPaths: hdPaths,
+    //   prefix: firstPrefix,
+    // };
+    // const options: DirectSecp256k1HdWalletOptions = {
     const options = {
-        hdPaths: hdPaths,
+        // bip39Password: '',
         prefix: firstPrefix,
+        hdPaths,
     };
     // console.log('cosmosUtils - options to use ', options);
     return StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);

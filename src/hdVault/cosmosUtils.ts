@@ -1,9 +1,15 @@
-import { HdPath, pathToString, stringToPath } from '@cosmjs/crypto';
+import { pathToString, stringToPath } from '@cosmjs/crypto';
 import { fromUtf8, toUtf8 } from '@cosmjs/encoding';
+// import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 // import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { assert, isNonNullObject } from '@cosmjs/utils';
-import StratosDirectSecp256k1HdWallet from '../hdVault/StratosDirectSecp256k1HdWallet';
+import StratosDirectSecp256k1HdWallet, {
+  Secp256k1Derivation,
+} from '../hdVault/StratosDirectSecp256k1HdWallet';
 import { decrypt, encrypt } from './cosmosWallet';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const crypto_1 = require('@cosmjs/crypto');
 
 /**
  * Derivation information required to derive a keypair and an address from a mnemonic.
@@ -26,10 +32,10 @@ interface DirectSecp256k1HdWalletData {
 /**
  * Derivation information required to derive a keypair and an address from a mnemonic.
  */
-interface Secp256k1Derivation {
-  readonly hdPath: HdPath;
-  readonly prefix: string;
-}
+// interface Secp256k1Derivation {
+//   readonly hdPath: HdPath;
+//   readonly prefix: string;
+// }
 // const serializationTypeV1 = 'directsecp256k1hdwallet-v1';
 
 export const serializeWithEncryptionKey = (
@@ -84,11 +90,20 @@ export const deserializeWithEncryptionKey = async (
   if (!accounts.every(({ prefix }) => prefix === firstPrefix)) {
     throw new Error('Accounts do not all have the same prefix');
   }
-  const hdPaths = accounts.map(({ hdPath }) => stringToPath(hdPath));
+  const hdPaths: typeof crypto_1.HdPath = (accounts as Secp256k1Derivation[]).map(({ hdPath }) =>
+    stringToPath(hdPath),
+  );
 
+  // const options = {
+  //   hdPaths: hdPaths,
+  //   prefix: firstPrefix,
+  // };
+
+  // const options: DirectSecp256k1HdWalletOptions = {
   const options = {
-    hdPaths: hdPaths,
+    // bip39Password: '',
     prefix: firstPrefix,
+    hdPaths,
   };
   // console.log('cosmosUtils - options to use ', options);
 

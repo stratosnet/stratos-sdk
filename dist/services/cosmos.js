@@ -4,15 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCosmos = exports.resetCosmos = exports.StratosCosmos = void 0;
-const proto_signing_1 = require("@cosmjs/proto-signing");
+const proto_signing_2 = require("@cosmjs/proto-signing");
 const StratosSigningStargateClient_1 = require("../hdVault/StratosSigningStargateClient");
 const StratosStargateAccounts_1 = require("../hdVault/StratosStargateAccounts");
 const wallet_1 = require("../hdVault/wallet");
 const Sdk_1 = __importDefault(require("../Sdk"));
 const stratosRegistry_1 = require("../transactions/stratosRegistry");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const proto_signing_1 = require('@cosmjs/proto-signing');
 const getCosmosClient = async (rpcEndpoint, deserializedWallet) => {
     const clientRegistryTypes = (0, stratosRegistry_1.getStratosTransactionRegistryTypes)();
-    const clientRegistry = new proto_signing_1.Registry(clientRegistryTypes);
+    const clientRegistry = new proto_signing_2.Registry(clientRegistryTypes);
     const options = {
         registry: clientRegistry,
         // in order to be able to decode `ethSecp256k1` pubkey

@@ -22,8 +22,14 @@ import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import createKeccakHash from 'keccak';
 import { stratosAddressPrefix } from '../config/hdVault';
 
-interface Secp256k1Derivation {
-  readonly hdPath: HdPath;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const crypto_1 = require('@cosmjs/crypto');
+
+/**
+ * Derivation information required to derive a keypair and an address from a mnemonic.
+ */
+export interface Secp256k1Derivation {
+  readonly hdPath: typeof crypto_1.HdPath;
   readonly prefix: string;
 }
 
@@ -58,7 +64,12 @@ interface AccountDataWithPrivkey extends AccountData {
   readonly privkey: Uint8Array;
 }
 
-export function makeStratosHubPath(a: number): HdPath {
+/**
+ * const keyPath =                            "m/44'/606'/0'/0/1";
+ * The Cosmos Hub derivation path in the form `m/44'/118'/0'/0/a`
+ * with 0-based account index `a`.
+ */
+export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
   return [
     Slip10RawIndex.hardened(44),
     Slip10RawIndex.hardened(606),
@@ -127,17 +138,23 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     });
   }
 
-  protected constructor(mnemonic: EnglishMnemonic, options: DirectSecp256k1HdWalletConstructorOptions) {
+  protected constructor(
+    mnemonic: typeof crypto_1.EnglishMnemonic,
+    options: DirectSecp256k1HdWalletConstructorOptions,
+  ) {
     const prefix = options.prefix ?? defaultOptions.prefix;
     const hdPaths = options.hdPaths ?? defaultOptions.hdPaths;
     super(mnemonic, options);
 
     this.mySecret = mnemonic;
     this.mySeed = options.seed;
-    this.myAccounts = hdPaths.map(hdPath => ({
+
+    const a = hdPaths.map(hdPath => ({
       hdPath: hdPath,
       prefix: prefix,
     }));
+
+    this.myAccounts = a;
   }
 
   public get mnemonic(): string {
