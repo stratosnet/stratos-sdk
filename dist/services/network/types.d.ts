@@ -531,7 +531,7 @@ export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {
 }
 export interface RestSdsPrepayTxBodyMessage extends RestTxBodyMessage {
     sender: string;
-    coins: Amount[];
+    amount: Amount[];
 }
 export interface RestSendTx extends RestTx {
     body: RestSendTxBody;
@@ -639,7 +639,7 @@ export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
     };
 }
 export type TxHistoryUserTypes = typeof TxHistoryUser;
-export type TxHistoryUserType = typeof TxHistoryUser[keyof TxHistoryUserTypes];
+export type TxHistoryUserType = (typeof TxHistoryUser)[keyof TxHistoryUserTypes];
 export declare const TxHistoryUser: {
     readonly TxHistorySenderUser: 1;
     readonly TxHistoryReceiverUser: 2;
