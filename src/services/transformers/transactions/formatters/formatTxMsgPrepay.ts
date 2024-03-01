@@ -40,10 +40,12 @@ export const formatTxMsgPrepay = (
     return baseTx;
   }
 
-  const { sender, coins } = txResponseItemTxBodyMessage;
+  const { sender, amount: coins } = txResponseItemTxBodyMessage;
 
   const amounts = formatTxMultipleAmounts(coins);
   const toAddress = findPrepayReciever(txResponseItemLogEntry);
+
+  console.log('prepay amounts', amounts);
 
   return {
     ...baseTx,

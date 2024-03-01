@@ -554,7 +554,9 @@ const getTxHistory = async (userMnemonic, hdPathIndex) => {
     const zeroAddress = firstAccount.address;
     const pageNumber = 1;
     const pageLimit = 100;
-    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, NetworkTypes.TxHistoryUser.TxHistoryReceiverUser);
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, pageNumber, pageLimit, 
+    // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
+    NetworkTypes.TxHistoryUser.TxHistorySenderUser);
     console.log('hist result!! !', result);
     return true;
 };
@@ -874,8 +876,8 @@ const tmpTest = async (hdPathIndex, givenMnemonic) => {
     console.log('network result d.response', d.response);
 };
 const main = async () => {
-    const sdkEnv = sdkEnvDev;
-    // const sdkEnv = sdkEnvTest;
+    // const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
@@ -919,7 +921,7 @@ const main = async () => {
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
     // const faucetMnemonic =''
@@ -952,7 +954,7 @@ const main = async () => {
     // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-    // await getTxHistory(zeroUserMnemonic, 0);
+    await getTxHistory(zeroUserMnemonic, 0);
     // await getTxHistory(mainnetDev, 0);
     // await tmpTest(0, zeroUserMnemonic);
     // await tmpTest(0, mainnetDev);
