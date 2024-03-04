@@ -690,11 +690,11 @@ const getTxHistory = async (userMnemonic: string, hdPathIndex: number) => {
 
   const result = await accounts.getAccountTrasactions(
     zeroAddress,
-    transactionTypes.HistoryTxType.All,
+    transactionTypes.HistoryTxType.SdsPrepay,
     pageNumber,
     pageLimit,
-    NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
-    // NetworkTypes.TxHistoryUser.TxHistorySenderUser,
+    // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
+    NetworkTypes.TxHistoryUser.TxHistorySenderUser,
   );
 
   console.log('hist result!! !', result);
@@ -1196,9 +1196,9 @@ const tmpTest = async (hdPathIndex: number, givenMnemonic: string) => {
 };
 
 const main = async () => {
-  const sdkEnv = sdkEnvDev;
+  // const sdkEnv = sdkEnvDev;
 
-  // const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvTest;
 
   // const sdkEnv = sdkEnvMainNet;
 
@@ -1278,7 +1278,7 @@ const main = async () => {
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
   // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);
@@ -1309,7 +1309,7 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  const hdPathIndexReceiver = 1;
+  const hdPathIndexReceiver = 0;
 
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
@@ -1323,7 +1323,7 @@ const main = async () => {
 
   // const randomPrefix = Date.now() + '';
   // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-  // await getTxHistory(zeroUserMnemonic, 0);
+  await getTxHistory(zeroUserMnemonic, 0);
   // await getTxHistory(mainnetDev, 0);
   // await tmpTest(0, zeroUserMnemonic);
   // await tmpTest(0, mainnetDev);
