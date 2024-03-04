@@ -1309,7 +1309,7 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  const hdPathIndexReceiver = 1;
+  const hdPathIndexReceiver = 0;
 
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
