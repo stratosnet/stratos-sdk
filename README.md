@@ -27,7 +27,7 @@ $ yarn install
 
 ### Start the development environment
 
-NOTE: Before using the development sandbox (details are below), you need to copy the `env.sandbox` file into `.env` file and update `ZERO_MNEMONIC` with a mnemonic phrase that you would like to use.
+NOTE: Before using the development sandbox (details are below), you need to copy the `env.sandbox` file into the `.env` file and update `ZERO_MNEMONIC` with a mnemonic phrase that you would like to use.
 
 For the purpose of developing new features, testing the changes, as well as the TS compilation, project has a **sandbox** file, which you can modify and save, and after that the source code would be re-compiled and executed.
 
@@ -40,6 +40,10 @@ $ yarn start
 ```
 
 Then, modify `src/run.ts` file, and save it, so the code would be re-compiled, executed and re-rendered in the output.
+
+### Documentation
+
+SDK comes with two directories containing Documentation. Those are `docs` and `docs-html`. You can always generate the latest docs by running either `yarn doc` (which would create docs in `md` format), or `yarn doc-html` (which would create html pages with the documentation).
 
 ### Testing
 
