@@ -35,6 +35,7 @@
     "jest-coverage": "yarn run jest -- --coverage",
     "doc-html": "typedoc --out docs-html src",
     "doc": "typedoc --plugin typedoc-plugin-markdown --out docs src",
+    "doc-all": "yarn doc && yarn doc-html",
     "update-proto": "yarn upgrade @stratos-network/stratos-cosmosjs-types",
     "start:once": " yarn cli:build; yarn start:run:once",
     "start:run:once": " node --trace-warnings dist/run.js ",

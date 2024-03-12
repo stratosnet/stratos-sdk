@@ -6,6 +6,7 @@
 
 ### Namespaces
 
+- [RemoteFilesystem](modules/RemoteFilesystem.md)
 - [Sdk](modules/Sdk.md)
 - [Transformers](modules/Transformers.md)
 - [accountTypes](modules/accountTypes.md)
