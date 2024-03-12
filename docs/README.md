@@ -1,3 +1,5 @@
+Stratos SDK / [Exports](modules.md)
+
 # Stratos JavaScript SDK
 
 ## Technology Stack
