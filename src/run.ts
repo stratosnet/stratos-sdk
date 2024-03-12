@@ -1231,11 +1231,11 @@ const main = async () => {
   const hdPathIndex = 0;
 
   const testMnemonic =
-    'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    'speed script velvet draft assault observe invest bracket sick item car switch fruit very rigid only about matrix gorilla local uphold kid morning face';
 
   // here is that mnemonic
-  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  // const phrase = mnemonic.convertStringToArray(testMnemonic);
+  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  const phrase = mnemonic.convertStringToArray(testMnemonic);
 
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
 
@@ -1250,7 +1250,7 @@ const main = async () => {
   // const filename = 'text_test.txt';
   // const filename = 'file1G_Jan_9_v1';
 
-  const mainnetDev = '';
+  // const mainnetDev = '';
   // await testItFileUp(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
@@ -1278,7 +1278,7 @@ const main = async () => {
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
   // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);
@@ -1297,9 +1297,10 @@ const main = async () => {
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
 
-  // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-  // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   // const receiverMnemonic = zeroUserMnemonic;
+  console.log('receiverMnemonic', receiverMnemonic);
 
   // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
   // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
@@ -1309,7 +1310,7 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  const hdPathIndexReceiver = 0;
+  // const hdPathIndexReceiver = 0;
 
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
@@ -1323,7 +1324,7 @@ const main = async () => {
 
   // const randomPrefix = Date.now() + '';
   // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-  await getTxHistory(zeroUserMnemonic, 0);
+  // await getTxHistory(zeroUserMnemonic, 0);
   // await getTxHistory(mainnetDev, 0);
   // await tmpTest(0, zeroUserMnemonic);
   // await tmpTest(0, mainnetDev);

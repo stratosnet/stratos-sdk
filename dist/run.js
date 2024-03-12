@@ -888,10 +888,10 @@ const main = async () => {
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
-    const testMnemonic = 'gossip magic please parade album ceiling cereal jealous common chimney cushion bounce bridge saddle elegant laptop across exhaust wasp garlic high flash near dad';
+    const testMnemonic = 'speed script velvet draft assault observe invest bracket sick item car switch fruit very rigid only about matrix gorilla local uphold kid morning face';
     // here is that mnemonic
-    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
-    // const phrase = mnemonic.convertStringToArray(testMnemonic);
+    // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
@@ -900,7 +900,7 @@ const main = async () => {
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
     // const filename = 'file1G_Jan_9_v1';
-    const mainnetDev = '';
+    // const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
@@ -921,7 +921,7 @@ const main = async () => {
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
     // const faucetMnemonic =''
@@ -934,9 +934,10 @@ const main = async () => {
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
-    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+    const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     // const receiverMnemonic = zeroUserMnemonic;
+    console.log('receiverMnemonic', receiverMnemonic);
     // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
     // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
     // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
@@ -944,7 +945,7 @@ const main = async () => {
     // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
     // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-    const hdPathIndexReceiver = 0;
+    // const hdPathIndexReceiver = 0;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
     // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
@@ -954,7 +955,7 @@ const main = async () => {
     // testReadAndWriteLocalMultipleIo(filename);
     // const randomPrefix = Date.now() + '';
     // const rr = await integration.uploadFileToRemote(filename, randomPrefix, 0, zeroUserMnemonic);
-    await getTxHistory(zeroUserMnemonic, 0);
+    // await getTxHistory(zeroUserMnemonic, 0);
     // await getTxHistory(mainnetDev, 0);
     // await tmpTest(0, zeroUserMnemonic);
     // await tmpTest(0, mainnetDev);
