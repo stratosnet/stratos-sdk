@@ -192,7 +192,7 @@ const mainSend = async (
 
   const fromAddress = keyPairZero.address;
 
-  const sendAmount = 0.04;
+  const sendAmount = 0.18;
 
   const sendTxMessages = await transactions.getSendTx(fromAddress, [
     { amount: sendAmount, toAddress: keyPairOne.address },
@@ -205,26 +205,27 @@ const mainSend = async (
   // dirLog('signedTx run', signedTx);
 
   // Tx with sibstituted message
-  const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
+  // const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
   // dirLog('decodedToTest', decodedToTest);
 
   // Tx with substituted as a string
-  const decodedInString = JSON.stringify(decodedToTest, null, 2);
+  // const decodedInString = JSON.stringify(decodedToTest, null, 2);
   // Tx with substituted as a string parsed back to decodedToTest
-  const decodeReAssembled = JSON.parse(decodedInString);
+  // const decodeReAssembled = JSON.parse(decodedInString);
 
   // Pure Tx (so value , signature and auth are bytes)
-  const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
+  // const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
   // const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
 
   // dirLog('encodedToTest', encodedToTest);
 
-  const assembled = transactions.assembleTxRawFromTx(encodedToTest);
+  // const assembled = transactions.assembleTxRawFromTx(encodedToTest);
 
-  // if (signedTx) {
-  if (assembled) {
+  if (signedTx) {
+    // if (assembled) {
     try {
-      const _result = await transactions.broadcast(assembled);
+      // const _result = await transactions.broadcast(assembled);
+      const _result = await transactions.broadcast(signedTx);
       console.log('broadcasting result!', _result);
     } catch (error) {
       const err: Error = error as Error;
@@ -690,7 +691,7 @@ const getTxHistory = async (userMnemonic: string, hdPathIndex: number) => {
 
   const result = await accounts.getAccountTrasactions(
     zeroAddress,
-    transactionTypes.HistoryTxType.SdsPrepay,
+    transactionTypes.HistoryTxType.All,
     pageNumber,
     pageLimit,
     // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
@@ -1196,9 +1197,9 @@ const tmpTest = async (hdPathIndex: number, givenMnemonic: string) => {
 };
 
 const main = async () => {
-  // const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvDev;
 
-  const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvTest;
 
   // const sdkEnv = sdkEnvMainNet;
 
@@ -1234,8 +1235,8 @@ const main = async () => {
     'speed script velvet draft assault observe invest bracket sick item car switch fruit very rigid only about matrix gorilla local uphold kid morning face';
 
   // here is that mnemonic
-  // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-  const phrase = mnemonic.convertStringToArray(testMnemonic);
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+  // const phrase = mnemonic.convertStringToArray(testMnemonic);
 
   const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
 
@@ -1277,8 +1278,8 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
   // await getAccountTransactions(0, mainnetDev);
@@ -1297,10 +1298,10 @@ const main = async () => {
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
 
-  const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
-  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+  // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
   // const receiverMnemonic = zeroUserMnemonic;
-  console.log('receiverMnemonic', receiverMnemonic);
+  // console.log('receiverMnemonic', receiverMnemonic);
 
   // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
   // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
@@ -1310,10 +1311,11 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  // const hdPathIndexReceiver = 0;
+  // const hdPathIndexReceiver = 1;
 
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
+  // await getBalanceCardMetrics(hdPathIndexReceiver, zeroUserMnemonic);
   // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
   // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
 
