@@ -900,7 +900,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    // const filename = 'file1G_Jan_9_v1';
+    // const filename = 'file200M_March_13_v1';
     // const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);

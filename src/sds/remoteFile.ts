@@ -481,7 +481,6 @@ export const updloadFile = async (
         },
       ];
 
-      log('will call upload (start)');
       const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
       log('call result upload (end)', JSON.stringify(callResultUpload));
 
