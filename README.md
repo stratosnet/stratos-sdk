@@ -4,25 +4,6 @@
 
 TypeScript, axios, jest, webpack5, @cosmjs/crypto, bip39, crypto
 
-## Prerequisites
-
-### Packages to be installed on a global level
-
-1. Install [Node.js](https://nodejs.org/en/download/) (version >= v12.18.1 );
-2. Install **yarn** package management tool globally;
-
-```bash
-$ npm install -g yarn
-```
-
-### Project dependencies installation
-
-In the project directory, execute the following command:
-
-```bash
-$ yarn install
-```
-
 ## Getting Started
 
 ### Add Stratos SDK to your project
@@ -80,7 +61,6 @@ This is usually done at a very beginning of your application load. For example i
 ```ts
 // AppStore.ts
 
-import * as stratosSdk from '@stratos-network/stratos-sdk.js';
 import { Sdk } from '@stratos-network/stratos-sdk.js';
 
 const networkInfo = {
@@ -123,7 +103,6 @@ To be able to sign a transaction, or to send it, you need to initialize the cosm
 
 ```ts
 // yourLoginComponent.ts
-import { networkService, Sdk } from '@stratos-network/stratos-sdk.js';
 import * as stratosSdk from '@stratos-network/stratos-sdk.js';
 
 const main = async () => {
@@ -214,6 +193,25 @@ main();
 ```
 
 You can find a lot more examples in the `src/run.ts` file. More about it in the next section, where you can learn how to develop in the SDK and how to run its code directly, without importing it in your application.
+
+## Prerequisites for the Development
+
+### Packages to be installed on a global level
+
+1. Install [Node.js](https://nodejs.org/en/download/) (version >= v12.18.1 );
+2. Install **yarn** package management tool globally;
+
+```bash
+$ npm install -g yarn
+```
+
+### Project dependencies installation
+
+In the project directory, execute the following command:
+
+```bash
+$ yarn install
+```
 
 ## Development
 
