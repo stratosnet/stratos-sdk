@@ -322,7 +322,6 @@ const updloadFile = async (keypair, fileReadPath) => {
                     data: encodedFileChunk,
                 },
             ];
-            (0, helpers_1.log)('will call upload (start)');
             const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
             (0, helpers_1.log)('call result upload (end)', JSON.stringify(callResultUpload));
             const { response: responseUpload } = callResultUpload;

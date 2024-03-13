@@ -176,7 +176,7 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
     const keyPairOne = await createKeypairFromMnemonic(receiverPhrase, hdPathIndexReceiver);
     // const keyPairTwo = await createKeypairFromMnemonic(receiverPhrase, 2);
     const fromAddress = keyPairZero.address;
-    const sendAmount = 0.04;
+    const sendAmount = 0.18;
     const sendTxMessages = await transactions.getSendTx(fromAddress, [
         { amount: sendAmount, toAddress: keyPairOne.address },
         // { amount: sendAmount + 1, toAddress: keyPairTwo.address },
@@ -186,21 +186,22 @@ const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, h
     const signedTx = await transactions.sign(fromAddress, sendTxMessages);
     // dirLog('signedTx run', signedTx);
     // Tx with sibstituted message
-    const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
+    // const decodedToTest = await transactions.decodeTxRawToTxHr(signedTx);
     // dirLog('decodedToTest', decodedToTest);
     // Tx with substituted as a string
-    const decodedInString = JSON.stringify(decodedToTest, null, 2);
+    // const decodedInString = JSON.stringify(decodedToTest, null, 2);
     // Tx with substituted as a string parsed back to decodedToTest
-    const decodeReAssembled = JSON.parse(decodedInString);
+    // const decodeReAssembled = JSON.parse(decodedInString);
     // Pure Tx (so value , signature and auth are bytes)
-    const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
+    // const encodedToTest = await transactions.encodeTxHrToTx(decodeReAssembled);
     // const encodedToTest = await transactions.encodeTxHrToTx(decodedToTest);
     // dirLog('encodedToTest', encodedToTest);
-    const assembled = transactions.assembleTxRawFromTx(encodedToTest);
-    // if (signedTx) {
-    if (assembled) {
+    // const assembled = transactions.assembleTxRawFromTx(encodedToTest);
+    if (signedTx) {
+        // if (assembled) {
         try {
-            const _result = await transactions.broadcast(assembled);
+            // const _result = await transactions.broadcast(assembled);
+            const _result = await transactions.broadcast(signedTx);
             console.log('broadcasting result!', _result);
         }
         catch (error) {
@@ -554,7 +555,7 @@ const getTxHistory = async (userMnemonic, hdPathIndex) => {
     const zeroAddress = firstAccount.address;
     const pageNumber = 1;
     const pageLimit = 100;
-    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.SdsPrepay, pageNumber, pageLimit, 
+    const result = await accounts.getAccountTrasactions(zeroAddress, transactionTypes.HistoryTxType.All, pageNumber, pageLimit, 
     // NetworkTypes.TxHistoryUser.TxHistoryReceiverUser,
     NetworkTypes.TxHistoryUser.TxHistorySenderUser);
     console.log('hist result!! !', result);
@@ -876,8 +877,8 @@ const tmpTest = async (hdPathIndex, givenMnemonic) => {
     console.log('network result d.response', d.response);
 };
 const main = async () => {
-    // const sdkEnv = sdkEnvDev;
-    const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
+    // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
@@ -890,8 +891,8 @@ const main = async () => {
     const hdPathIndex = 0;
     const testMnemonic = 'speed script velvet draft assault observe invest bracket sick item car switch fruit very rigid only about matrix gorilla local uphold kid morning face';
     // here is that mnemonic
-    // const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
-    const phrase = hdVault_1.mnemonic.convertStringToArray(testMnemonic);
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    // const phrase = mnemonic.convertStringToArray(testMnemonic);
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
     const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
@@ -899,7 +900,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    // const filename = 'file1G_Jan_9_v1';
+    // const filename = 'file200M_March_13_v1';
     // const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
@@ -920,8 +921,8 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    await getBalanceCardMetrics(hdPathIndex, testMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
     // const faucetMnemonic =''
@@ -934,10 +935,10 @@ const main = async () => {
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
-    const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
-    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
+    // const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
     // const receiverMnemonic = zeroUserMnemonic;
-    console.log('receiverMnemonic', receiverMnemonic);
+    // console.log('receiverMnemonic', receiverMnemonic);
     // stvaloper1ql2uj69zf8xvrtfyj6pzehh8xhd2dt8enefsep: '21.9600 STOS',
     // stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp: '2,097.6794 STOS',
     // stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh: '1,024.0000 STOS'
@@ -945,8 +946,9 @@ const main = async () => {
     // const validatorDstAddress = 'stvaloper1zy9qal508nvc9h0xqmyz500mkuxhteu7wn4sgp';
     // const redelegateAmount = 5;
     // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-    // const hdPathIndexReceiver = 0;
+    // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+    // await getBalanceCardMetrics(hdPathIndexReceiver, zeroUserMnemonic);
     // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';
     // await mainDelegate(hdPathIndex, zeroUserMnemonic, vAddress, 1000);
     // 33 sec, 1m 1sec
