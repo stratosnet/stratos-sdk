@@ -414,6 +414,8 @@ export interface FileUserRequestUploadResponse extends MainRpcResponse {
 export interface FileUserUploadDataParams {
     filehash: string;
     data: string;
+    signature: UserFileSignature;
+    req_time: number;
 }
 export interface FileUserUploadDataResponse extends MainRpcResponse {
     result: {
