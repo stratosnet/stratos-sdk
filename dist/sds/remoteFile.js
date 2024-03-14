@@ -315,11 +315,20 @@ const updloadFile = async (keypair, fileReadPath) => {
             readSize = readSize + fileChunk.length;
             completedProgress = (100 * readSize) / fileSize;
             (0, helpers_1.log)(`from run.ts - completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
+            const timestampForUpload = (0, helpers_1.getTimestampInSeconds)();
+            const messageToSignForUpload = `${fileInfo.filehash}${address}${sequence}${timestampForUpload}`;
+            const signatureForUpload = await keyUtils.signWithPrivateKey(messageToSignForUpload, keypair.privateKey);
             // upload
             const extraParamsForUpload = [
                 {
                     filehash: fileInfo.filehash,
                     data: encodedFileChunk,
+                    signature: {
+                        address,
+                        pubkey: publicKey,
+                        signature: signatureForUpload,
+                    },
+                    req_time: timestampForUpload,
                 },
             ];
             const callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);

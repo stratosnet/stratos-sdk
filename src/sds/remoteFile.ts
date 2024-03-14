@@ -473,11 +473,25 @@ export const updloadFile = async (
         ).toFixed(2)}%`,
       );
 
+      const timestampForUpload = getTimestampInSeconds();
+      const messageToSignForUpload = `${fileInfo.filehash}${address}${sequence}${timestampForUpload}`;
+
+      const signatureForUpload = await keyUtils.signWithPrivateKey(
+        messageToSignForUpload,
+        keypair.privateKey,
+      );
+
       // upload
       const extraParamsForUpload = [
         {
           filehash: fileInfo.filehash,
           data: encodedFileChunk,
+          signature: {
+            address,
+            pubkey: publicKey,
+            signature: signatureForUpload,
+          },
+          req_time: timestampForUpload,
         },
       ];
 
