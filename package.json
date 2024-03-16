@@ -1,6 +1,6 @@
 {
   "name": "@stratos-network/stratos-sdk.js",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "The JavaScript SDK for Stratos Network",
   "license": "ISC",
   "author": "Stratos Network",
