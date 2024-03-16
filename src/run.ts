@@ -1215,7 +1215,9 @@ const main = async () => {
     isNewProtocol,
     // devnet
     ppNodeUrl: 'http://35.187.47.46',
-    ppNodePort: '8142',
+    // ppNodePort: '8142',
+    // ppNodePort: '8146',
+    ppNodePort: '8150',
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
@@ -1249,7 +1251,7 @@ const main = async () => {
 
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'text_test.txt';
-  // const filename = 'file200M_March_13_v1';
+  const filename = 'file600M_March_14_v6';
 
   // const mainnetDev = '';
   // await testItFileUp(filename, hdPathIndex);
@@ -1293,7 +1295,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);

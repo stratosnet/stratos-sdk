@@ -885,7 +885,10 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
-        ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
+        ppNodeUrl: 'http://35.187.47.46', 
+        // ppNodePort: '8142',
+        // ppNodePort: '8146',
+        ppNodePort: '8150' }));
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
@@ -900,7 +903,7 @@ const main = async () => {
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'text_test.txt';
-    // const filename = 'file200M_March_13_v1';
+    const filename = 'file600M_March_14_v6';
     // const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
@@ -932,7 +935,7 @@ const main = async () => {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);

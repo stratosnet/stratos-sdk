@@ -406,6 +406,7 @@ export const updloadFile = async (
   log('call result init (end of init)', JSON.stringify(callResultInit));
 
   if (!responseInit) {
+    log('params for sendUserRequestUpload which we had when the error occured', extraParams);
     log('we dont have response. it might be an error', callResultInit);
     throw new Error('we dont have response. it might be an error');
   }
@@ -501,10 +502,19 @@ export const updloadFile = async (
       const { response: responseUpload } = callResultUpload;
 
       if (!responseUpload) {
+        log('params to be sent to sendUserUploadData we had when the error occured', extraParamsForUpload);
         log('we dont have upload response. it might be an error', callResultUpload);
         throw new Error('we dont have upload response. it might be an error');
       }
 
+      if (!responseUpload.id || !!responseUpload.error) {
+        log('params to be sent to sendUserUploadData we had when the error occured', extraParamsForUpload);
+        log(
+          'we dont have upload response id or response has an error. it might be an error',
+          callResultUpload,
+        );
+        throw new Error('we dont have upload response or it has an error. it might be an error');
+      }
       const {
         result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload },
       } = responseUpload;

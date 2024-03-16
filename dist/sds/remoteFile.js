@@ -274,6 +274,7 @@ const updloadFile = async (keypair, fileReadPath) => {
     const { response: responseInit } = callResultInit;
     (0, helpers_1.log)('call result init (end of init)', JSON.stringify(callResultInit));
     if (!responseInit) {
+        (0, helpers_1.log)('params for sendUserRequestUpload which we had when the error occured', extraParams);
         (0, helpers_1.log)('we dont have response. it might be an error', callResultInit);
         throw new Error('we dont have response. it might be an error');
     }
@@ -335,8 +336,14 @@ const updloadFile = async (keypair, fileReadPath) => {
             (0, helpers_1.log)('call result upload (end)', JSON.stringify(callResultUpload));
             const { response: responseUpload } = callResultUpload;
             if (!responseUpload) {
+                (0, helpers_1.log)('params to be sent to sendUserUploadData we had when the error occured', extraParamsForUpload);
                 (0, helpers_1.log)('we dont have upload response. it might be an error', callResultUpload);
                 throw new Error('we dont have upload response. it might be an error');
+            }
+            if (!responseUpload.id || !!responseUpload.error) {
+                (0, helpers_1.log)('params to be sent to sendUserUploadData we had when the error occured', extraParamsForUpload);
+                (0, helpers_1.log)('we dont have upload response id or response has an error. it might be an error', callResultUpload);
+                throw new Error('we dont have upload response or it has an error. it might be an error');
             }
             const { result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload }, } = responseUpload;
             uploadReturn = isContinueUpload;
