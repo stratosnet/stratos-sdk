@@ -377,6 +377,7 @@ export const updloadFile = async (
 
   const timestamp = getTimestampInSeconds();
   const messageToSign = `${fileInfo.filehash}${address}${sequence}${timestamp}`;
+  console.log('messageToSign for userRequestUpload', messageToSign);
 
   const stats = fs.statSync(fileReadPath);
   const fileSize = stats.size;
@@ -395,9 +396,11 @@ export const updloadFile = async (
         signature,
       },
       req_time: timestamp,
+      sequencenumber: sequence,
     },
   ];
 
+  console.log('extraParams', extraParams);
   // log('beginning init call');
   const callResultInit = await Network.sendUserRequestUpload(extraParams);
 
@@ -452,7 +455,8 @@ export const updloadFile = async (
     // log('!!! while start, starting getting a slice');
 
     const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-    // log('slice is retrieved');
+    log('total readBinaryFile length is  ', readBinaryFile.length);
+    log('slice is retrieved, its length is ', fileChunk.length);
 
     if (!fileChunk) {
       log('fileChunk is missing, Exiting ', fileChunk);
@@ -482,10 +486,12 @@ export const updloadFile = async (
         keypair.privateKey,
       );
 
+      console.log(' - encodedFileChunk (data) length to be sent: ', encodedFileChunk.length);
       // upload
       const extraParamsForUpload = [
         {
           filehash: fileInfo.filehash,
+          // data: encodedFileChunk.substring(0, 100),
           data: encodedFileChunk,
           signature: {
             address,
@@ -493,6 +499,7 @@ export const updloadFile = async (
             signature: signatureForUpload,
           },
           req_time: timestampForUpload,
+          sequencenumber: sequence,
         },
       ];
 
