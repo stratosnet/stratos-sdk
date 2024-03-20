@@ -1260,10 +1260,11 @@ const main = async () => {
 
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'text_test.txt';
-  const filename = 'file600M_March_14_v6';
+  // const filename = 'file200M_March_20_v1';
+  const filename = 'file200M_March_20_v8';
 
   // const mainnetDev = '';
-  // await testItFileUp(filename, hdPathIndex);
+  await testItFileUp(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
 

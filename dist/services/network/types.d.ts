@@ -360,6 +360,7 @@ export interface FileUserRequestUploadParams {
     filehash: string;
     signature: UserFileSignature;
     req_time: number;
+    sequencenumber: string;
 }
 export interface FileUserRequestDownloadParams {
     filehandle: string;
