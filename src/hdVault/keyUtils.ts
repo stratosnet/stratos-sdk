@@ -15,7 +15,7 @@ import createKeccakHash from 'keccak';
 // import { fromHexString } from 'multihashes';
 import sjcl from 'sjcl';
 import {
-  bip39Password,
+  bip39Password as bip39PasswordDefault,
   encryptionIterations,
   encryptionKeyLength,
   stratosAddressPrefix,
@@ -26,6 +26,7 @@ import StratosDirectSecp256k1HdWallet, {
   makeStratosHubPath,
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
+import Sdk from '../Sdk';
 // import { log } from '../services/helpers';
 import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
@@ -53,7 +54,10 @@ export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uin
 
   const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
 
-  const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
+  const seed = await Bip39.mnemonicToSeed(
+    mnemonicChecked,
+    bip39PasswordDefault(Sdk.environment.keyPathParameters?.bip39Password),
+  );
 
   return seed;
 };

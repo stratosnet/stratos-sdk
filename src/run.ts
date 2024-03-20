@@ -11,6 +11,7 @@ import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/ke
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
+import type { KeyPathParameters } from './Sdk';
 import * as RemoteFilesystem from './sds/remoteFile';
 import { getCosmos, resetCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
@@ -1207,6 +1208,11 @@ const main = async () => {
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
 
+  const keyPathParametersForSdk: KeyPathParameters = {
+    // slip10RawIndexes: [44, 606, 0, 0], // st
+    slip10RawIndexes: [44, 0, 0, 0], // 0x
+  };
+
   // 2
   Sdk.init({
     ...sdkEnv,
@@ -1218,6 +1224,7 @@ const main = async () => {
     // ppNodePort: '8142',
     // ppNodePort: '8146',
     ppNodePort: '8150',
+    keyPathParameters: keyPathParametersForSdk,
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
@@ -1333,7 +1340,7 @@ const main = async () => {
   // await tmpTest(0, zeroUserMnemonic);
   //
   // await tmpTest(0, mainnetDev);
-  await testAccountData();
+  // await testAccountData();
 };
 
 main();

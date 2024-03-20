@@ -1,4 +1,9 @@
-import { keyPath as keyPathDefault, maxHdPathKeyindex } from '../config/hdVault';
+import {
+  maxHdPathKeyindex,
+  keyPath as keyPathDefault,
+  slip10RawIndexes,
+  masterkey as masterkeyDefault,
+} from '../config/hdVault';
 import Sdk from '../Sdk';
 import { deserializeWithEncryptionKey } from './cosmosUtils';
 import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
@@ -37,7 +42,10 @@ export const deriveKeyPair = async (
     return Promise.reject(false);
   }
 
-  const keyPath = Sdk.environment.keyPath || keyPathDefault;
+  const keyPath =
+    Sdk.environment.keyPathParameters?.fullKeyPath ||
+    keyPathDefault(slip10RawIndexes, masterkeyDefault(Sdk.environment.keyPathParameters?.masterkey));
+
   const path = `${keyPath}${keyIndex}`;
 
   const privateKeySeed = derivePrivateKeySeed(masterKeySeed, path);

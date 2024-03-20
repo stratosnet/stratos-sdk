@@ -20,7 +20,11 @@ import {
 } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import createKeccakHash from 'keccak';
-import { stratosAddressPrefix, slip10RawIndexes } from '../config/hdVault';
+import {
+  stratosAddressPrefix,
+  slip10RawIndexes as slip10RawIndexesDefault,
+  bip39Password as bip39PasswordDefaut,
+} from '../config/hdVault';
 import Sdk from '../Sdk';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -74,10 +78,10 @@ export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
   const { keyPathParameters } = Sdk.environment;
 
   const defaultPath = [
-    Slip10RawIndex.hardened(slip10RawIndexes[0]), // 44
-    Slip10RawIndex.hardened(slip10RawIndexes[1]), // 606
-    Slip10RawIndex.hardened(slip10RawIndexes[2]), // 0
-    Slip10RawIndex.normal(slip10RawIndexes[3]), // 0
+    Slip10RawIndex.hardened(slip10RawIndexesDefault[0]), // 44
+    Slip10RawIndex.hardened(slip10RawIndexesDefault[1]), // 606
+    Slip10RawIndex.hardened(slip10RawIndexesDefault[2]), // 0
+    Slip10RawIndex.normal(slip10RawIndexesDefault[3]), // 0
     Slip10RawIndex.normal(a),
   ];
 
@@ -85,27 +89,9 @@ export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
     return defaultPath;
   }
 
+  const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
+
   try {
-    // bip44purpose = "44'/" and stratosCoinType = "606'/0'/0/";
-    // gives "44'/606'/0'/0/";
-    const fullKeyPath = `${keyPathParameters.bip44purpose}${keyPathParameters.stratosCoinType}`;
-
-    const slip10RawIndexesToUse = fullKeyPath
-      .split('/')
-      .map(el => el.replace(/'/g, '').replace(/"/g, ''))
-      .filter(Boolean)
-      .map(el => +el);
-
-    if (slip10RawIndexesToUse.length !== 4) {
-      console.log('could not parse given keyPath, wrong lenght ', fullKeyPath, slip10RawIndexesToUse);
-      return defaultPath;
-    }
-
-    if (!slip10RawIndexesToUse.every(el => el === +`${el}`)) {
-      console.log('could not parse given keyPath ', fullKeyPath, slip10RawIndexesToUse);
-      return defaultPath;
-    }
-
     console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
 
     return [
@@ -135,7 +121,7 @@ interface DirectSecp256k1HdWalletConstructorOptions extends Partial<DirectSecp25
 }
 
 export const defaultOptions: DirectSecp256k1HdWalletOptions = {
-  bip39Password: Sdk.environment.keyPathParameters?.bip39Password || '',
+  bip39Password: bip39PasswordDefaut(Sdk.environment.keyPathParameters?.bip39Password),
   hdPaths: [makeStratosHubPath(0)],
   prefix: stratosAddressPrefix,
 };
