@@ -32,3 +32,5 @@ export const kdfConfiguration: KdfConfiguration = {
 
 export const encryptionKeyLength = 32;
 export const encryptionIterations = 10000;
+
+export const maxHdPathKeyindex = 65535;

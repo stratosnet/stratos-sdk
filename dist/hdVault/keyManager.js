@@ -24,6 +24,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
+const hdVault_1 = require("../config/hdVault");
+// import { log } from '../services/helpers';
 const cosmosWallet = __importStar(require("./cosmosWallet"));
 const keyUtils = __importStar(require("./keyUtils"));
 const mnemonic_1 = require("./mnemonic");
@@ -48,6 +50,9 @@ const createMasterKeySeedFromGivenSeed = async (derivedMasterKeySeed, password) 
 exports.createMasterKeySeedFromGivenSeed = createMasterKeySeedFromGivenSeed;
 // exposed outside, used in the DesktopWallet to "create" a wallet
 const createMasterKeySeed = async (phrase, password, hdPathIndex = 0) => {
+    if (hdPathIndex > hdVault_1.maxHdPathKeyindex) {
+        throw Error(`hd path index can not be more than ${hdVault_1.maxHdPathKeyindex}`);
+    }
     // log('Generating master key seed');
     const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
     // log('Creating wallet');
