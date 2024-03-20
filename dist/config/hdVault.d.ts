@@ -14,3 +14,4 @@ export declare const keyPathPattern: string;
 export declare const kdfConfiguration: KdfConfiguration;
 export declare const encryptionKeyLength = 32;
 export declare const encryptionIterations = 10000;
+export declare const maxHdPathKeyindex = 65535;

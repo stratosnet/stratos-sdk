@@ -35,6 +35,9 @@ Object.defineProperty(exports, "stratosTopDenom", { enumerable: true, get: funct
 Object.defineProperty(exports, "stratosUozDenom", { enumerable: true, get: function () { return hdVault_2.stratosUozDenom; } });
 const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
     let masterKeySeed;
+    if (keyIndex > hdVault_1.maxHdPathKeyindex) {
+        throw Error(`hd path index can not be more than ${hdVault_1.maxHdPathKeyindex}`);
+    }
     try {
         masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
     }
