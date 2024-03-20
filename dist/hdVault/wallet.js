@@ -22,9 +22,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deserializeEncryptedWallet = exports.deriveKeyPair = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosOzDenom = exports.stratosDenom = void 0;
 const hdVault_1 = require("../config/hdVault");
+const Sdk_1 = __importDefault(require("../Sdk"));
 const cosmosUtils_1 = require("./cosmosUtils");
 const deriveManager_1 = require("./deriveManager");
 const keyUtils = __importStar(require("./keyUtils"));
@@ -44,7 +48,8 @@ const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
     catch (er) {
         return Promise.reject(false);
     }
-    const path = `${hdVault_1.keyPath}${keyIndex}`;
+    const keyPath = Sdk_1.default.environment.keyPath || hdVault_1.keyPath;
+    const path = `${keyPath}${keyIndex}`;
     const privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, path);
     const derivedKeyPair = await (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed);
     const { address, encodedPublicKey, privateKey } = derivedKeyPair;

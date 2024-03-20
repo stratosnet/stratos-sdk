@@ -20,7 +20,8 @@ import {
 } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import createKeccakHash from 'keccak';
-import { stratosAddressPrefix } from '../config/hdVault';
+import { stratosAddressPrefix, slip10RawIndexes } from '../config/hdVault';
+import Sdk from '../Sdk';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const crypto_1 = require('@cosmjs/crypto');
@@ -70,13 +71,54 @@ interface AccountDataWithPrivkey extends AccountData {
  * with 0-based account index `a`.
  */
 export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
-  return [
-    Slip10RawIndex.hardened(44),
-    Slip10RawIndex.hardened(606),
-    Slip10RawIndex.hardened(0),
-    Slip10RawIndex.normal(0),
+  const { keyPathParameters } = Sdk.environment;
+
+  const defaultPath = [
+    Slip10RawIndex.hardened(slip10RawIndexes[0]), // 44
+    Slip10RawIndex.hardened(slip10RawIndexes[1]), // 606
+    Slip10RawIndex.hardened(slip10RawIndexes[2]), // 0
+    Slip10RawIndex.normal(slip10RawIndexes[3]), // 0
     Slip10RawIndex.normal(a),
   ];
+
+  if (!keyPathParameters) {
+    return defaultPath;
+  }
+
+  try {
+    // bip44purpose = "44'/" and stratosCoinType = "606'/0'/0/";
+    // gives "44'/606'/0'/0/";
+    const fullKeyPath = `${keyPathParameters.bip44purpose}${keyPathParameters.stratosCoinType}`;
+
+    const slip10RawIndexesToUse = fullKeyPath
+      .split('/')
+      .map(el => el.replace(/'/g, '').replace(/"/g, ''))
+      .filter(Boolean)
+      .map(el => +el);
+
+    if (slip10RawIndexesToUse.length !== 4) {
+      console.log('could not parse given keyPath, wrong lenght ', fullKeyPath, slip10RawIndexesToUse);
+      return defaultPath;
+    }
+
+    if (!slip10RawIndexesToUse.every(el => el === +`${el}`)) {
+      console.log('could not parse given keyPath ', fullKeyPath, slip10RawIndexesToUse);
+      return defaultPath;
+    }
+
+    console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
+
+    return [
+      Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
+      Slip10RawIndex.hardened(slip10RawIndexesToUse[1]),
+      Slip10RawIndex.hardened(slip10RawIndexesToUse[2]),
+      Slip10RawIndex.normal(slip10RawIndexesToUse[3]),
+      Slip10RawIndex.normal(a),
+    ];
+  } catch (error) {
+    console.log('could not parse  keyPathParameters from sdk', keyPathParameters);
+    return defaultPath;
+  }
 }
 
 const basicPasswordHashingOptions: KdfConfiguration = {
@@ -92,20 +134,11 @@ interface DirectSecp256k1HdWalletConstructorOptions extends Partial<DirectSecp25
   readonly seed: Uint8Array;
 }
 
-const defaultOptions: DirectSecp256k1HdWalletOptions = {
-  bip39Password: '',
+export const defaultOptions: DirectSecp256k1HdWalletOptions = {
+  bip39Password: Sdk.environment.keyPathParameters?.bip39Password || '',
   hdPaths: [makeStratosHubPath(0)],
   prefix: stratosAddressPrefix,
 };
-
-// const isCanonicalSignature = (signature: Uint8Array) => {
-//   return (
-//     !(signature[0] & 0x80) &&
-//     !(signature[0] === 0 && !(signature[1] & 0x80)) &&
-//     !(signature[32] & 0x80) &&
-//     !(signature[32] === 0 && !(signature[33] & 0x80))
-//   );
-// };
 
 export interface Pubkey {
   readonly type: string;

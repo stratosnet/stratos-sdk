@@ -636,7 +636,7 @@ const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string)
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
-  console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+  console.log('🚀 ~ file: run.ts ~ line 639 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
     return;
@@ -1331,7 +1331,9 @@ const main = async () => {
   // await getTxHistory(zeroUserMnemonic, 0);
   // await getTxHistory(mainnetDev, 0);
   // await tmpTest(0, zeroUserMnemonic);
+  //
   // await tmpTest(0, mainnetDev);
+  await testAccountData();
 };
 
 main();

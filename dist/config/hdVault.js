@@ -1,10 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.maxHdPathKeyindex = exports.encryptionIterations = exports.encryptionKeyLength = exports.kdfConfiguration = exports.keyPathPattern = exports.keyPath = exports.stratosOzDenom = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosDenom = exports.stratosPubkeyPrefix = exports.stratosAddressPrefix = exports.stratosCoinType = exports.bip39Password = exports.bip44purpose = exports.masterkey = void 0;
-exports.masterkey = 'm/';
-exports.bip44purpose = "44'/";
+exports.maxHdPathKeyindex = exports.encryptionIterations = exports.encryptionKeyLength = exports.kdfConfiguration = exports.keyPathPattern = exports.keyPath = exports.stratosOzDenom = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosDenom = exports.stratosPubkeyPrefix = exports.stratosAddressPrefix = exports.stratosCoinType = exports.bip44purpose = exports.slip10RawIndexes = exports.masterkey = exports.bip39Password = void 0;
 exports.bip39Password = '';
-exports.stratosCoinType = "606'/0'/0/";
+exports.masterkey = 'm/';
+exports.slip10RawIndexes = [44, 606, 0, 0];
+// bip44purpose = "44'/";
+exports.bip44purpose = `${exports.slip10RawIndexes[0]}'/`;
+// stratosCoinType = "606'/0'/0/";
+exports.stratosCoinType = `${exports.slip10RawIndexes[1]}'/${exports.slip10RawIndexes[2]}'/${exports.slip10RawIndexes[3]}/`;
 exports.stratosAddressPrefix = 'st';
 exports.stratosPubkeyPrefix = 'stpub';
 // export const stratosDenom = 'ustos';

@@ -239,14 +239,15 @@ const serializeWallet = async (wallet, password) => {
 };
 exports.serializeWallet = serializeWallet;
 async function createWalletAtPath(hdPathIndex, mnemonic) {
-    const addressPrefix = hdVault_1.stratosAddressPrefix;
+    // const addressPrefix = stratosAddressPrefix;
     // works - way 1
     const hdPaths = [(0, StratosDirectSecp256k1HdWallet_1.makeStratosHubPath)(hdPathIndex)];
-    const options = {
-        bip39Password: '',
-        prefix: addressPrefix,
-        hdPaths,
-    };
+    // const options: DirectSecp256k1HdWalletOptions = {
+    //   bip39Password: '',
+    //   prefix: addressPrefix,
+    //   hdPaths,
+    // };
+    const options = Object.assign(Object.assign({}, StratosDirectSecp256k1HdWallet_1.defaultOptions), { hdPaths });
     // console.log('keyUtils - options to use ', options);
     const wallet = await StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
     // console.log('direct wallet', JSON.stringify(wallet));

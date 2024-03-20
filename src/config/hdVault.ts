@@ -1,11 +1,17 @@
 import { KdfConfiguration } from '@cosmjs/proto-signing';
 
-export const masterkey = 'm/';
-
-export const bip44purpose = "44'/";
 export const bip39Password = '';
 
-export const stratosCoinType = "606'/0'/0/";
+export const masterkey = 'm/';
+
+export const slip10RawIndexes = [44, 606, 0, 0];
+
+// bip44purpose = "44'/";
+export const bip44purpose = `${slip10RawIndexes[0]}'/`;
+
+// stratosCoinType = "606'/0'/0/";
+export const stratosCoinType = `${slip10RawIndexes[1]}'/${slip10RawIndexes[2]}'/${slip10RawIndexes[3]}/`;
+
 export const stratosAddressPrefix = 'st';
 export const stratosPubkeyPrefix = 'stpub';
 

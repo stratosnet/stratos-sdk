@@ -1,3 +1,11 @@
+import {
+  masterkey as masterkeyDefault,
+  bip44purpose as bip44purposeDefault,
+  bip39Password as bip39PasswordDefault,
+  stratosCoinType as stratosCoinTypeDefault,
+  keyPath as keyPathDefault,
+} from './config/hdVault';
+
 export interface SdkEnvironmentConfig {
   restUrl: string;
   rpcUrl: string;
@@ -8,6 +16,13 @@ export interface SdkEnvironmentConfig {
   faucetUrl?: string;
   nodeProtocolVersion?: string;
   isNewProtocol?: boolean;
+  keyPathParameters?: {
+    masterkey: string;
+    bip44purpose: string;
+    stratosCoinType: string;
+    bip39Password: string;
+  };
+  keyPath?: string;
 }
 
 const SdkDefaultEnvironment: SdkEnvironmentConfig = {
@@ -18,6 +33,14 @@ const SdkDefaultEnvironment: SdkEnvironmentConfig = {
   ppNodeUrl: '',
   ppNodePort: '',
   faucetUrl: '',
+  isNewProtocol: true,
+  keyPathParameters: {
+    masterkey: masterkeyDefault,
+    bip44purpose: bip44purposeDefault,
+    stratosCoinType: stratosCoinTypeDefault,
+    bip39Password: bip39PasswordDefault,
+  },
+  keyPath: keyPathDefault,
 };
 
 export default class Sdk {

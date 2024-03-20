@@ -22,6 +22,7 @@ import {
   stratosPubkeyPrefix,
 } from '../config/hdVault';
 import StratosDirectSecp256k1HdWallet, {
+  defaultOptions as hdWalletDefaultOptions,
   makeStratosHubPath,
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
@@ -283,16 +284,17 @@ export async function createWalletAtPath(
   hdPathIndex: number,
   mnemonic: string,
 ): Promise<StratosDirectSecp256k1HdWallet> {
-  const addressPrefix = stratosAddressPrefix;
+  // const addressPrefix = stratosAddressPrefix;
 
   // works - way 1
   const hdPaths = [makeStratosHubPath(hdPathIndex)];
-  const options: DirectSecp256k1HdWalletOptions = {
-    bip39Password: '',
-    prefix: addressPrefix,
-    hdPaths,
-  };
+  // const options: DirectSecp256k1HdWalletOptions = {
+  //   bip39Password: '',
+  //   prefix: addressPrefix,
+  //   hdPaths,
+  // };
 
+  const options: DirectSecp256k1HdWalletOptions = { ...hdWalletDefaultOptions, hdPaths };
   // console.log('keyUtils - options to use ', options);
 
   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
