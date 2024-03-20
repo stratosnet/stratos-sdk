@@ -882,6 +882,11 @@ const main = async () => {
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
+    // to be passed to the INIT if custom path is needed
+    const keyPathParametersForSdk = {
+        slip10RawIndexes: [44, 606, 0, 0], // st
+        // slip10RawIndexes: [44, 0, 0, 0], // 0x
+    };
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
@@ -965,7 +970,7 @@ const main = async () => {
     // await tmpTest(0, zeroUserMnemonic);
     //
     // await tmpTest(0, mainnetDev);
-    await testAccountData();
+    // await testAccountData();
 };
 main();
 //# sourceMappingURL=run.js.map

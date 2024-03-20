@@ -1208,9 +1208,10 @@ const main = async () => {
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
 
+  // to be passed to the INIT if custom path is needed
   const keyPathParametersForSdk: KeyPathParameters = {
-    // slip10RawIndexes: [44, 606, 0, 0], // st
-    slip10RawIndexes: [44, 0, 0, 0], // 0x
+    slip10RawIndexes: [44, 606, 0, 0], // st
+    // slip10RawIndexes: [44, 0, 0, 0], // 0x
   };
 
   // 2
@@ -1224,7 +1225,8 @@ const main = async () => {
     // ppNodePort: '8142',
     // ppNodePort: '8146',
     ppNodePort: '8150',
-    keyPathParameters: keyPathParametersForSdk,
+    // optional
+    // keyPathParameters: keyPathParametersForSdk,
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',

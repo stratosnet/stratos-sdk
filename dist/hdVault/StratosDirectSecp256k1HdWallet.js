@@ -44,23 +44,8 @@ function makeStratosHubPath(a) {
     if (!keyPathParameters) {
         return defaultPath;
     }
+    const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
     try {
-        // bip44purpose = "44'/" and stratosCoinType = "606'/0'/0/";
-        // gives "44'/606'/0'/0/";
-        const fullKeyPath = `${keyPathParameters.bip44purpose}${keyPathParameters.stratosCoinType}`;
-        const slip10RawIndexesToUse = fullKeyPath
-            .split('/')
-            .map(el => el.replace(/'/g, '').replace(/"/g, ''))
-            .filter(Boolean)
-            .map(el => +el);
-        if (slip10RawIndexesToUse.length !== 4) {
-            console.log('could not parse given keyPath, wrong lenght ', fullKeyPath, slip10RawIndexesToUse);
-            return defaultPath;
-        }
-        if (!slip10RawIndexesToUse.every(el => el === +`${el}`)) {
-            console.log('could not parse given keyPath ', fullKeyPath, slip10RawIndexesToUse);
-            return defaultPath;
-        }
         console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
         return [
             crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
@@ -85,7 +70,7 @@ const basicPasswordHashingOptions = {
     },
 };
 exports.defaultOptions = {
-    bip39Password: ((_a = Sdk_1.default.environment.keyPathParameters) === null || _a === void 0 ? void 0 : _a.bip39Password) || '',
+    bip39Password: (0, hdVault_1.bip39Password)((_a = Sdk_1.default.environment.keyPathParameters) === null || _a === void 0 ? void 0 : _a.bip39Password),
     hdPaths: [makeStratosHubPath(0)],
     prefix: hdVault_1.stratosAddressPrefix,
 };

@@ -1,3 +1,11 @@
+export type KeyPathParameters = {
+    masterkey?: string;
+    bip44purpose?: string;
+    stratosCoinType?: string;
+    fullKeyPath?: string;
+    bip39Password?: string;
+    slip10RawIndexes: number[];
+};
 export interface SdkEnvironmentConfig {
     restUrl: string;
     rpcUrl: string;
@@ -8,13 +16,7 @@ export interface SdkEnvironmentConfig {
     faucetUrl?: string;
     nodeProtocolVersion?: string;
     isNewProtocol?: boolean;
-    keyPathParameters?: {
-        masterkey: string;
-        bip44purpose: string;
-        stratosCoinType: string;
-        bip39Password: string;
-    };
-    keyPath?: string;
+    keyPathParameters?: KeyPathParameters;
 }
 export default class Sdk {
     static environment: {
@@ -27,13 +29,7 @@ export default class Sdk {
         faucetUrl?: string | undefined;
         nodeProtocolVersion?: string | undefined;
         isNewProtocol?: boolean | undefined;
-        keyPathParameters?: {
-            masterkey: string;
-            bip44purpose: string;
-            stratosCoinType: string;
-            bip39Password: string;
-        } | undefined;
-        keyPath?: string | undefined;
+        keyPathParameters?: KeyPathParameters | undefined;
     };
     static init(sdkEnv: SdkEnvironmentConfig): void;
     static reset(): void;
