@@ -92,7 +92,7 @@ export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
   const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
 
   try {
-    console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
+    // console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
 
     return [
       Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
