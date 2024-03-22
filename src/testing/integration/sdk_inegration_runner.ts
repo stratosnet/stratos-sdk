@@ -1012,10 +1012,13 @@ export const downloadFileFromRemote = async (
 
   const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
 
+  const filesize = 10_000_001;
+
   const downloadResult = await RemoteFilesystem.downloadFile(
     keypair,
     filePathToSaveDownloadedTo,
     uploadedLocalFileHash,
+    filesize,
   );
 
   const { filePathToSave } = downloadResult;
