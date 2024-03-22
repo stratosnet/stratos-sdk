@@ -914,7 +914,7 @@ const main = async () => {
     const filename = 'file10M_March_22_v1';
     // const mainnetDev = '';
     // await testItFileUp(filename, hdPathIndex);
-    // await testFileHash(filename, hdPathIndex);
+    await testFileHash(filename, hdPathIndex);
     // 3a
     // const filename = 'file10_test_1689623710986';
     // const filehash = 'v05j1m5592qkp11b9021r8jefjdngahbhqdk7bm8';
