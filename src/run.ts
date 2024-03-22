@@ -1262,7 +1262,7 @@ const main = async () => {
   // const mainnetDev = '';
   // await testItFileUp(filename, hdPathIndex);
 
-  // await testFileHash(filename, hdPathIndex);
+  await testFileHash(filename, hdPathIndex);
 
   // 3a
   // const filename = 'file10_test_1689623710986';
