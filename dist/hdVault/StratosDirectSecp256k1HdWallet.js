@@ -46,7 +46,7 @@ function makeStratosHubPath(a) {
     }
     const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
     try {
-        console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
+        // console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
         return [
             crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
             crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[1]),

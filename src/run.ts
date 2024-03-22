@@ -1211,7 +1211,7 @@ const main = async () => {
   // to be passed to the INIT if custom path is needed
   const keyPathParametersForSdk: KeyPathParameters = {
     slip10RawIndexes: [44, 606, 0, 0], // st
-    // slip10RawIndexes: [44, 0, 0, 0], // 0x
+    // slip10RawIndexes: [44, 60, 0, 0], // 0x
   };
 
   // 2
@@ -1226,7 +1226,7 @@ const main = async () => {
     // ppNodePort: '8146',
     ppNodePort: '8150',
     // optional
-    // keyPathParameters: keyPathParametersForSdk,
+    keyPathParameters: keyPathParametersForSdk,
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
@@ -1304,7 +1304,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
@@ -1343,6 +1343,7 @@ const main = async () => {
   //
   // await tmpTest(0, mainnetDev);
   // await testAccountData();
+  // await testAddressConverstion(0);
 };
 
 main();
