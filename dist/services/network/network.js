@@ -99,7 +99,7 @@ const sendRpcCall = async (givenPayload, config) => {
     };
     const url = `${getPpNodeRoute()}`;
     const payload = Object.assign(Object.assign({}, defaultPayload), givenPayload);
-    (0, helpers_1.log)('from network ~ rpc call url', url);
+    // log('from network ~ rpc call url', url);
     const dataResult = await (0, exports.apiPost)(url, payload, Object.assign({}, config));
     return dataResult;
 };
