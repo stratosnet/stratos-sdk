@@ -16,7 +16,7 @@ export interface UploadedFileStatusInfo {
 }
 export declare const getUploadedFilesStatus: (keypair: wallet.KeyPairInfo, fileHash: string) => Promise<UploadedFileStatusInfo>;
 export declare const getUploadedFileList: (keypair: wallet.KeyPairInfo, page?: number) => Promise<UserFileListResponse>;
-export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string) => Promise<{
+export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, filehash: string, filesize: number) => Promise<{
     filePathToSave: string;
 }>;
 export declare const updloadFile: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<{
@@ -34,5 +34,5 @@ export declare const getSharedFileList: (keypair: wallet.KeyPairInfo, page?: num
     files: Network.networkTypes.SharedFileInfoItem[];
     totalnumber: number;
 }>;
-export declare const downloadSharedFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, sharelink: string) => Promise<void>;
+export declare const downloadSharedFile: (keypair: wallet.KeyPairInfo, filePathToSave: string, sharelink: string, filesize: number) => Promise<void>;
 export {};

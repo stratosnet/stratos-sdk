@@ -56,7 +56,7 @@ const getOzoneMetricValue = (denom, amount) => {
     }
     const balanceInWei = (0, bigNumber_1.create)(amount);
     const balance = (0, bigNumber_1.fromWei)(balanceInWei, 9).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
-    console.log('oz balance', balance);
+    // console.log('oz balance', balance);
     const balanceToReturn = `${balance} ${printableDenome}`;
     return balanceToReturn;
 };

@@ -852,7 +852,11 @@ const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) 
   console.log('retrieved user shared file list', userFileList);
 };
 
-const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink: string) => {
+const testRequestUserDownloadSharedFile = async (
+  hdPathIndex: number,
+  sharelink: string,
+  filesize: number,
+) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
@@ -877,6 +881,7 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink:
     keyPairZeroA,
     filePathToSave,
     sharelink,
+    filesize,
   );
 
   console.log('retrieved user shared file list', userDownloadSharedFileResult);
@@ -1074,8 +1079,8 @@ const testReadAndWriteLocalMultipleIo = async (filename: string) => {
   // log('writeFileToPath of the encodedFile from decoded file is done');
 };
 
-const testFileDl = async (hdPathIndex: number, filename: string, filehash: string) => {
-  console.log(`downloading file ${filename}`);
+const testFileDl = async (hdPathIndex: number, filename: string, filehash: string, filesize: number) => {
+  log(`Downloading file ${filename}`);
 
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -1095,9 +1100,9 @@ const testFileDl = async (hdPathIndex: number, filename: string, filehash: strin
 
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
 
-  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
+  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
 
-  log('done. filePathToSave', filePathToSave);
+  log('Done. filePathToSave', filePathToSave);
 };
 
 const testFileHash = async (filename: string, hdPathIndex: number) => {
@@ -1252,17 +1257,21 @@ const main = async () => {
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'text_test.txt';
   // const filename = 'file200M_March_20_v1';
-  const filename = 'file200M_March_20_v8';
+  const filename = 'file10M_March_22_v1';
 
   // const mainnetDev = '';
-  await testItFileUp(filename, hdPathIndex);
+  // await testItFileUp(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
 
   // 3a
   // const filename = 'file10_test_1689623710986';
-  // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
-  // await testFileDl(hdPathIndex, filename, filehash);
+  // const filehash = 'v05j1m5592qkp11b9021r8jefjdngahbhqdk7bm8';
+  // const filename = 'file10M_March_16_v3';
+  // const filehash = 'v05j1m55csmh36n7cc6kun2l6avkk36k2ovq8bng';
+  // const filesize = 10000001;
+
+  // await testFileDl(hdPathIndex, filename, filehash, filesize);
 
   // 4a
   // await testRequestUserSharedFileList(0, hdPathIndex);
@@ -1296,7 +1305,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
