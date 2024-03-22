@@ -15,16 +15,18 @@ import createKeccakHash from 'keccak';
 // import { fromHexString } from 'multihashes';
 import sjcl from 'sjcl';
 import {
-  bip39Password,
+  bip39Password as bip39PasswordDefault,
   encryptionIterations,
   encryptionKeyLength,
   stratosAddressPrefix,
   stratosPubkeyPrefix,
 } from '../config/hdVault';
 import StratosDirectSecp256k1HdWallet, {
+  defaultOptions as hdWalletDefaultOptions,
   makeStratosHubPath,
   pubkeyToRawAddressWithKeccak,
 } from '../hdVault/StratosDirectSecp256k1HdWallet';
+import Sdk from '../Sdk';
 // import { log } from '../services/helpers';
 import { serializeWithEncryptionKey } from './cosmosUtils';
 import { PubKey } from './cosmosWallet';
@@ -52,7 +54,10 @@ export const generateMasterKeySeed = async (phrase: MnemonicPhrase): Promise<Uin
 
   const mnemonicChecked = new EnglishMnemonic(stringMnemonic);
 
-  const seed = await Bip39.mnemonicToSeed(mnemonicChecked, bip39Password);
+  const seed = await Bip39.mnemonicToSeed(
+    mnemonicChecked,
+    bip39PasswordDefault(Sdk.environment.keyPathParameters?.bip39Password),
+  );
 
   return seed;
 };
@@ -283,16 +288,17 @@ export async function createWalletAtPath(
   hdPathIndex: number,
   mnemonic: string,
 ): Promise<StratosDirectSecp256k1HdWallet> {
-  const addressPrefix = stratosAddressPrefix;
+  // const addressPrefix = stratosAddressPrefix;
 
   // works - way 1
   const hdPaths = [makeStratosHubPath(hdPathIndex)];
-  const options: DirectSecp256k1HdWalletOptions = {
-    bip39Password: '',
-    prefix: addressPrefix,
-    hdPaths,
-  };
+  // const options: DirectSecp256k1HdWalletOptions = {
+  //   bip39Password: '',
+  //   prefix: addressPrefix,
+  //   hdPaths,
+  // };
 
+  const options: DirectSecp256k1HdWalletOptions = { ...hdWalletDefaultOptions, hdPaths };
   // console.log('keyUtils - options to use ', options);
 
   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);

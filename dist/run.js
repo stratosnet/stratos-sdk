@@ -517,7 +517,7 @@ const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
     const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
     const keyPairZero = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, encryptedMasterKeySeedString);
-    console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+    console.log('🚀 ~ file: run.ts ~ line 639 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
     if (!keyPairZero) {
         return;
     }
@@ -882,13 +882,20 @@ const main = async () => {
     // const sdkEnv = sdkEnvMainNet;
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
+    // to be passed to the INIT if custom path is needed
+    const keyPathParametersForSdk = {
+        slip10RawIndexes: [44, 606, 0, 0], // st
+        // slip10RawIndexes: [44, 60, 0, 0], // 0x
+    };
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
         ppNodeUrl: 'http://35.187.47.46', 
         // ppNodePort: '8142',
         // ppNodePort: '8146',
-        ppNodePort: '8150' }));
+        ppNodePort: '8150', 
+        // optional
+        keyPathParameters: keyPathParametersForSdk }));
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
@@ -935,7 +942,7 @@ const main = async () => {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);
@@ -963,7 +970,10 @@ const main = async () => {
     // await getTxHistory(zeroUserMnemonic, 0);
     // await getTxHistory(mainnetDev, 0);
     // await tmpTest(0, zeroUserMnemonic);
+    //
     // await tmpTest(0, mainnetDev);
+    // await testAccountData();
+    // await testAddressConverstion(0);
 };
 main();
 //# sourceMappingURL=run.js.map

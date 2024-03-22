@@ -35,6 +35,7 @@ const keccak_1 = __importDefault(require("keccak"));
 const sjcl_1 = __importDefault(require("sjcl"));
 const hdVault_1 = require("../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = __importStar(require("../hdVault/StratosDirectSecp256k1HdWallet"));
+const Sdk_1 = __importDefault(require("../Sdk"));
 // import { log } from '../services/helpers';
 const cosmosUtils_1 = require("./cosmosUtils");
 const mnemonic_1 = require("./mnemonic");
@@ -54,9 +55,10 @@ const mnemonic_1 = require("./mnemonic");
 //   ];
 // }
 const generateMasterKeySeed = async (phrase) => {
+    var _a;
     const stringMnemonic = (0, mnemonic_1.convertArrayToString)(phrase);
     const mnemonicChecked = new crypto_1.EnglishMnemonic(stringMnemonic);
-    const seed = await crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, hdVault_1.bip39Password);
+    const seed = await crypto_1.Bip39.mnemonicToSeed(mnemonicChecked, (0, hdVault_1.bip39Password)((_a = Sdk_1.default.environment.keyPathParameters) === null || _a === void 0 ? void 0 : _a.bip39Password));
     return seed;
 };
 exports.generateMasterKeySeed = generateMasterKeySeed;
@@ -239,14 +241,15 @@ const serializeWallet = async (wallet, password) => {
 };
 exports.serializeWallet = serializeWallet;
 async function createWalletAtPath(hdPathIndex, mnemonic) {
-    const addressPrefix = hdVault_1.stratosAddressPrefix;
+    // const addressPrefix = stratosAddressPrefix;
     // works - way 1
     const hdPaths = [(0, StratosDirectSecp256k1HdWallet_1.makeStratosHubPath)(hdPathIndex)];
-    const options = {
-        bip39Password: '',
-        prefix: addressPrefix,
-        hdPaths,
-    };
+    // const options: DirectSecp256k1HdWalletOptions = {
+    //   bip39Password: '',
+    //   prefix: addressPrefix,
+    //   hdPaths,
+    // };
+    const options = Object.assign(Object.assign({}, StratosDirectSecp256k1HdWallet_1.defaultOptions), { hdPaths });
     // console.log('keyUtils - options to use ', options);
     const wallet = await StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
     // console.log('direct wallet', JSON.stringify(wallet));

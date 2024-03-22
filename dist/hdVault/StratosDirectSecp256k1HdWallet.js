@@ -2,14 +2,16 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
+exports.defaultOptions = exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
 const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const keccak_1 = __importDefault(require("keccak"));
 const hdVault_1 = require("../config/hdVault");
+const Sdk_1 = __importDefault(require("../Sdk"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const crypto_1 = require('@cosmjs/crypto');
 function pubkeyToRawAddressWithKeccak(pubkey) {
@@ -31,13 +33,32 @@ exports.pubkeyToRawAddressWithKeccak = pubkeyToRawAddressWithKeccak;
  * with 0-based account index `a`.
  */
 function makeStratosHubPath(a) {
-    return [
-        crypto_2.Slip10RawIndex.hardened(44),
-        crypto_2.Slip10RawIndex.hardened(606),
-        crypto_2.Slip10RawIndex.hardened(0),
-        crypto_2.Slip10RawIndex.normal(0),
+    const { keyPathParameters } = Sdk_1.default.environment;
+    const defaultPath = [
+        crypto_2.Slip10RawIndex.hardened(hdVault_1.slip10RawIndexes[0]),
+        crypto_2.Slip10RawIndex.hardened(hdVault_1.slip10RawIndexes[1]),
+        crypto_2.Slip10RawIndex.hardened(hdVault_1.slip10RawIndexes[2]),
+        crypto_2.Slip10RawIndex.normal(hdVault_1.slip10RawIndexes[3]),
         crypto_2.Slip10RawIndex.normal(a),
     ];
+    if (!keyPathParameters) {
+        return defaultPath;
+    }
+    const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
+    try {
+        // console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
+        return [
+            crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
+            crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[1]),
+            crypto_2.Slip10RawIndex.hardened(slip10RawIndexesToUse[2]),
+            crypto_2.Slip10RawIndex.normal(slip10RawIndexesToUse[3]),
+            crypto_2.Slip10RawIndex.normal(a),
+        ];
+    }
+    catch (error) {
+        console.log('could not parse  keyPathParameters from sdk', keyPathParameters);
+        return defaultPath;
+    }
 }
 exports.makeStratosHubPath = makeStratosHubPath;
 const basicPasswordHashingOptions = {
@@ -48,8 +69,8 @@ const basicPasswordHashingOptions = {
         memLimitKib: 12 * 1024,
     },
 };
-const defaultOptions = {
-    bip39Password: '',
+exports.defaultOptions = {
+    bip39Password: (0, hdVault_1.bip39Password)((_a = Sdk_1.default.environment.keyPathParameters) === null || _a === void 0 ? void 0 : _a.bip39Password),
     hdPaths: [makeStratosHubPath(0)],
     prefix: hdVault_1.stratosAddressPrefix,
 };
@@ -61,8 +82,8 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
     }
     constructor(mnemonic, options) {
         var _a, _b;
-        const prefix = (_a = options.prefix) !== null && _a !== void 0 ? _a : defaultOptions.prefix;
-        const hdPaths = (_b = options.hdPaths) !== null && _b !== void 0 ? _b : defaultOptions.hdPaths;
+        const prefix = (_a = options.prefix) !== null && _a !== void 0 ? _a : exports.defaultOptions.prefix;
+        const hdPaths = (_b = options.hdPaths) !== null && _b !== void 0 ? _b : exports.defaultOptions.hdPaths;
         super(mnemonic, options);
         this.mySecret = mnemonic;
         this.mySeed = options.seed;

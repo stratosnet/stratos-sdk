@@ -28,6 +28,7 @@ export declare function makeStratosHubPath(a: number): typeof crypto_1.HdPath;
 interface DirectSecp256k1HdWalletConstructorOptions extends Partial<DirectSecp256k1HdWalletOptions> {
     readonly seed: Uint8Array;
 }
+export declare const defaultOptions: DirectSecp256k1HdWalletOptions;
 export interface Pubkey {
     readonly type: string;
     readonly value: any;

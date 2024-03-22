@@ -11,6 +11,7 @@ import { createMasterKeySeed, getSerializedWalletFromPhrase } from './hdVault/ke
 import * as keyUtils from './hdVault/keyUtils';
 import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
+import type { KeyPathParameters } from './Sdk';
 import * as RemoteFilesystem from './sds/remoteFile';
 import { getCosmos, resetCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
@@ -636,7 +637,7 @@ const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string)
 
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   const keyPairZero = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedString);
-  console.log('🚀 ~ file: run.ts ~ line 464 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
+  console.log('🚀 ~ file: run.ts ~ line 639 ~ getBalanceCardMetrics ~ keyPairZero', keyPairZero);
 
   if (!keyPairZero) {
     return;
@@ -1207,6 +1208,12 @@ const main = async () => {
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
 
+  // to be passed to the INIT if custom path is needed
+  const keyPathParametersForSdk: KeyPathParameters = {
+    slip10RawIndexes: [44, 606, 0, 0], // st
+    // slip10RawIndexes: [44, 60, 0, 0], // 0x
+  };
+
   // 2
   Sdk.init({
     ...sdkEnv,
@@ -1218,6 +1225,8 @@ const main = async () => {
     // ppNodePort: '8142',
     // ppNodePort: '8146',
     ppNodePort: '8150',
+    // optional
+    keyPathParameters: keyPathParametersForSdk,
 
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
@@ -1295,7 +1304,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
@@ -1331,7 +1340,10 @@ const main = async () => {
   // await getTxHistory(zeroUserMnemonic, 0);
   // await getTxHistory(mainnetDev, 0);
   // await tmpTest(0, zeroUserMnemonic);
+  //
   // await tmpTest(0, mainnetDev);
+  // await testAccountData();
+  // await testAddressConverstion(0);
 };
 
 main();
