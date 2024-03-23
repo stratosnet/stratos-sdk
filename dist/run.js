@@ -657,7 +657,7 @@ const testRequestUserSharedFileList = async (page, hdPathIndex) => {
     const userFileList = await RemoteFilesystem.getSharedFileList(keyPairZeroA, page);
     console.log('retrieved user shared file list', userFileList);
 };
-const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink) => {
+const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesize) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -669,7 +669,7 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink) => {
     }
     // const { address } = keyPairZeroA;
     const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
-    const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(keyPairZeroA, filePathToSave, sharelink);
+    const userDownloadSharedFileResult = await RemoteFilesystem.downloadSharedFile(keyPairZeroA, filePathToSave, sharelink, filesize);
     console.log('retrieved user shared file list', userDownloadSharedFileResult);
 };
 const testRequestUserFileList = async (page, hdPathIndex) => {
@@ -796,8 +796,8 @@ const testReadAndWriteLocalMultipleIo = async (filename) => {
     // await FilesystemService.writeFileToPath(fileWritePath, encodedFile);
     // log('writeFileToPath of the encodedFile from decoded file is done');
 };
-const testFileDl = async (hdPathIndex, filename, filehash) => {
-    console.log(`downloading file ${filename}`);
+const testFileDl = async (hdPathIndex, filename, filehash, filesize) => {
+    (0, helpers_1.log)(`Downloading file ${filename}`);
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -807,8 +807,8 @@ const testFileDl = async (hdPathIndex, filename, filehash) => {
         return;
     }
     const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
-    await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
-    (0, helpers_1.log)('done. filePathToSave', filePathToSave);
+    await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
+    (0, helpers_1.log)('Done. filePathToSave', filePathToSave);
 };
 const testFileHash = async (filename, hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -909,15 +909,15 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    // const filename = 'text_test.txt';
-    const filename = 'file600M_March_14_v6';
-    // const mainnetDev = '';
+    // const filename = 'file500M_March_23_v9';
     // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
-    // const filename = 'file10_test_1689623710986';
-    // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
-    // await testFileDl(hdPathIndex, filename, filehash);
+    // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
+    // const filesize= 200000002;
+    // const filename= 'file200M_March_23_v7';
+    //
+    // await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
     // await testRequestUserSharedFileList(0, hdPathIndex);
     // 5a

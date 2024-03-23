@@ -478,6 +478,7 @@ export interface FileUserRequestUploadParams {
   filehash: string;
   signature: UserFileSignature;
   req_time: number;
+  sequencenumber: string;
 }
 
 export interface FileUserRequestDownloadParams {
@@ -563,6 +564,8 @@ export interface FileUserUploadDataParams {
   data: string;
   signature: UserFileSignature;
   req_time: number;
+  sequencenumber: string;
+  stop?: boolean;
 }
 
 export interface FileUserUploadDataResponse extends MainRpcResponse {

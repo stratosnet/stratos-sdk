@@ -123,7 +123,7 @@ export const sendRpcCall = async <N>(
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  log('from network ~ rpc call url', url);
+  // log('from network ~ rpc call url', url);
   const dataResult = await apiPost(url, payload, { ...config });
 
   return dataResult;

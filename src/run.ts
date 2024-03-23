@@ -853,7 +853,11 @@ const testRequestUserSharedFileList = async (page: number, hdPathIndex: number) 
   console.log('retrieved user shared file list', userFileList);
 };
 
-const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink: string) => {
+const testRequestUserDownloadSharedFile = async (
+  hdPathIndex: number,
+  sharelink: string,
+  filesize: number,
+) => {
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
@@ -878,6 +882,7 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex: number, sharelink:
     keyPairZeroA,
     filePathToSave,
     sharelink,
+    filesize,
   );
 
   console.log('retrieved user shared file list', userDownloadSharedFileResult);
@@ -1075,8 +1080,8 @@ const testReadAndWriteLocalMultipleIo = async (filename: string) => {
   // log('writeFileToPath of the encodedFile from decoded file is done');
 };
 
-const testFileDl = async (hdPathIndex: number, filename: string, filehash: string) => {
-  console.log(`downloading file ${filename}`);
+const testFileDl = async (hdPathIndex: number, filename: string, filehash: string, filesize: number) => {
+  log(`Downloading file ${filename}`);
 
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
@@ -1096,9 +1101,9 @@ const testFileDl = async (hdPathIndex: number, filename: string, filehash: strin
 
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
 
-  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash);
+  await RemoteFilesystem.downloadFile(keyPairZeroA, filePathToSave, filehash, filesize);
 
-  log('done. filePathToSave', filePathToSave);
+  log('Done. filePathToSave', filePathToSave);
 };
 
 const testFileHash = async (filename: string, hdPathIndex: number) => {
@@ -1259,18 +1264,18 @@ const main = async () => {
   // await testRequestUserFileList(0, hdPathIndex);
 
   // 2a - that is the file name - it has to be in ./src
-  // const filename = 'text_test.txt';
-  const filename = 'file600M_March_14_v6';
+  // const filename = 'file500M_March_23_v9';
 
-  // const mainnetDev = '';
   // await testItFileUp(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
 
   // 3a
-  // const filename = 'file10_test_1689623710986';
-  // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
-  // await testFileDl(hdPathIndex, filename, filehash);
+  // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
+  // const filesize= 200000002;
+  // const filename= 'file200M_March_23_v7';
+  //
+  // await testFileDl(hdPathIndex, filename, filehash, filesize);
 
   // 4a
   // await testRequestUserSharedFileList(0, hdPathIndex);
