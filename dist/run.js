@@ -909,18 +909,14 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    // const filename = 'text_test.txt';
-    // const filename = 'file200M_March_20_v1';
-    const filename = 'file10M_March_22_v1';
-    // const mainnetDev = '';
+    // const filename = 'file500M_March_23_v9';
     // await testItFileUp(filename, hdPathIndex);
-    await testFileHash(filename, hdPathIndex);
+    // await testFileHash(filename, hdPathIndex);
     // 3a
-    // const filename = 'file10_test_1689623710986';
-    // const filehash = 'v05j1m5592qkp11b9021r8jefjdngahbhqdk7bm8';
-    // const filename = 'file10M_March_16_v3';
-    // const filehash = 'v05j1m55csmh36n7cc6kun2l6avkk36k2ovq8bng';
-    // const filesize = 10000001;
+    // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
+    // const filesize= 200000002;
+    // const filename= 'file200M_March_23_v7';
+    //
     // await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
     // await testRequestUserSharedFileList(0, hdPathIndex);

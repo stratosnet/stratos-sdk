@@ -1,10 +1,10 @@
 import { wallet } from '../hdVault';
 import * as Network from '../services/network';
 import { networkTypes } from '../services/network';
-import { FileInfoItem } from '../services/network/types';
+import * as NetworkTypes from '../services/network/types';
 type RequestUserFilesResponse = networkTypes.FileUserRequestResult<networkTypes.FileUserRequestListResponse>;
 interface UserFileListResponse {
-    files: FileInfoItem[];
+    files: NetworkTypes.FileInfoItem[];
     originalResponse: RequestUserFilesResponse;
 }
 export interface UploadedFileStatusInfo {
