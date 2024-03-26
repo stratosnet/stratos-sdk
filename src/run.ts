@@ -1151,6 +1151,39 @@ const testItFileUp = async (filename: string, hdPathIndex: number) => {
   log('done!');
 };
 
+const testItFileUpFromBuffer = async (filename: string, hdPathIndex: number) => {
+  const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
+
+  const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  const keypair = await deriveKeyPair(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+
+  if (!keypair) {
+    return;
+  }
+
+  const PROJECT_ROOT = path.resolve(__dirname, '../');
+  const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
+
+  const fileReadPath = path.resolve(SRC_ROOT, filename);
+
+  const imageFileName = path.basename(fileReadPath);
+
+  const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+
+  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+
+  const uploadResult = await RemoteFilesystem.updloadFileFromBuffer(
+    keypair,
+    readBinaryFile,
+    imageFileName,
+    fileInfo.filehash,
+    fileInfo.size,
+  );
+
+  log('done!', uploadResult);
+};
+
 const testAddressConverstion = async (hdPathIndex: number) => {
   const phrase = mnemonic.convertStringToArray(zeroUserMnemonic);
 
@@ -1264,9 +1297,10 @@ const main = async () => {
   // await testRequestUserFileList(0, hdPathIndex);
 
   // 2a - that is the file name - it has to be in ./src
-  // const filename = 'file500M_March_23_v9';
+  const filename = 'file100M_March_26_v3';
 
   // await testItFileUp(filename, hdPathIndex);
+  await testItFileUpFromBuffer(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
 

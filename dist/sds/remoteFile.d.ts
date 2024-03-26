@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { wallet } from '../hdVault';
 import * as Network from '../services/network';
 import { networkTypes } from '../services/network';
@@ -20,6 +21,16 @@ export declare const downloadFile: (keypair: wallet.KeyPairInfo, filePathToSave:
     filePathToSave: string;
 }>;
 export declare const updloadFile: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<{
+    uploadReturn: string;
+    filehash: string;
+    fileStatusInfo: UploadedFileStatusInfo;
+}>;
+export declare const updloadFileV1: (keypair: wallet.KeyPairInfo, fileReadPath: string) => Promise<{
+    uploadReturn: string;
+    filehash: string;
+    fileStatusInfo: UploadedFileStatusInfo;
+}>;
+export declare const updloadFileFromBuffer: (keypair: wallet.KeyPairInfo, fileBuffer: Buffer, imageFileName: string, fileHash: string, fileSize: number) => Promise<{
     uploadReturn: string;
     filehash: string;
     fileStatusInfo: UploadedFileStatusInfo;

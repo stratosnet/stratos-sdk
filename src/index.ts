@@ -7,6 +7,7 @@ export * as networkService from './services/network/network';
 export * as networkTypes from './services/network/types';
 export * as Transformers from './services/transformers';
 export * as transformerTypes from './services/transformers/transactions/types';
+export * as LocalFileSystem from './services/filesystem/filesystem';
 export * as walletService from './services/walletService';
 export * as transactions from './transactions';
 export * as transactionTypes from './transactions/types';
