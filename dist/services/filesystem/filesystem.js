@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashOld = exports.getFileBuffer = void 0;
+exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashFromBuffer = exports.calculateFileHashOld = exports.getFileBuffer = void 0;
 const cids_1 = __importDefault(require("cids"));
 const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
@@ -54,8 +54,7 @@ const calculateFileHashOld = async (filePath) => {
     return realFileHash;
 };
 exports.calculateFileHashOld = calculateFileHashOld;
-const calculateFileHash = async (filePath) => {
-    const fileBuffer = await (0, exports.getFileBuffer)(filePath);
+const calculateFileHashFromBuffer = async (fileBuffer) => {
     const firstKeccak = await (0, multihashing_async_1.default)(fileBuffer, 'keccak-256', 20);
     const secondKeccak = await (0, multihashing_async_1.default)(firstKeccak, 'keccak-256', 20);
     const keccak256Hasher = hasher.from({
@@ -66,8 +65,28 @@ const calculateFileHash = async (filePath) => {
     const encodedHashO = await keccak256Hasher.digest(secondKeccak);
     const cid = cid_1.CID.create(1, 0x66, encodedHashO);
     const realFileHash = cid.toString(base32_1.base32hex);
-    const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
+    // const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
     return realFileHash;
+};
+exports.calculateFileHashFromBuffer = calculateFileHashFromBuffer;
+const calculateFileHash = async (filePath) => {
+    const fileBuffer = await (0, exports.getFileBuffer)(filePath);
+    return (0, exports.calculateFileHashFromBuffer)(fileBuffer);
+    // const firstKeccak = await multihashing(fileBuffer, 'keccak-256', 20);
+    // const secondKeccak = await multihashing(firstKeccak, 'keccak-256', 20);
+    //
+    // const keccak256Hasher = hasher.from({
+    //   name: 'keccak-256',
+    //   code: 0x1b,
+    //   encode: input => input.slice(-20),
+    // });
+    //
+    // const encodedHashO = await keccak256Hasher.digest(secondKeccak);
+    //
+    // const cid = CID.create(1, 0x66, encodedHashO);
+    // const realFileHash = cid.toString(base32hex);
+    //
+    // return realFileHash;
 };
 exports.calculateFileHash = calculateFileHash;
 const getFileInfo = async (filePath) => {

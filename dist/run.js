@@ -30,6 +30,7 @@ const encoding_1 = require("@cosmjs/encoding");
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+// import { SimpleObject } from 'services/walletService';
 const accounts = __importStar(require("./accounts"));
 const config_1 = require("./config");
 const hdVault_1 = require("./hdVault");
@@ -836,8 +837,44 @@ const testItFileUp = async (filename, hdPathIndex) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
     const fileReadPath = path_1.default.resolve(SRC_ROOT, filename);
-    await RemoteFilesystem.updloadFile(keypair, fileReadPath);
-    (0, helpers_1.log)('done!');
+    const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileReadPath);
+    (0, helpers_1.log)('done!', uploadResult);
+};
+const testItFileUpFromBuffer = async (filename, hdPathIndex) => {
+    const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
+    const masterKeySeed = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
+    const keypair = await (0, wallet_1.deriveKeyPair)(hdPathIndex, password, masterKeySeed.encryptedMasterKeySeed.toString());
+    if (!keypair) {
+        return;
+    }
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const fileReadPath = path_1.default.resolve(SRC_ROOT, filename);
+    const resolvedFileName = path_1.default.basename(fileReadPath);
+    const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
+    const bufferOfTheFile = await FilesystemService.getFileBuffer(fileReadPath);
+    const myCb = (data) => {
+        const { result: { success, code, details, message }, error, } = data;
+        if (error) {
+            (0, helpers_1.dirLog)('we have an error. data from myCb', data);
+        }
+        else if (success === false) {
+            (0, helpers_1.log)('success is false. data from myCb', data);
+        }
+        else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_RESPONSE_CORRECT) {
+            (0, helpers_1.log)('message -', message);
+        }
+        else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED) {
+            // log('4 details! ', details);
+            (0, helpers_1.log)('upload data completed message -', message);
+            // dirLog('4 data', data);
+        }
+        else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_FINISHED) {
+            (0, helpers_1.dirLog)('upload confirmed details', details);
+        }
+    };
+    const uploadResult = await RemoteFilesystem.updloadFileFromBuffer(keypair, bufferOfTheFile, resolvedFileName, fileInfo.filehash, fileInfo.size, myCb);
+    (0, helpers_1.log)('done! function uploadResult', uploadResult);
 };
 const testAddressConverstion = async (hdPathIndex) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(zeroUserMnemonic);
@@ -890,12 +927,7 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
-        ppNodeUrl: 'http://35.187.47.46', 
-        // ppNodePort: '8142',
-        // ppNodePort: '8146',
-        ppNodePort: '8150', 
-        // optional
-        keyPathParameters: keyPathParametersForSdk }));
+        ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
@@ -909,13 +941,16 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    // const filename = 'file500M_March_23_v9';
+    const filename = 'file800M_March_28_v10';
     // await testItFileUp(filename, hdPathIndex);
+    // await testItFileUpFromBuffer(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
     // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
     // const filesize= 200000002;
     // const filename= 'file200M_March_23_v7';
+    // const filehash = 'v05j1m527jl08b9slfo7kd7gua9elfsm8hs969ng';
+    // const filesize = 800_000_001;
     //
     // await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
