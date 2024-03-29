@@ -22,9 +22,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deserializeEncryptedWallet = exports.deriveKeyPair = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosOzDenom = exports.stratosDenom = void 0;
 const hdVault_1 = require("../config/hdVault");
+const Sdk_1 = __importDefault(require("../Sdk"));
 const cosmosUtils_1 = require("./cosmosUtils");
 const deriveManager_1 = require("./deriveManager");
 const keyUtils = __importStar(require("./keyUtils"));
@@ -34,14 +38,20 @@ Object.defineProperty(exports, "stratosOzDenom", { enumerable: true, get: functi
 Object.defineProperty(exports, "stratosTopDenom", { enumerable: true, get: function () { return hdVault_2.stratosTopDenom; } });
 Object.defineProperty(exports, "stratosUozDenom", { enumerable: true, get: function () { return hdVault_2.stratosUozDenom; } });
 const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
+    var _a, _b;
     let masterKeySeed;
+    if (keyIndex > hdVault_1.maxHdPathKeyindex) {
+        throw Error(`hd path index can not be more than ${hdVault_1.maxHdPathKeyindex}`);
+    }
     try {
         masterKeySeed = await keyUtils.getMasterKeySeed(password, encryptedMasterKeySeed);
     }
     catch (er) {
         return Promise.reject(false);
     }
-    const path = `${hdVault_1.keyPath}${keyIndex}`;
+    const keyPath = ((_a = Sdk_1.default.environment.keyPathParameters) === null || _a === void 0 ? void 0 : _a.fullKeyPath) ||
+        (0, hdVault_1.keyPath)(hdVault_1.slip10RawIndexes, (0, hdVault_1.masterkey)((_b = Sdk_1.default.environment.keyPathParameters) === null || _b === void 0 ? void 0 : _b.masterkey));
+    const path = `${keyPath}${keyIndex}`;
     const privateKeySeed = (0, deriveManager_1.derivePrivateKeySeed)(masterKeySeed, path);
     const derivedKeyPair = await (0, deriveManager_1.deriveKeyPairFromPrivateKeySeed)(privateKeySeed);
     const { address, encodedPublicKey, privateKey } = derivedKeyPair;

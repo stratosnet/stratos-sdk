@@ -714,7 +714,8 @@ const downloadFileFromRemote = async (fileReadName, randomTestPreffix, hdPathInd
     await main(receiverMnemonic, hdPathIndex);
     const uploadedLocalFileHash = await FilesystemService.calculateFileHash(uploadedFileWritePath);
     const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
-    const downloadResult = await RemoteFilesystem.downloadFile(keypair, filePathToSaveDownloadedTo, uploadedLocalFileHash);
+    const filesize = 10000001;
+    const downloadResult = await RemoteFilesystem.downloadFile(keypair, filePathToSaveDownloadedTo, uploadedLocalFileHash, filesize);
     const { filePathToSave } = downloadResult;
     const downloadedFileHash = await FilesystemService.calculateFileHash(filePathToSave);
     if (downloadedFileHash !== uploadedLocalFileHash) {

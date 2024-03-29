@@ -1,4 +1,5 @@
-import { log } from '../services/helpers';
+import { maxHdPathKeyindex } from '../config/hdVault';
+// import { log } from '../services/helpers';
 import * as cosmosWallet from './cosmosWallet';
 import * as keyUtils from './keyUtils';
 import { convertArrayToString, convertStringToArray, MnemonicPhrase } from './mnemonic';
@@ -52,6 +53,9 @@ export const createMasterKeySeed = async (
   password: string,
   hdPathIndex = 0,
 ): Promise<MasterKeyInfo> => {
+  if (hdPathIndex > maxHdPathKeyindex) {
+    throw Error(`hd path index can not be more than ${maxHdPathKeyindex}`);
+  }
   // log('Generating master key seed');
   const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
 

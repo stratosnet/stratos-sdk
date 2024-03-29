@@ -36,22 +36,23 @@ const getRpcRoute = (): string => {
 const getPpNodeRoute = (): string => {
   const { ppNodeUrl, ppNodePort } = Sdk.environment;
 
-  if (!ppNodeUrl || !ppNodePort) {
+  if (!ppNodeUrl) {
     throw new Error(
-      'SDK must be initialized with pp node url and port prior to use the getPpNodeRoute function',
+      'SDK must be initialized with pp node url and (optionally) port prior to use the getPpNodeRoute function',
     );
   }
 
-  return `${ppNodeUrl}:${ppNodePort}`;
+  const ppNodeUrlRes = `${ppNodeUrl}${ppNodePort ? `:${ppNodePort}` : ''}`;
+  return ppNodeUrlRes;
 };
 
-const getExplorerRoute = (): string => {
-  const { explorerUrl } = Sdk.environment;
-
-  const url = `${explorerUrl}`;
-
-  return url;
-};
+// const getExplorerRoute = (): string => {
+//   const { explorerUrl } = Sdk.environment;
+//
+//   const url = `${explorerUrl}`;
+//
+//   return url;
+// };
 
 export const apiPost = async (
   url: string,
@@ -123,7 +124,9 @@ export const sendRpcCall = async <N>(
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  log('from network ~ rpc call url', url);
+  // log('from network ~ rpc call url', url);
+  // log('from network ~ rpc call payload', payload);
+  // dirLog('from network ~ rpc call payload', payload);
   const dataResult = await apiPost(url, payload, { ...config });
 
   return dataResult;
