@@ -865,9 +865,7 @@ const testItFileUpFromBuffer = async (filename, hdPathIndex) => {
             (0, helpers_1.log)('message -', message);
         }
         else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED) {
-            // log('4 details! ', details);
             (0, helpers_1.log)('upload data completed message -', message);
-            // dirLog('4 data', data);
         }
         else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_FINISHED) {
             (0, helpers_1.dirLog)('upload confirmed details', details);
@@ -927,7 +925,17 @@ const main = async () => {
     // 2
     Sdk_1.default.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
-        ppNodeUrl: 'http://35.187.47.46', ppNodePort: '8142' }));
+        // ppNodeUrl: 'http://35.187.47.46',
+        // ppNodePort: '8142',
+        // ppNodePort: '8146',
+        // ppNodePort: '8150',
+        // optional
+        // keyPathParameters: keyPathParametersForSdk,
+        // ppNodeUrl: '35.233.146.208',
+        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+        // ppNodePort: '',
+        // pp8
+        ppNodeUrl: 'http://35.233.146.208', ppNodePort: '8143' }));
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
@@ -941,16 +949,13 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    const filename = 'file800M_March_28_v10';
+    // const filename = 'file20M_March_29_v1';
     // await testItFileUp(filename, hdPathIndex);
     // await testItFileUpFromBuffer(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
     // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
-    // const filesize= 200000002;
     // const filename= 'file200M_March_23_v7';
-    // const filehash = 'v05j1m527jl08b9slfo7kd7gua9elfsm8hs969ng';
-    // const filesize = 800_000_001;
     //
     // await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
@@ -966,7 +971,7 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
@@ -977,7 +982,7 @@ const main = async () => {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await runFaucet(hdPathIndex, testMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, testMnemonic);
     // await getOzoneBalance(hdPathIndex, testMnemonic);
     // const receiverPhrase = mnemonic.generateMnemonicPhrase(24);

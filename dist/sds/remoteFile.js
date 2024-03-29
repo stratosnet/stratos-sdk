@@ -134,7 +134,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
     });
     const encodedFileChunks = sortedFileInfoChunks
         .map(fileInfoChunk => {
-        // log('offsetstart, offsetend', fileInfoChunk.offsetstart, fileInfoChunk.offsetend);
         return fileInfoChunk.filedata || '';
     })
         .filter(Boolean);
@@ -159,7 +158,6 @@ const getUploadedFilesStatus = async (keypair, fileHash, progressCb = () => { })
         },
     ];
     const callResultGetFileStatus = await Network.sendUserRequestGetFileStatus(extraParamsForGetFileStatus);
-    // log('call result get file status (end)', JSON.stringify(callResultGetFileStatus));
     progressCb({
         result: {
             success: true,
@@ -172,10 +170,6 @@ const getUploadedFilesStatus = async (keypair, fileHash, progressCb = () => { })
     });
     const { response: responseGetFileStatus } = callResultGetFileStatus;
     if (!responseGetFileStatus) {
-        // dirLog(
-        //   'we dont have response for get file status request. it might be an error',
-        //   callResultGetFileStatus,
-        // );
         const errorMsg = 'we dont have response for get file status request. it might be an error';
         progressCb({
             result: {
@@ -192,9 +186,6 @@ const getUploadedFilesStatus = async (keypair, fileHash, progressCb = () => { })
     const { result: updloadedFileStatusResult } = responseGetFileStatus;
     const { return: requestGetFileStatusReturn, file_upload_state: fileUploadState, user_has_file: userHasFile, replicas, } = updloadedFileStatusResult;
     if (parseInt(requestGetFileStatusReturn, 10) !== 0) {
-        // throw new Error(
-        //   `return field in the request get file status response contains an error. Error code "${requestGetFileStatusReturn}"`,
-        // );
         const errorMsg = `return field in the file status response has an error. It must be equal to 0. Error code "${requestGetFileStatusReturn}"`;
         progressCb({
             result: { success: false, code: exports.UPLOAD_CODES.GET_FILE_STATUS_NOT_NUMBER },
@@ -311,7 +302,6 @@ const getUserRequestUploadParams = async (keypair, filehash, filename, filesize)
     const sequence = await getCurrentSequenceString(address);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
-    // log('MessageToSign for userRequestUpload', messageToSign);
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = [
         {
@@ -332,14 +322,10 @@ const getUserRequestUploadParams = async (keypair, filehash, filename, filesize)
 const getOffsetsAndResultFromRequestUpload = async (extraParams) => {
     const callResultInit = await Network.sendUserRequestUpload(extraParams);
     const { response: responseInit } = callResultInit;
-    // log('call result init (end of init)', JSON.stringify(callResultInit));
     const errorsList = [];
     if (!responseInit) {
         errorsList.push(`params for sendUserRequestUpload which we had when the error occured. ${JSON.stringify(extraParams)}`);
         errorsList.push('we dont have response. it might be an error.');
-        // log('params for sendUserRequestUpload which we had when the error occured', extraParams);
-        // log('we dont have response. it might be an error', callResultInit);
-        // throw new Error('we dont have response. it might be an error');
         return { responseInit, isContinueInit: 0, callResultInit, errorsList };
     }
     const { result: resultWithOffesets } = responseInit;
@@ -377,207 +363,9 @@ const updloadFile = async (keypair, fileReadPath) => {
     return (0, exports.updloadFileFromBuffer)(keypair, readBinaryFile, imageFileName, fileInfo.filehash, fileInfo.size);
 };
 exports.updloadFile = updloadFile;
-/*
- * @depricated replaced with updloadFileFromBuffer + uploadFile
- * */
-// export const updloadFileV1 = async (
-//   keypair: wallet.KeyPairInfo,
-//   fileReadPath: string,
-// ): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: UploadedFileStatusInfo }> => {
-//   const imageFileName = path.basename(fileReadPath);
-//
-//   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
-//
-//   const fileSize = fileInfo.size;
-//
-//   const extraParams = await getUserRequestUploadParams(
-//     keypair,
-//     fileInfo.filehash,
-//     imageFileName,
-//     fileInfo.size,
-//   );
-//
-//   const { responseInit, offsetstartInit, offsetendInit, isContinueInit } =
-//     await getOffsetsAndResultFromRequestUpload(extraParams);
-//
-//   let offsetStartGlobal;
-//   let offsetEndGlobal;
-//   let isContinueGlobal = 0;
-//
-//   let responseInitGlobal = responseInit;
-//
-//   isContinueGlobal = +isContinueInit;
-//
-//   offsetStartGlobal = offsetstartInit!;
-//   offsetEndGlobal = offsetendInit!;
-//
-//   if (isContinueGlobal === -13) {
-//     log('looks like the file was already sent. will try to reset its progress');
-//
-//     const extraParamsForUpload = await getUserUploadDataParams(keypair, fileInfo.filehash, '', true);
-//
-//     let callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
-//
-//     const { response: responseUploadToTest } = callResultUpload;
-//
-//     log('responseUploadToTest after sending the stop to sendUserUploadData', responseUploadToTest);
-//
-//     try {
-//       const {
-//         result: { return: returnStop },
-//       } = responseUploadToTest!;
-//
-//       if (+returnStop === -14) {
-//         log('we have stopped the upload succesfully. sending request upload again');
-//
-//         const { responseInit, offsetstartInit, offsetendInit, isContinueInit } =
-//           await getOffsetsAndResultFromRequestUpload(extraParams);
-//
-//         responseInitGlobal = responseInit;
-//         isContinueGlobal = +isContinueInit;
-//
-//         offsetStartGlobal = +offsetstartInit!;
-//         offsetEndGlobal = +offsetendInit!;
-//       }
-//     } catch (error) {
-//       console.log('error of stopping the upload', error);
-//       throw Error('we could not stop the upload. Exiting. try agian later');
-//     }
-//   }
-//
-//   if (offsetEndGlobal === undefined) {
-//     log('we dont have an offest end for init. could be an error. response is', responseInitGlobal);
-//
-//     throw new Error('we dont have an offest end for init. could be an error.');
-//   }
-//
-//   if (offsetStartGlobal === undefined) {
-//     log('we dont have an offest start for init. could be an error. response is', responseInitGlobal);
-//     throw new Error('we dont have an offest start for init. could be an error.');
-//   }
-//
-//   let readSize = 0;
-//   let completedProgress = 0;
-//
-//   offsetStartGlobal = +offsetStartGlobal;
-//   offsetEndGlobal = +offsetEndGlobal;
-//
-//   const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
-//
-//   let uploadReturn = '';
-//
-//   while (isContinueGlobal === 1) {
-//     const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-//
-//     if (!fileChunk) {
-//       log('fileChunk is missing, Exiting ', fileChunk);
-//       throw new Error('fileChunk is missing. Exiting');
-//     }
-//
-//     if (fileChunk) {
-//       const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
-//
-//       readSize = readSize + fileChunk.length;
-//
-//       completedProgress = (100 * readSize) / fileSize;
-//
-//       const completedProgressMessage = `completed ${readSize} from ${fileSize} bytes, or ${(
-//         Math.round(completedProgress * 100) / 100
-//       ).toFixed(2)}%`;
-//
-//       let responseUpload;
-//
-//
-//       do {
-//         const extraParamsForUpload = await getUserUploadDataParams(
-//           keypair,
-//           fileInfo.filehash,
-//           encodedFileChunk,
-//         );
-//
-//         let callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
-//
-//         const { response: responseUploadToTest } = callResultUpload;
-//
-//         if (!responseUploadToTest) {
-//           log('-- ERROR 1 -- call result upload (end)', JSON.stringify(callResultUpload));
-//           log('-- ERROR 1 we dont have upload response. it might be an error', callResultUpload);
-//           continue;
-//         }
-//
-//         if (!responseUploadToTest.id || !!responseUploadToTest.error) {
-//           log('ERROR 2 --- we dont have upload response id or ie has an error.', callResultUpload);
-//           log('ERROR 2a --- error.', callResultUpload.response?.error);
-//           continue;
-//         }
-//         responseUpload = responseUploadToTest;
-//         log('we have a correct responseUpload', completedProgressMessage);
-//       } while (!responseUpload);
-//
-//       const {
-//         result: { offsetend: offsetendUpload, offsetstart: offsetstartUpload, return: isContinueUpload },
-//       } = responseUpload;
-//
-//       uploadReturn = isContinueUpload;
-//
-//       isContinueGlobal = +isContinueUpload;
-//
-//       if (offsetendUpload === undefined) {
-//         log('--- ERROR 3 - we dont have an offest. could be an error. response is', responseUpload);
-//         break;
-//       }
-//
-//       if (offsetstartUpload === undefined) {
-//         log('--- ERROR 4 - we dont have an offest. could be an error. response is', responseUpload);
-//         break;
-//       }
-//
-//       offsetStartGlobal = +offsetstartUpload;
-//       offsetEndGlobal = +offsetendUpload;
-//     }
-//   }
-//
-//   log(`The latest upload request return code / value is "${uploadReturn}"`);
-//
-//   if (isContinueGlobal !== 0) {
-//     log('oh no!!! isContinueGlobal', isContinueGlobal);
-//
-//     const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}"`;
-//     throw new Error(errorMsg);
-//   }
-//
-//   let updloadedFileStateGlobal = 2; // failed
-//   let fileStatusInfoGlobal: UploadedFileStatusInfo;
-//   let attemptsCount = 0;
-//
-//   do {
-//     attemptsCount += 1;
-//
-//     const fileStatusInfo = await getUploadedFilesStatus(keypair, fileInfo.filehash);
-//     const { fileUploadState } = fileStatusInfo;
-//     fileStatusInfoGlobal = fileStatusInfo;
-//
-//     updloadedFileStateGlobal = fileUploadState;
-//
-//     await delay(FILE_STATUS_CHECK_WAIT_TIME);
-//   } while (attemptsCount <= FILE_STATUS_CHECK_MAX_ATTEMPTS && updloadedFileStateGlobal !== 3);
-//
-//   const uploadResult = {
-//     uploadReturn,
-//     filehash: fileInfo.filehash,
-//     fileStatusInfo: fileStatusInfoGlobal,
-//   };
-//
-//   console.log('Uploaded filehash: ', fileInfo.filehash);
-//
-//   return uploadResult;
-// };
-//
 const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, fileHash, fileSize, progressCb = () => { }) => {
-    // console.log('given fileBuffer to the sdk', fileBuffer);
     var _a;
     const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize);
-    // console.log('extraParams for getUserRequestUploadParams', extraParams);
     const { errorsList: initErrorsList, responseInit, callResultInit, offsetstartInit, offsetendInit, isContinueInit, } = await getOffsetsAndResultFromRequestUpload(extraParams);
     if (initErrorsList.length) {
         const errorMsg = 'sendUserRequestUpload has returned an error';
@@ -598,7 +386,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
     offsetStartGlobal = offsetstartInit;
     offsetEndGlobal = offsetendInit;
     if (isContinueGlobal === -13) {
-        // log('looks like the file was already sent. will try to reset its progress');
         const errorMsg = 'looks like the file was already sent. will try to reset its progress';
         progressCb({
             result: { success: false, code: exports.UPLOAD_CODES.USER_REQUEST_UPLOAD_FILE_ALREADY_SENT },
@@ -610,7 +397,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
         let callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
         const { response: responseUploadToTest } = callResultUpload;
-        // log(, responseUploadToTest);
         const resMsg = 'responseUploadToTest after sending the stop to sendUserUploadData';
         progressCb({
             result: { success: true, message: resMsg, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_REQUEST_SENT },
@@ -618,7 +404,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         try {
             const { result: { return: returnStop }, } = responseUploadToTest;
             if (+returnStop === -14) {
-                // log('we have stopped the upload succesfully. sending request upload again');
                 const resMsg = 'we have stopped the upload succesfully. sending request upload again';
                 progressCb({
                     result: {
@@ -636,7 +421,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             }
         }
         catch (error) {
-            // console.log('error of stopping the upload', error);
             const errorMsg = 'we could not stop the upload. Exiting. try agian later';
             progressCb({
                 result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_PROCESS_STOP_FAIL },
@@ -649,7 +433,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         }
     }
     if (offsetEndGlobal === undefined) {
-        // log('we dont have an offest end for init. could be an error. response is', responseInitGlobal);
         const errorMsg = 'we dont have an offest end for init. could be an error.';
         progressCb({
             result: { success: false, code: exports.UPLOAD_CODES.USER_REQUEST_UPLOAD_NO_OFFSET_END },
@@ -661,7 +444,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         throw Error(errorMsg);
     }
     if (offsetStartGlobal === undefined) {
-        // log('we dont have an offest start for init. could be an error. response is', responseInitGlobal);
         const errorMsg = 'we dont have an offest start for init. could be an error.';
         progressCb({
             result: { success: false, code: exports.UPLOAD_CODES.USER_REQUEST_UPLOAD_NO_OFFSET_START },
@@ -677,16 +459,10 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
     offsetStartGlobal = +offsetStartGlobal;
     offsetEndGlobal = +offsetEndGlobal;
     const readBinaryFile = fileBuffer;
-    // console.log('readBinaryFile after assignment', readBinaryFile);
-    // console.log('fileBuffer after assignment', fileBuffer);
     let uploadReturn = '';
     while (isContinueGlobal === 1) {
-        // console.log('offsetStartGlobal', offsetStartGlobal);
-        // console.log('offsetEndGlobal', offsetEndGlobal);
         const fileChunk = readBinaryFile.slice(offsetStartGlobal, offsetEndGlobal);
-        // console.log('fileChunk slice', fileChunk);
         if (!fileChunk) {
-            // log('fileChunk is missing, Exiting ', fileChunk);
             const errorMsg = 'fileChunk is missing. Exiting';
             progressCb({
                 result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_NO_FILE_CHUNK },
@@ -700,8 +476,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         if (fileChunk) {
             const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
             readSize = readSize + fileChunk.length;
-            // console.log('fileChunk.length', fileChunk.length);
-            // console.log('readSize', readSize);
             completedProgress = (100 * readSize) / fileSize;
             const completedPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
             const completedProgressMessage = `completed ${readSize} from ${fileSize} bytes, or ${completedPercentage}%`;
@@ -725,8 +499,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                 let callResultUpload = await Network.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {
-                    // log('-- ERROR 1 -- call result upload (end)', JSON.stringify(callResultUpload));
-                    // log('-- ERROR 1 we dont have upload response. it might be an error', callResultUpload);
                     const errorMsg = '-- ERROR 1 we dont have upload response. it might be an error';
                     progressCb({
                         result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_NO_RESPONSE },
@@ -738,8 +510,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                     continue;
                 }
                 if (!responseUploadToTest.id || !!responseUploadToTest.error) {
-                    // log('ERROR 2 --- we dont have upload response id or ie has an error.', callResultUpload);
-                    // log('ERROR 2a --- error.', callResultUpload.response?.error);
                     const errorMsg = `ERROR 2 --- we dont have upload response id or it has an error. ${JSON.stringify(callResultUpload)}`;
                     progressCb({
                         result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_NO_ID_IN_RESPONSE },
@@ -754,7 +524,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                     continue;
                 }
                 responseUpload = responseUploadToTest;
-                // log('we have a correct responseUpload', completedProgressMessage);
                 progressCb({
                     result: {
                         success: true,
@@ -775,9 +544,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             uploadReturn = isContinueUpload;
             isContinueGlobal = +isContinueUpload;
             if (offsetendUpload === undefined) {
-                // log('--- ERROR 3 - we dont have an offest. could be an error. response is', responseUpload);
                 const errorMsg = `--- ERROR 3 - we dont have an offest. could be an error. response is:  ${JSON.stringify(responseUpload)}`;
-                // log(errorMsg, responseUpload);
                 progressCb({
                     result: {
                         success: false,
@@ -785,16 +552,11 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                         message: errorMsg,
                         details: { offsetendUpload },
                     },
-                    // error: {
-                    //   message: errorMsg,
-                    //   details: { offsetendUpload },
-                    // },
                 });
                 break;
             }
             if (offsetstartUpload === undefined) {
                 const errorMsg = `--- ERROR 4 - we dont have an offest. could be an error. response is:  ${JSON.stringify(responseUpload)}`;
-                // log(errorMsg, responseUpload);
                 progressCb({
                     result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_NO_OFFSET_START },
                     error: {
@@ -808,7 +570,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             offsetEndGlobal = +offsetendUpload;
         }
     }
-    // log(`The latest upload request return code / value is "${uploadReturn}"`);
     progressCb({
         result: {
             success: true,
@@ -818,7 +579,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         },
     });
     if (isContinueGlobal !== 0) {
-        // log('oh no!!! isContinueGlobal', isContinueGlobal);
         const errorMsg = `There was an error during the upload. "return" from the request is "${isContinueGlobal}" , Details: (${uploadReturn})`;
         progressCb({
             result: { success: false, code: exports.UPLOAD_CODES.USER_UPLOAD_DATA_NO_CONTINUE },
@@ -855,8 +615,6 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             },
         },
     });
-    // console.log('Uploaded filehash: ', fileInfo.filehash);
-    // console.log('Uploaded filehash: ', fileHash);
     return uploadResult;
 };
 exports.updloadFileFromBuffer = updloadFileFromBuffer;

@@ -1188,9 +1188,7 @@ const testItFileUpFromBuffer = async (filename: string, hdPathIndex: number) => 
     } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_RESPONSE_CORRECT) {
       log('message -', message);
     } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED) {
-      // log('4 details! ', details);
       log('upload data completed message -', message);
-      // dirLog('4 data', data);
     } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_FINISHED) {
       dirLog('upload confirmed details', details);
     }
@@ -1283,8 +1281,8 @@ const main = async () => {
     nodeProtocolVersion: resolvedChainVersion,
     isNewProtocol,
     // devnet
-    ppNodeUrl: 'http://35.187.47.46',
-    ppNodePort: '8142',
+    // ppNodeUrl: 'http://35.187.47.46',
+    // ppNodePort: '8142',
     // ppNodePort: '8146',
     // ppNodePort: '8150',
     // optional
@@ -1292,6 +1290,11 @@ const main = async () => {
     // ppNodeUrl: '35.233.146.208',
     // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
     // ppNodePort: '',
+
+    // pp8
+    ppNodeUrl: 'http://35.233.146.208',
+    ppNodePort: '8143',
+
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
     // ppNodePort: '8143',
@@ -1325,7 +1328,7 @@ const main = async () => {
   // await testRequestUserFileList(0, hdPathIndex);
 
   // 2a - that is the file name - it has to be in ./src
-  const filename = 'file800M_March_28_v10';
+  // const filename = 'file20M_March_29_v1';
 
   // await testItFileUp(filename, hdPathIndex);
   // await testItFileUpFromBuffer(filename, hdPathIndex);
@@ -1334,10 +1337,7 @@ const main = async () => {
 
   // 3a
   // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
-  // const filesize= 200000002;
   // const filename= 'file200M_March_23_v7';
-  // const filehash = 'v05j1m527jl08b9slfo7kd7gua9elfsm8hs969ng';
-  // const filesize = 800_000_001;
   //
   // await testFileDl(hdPathIndex, filename, filehash, filesize);
 
@@ -1358,7 +1358,7 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 
@@ -1373,7 +1373,7 @@ const main = async () => {
   // await runFaucet(hdPathIndex, testMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
   // await mainSdsPrepay(hdPathIndex, testMnemonic);
   // await getOzoneBalance(hdPathIndex, testMnemonic);
