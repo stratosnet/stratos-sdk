@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNewProtocolFlag = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
+exports.toBuffer = exports.toArrayBuffer = exports.getNewProtocolFlag = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
 const now = () => new Date().toLocaleString();
 exports.now = now;
 // NOTE - did log for console output -
@@ -45,4 +45,22 @@ const getNewProtocolFlag = (currentVersion, minRequiredNewVersion) => {
     return !isOldProtocol;
 };
 exports.getNewProtocolFlag = getNewProtocolFlag;
+function toArrayBuffer(buffer) {
+    const arrayBuffer = new ArrayBuffer(buffer.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < buffer.length; ++i) {
+        view[i] = buffer[i];
+    }
+    return arrayBuffer;
+}
+exports.toArrayBuffer = toArrayBuffer;
+function toBuffer(arrayBuffer) {
+    const buffer = Buffer.alloc(arrayBuffer.byteLength);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < buffer.length; ++i) {
+        buffer[i] = view[i];
+    }
+    return buffer;
+}
+exports.toBuffer = toBuffer;
 //# sourceMappingURL=helpers.js.map

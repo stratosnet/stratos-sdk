@@ -2,6 +2,7 @@ import { fromBase64, fromHex, toAscii, toBase64, toBech32, toHex } from '@cosmjs
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+// import { SimpleObject } from 'services/walletService';
 import * as accounts from './accounts';
 import { hdVault, tokens, options } from './config';
 import { mnemonic, wallet } from './hdVault';
@@ -13,6 +14,7 @@ import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 import Sdk from './Sdk';
 import type { KeyPathParameters } from './Sdk';
 import * as RemoteFilesystem from './sds/remoteFile';
+import * as SdsTypes from './sds/types';
 import { getCosmos, resetCosmos } from './services/cosmos';
 import * as FilesystemService from './services/filesystem';
 import { delay, dirLog, getTimestampInSeconds, log } from './services/helpers';
@@ -1147,8 +1149,8 @@ const testItFileUp = async (filename: string, hdPathIndex: number) => {
 
   const fileReadPath = path.resolve(SRC_ROOT, filename);
 
-  await RemoteFilesystem.updloadFile(keypair, fileReadPath);
-  log('done!');
+  const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileReadPath);
+  log('done!', uploadResult);
 };
 
 const testItFileUpFromBuffer = async (filename: string, hdPathIndex: number) => {
@@ -1167,21 +1169,43 @@ const testItFileUpFromBuffer = async (filename: string, hdPathIndex: number) => 
 
   const fileReadPath = path.resolve(SRC_ROOT, filename);
 
-  const imageFileName = path.basename(fileReadPath);
+  const resolvedFileName = path.basename(fileReadPath);
 
   const fileInfo = await FilesystemService.getFileInfo(fileReadPath);
 
-  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+  const bufferOfTheFile = await FilesystemService.getFileBuffer(fileReadPath);
+
+  const myCb = (data: SdsTypes.ProgressCbData) => {
+    const {
+      result: { success, code, details, message },
+      error,
+    } = data;
+
+    if (error) {
+      dirLog('we have an error. data from myCb', data);
+    } else if (success === false) {
+      log('success is false. data from myCb', data);
+    } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_RESPONSE_CORRECT) {
+      log('message -', message);
+    } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED) {
+      // log('4 details! ', details);
+      log('upload data completed message -', message);
+      // dirLog('4 data', data);
+    } else if (code === RemoteFilesystem.UPLOAD_CODES.USER_UPLOAD_DATA_FINISHED) {
+      dirLog('upload confirmed details', details);
+    }
+  };
 
   const uploadResult = await RemoteFilesystem.updloadFileFromBuffer(
     keypair,
-    readBinaryFile,
-    imageFileName,
+    bufferOfTheFile,
+    resolvedFileName,
     fileInfo.filehash,
     fileInfo.size,
+    myCb,
   );
 
-  log('done!', uploadResult);
+  log('done! function uploadResult', uploadResult);
 };
 
 const testAddressConverstion = async (hdPathIndex: number) => {
@@ -1260,15 +1284,19 @@ const main = async () => {
     isNewProtocol,
     // devnet
     ppNodeUrl: 'http://35.187.47.46',
-    // ppNodePort: '8142',
+    ppNodePort: '8142',
     // ppNodePort: '8146',
-    ppNodePort: '8150',
+    // ppNodePort: '8150',
     // optional
-    keyPathParameters: keyPathParametersForSdk,
-
+    // keyPathParameters: keyPathParametersForSdk,
+    // ppNodeUrl: '35.233.146.208',
+    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    // ppNodePort: '',
     // ppNodeUrl: 'http://35.233.85.255',
     // ppNodePort: '8142',
-
+    // ppNodePort: '8143',
+    // ppNodeUrl: 'http://34.73.153.160',
+    // ppNodePort: '8140',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.78.29.120',
     // ppNodePort: '8142',
@@ -1297,10 +1325,10 @@ const main = async () => {
   // await testRequestUserFileList(0, hdPathIndex);
 
   // 2a - that is the file name - it has to be in ./src
-  const filename = 'file100M_March_26_v3';
+  const filename = 'file800M_March_28_v10';
 
   // await testItFileUp(filename, hdPathIndex);
-  await testItFileUpFromBuffer(filename, hdPathIndex);
+  // await testItFileUpFromBuffer(filename, hdPathIndex);
 
   // await testFileHash(filename, hdPathIndex);
 
@@ -1308,6 +1336,8 @@ const main = async () => {
   // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
   // const filesize= 200000002;
   // const filename= 'file200M_March_23_v7';
+  // const filehash = 'v05j1m527jl08b9slfo7kd7gua9elfsm8hs969ng';
+  // const filesize = 800_000_001;
   //
   // await testFileDl(hdPathIndex, filename, filehash, filesize);
 
