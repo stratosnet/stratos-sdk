@@ -932,10 +932,7 @@ const main = async () => {
         // optional
         // keyPathParameters: keyPathParametersForSdk,
         // ppNodeUrl: '35.233.146.208',
-        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-        // ppNodePort: '',
-        // pp8
-        ppNodeUrl: 'http://35.233.146.208', ppNodePort: '8143' }));
+        ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
     // console.log('sdkEnv', Sdk.environment);
     // await evmSend();
     const hdPathIndex = 0;
@@ -949,12 +946,13 @@ const main = async () => {
     // 1a
     // await testRequestUserFileList(0, hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    // const filename = 'file20M_March_29_v1';
-    // await testItFileUp(filename, hdPathIndex);
+    // const filename = 'file2000M_April_4_v3.bin';
     // await testItFileUpFromBuffer(filename, hdPathIndex);
+    // await testItFileUp(filename, hdPathIndex);
     // await testFileHash(filename, hdPathIndex);
     // 3a
-    // const filehash= 'v05j1m57blkivpgj8m9ia3vs1tjf40hrr2emo9sg';
+    // const filehash = 'v05j1m51nj0f78oldq11lfvk3qobhb9rrj351n5g';
+    // const filesize = 2_000_000_006;
     // const filename= 'file200M_March_23_v7';
     //
     // await testFileDl(hdPathIndex, filename, filehash, filesize);
@@ -971,7 +969,7 @@ const main = async () => {
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink);
     // 1 Check balance
     // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
     // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
     // await getAccountTransactions(0, mainnetDev);
