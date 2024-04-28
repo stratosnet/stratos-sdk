@@ -1,5 +1,5 @@
-import * as NetworkTypes from '../../../network/types';
-import * as Types from '../types';
+import * as NetworkTypes from '../../../../network/networkTypes';
+import * as Types from '../../transactions/types';
 import { formatBaseTx } from './formatBaseTx';
 
 export const formatTxdDefault = (

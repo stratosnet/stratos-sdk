@@ -1,4 +1,4 @@
-import * as NetworkTypes from '../../../network/types';
+import * as NetworkTypes from '../../../../network/networkTypes';
 import * as Types from '../types';
 import { isDelegateTxBodyMessage } from '../utils';
 import { formatBaseTx } from './formatBaseTx';

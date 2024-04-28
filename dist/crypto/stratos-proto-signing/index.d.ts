@@ -1,4 +1,4 @@
-export * from './StratosDirectSecp256k1HdWallet';
-export * from './StratosRegistry';
-export * from './StratosSigningStargateClient';
-export * from './StratosStargateAccounts';
+export * as StratosDirectSecp256k1HdWallet from './StratosDirectSecp256k1HdWallet';
+export * as StratosRegistry from './StratosRegistry';
+export * as StratosSigningStargateClient from './StratosSigningStargateClient';
+export * as StratosStargateAccounts from './StratosStargateAccounts';

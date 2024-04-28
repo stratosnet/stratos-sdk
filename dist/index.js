@@ -26,11 +26,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.crypto = exports.networkTypes = exports.networkApi = exports.chain = exports.Sdk = void 0;
+exports.crypto = exports.networkTypes = exports.networkApi = exports.accounts = exports.chain = exports.Sdk = void 0;
 // export * as accounts from './accounts';
 // export * as accountTypes from './accounts/types';
 // export * as hdVault from './hdVault';
 // export * as Sdk from './Sdk';
+const accounts = __importStar(require("./accounts"));
+exports.accounts = accounts;
 const chain = __importStar(require("./chain"));
 exports.chain = chain;
 // import * as evm from './chain/evm';

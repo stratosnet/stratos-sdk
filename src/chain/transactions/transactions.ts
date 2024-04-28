@@ -1,9 +1,8 @@
-// import { fromBase64, toBase64, toHex } from '@cosmjs/encoding';
-// import { DecodedTxRaw, decodeTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { AuthInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import _get from 'lodash/get';
-import { stratosDenom } from '../config/hdVault';
+import * as transactionsCommon from '../../common/transactions';
+import { stratosDenom } from '../../config/hdVault';
 import {
   baseGasAmount,
   decimalPrecision,
@@ -11,11 +10,11 @@ import {
   minGasPrice,
   perMsgGasAmount,
   standardFeeAmount,
-} from '../config/tokens';
-import { toWei } from '../services/bigNumber';
-import { getCosmos } from '../services/cosmos';
-import { dirLog, log } from '../services/helpers';
-import { getValidatorsBondedToDelegator } from '../validators';
+} from '../../config/tokens';
+import { toWei } from '../../services/bigNumber';
+import { dirLog, log } from '../../services/helpers';
+import { cosmosService } from '../cosmos';
+import { validatorsApi } from '../validators';
 import * as Types from './types';
 
 const maxMessagesPerTx = 500;
@@ -25,7 +24,7 @@ interface JsonizedMessage {
   value: string;
 }
 
-export interface JsonizedTx {
+interface JsonizedTx {
   body: {
     messages: JsonizedMessage[];
   };
@@ -33,23 +32,23 @@ export interface JsonizedTx {
   signatures: string[];
 }
 
-function* payloadGenerator(dataList: Types.TxPayload[]) {
-  while (dataList.length) {
-    yield dataList.shift();
-  }
-}
+// function* payloadGenerator(dataList: Types.TxPayload[]) {
+//   while (dataList.length) {
+//     yield dataList.shift();
+//   }
+// }
 
-declare global {
-  interface Window {
-    encoder: any;
-  }
-  /* eslint-disable-next-line @typescript-eslint/no-namespace */
-  namespace NodeJS {
-    interface Global {
-      encoder: any;
-    }
-  }
-}
+// declare global {
+//   interface Window {
+//     encoder: any;
+//   }
+//   /* eslint-disable-next-line @typescript-eslint/no-namespace */
+//   namespace NodeJS {
+//     interface Global {
+//       encoder: any;
+//     }
+//   }
+// }
 
 export const assembleTxRawFromTx = (tx: Tx) => {
   const txR = TxRaw.fromPartial({
@@ -62,7 +61,7 @@ export const assembleTxRawFromTx = (tx: Tx) => {
 };
 
 export const encodeTxHrToTx = async (jsonizedTx: JsonizedTx) => {
-  const client = await getCosmos();
+  const client = await cosmosService.getCosmos();
 
   const encodedMessages = await client.encodeMessagesFromTheTxBody(jsonizedTx.body.messages);
 
@@ -90,7 +89,7 @@ export const decodeTxRawToTx = (signedTx: TxRaw) => {
 };
 
 export const decodeTxRawToTxHr = async (signedTx: TxRaw) => {
-  const client = await getCosmos();
+  const client = await cosmosService.getCosmos();
 
   const decoded = decodeTxRawToTx(signedTx);
 
@@ -112,7 +111,7 @@ export const encodeTxRawToEncodedTx = (signedTx: TxRaw): Uint8Array => {
 
 export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => {
   try {
-    const client = await getCosmos();
+    const client = await cosmosService.getCosmos();
 
     const txBytes = encodeTxRawToEncodedTx(signedTx);
 
@@ -161,7 +160,7 @@ export const getStandardFee = async (
   }
 
   try {
-    const client = await getCosmos();
+    const client = await cosmosService.getCosmos();
     const gas = await client.simulate(signerAddress, txMessages, '');
     const estimatedGas = Math.round(gas * gasAdjustment);
 
@@ -200,7 +199,7 @@ export const sign = async (
   const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
   // const fee = givenFee ? givenFee : getStandardDefaultFee();
 
-  const client = await getCosmos();
+  const client = await cosmosService.getCosmos();
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
 
@@ -209,20 +208,21 @@ export const sign = async (
   return signedTx;
 };
 
-export const getStandardAmount = (amounts: number[]): Types.AmountType[] => {
-  const result = amounts.map(amount => ({
-    amount: toWei(amount, decimalPrecision).toFixed(),
-    denom: stratosDenom,
-  }));
-
-  return result;
-};
+// common, move
+// export const getStandardAmount = (amounts: number[]): CommonTypes.AmountType[] => {
+//   const result = amounts.map(amount => ({
+//     amount: toWei(amount, decimalPrecision).toFixed(),
+//     denom: stratosDenom,
+//   }));
+//
+//   return result;
+// };
 
 export const getSendTx = async (
   keyPairAddress: string,
   sendPayload: Types.SendTxPayload[],
 ): Promise<Types.SendTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(sendPayload);
+  const payloadToProcess = transactionsCommon.payloadGenerator(sendPayload);
 
   let iteratedData = payloadToProcess.next();
 
@@ -234,7 +234,7 @@ export const getSendTx = async (
     const message = {
       typeUrl: Types.TxMsgTypes.Send,
       value: {
-        amount: getStandardAmount([amount]),
+        amount: transactionsCommon.getStandardAmount([amount]),
         fromAddress: keyPairAddress,
         toAddress: toAddress,
       },
@@ -252,7 +252,7 @@ export const getDelegateTx = async (
   delegatorAddress: string,
   delegatePayload: Types.DelegateTxPayload[],
 ): Promise<Types.DelegateTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(delegatePayload);
+  const payloadToProcess = transactionsCommon.payloadGenerator(delegatePayload);
 
   let iteratedData = payloadToProcess.next();
 
@@ -287,7 +287,7 @@ export const getBeginRedelegateTx = async (
   delegatorAddress: string,
   delegatePayload: Types.BeginRedelegateTxPayload[],
 ): Promise<Types.BeginRedelegateTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(delegatePayload);
+  const payloadToProcess = transactionsCommon.payloadGenerator(delegatePayload);
 
   let iteratedData = payloadToProcess.next();
 
@@ -324,7 +324,7 @@ export const getUnDelegateTx = async (
   delegatorAddress: string,
   unDelegatePayload: Types.UnDelegateTxPayload[],
 ): Promise<Types.UnDelegateTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(unDelegatePayload);
+  const payloadToProcess = transactionsCommon.payloadGenerator(unDelegatePayload);
 
   let iteratedData = payloadToProcess.next();
 
@@ -357,7 +357,7 @@ export const getWithdrawalRewardTx = async (
   delegatorAddress: string,
   withdrawalPayload: Types.WithdrawalRewardTxPayload[],
 ): Promise<Types.WithdrawalRewardTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(withdrawalPayload);
+  const payloadToProcess = transactionsCommon.payloadGenerator(withdrawalPayload);
 
   let iteratedData = payloadToProcess.next();
 
@@ -385,11 +385,11 @@ export const getWithdrawalRewardTx = async (
 export const getWithdrawalAllRewardTx = async (
   delegatorAddress: string,
 ): Promise<Types.WithdrawalRewardTxMessage[]> => {
-  const vListResult = await getValidatorsBondedToDelegator(delegatorAddress);
+  const vListResult = await validatorsApi.getValidatorsBondedToDelegator(delegatorAddress);
 
   const { data: withdrawalPayload } = vListResult;
 
-  const payloadToProcess = payloadGenerator(
+  const payloadToProcess = transactionsCommon.payloadGenerator(
     withdrawalPayload.map((item: { address: string }) => ({
       validatorAddress: item.address,
     })),
@@ -409,40 +409,6 @@ export const getWithdrawalAllRewardTx = async (
         validatorAddress: validatorAddress,
       },
     };
-
-    messagesList.push(message);
-
-    iteratedData = payloadToProcess.next();
-  }
-
-  return messagesList;
-};
-
-export const getSdsPrepayTx = async (
-  senderAddress: string,
-  prepayPayload: Types.SdsPrepayTxPayload[],
-): Promise<Types.SdsPrepayTxMessage[]> => {
-  const payloadToProcess = payloadGenerator(prepayPayload);
-
-  let iteratedData = payloadToProcess.next();
-
-  const messagesList: Types.SdsPrepayTxMessage[] = [];
-
-  while (iteratedData.value) {
-    const { amount } = iteratedData.value as Types.SdsPrepayTxPayload;
-
-    const message = {
-      typeUrl: Types.TxMsgTypes.SdsPrepay,
-      value: {
-        sender: senderAddress,
-        beneficiary: senderAddress,
-        // NOTE: this is still coins on tropos and it is amount on devnet
-        // coins: getStandardAmount([amount]),
-        amount: getStandardAmount([amount]),
-      },
-    };
-
-    dirLog('sds prepay message to be signed', message);
 
     messagesList.push(message);
 

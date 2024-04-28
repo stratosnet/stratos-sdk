@@ -1,4 +1,4 @@
-import * as NetworkTypes from '../../../network/types';
+import * as NetworkTypes from '../../../../network/networkTypes';
 import * as Types from '../types';
 import { formatBaseTx } from './formatBaseTx';
 
@@ -6,8 +6,6 @@ export const formatTxMsgCreateIndexingNode = (
   txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,
   txResponseItemLogEntry?: NetworkTypes.RestTxResponseLog,
 ): Types.FormattedBlockChainTxMessage => {
-  // const msgFrom = msg?.value?.reporter || baseTx.eventSender || '';
-
   const baseTx = formatBaseTx(txResponseItemTxBodyMessage, txResponseItemLogEntry);
 
   const toAddress = 'n/a';

@@ -1,4 +1,4 @@
-import * as NetworkTypes from '../../../network/types';
+import * as NetworkTypes from '../../../../network/networkTypes';
 import * as Types from '../types';
 import { isPrepayTxBodyMessage } from '../utils';
 import { formatBaseTx } from './formatBaseTx';

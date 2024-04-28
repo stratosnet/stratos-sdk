@@ -7,6 +7,7 @@ import {
 import Sdk from '../../Sdk';
 import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';
 import { type KeyPairInfo } from './hdVaultTypes';
+import * as keyManager from './keyManager';
 import * as keyUtils from './keyUtils';
 
 // used in externally to switch between keypairs and during create wallet
@@ -47,4 +48,19 @@ export const deriveKeyPair = async (
   };
 
   return res;
+};
+
+// helper to quickly derive a keypair from a givenMnemonic
+export const deriveKeyPairFromMnemonic = async (givenMnemonic: string, hdPathIndex = 0, password = '') => {
+  const encryptedMasterKeySeed = await keyManager.getMasterKeySeedFromPhrase(
+    givenMnemonic,
+    password,
+    hdPathIndex,
+  );
+
+  const encryptedMasterKeySeedInString = encryptedMasterKeySeed.toString();
+
+  const derivedKeyPair = await deriveKeyPair(hdPathIndex, password, encryptedMasterKeySeedInString);
+
+  return derivedKeyPair;
 };

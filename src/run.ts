@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 // import { getCosmos, resetCosmos } from './chain/cosmos';
 // import { SimpleObject } from 'services/walletService';
 // import * as accounts from './accounts';
-// import { hdVault, tokens, options } from './config';
+import { hdVault, tokens, chain } from './config';
 // import { mnemonic, wallet } from './hdVault';
 // import { deserializeWithEncryptionKey, serializeWithEncryptionKey } from './hdVault/cosmosUtils';
 // import * as cosmosWallet from './hdVault/cosmosWallet';
@@ -17,6 +17,7 @@ import dotenv from 'dotenv';
 // import { deriveKeyPair, deserializeEncryptedWallet } from './hdVault/wallet';
 // import Sdk from './Sdk';
 import * as stratos from './index';
+import { delay, dirLog, getTimestampInSeconds, log } from './services/helpers';
 
 // import * as FilesystemService from './services/filesystem';
 // import { delay, dirLog, getTimestampInSeconds, log } from './services/helpers';
@@ -63,25 +64,113 @@ const sdkEnvMainNet = {
   explorerUrl: 'https://big-dipper.thestratos.org',
 };
 
-// const testA = async (userMnemonic = zeroUserMnemonic, hdPathIndex = 0) => {
-//   const phrase = mnemonic.convertStringToArray(userMnemonic);
-//   const masterKeySeedInfo = await createMasterKeySeed(phrase, password);
-//
-//   const keyPairZero = await deriveKeyPair(
-//     hdPathIndex,
-//     password,
-//     masterKeySeedInfo.encryptedMasterKeySeed.toString(),
-//   );
-//
-//   console.log('keyPairZero', keyPairZero);
-// };
+const runFaucet = async (hdPathIndex: number, givenMnemonic: string) => {
+  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
+    givenMnemonic,
+    hdPathIndex,
+  );
 
-// const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
-//   const delegatorAddress = keyPairZero.address;
-//   const b = await accounts.getBalanceCardMetrics(delegatorAddress);
-//
-//   console.log('balanace card metrics ', b);
-// };
+  if (!derivedKeyPair) {
+    return;
+  }
+  const walletAddress = derivedKeyPair.address;
+  console.log('walletAddress', walletAddress);
+
+  const faucetUrl = stratos.Sdk.environment.faucetUrl || '';
+  log(`will be useing faucetUrl - "${faucetUrl}"`);
+
+  const result = await stratos.accounts.accountsApi.increaseBalance(
+    walletAddress,
+    faucetUrl,
+    hdVault.stratosTopDenom,
+  );
+
+  console.log('faucet result', result);
+};
+
+const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
+  const phrase = stratos.crypto.hdVault.mnemonic.convertStringToArray(givenMnemonic);
+  const masterKeySeedInfo = await stratos.crypto.hdVault.keyManager.createMasterKeySeed(
+    phrase,
+    password,
+    hdPathIndex,
+  );
+  const encryptedMasterKeySeed = masterKeySeedInfo.encryptedMasterKeySeed.toString();
+  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPair(
+    hdPathIndex,
+    password,
+    encryptedMasterKeySeed,
+  );
+
+  if (!derivedKeyPair) {
+    return;
+  }
+  const balanaces = await stratos.accounts.accountsApi.getBalanceCardMetrics(derivedKeyPair.address);
+
+  console.log('balanace card metrics ', balanaces);
+};
+
+const getOzoneBalance = async (hdPathIndex: number, givenMnemonic: string) => {
+  const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
+    givenMnemonic,
+    hdPathIndex,
+  );
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  const balance = await stratos.accounts.accountsApi.getOtherBalanceCardMetrics(keyPairZero.address);
+
+  console.log(' new other balanace card metrics ', balance);
+};
+
+const mainSend = async (
+  hdPathIndex: number,
+  givenReceiverMnemonic = zeroUserMnemonic,
+  hdPathIndexReceiver = 0,
+) => {
+  const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
+    givenReceiverMnemonic,
+    hdPathIndex,
+  );
+
+  const keyPairOne = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
+    givenReceiverMnemonic,
+    hdPathIndexReceiver,
+  );
+
+  if (!keyPairOne || !keyPairZero) {
+    return;
+  }
+
+  const fromAddress = keyPairZero.address;
+
+  const sendAmount = 1.25;
+
+  const sendTxMessages = await stratos.chain.transactions.getSendTx(fromAddress, [
+    { amount: sendAmount, toAddress: keyPairOne.address },
+  ]);
+  // console.log('run sendTxMessages ', sendTxMessages);
+
+  // TxRaw
+  const signedTx = await stratos.chain.transactions.sign(fromAddress, sendTxMessages);
+
+  if (signedTx) {
+    try {
+      const _result = await stratos.chain.transactions.broadcast(signedTx);
+      console.log('broadcasting result!', _result);
+    } catch (error) {
+      const err: Error = error as Error;
+      console.log('error broadcasting', err.message);
+    }
+  }
+
+  await delay(3000);
+  const balances = await stratos.accounts.accountsApi.getBalanceCardMetrics(keyPairOne.address);
+  console.log('receiver balance', balances);
+};
+
 const main = async () => {
   const sdkEnv = sdkEnvDev;
 
@@ -144,21 +233,22 @@ const main = async () => {
   // const _cosmosClient = await stratos.cosmos.cosmosService.getCosmos(serialized, password);
   const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
 
-  const wallet = await stratos.chain.cosmos.cosmosWallet.createWalletAtPath(hdPathIndex, zeroUserMnemonic);
-  console.log('wallet', wallet);
+  // const wallet = await stratos.chain.cosmos.cosmosWallet.createWalletAtPath(hdPathIndex, zeroUserMnemonic);
+  // console.log('wallet', wallet);
+
   // const a = await wallet.getAccounts();
   // console.log('a', a);
 
   // const encryptedMasterKeySeed =
 
-  const phrase = stratos.crypto.hdVault.mnemonic.convertStringToArray(zeroUserMnemonic);
-  const masterKeySeedInfo = await stratos.crypto.hdVault.keyManager.createMasterKeySeed(
-    phrase,
-    password,
-    hdPathIndex,
-  );
-  const b = masterKeySeedInfo.encryptedMasterKeySeed.toString();
-  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPair(hdPathIndex, password, b);
+  // const phrase = stratos.crypto.hdVault.mnemonic.convertStringToArray(zeroUserMnemonic);
+  // const masterKeySeedInfo = await stratos.crypto.hdVault.keyManager.createMasterKeySeed(
+  //   phrase,
+  //   password,
+  //   hdPathIndex,
+  // );
+  // const b = masterKeySeedInfo.encryptedMasterKeySeed.toString();
+  // const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPair(hdPathIndex, password, b);
   // console.log('derivedKeyPair', derivedKeyPair);
 
   // const serialized = stratos.cosmos.cosmosUtils.serializeWithEncryptionKey(password, wallet);
@@ -201,7 +291,7 @@ const main = async () => {
 
   // 1 Check balance
   // st1ev0mv8wl0pqdn99wq5zkldxl527jv9y92ugz7g
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, testMnemonic);
   // await getBalanceCardMetrics(hdPathIndex, mainnetDev);
 

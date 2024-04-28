@@ -1,5 +1,6 @@
-import * as TxTypes from '../../../transactions/types';
-import * as NetworkTypes from '../../network/types';
+import * as TxTypes from '../../../chain/transactions/types';
+import * as NetworkTypes from '../../../network/networkTypes';
+import * as TxTypesPrepay from '../../../sds/transactions/types';
 
 export const isSendTxBodyMessage = (
   bodyMessage: NetworkTypes.RestTxBodyMessage,
@@ -35,5 +36,5 @@ export const isGetRewardsTxBodyMessage = (
 export const isPrepayTxBodyMessage = (
   bodyMessage: NetworkTypes.RestTxBodyMessage,
 ): bodyMessage is NetworkTypes.RestSdsPrepayTxBodyMessage => {
-  return bodyMessage['@type'] === TxTypes.TxMsgTypes.SdsPrepay;
+  return bodyMessage['@type'] === TxTypesPrepay.TxMsgTypes.SdsPrepay;
 };

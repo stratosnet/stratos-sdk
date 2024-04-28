@@ -1,2 +1,2 @@
-export * as sdsTypes from './types';
-export * as sdsTransactions from './transactions';
+export * as sdsTxTypes from './types';
+export * from './transactions';

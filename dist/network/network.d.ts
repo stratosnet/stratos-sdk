@@ -1,4 +1,4 @@
-import * as Types from './types';
+import * as Types from './networkTypes';
 export declare const apiPost: (url: string, data?: Types.ParsedTransactionData, config?: Types.NetworkAxiosConfig) => Promise<Types.NetworkAxiosDataResult>;
 export declare const apiGet: (url: string, config?: Types.NetworkAxiosConfig) => Promise<Types.NetworkAxiosDataResult>;
 export declare const sendRpcCall: <N>(givenPayload: N, config?: Types.NetworkAxiosConfig) => Promise<Types.NetworkAxiosDataResult>;

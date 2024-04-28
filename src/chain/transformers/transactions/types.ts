@@ -1,5 +1,5 @@
-import * as TxTypes from '../../../transactions/types';
-import * as NetworkTypes from '../../network/types';
+import * as TxTypes from '../../../chain/transactions/types';
+import * as NetworkTypes from '../../../network/networkTypes';
 
 export type TxFormatter = (
   txResponseItemTxBodyMessage: NetworkTypes.RestTxBodyMessage,

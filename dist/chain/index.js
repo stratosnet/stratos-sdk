@@ -23,7 +23,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.evm = exports.cosmos = void 0;
+exports.transactions = exports.trasformers = exports.evm = exports.cosmos = void 0;
 exports.cosmos = __importStar(require("./cosmos"));
 exports.evm = __importStar(require("./evm"));
+exports.trasformers = __importStar(require("./transformers"));
+exports.transactions = __importStar(require("./transactions"));
 //# sourceMappingURL=index.js.map

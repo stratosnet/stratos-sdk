@@ -1,7 +1,7 @@
 import { stratosTopDenom } from '../../../../config/hdVault';
 import { decimalPrecision } from '../../../../config/tokens';
+import * as NetworkTypes from '../../../../network/networkTypes';
 import { create as createBigNumber, fromWei, ROUND_DOWN } from '../../../../services/bigNumber';
-import * as NetworkTypes from '../../../network/types';
 
 export const emptyAmounts = [{ amount: '0', denom: 'n/a' }];
 

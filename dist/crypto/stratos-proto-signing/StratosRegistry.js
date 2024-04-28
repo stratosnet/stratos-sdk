@@ -32,7 +32,7 @@ const getStratosTransactionRegistryTypes = () => {
     const msgPrepayProto = stratosTypes.stratos.sds.v1.MsgPrepay;
     const stratosTxRegistryTypes = [
         ...stargate_1.defaultRegistryTypes,
-        [types_1.TxMsgTypesSds.SdsPrepay, msgPrepayProto],
+        [types_1.TxMsgTypes.SdsPrepay, msgPrepayProto],
         ...evm_1.evmTransactions.registryTypes,
     ];
     return stratosTxRegistryTypes;

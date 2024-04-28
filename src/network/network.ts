@@ -5,8 +5,8 @@ import { hdVault, chain } from '../config';
 import Sdk from '../Sdk';
 import { getNewProtocolFlag } from './helpers';
 // import { log, getNewProtocolFlag } from '../../services/helpers';
-import * as Types from './types';
-import { TxHistoryUser } from './types';
+import * as Types from './networkTypes';
+import { TxHistoryUser } from './networkTypes';
 
 const _axios = axios.create({});
 

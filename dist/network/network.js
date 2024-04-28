@@ -10,7 +10,7 @@ const qs_1 = __importDefault(require("qs"));
 const config_1 = require("../config");
 const Sdk_1 = __importDefault(require("../Sdk"));
 const helpers_1 = require("./helpers");
-const types_1 = require("./types");
+const networkTypes_1 = require("./networkTypes");
 const _axios = axios_1.default.create({});
 _axios.defaults.transformResponse = [
     data => {
@@ -138,11 +138,11 @@ const submitTransaction = async (delegatorAddr, data, config) => {
 };
 exports.submitTransaction = submitTransaction;
 // done
-const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = types_1.TxHistoryUser.TxHistorySenderUser, config) => {
+const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = networkTypes_1.TxHistoryUser.TxHistorySenderUser, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
     console.log('url', url);
     console.log('given page', givenPage, pageLimit);
-    const userQueryType = userType === types_1.TxHistoryUser.TxHistorySenderUser
+    const userQueryType = userType === networkTypes_1.TxHistoryUser.TxHistorySenderUser
         ? `message.sender='${address}'`
         : `transfer.recipient='${address}'`;
     const givenEvents = [userQueryType];

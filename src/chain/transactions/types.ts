@@ -1,8 +1,11 @@
 import { DecodedTxRaw } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { type AmountType, type TransactionValue } from '../../common/types/transactionTypes';
+import { sdsTxTypes } from '../../sds/transactions';
 
 export enum TxMsgTypes {
+  All = '',
   Account = '/cosmos.auth.v1beta1.BaseAccount', // Account 10
   Send = '/cosmos.bank.v1beta1.MsgSend', // Transfer 1
   Delegate = '/cosmos.staking.v1beta1.MsgDelegate', // Delegate 2
@@ -10,12 +13,6 @@ export enum TxMsgTypes {
   WithdrawRewards = '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', // GetReward 4
   CreateValidator = '/cosmos.staking.v1beta1.MsgCreateValidator', // CreateValidator 9
   BeginRedelegate = '/cosmos.staking.v1beta1.MsgBeginRedelegate', // BeginRedelegate 17
-}
-
-export enum TxMsgTypes {
-  SdsAll = '', // All 0
-  SdsPrepay = '/stratos.sds.v1.MsgPrepay', // SdsPrepay 5
-  SdsFileUpload = '/stratos.sds.v1.MsgFileUpload', // SdsFileUpload 6
 }
 
 export enum TxMsgTypes {
@@ -38,8 +35,6 @@ export enum HistoryTxType {
   Delegate = 2,
   Undelegate = 3,
   GetReward = 4,
-  SdsPrepay = 5,
-  SdsFileUpload = 6,
   PotVolumeReport = 7,
   PotWithdraw = 8,
   CreateValidator = 9,
@@ -53,18 +48,19 @@ export enum HistoryTxType {
   BeginRedelegate = 17,
 }
 
-export enum TxHistoryTypes {
-  SdsAll = '',
-  Transfer = 'cosmos-sdk/MsgSend',
-  Delegate = 'cosmos-sdk/MsgDelegate',
-  Undelegate = 'cosmos-sdk/MsgUndelegate',
-  GetReward = 'cosmos-sdk/MsgWithdrawDelegationReward',
-  SdsPrepay = 'sds/PrepayTx',
-  BeginRedelegate = 'cosmos-sdk/MsgBeginRedelegate',
-}
+// we dont need it?
+// export enum TxHistoryTypes {
+// SdsAll = '',
+// Transfer = 'cosmos-sdk/MsgSend',
+// Delegate = 'cosmos-sdk/MsgDelegate',
+// Undelegate = 'cosmos-sdk/MsgUndelegate',
+// GetReward = 'cosmos-sdk/MsgWithdrawDelegationReward',
+// SdsPrepay = 'sds/PrepayTx',
+// BeginRedelegate = 'cosmos-sdk/MsgBeginRedelegate',
+// }
 
 export const TxMsgTypesMap = new Map<number, string>([
-  [HistoryTxType.All, TxMsgTypes.SdsAll],
+  [HistoryTxType.All, TxMsgTypes.All],
   [HistoryTxType.Account, TxMsgTypes.Account],
   [HistoryTxType.Transfer, TxMsgTypes.Send],
   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
@@ -72,8 +68,6 @@ export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
   [HistoryTxType.CreateValidator, TxMsgTypes.CreateValidator],
-  [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
-  [HistoryTxType.SdsFileUpload, TxMsgTypes.SdsFileUpload],
   [HistoryTxType.PotVolumeReport, TxMsgTypes.PotVolumeReport],
   [HistoryTxType.PotFoundationDeposit, TxMsgTypes.PotFoundationDeposit],
   [HistoryTxType.PotWithdraw, TxMsgTypes.PotWithdraw],
@@ -82,49 +76,42 @@ export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.RegisterCreateIndexingNode, TxMsgTypes.RegisterCreateIndexingNode],
   [HistoryTxType.RegisterRemoveIndexingNode, TxMsgTypes.RegisterRemoveIndexingNode],
   [HistoryTxType.RegisterIndexingNodeRegistrationVote, TxMsgTypes.RegisterIndexingNodeRegistrationVote],
+  [sdsTxTypes.HistoryTxType.SdsPrepay, sdsTxTypes.TxMsgTypes.SdsPrepay],
+  [sdsTxTypes.HistoryTxType.SdsFileUpload, sdsTxTypes.TxMsgTypes.SdsFileUpload],
 ]);
 
 export const BlockChainTxMsgTypesMap = new Map<number, string>([
-  [HistoryTxType.All, TxMsgTypes.SdsAll],
+  [HistoryTxType.All, TxMsgTypes.All],
   [HistoryTxType.Transfer, TxMsgTypes.Send],
   [HistoryTxType.Delegate, TxMsgTypes.Delegate],
   [HistoryTxType.BeginRedelegate, TxMsgTypes.BeginRedelegate],
   [HistoryTxType.Undelegate, TxMsgTypes.Undelegate],
   [HistoryTxType.GetReward, TxMsgTypes.WithdrawRewards],
-  [HistoryTxType.SdsPrepay, TxMsgTypes.SdsPrepay],
+  [sdsTxTypes.HistoryTxType.SdsPrepay, sdsTxTypes.TxMsgTypes.SdsPrepay],
 ]);
 
 export const TxHistoryTypesMap = new Map<string, number>([
-  [TxMsgTypes.SdsAll, HistoryTxType.All],
+  [TxMsgTypes.All, HistoryTxType.All],
   [TxMsgTypes.Send, HistoryTxType.Transfer],
   [TxMsgTypes.Delegate, HistoryTxType.Delegate],
   [TxMsgTypes.BeginRedelegate, HistoryTxType.BeginRedelegate],
   [TxMsgTypes.Undelegate, HistoryTxType.Undelegate],
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
-  [TxMsgTypes.SdsPrepay, HistoryTxType.SdsPrepay],
+  [sdsTxTypes.TxMsgTypes.SdsPrepay, sdsTxTypes.HistoryTxType.SdsPrepay],
 ]);
 
-export interface EmptyObject {
-  [key: string]: any;
-}
+// export interface EmptyObject {
+//   [key: string]: any;
+// }
 
 export interface BroadcastResult extends DeliverTxResponse {}
 
 export interface SignedTransaction extends TxRaw {}
 export interface DecodedSignedTransaction extends DecodedTxRaw {}
 
-export interface AmountType {
-  amount: string;
-  denom: string;
-}
-
 export interface TransactionFee {
   amount: AmountType[];
   gas: string;
-}
-
-export interface TransactionValue {
-  amount?: AmountType | AmountType[];
 }
 
 export interface SendTransactionValue extends TransactionValue {
@@ -137,12 +124,7 @@ export interface DelegateTransactionValue extends TransactionValue {
   validatorAddress: string;
 }
 
-export interface SdsPrepayValue extends TransactionValue {
-  sender: string;
-  coins: AmountType[];
-}
-
-type TransactionValueType = SendTransactionValue | DelegateTransactionValue | SdsPrepayValue;
+type TransactionValueType = SendTransactionValue | DelegateTransactionValue | sdsTxTypes.SdsPrepayValue;
 
 export interface TransactionMessage {
   typeUrl: TxMsgTypes;
@@ -199,21 +181,11 @@ export interface WithdrawalRewardTxMessage {
   };
 }
 
-export interface SdsPrepayTxMessage {
-  typeUrl: TxMsgTypes;
-  value: {
-    sender: string;
-    // NOTE: this is still coins on tropos and it is amount on devnet
-    // coins: AmountType[];
-    amount: AmountType[];
-  };
-}
-
 export type TxMessage =
   | SendTxMessage
   | DelegateTxMessage
   | WithdrawalRewardTxMessage
-  | SdsPrepayTxMessage
+  | sdsTxTypes.SdsPrepayTxMessage
   | BeginRedelegateTxMessage;
 
 export interface SendTxPayload {
@@ -238,14 +210,10 @@ export interface WithdrawalRewardTxPayload {
   validatorAddress: string;
 }
 
-export interface SdsPrepayTxPayload {
-  amount: number;
-}
-
 export type TxPayload =
   | SendTxPayload
   | DelegateTxPayload
   | BeginRedelegateTxPayload
   | UnDelegateTxPayload
   | WithdrawalRewardTxPayload
-  | SdsPrepayTxPayload;
+  | sdsTxTypes.SdsPrepayTxPayload;

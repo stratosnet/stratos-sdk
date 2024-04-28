@@ -25,30 +25,30 @@ export interface NetworkAxiosConfig {
   params?: any;
 }
 
-export interface CosmosBaseAccount {
-  address: string;
-  pu_key: string;
-  account_number: string;
-  sequence: string;
-}
+// export interface CosmosBaseAccount {
+//   address: string;
+//   pu_key: string;
+//   account_number: string;
+//   sequence: string;
+// }
 
-export interface CosmosAccount {
-  '@type': string;
-  base_account: CosmosBaseAccount;
-  code_hash: string;
-  address: string;
-  pub_key: string;
-  account_number: string;
-  sequence: string;
-}
+// export interface CosmosAccount {
+//   '@type': string;
+//   base_account: CosmosBaseAccount;
+//   code_hash: string;
+//   address: string;
+//   pub_key: string;
+//   account_number: string;
+//   sequence: string;
+// }
 
 export interface AccountsDataResult extends NetworkAxiosDataResult {}
 
-export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
-  response?: {
-    account: CosmosAccount;
-  };
-}
+// export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
+//   response?: {
+//     account: CosmosAccount;
+//   };
+// }
 
 export type RestPagination = {
   next_key: null | number;

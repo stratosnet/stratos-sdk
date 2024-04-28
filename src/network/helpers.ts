@@ -3,7 +3,7 @@ import {
   type AvailableBalanceResponseO,
   type AvailableBalanceResponseN,
   type RestPagination,
-} from './types';
+} from './networkTypes';
 
 export const getNewProtocolFlag = (currentVersion: string, minRequiredNewVersion: string) => {
   console.log('current protocol version ', currentVersion);

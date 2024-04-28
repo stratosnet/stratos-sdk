@@ -1,5 +1,4 @@
-import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../../../../config/hdVault';
-import * as NetworkTypes from '../../../network/types';
+import * as NetworkTypes from '../../../../network/networkTypes';
 import { getBalanceCardMetricDinamicValue } from '../../balanceValues';
 import * as Types from '../types';
 import { isGetRewardsTxBodyMessage } from '../utils';

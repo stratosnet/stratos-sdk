@@ -2,6 +2,7 @@
 // export * as accountTypes from './accounts/types';
 // export * as hdVault from './hdVault';
 // export * as Sdk from './Sdk';
+import * as accounts from './accounts';
 import * as chain from './chain';
 // import * as evm from './chain/evm';
 import * as crypto from './crypto';
@@ -9,7 +10,7 @@ import { networkApi, networkTypes } from './network';
 import Sdk from './Sdk';
 
 // export * as cosmosService from './services/cosmos';
-export { Sdk, chain, networkApi, networkTypes, crypto };
+export { Sdk, chain, accounts, networkApi, networkTypes, crypto };
 // export * as networkService from './services/network/network';
 // export * as networkTypes from './services/network/types';
 // export * as Transformers from './services/transformers';

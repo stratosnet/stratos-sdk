@@ -23,7 +23,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.networkTypes = exports.networkApi = void 0;
+exports.networkHelpers = exports.networkTypes = exports.networkApi = void 0;
 exports.networkApi = __importStar(require("./network"));
-exports.networkTypes = __importStar(require("./types"));
+exports.networkTypes = __importStar(require("./networkTypes"));
+exports.networkHelpers = __importStar(require("./helpers"));
 //# sourceMappingURL=index.js.map

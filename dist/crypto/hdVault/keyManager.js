@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
+exports.getMasterKeySeedFromPhrase = exports.getSerializedWalletFromPhrase = exports.unlockMasterKeySeed = exports.createMasterKeySeed = exports.createMasterKeySeedFromGivenSeed = void 0;
 const cosmosUtils = __importStar(require("../../chain/cosmos/cosmosUtils"));
 const cosmosWallet = __importStar(require("../../chain/cosmos/cosmosWallet"));
 const hdVault_1 = require("../../config/hdVault");
@@ -99,4 +99,11 @@ const getSerializedWalletFromPhrase = async (userMnemonic, password, hdPathIndex
     return serialized;
 };
 exports.getSerializedWalletFromPhrase = getSerializedWalletFromPhrase;
+// helper which is used in wallet hdVault
+const getMasterKeySeedFromPhrase = async (userMnemonic, password, hdPathIndex = 0) => {
+    const phrase = (0, mnemonic_1.convertStringToArray)(userMnemonic);
+    const masterKeySeedInfo = await (0, exports.createMasterKeySeed)(phrase, password, hdPathIndex);
+    return masterKeySeedInfo.encryptedMasterKeySeed;
+};
+exports.getMasterKeySeedFromPhrase = getMasterKeySeedFromPhrase;
 //# sourceMappingURL=keyManager.js.map

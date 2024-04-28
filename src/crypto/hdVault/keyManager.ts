@@ -101,3 +101,11 @@ export const getSerializedWalletFromPhrase = async (
 
   return serialized;
 };
+
+// helper which is used in wallet hdVault
+export const getMasterKeySeedFromPhrase = async (userMnemonic: string, password: string, hdPathIndex = 0) => {
+  const phrase = convertStringToArray(userMnemonic);
+  const masterKeySeedInfo = await createMasterKeySeed(phrase, password, hdPathIndex);
+
+  return masterKeySeedInfo.encryptedMasterKeySeed;
+};

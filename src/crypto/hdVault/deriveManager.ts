@@ -1,14 +1,13 @@
 import * as CosmosCrypto from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import {
-  // getMasterKeySeedPublicKey,
   getPublicKeyFromPrivKey,
   getMasterKeySeedPublicKeyWithKeccak,
 } from '../../chain/cosmos/cosmosWallet';
 import { type KeyPair, type KeyPairCurve } from './hdVaultTypes';
 import {
   generateMasterKeySeed,
-  getEncodedPublicKey, // getAddressFromPubKey,
+  getEncodedPublicKey,
   getAminoPublicKey,
   getAddressFromPubKeyWithKeccak,
 } from './keyUtils';
