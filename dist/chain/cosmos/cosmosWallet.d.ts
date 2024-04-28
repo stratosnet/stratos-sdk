@@ -1,4 +1,4 @@
-import StratosDirectSecp256k1HdWallet from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
+import { StratosDirectSecp256k1HdWallet } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
 import { PubKey } from './cosmosTypes';
 export declare const deserializeEncryptedWallet: (serializedWallet: string, password: string) => Promise<StratosDirectSecp256k1HdWallet>;
 export declare const serializeWallet: (wallet: StratosDirectSecp256k1HdWallet, password: string) => Promise<string>;

@@ -324,9 +324,9 @@ const main = async () => {
   // const redelegateAmount = 5;
 
   // await mainReDelegate(0, zeroUserMnemonic, validatorSrcAddress, validatorDstAddress, redelegateAmount);
-  // const hdPathIndexReceiver = 1;
+  const hdPathIndexReceiver = 1;
 
-  // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
+  await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
 
   // await getBalanceCardMetrics(hdPathIndexReceiver, zeroUserMnemonic);
   // const vAddress = 'stvaloper1dnt7mjfxskza094cwjvt70707ts2lc2hv9zrkh';

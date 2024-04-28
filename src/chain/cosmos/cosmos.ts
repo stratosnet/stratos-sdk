@@ -1,6 +1,5 @@
 import { Registry } from '@cosmjs/proto-signing';
-// import { AccountsData } from '../accounts/types';
-import StratosDirectSecp256k1HdWallet from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
+import { StratosDirectSecp256k1HdWallet } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
 import { getStratosTransactionRegistryTypes } from '../../crypto/stratos-proto-signing/StratosRegistry';
 import { StratosSigningStargateClient } from '../../crypto/stratos-proto-signing/StratosSigningStargateClient';
 import { accountFromAnyStratos } from '../../crypto/stratos-proto-signing/StratosStargateAccounts';

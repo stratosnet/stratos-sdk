@@ -1,24 +1,13 @@
 import { pathToString, stringToPath } from '@cosmjs/crypto';
-import {
-  // Bip39,
-  // EnglishMnemonic,
-  // HdPath,
-  Hmac, // ripemd160,
-  Secp256k1, // Secp256k1Signature,
-  // sha256,
-  Sha512,
-  Slip10Curve, // Slip10RawIndex,
-  // stringToPath,
-} from '@cosmjs/crypto';
-import { fromBase64, toAscii, toBase64 } from '@cosmjs/encoding';
+import { Slip10Curve } from '@cosmjs/crypto';
+import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { fromUtf8, toUtf8 } from '@cosmjs/encoding';
-// import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 import { assert, isNonNullObject } from '@cosmjs/utils';
 import BN from 'bn.js';
 import sjcl from 'sjcl';
-import StratosDirectSecp256k1HdWallet, {
-  Secp256k1Derivation, // defaultOptions as hdWalletDefaultOptions,
-  // makeStratosHubPath,
+import {
+  Secp256k1Derivation,
+  StratosDirectSecp256k1HdWallet,
 } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
 import { type DerivationInfoJson, type DirectSecp256k1HdWalletData } from './cosmosTypes';
 

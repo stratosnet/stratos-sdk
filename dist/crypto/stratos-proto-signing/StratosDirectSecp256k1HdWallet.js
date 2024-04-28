@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultOptions = exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
+exports.StratosDirectSecp256k1HdWallet = exports.defaultOptions = exports.makeStratosHubPath = exports.pubkeyToRawAddressWithKeccak = void 0;
 const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
@@ -182,5 +182,6 @@ class StratosDirectSecp256k1HdWallet extends proto_signing_1.DirectSecp256k1HdWa
         }));
     }
 }
-exports.default = StratosDirectSecp256k1HdWallet;
+exports.StratosDirectSecp256k1HdWallet = StratosDirectSecp256k1HdWallet;
+// export default StratosDirectSecp256k1HdWallet;
 //# sourceMappingURL=StratosDirectSecp256k1HdWallet.js.map

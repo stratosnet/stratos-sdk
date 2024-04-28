@@ -6,22 +6,15 @@ import {
   EncodeObject,
   encodePubkey,
   makeAuthInfoBytes,
-  makeSignDoc, // OfflineSigner,
+  makeSignDoc,
   TxBodyEncodeObject,
   OfflineSigner,
   isOfflineDirectSigner,
 } from '@cosmjs/proto-signing';
-import {
-  SigningStargateClient,
-  SignerData, // AccountParser,
-  SigningStargateClientOptions,
-} from '@cosmjs/stargate';
+import { SigningStargateClient, SignerData, SigningStargateClientOptions } from '@cosmjs/stargate';
 import { createProtobufRpcClient } from '@cosmjs/stargate/build/queryclient';
-import {
-  HttpEndpoint, // Tendermint34Client,
-  TendermintClient,
-} from '@cosmjs/tendermint-rpc';
-import { assert, assertDefined } from '@cosmjs/utils';
+import { HttpEndpoint, TendermintClient } from '@cosmjs/tendermint-rpc';
+import { assert } from '@cosmjs/utils';
 import * as stratosTypes from '@stratos-network/stratos-cosmosjs-types';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
 import { SimulateRequest, ServiceClientImpl } from 'cosmjs-types/cosmos/tx/v1beta1/service';

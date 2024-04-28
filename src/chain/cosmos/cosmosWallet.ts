@@ -1,14 +1,10 @@
-import {
-  Hmac, // ripemd160,
-  Secp256k1, // Secp256k1Signature,
-  Sha512,
-  Slip10Curve, // Slip10RawIndex,
-} from '@cosmjs/crypto';
+import { Hmac, Secp256k1, Sha512, Slip10Curve } from '@cosmjs/crypto';
 import { toAscii, toBase64 } from '@cosmjs/encoding';
 import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
-import StratosDirectSecp256k1HdWallet, { // Secp256k1Derivation,
+import {
   defaultOptions as hdWalletDefaultOptions,
   makeStratosHubPath,
+  StratosDirectSecp256k1HdWallet,
 } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
 import { Slip10Result, PubKey } from './cosmosTypes';
 import { isGteN, isZero, deserializeWithEncryptionKey, serializeWithEncryptionKey } from './cosmosUtils';

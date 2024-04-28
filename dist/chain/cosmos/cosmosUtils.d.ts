@@ -1,7 +1,7 @@
 import { Slip10Curve } from '@cosmjs/crypto';
 import BN from 'bn.js';
 import sjcl from 'sjcl';
-import StratosDirectSecp256k1HdWallet from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
+import { StratosDirectSecp256k1HdWallet } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
 export declare const isZero: (privkey: Uint8Array) => boolean;
 export declare const n: (curve: Slip10Curve) => BN;
 export declare const isGteN: (curve: Slip10Curve, privkey: Uint8Array) => boolean;

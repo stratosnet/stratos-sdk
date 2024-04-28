@@ -136,7 +136,7 @@ export interface StdSignature {
   readonly signature: string;
 }
 
-class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
+export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   /** Base secret */
   private readonly mySecret: EnglishMnemonic;
   /** BIP39 seed */
@@ -297,4 +297,4 @@ class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   }
 }
 
-export default StratosDirectSecp256k1HdWallet;
+// export default StratosDirectSecp256k1HdWallet;

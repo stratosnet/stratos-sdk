@@ -37,7 +37,7 @@ export interface StdSignature {
     readonly pub_key: Pubkey;
     readonly signature: string;
 }
-declare class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
+export declare class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     /** Base secret */
     private readonly mySecret;
     /** BIP39 seed */
@@ -54,4 +54,4 @@ declare class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     protected getMyKeyPair(hdPath: HdPath): Promise<Secp256k1Keypair>;
     protected getMyAccountsWithPrivkeys(): Promise<readonly AccountDataWithPrivkey[]>;
 }
-export default StratosDirectSecp256k1HdWallet;
+export {};

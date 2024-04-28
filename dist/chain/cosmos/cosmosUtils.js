@@ -8,11 +8,10 @@ const crypto_2 = require("@cosmjs/crypto");
 const crypto_3 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const encoding_2 = require("@cosmjs/encoding");
-// import { DirectSecp256k1HdWalletOptions } from '@cosmjs/proto-signing';
 const utils_1 = require("@cosmjs/utils");
 const bn_js_1 = __importDefault(require("bn.js"));
 const sjcl_1 = __importDefault(require("sjcl"));
-const StratosDirectSecp256k1HdWallet_1 = __importDefault(require("../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet"));
+const StratosDirectSecp256k1HdWallet_1 = require("../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const crypto_1 = require('@cosmjs/crypto');
 function isDerivationJson(thing) {
@@ -93,7 +92,7 @@ const deserializeWithEncryptionKey = async (password, serialization) => {
         prefix: firstPrefix,
         hdPaths,
     };
-    return StratosDirectSecp256k1HdWallet_1.default.fromMnemonic(mnemonic, options);
+    return StratosDirectSecp256k1HdWallet_1.StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
 };
 exports.deserializeWithEncryptionKey = deserializeWithEncryptionKey;
 const serializeWithEncryptionKey = (password, wallet) => {
