@@ -33,7 +33,7 @@
 
 #### Defined in
 
-services/network/types.ts:677
+network/types.ts:682
 
 ___
 
@@ -43,7 +43,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:689
+network/types.ts:694
 
 ___
 
@@ -53,7 +53,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:687
+network/types.ts:692
 
 ___
 
@@ -63,4 +63,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:688
+network/types.ts:693

@@ -35,7 +35,7 @@ Omit.createtime
 
 #### Defined in
 
-services/network/types.ts:457
+network/types.ts:457
 
 ___
 
@@ -49,7 +49,7 @@ Omit.filehash
 
 #### Defined in
 
-services/network/types.ts:454
+network/types.ts:454
 
 ___
 
@@ -63,7 +63,7 @@ Omit.filename
 
 #### Defined in
 
-services/network/types.ts:456
+network/types.ts:456
 
 ___
 
@@ -77,7 +77,7 @@ Omit.filesize
 
 #### Defined in
 
-services/network/types.ts:455
+network/types.ts:455
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:461
+network/types.ts:461
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:462
+network/types.ts:462
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:463
+network/types.ts:463
 
 ___
 
@@ -117,4 +117,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:464
+network/types.ts:464

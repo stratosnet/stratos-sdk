@@ -21,7 +21,7 @@
 
 #### Defined in
 
-services/network/types.ts:448
+network/types.ts:448
 
 ___
 
@@ -31,7 +31,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:450
+network/types.ts:450
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:449
+network/types.ts:449
 
 ___
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:447
+network/types.ts:447

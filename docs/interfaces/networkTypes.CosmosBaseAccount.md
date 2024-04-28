@@ -4,12 +4,6 @@
 
 [networkTypes](../modules/networkTypes.md).CosmosBaseAccount
 
-## Hierarchy
-
-- **`CosmosBaseAccount`**
-
-  ↳ [`CosmosBaseAccount`](accountTypes.CosmosBaseAccount.md)
-
 ## Table of contents
 
 ### Properties
@@ -27,7 +21,7 @@
 
 #### Defined in
 
-services/network/types.ts:31
+network/types.ts:31
 
 ___
 
@@ -37,7 +31,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:29
+network/types.ts:29
 
 ___
 
@@ -47,7 +41,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:30
+network/types.ts:30
 
 ___
 
@@ -57,4 +51,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:32
+network/types.ts:32

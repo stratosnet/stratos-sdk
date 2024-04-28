@@ -22,4 +22,4 @@
 
 #### Defined in
 
-services/network/types.ts:20
+network/types.ts:20

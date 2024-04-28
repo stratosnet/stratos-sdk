@@ -25,7 +25,7 @@
 
 #### Defined in
 
-services/network/types.ts:355
+network/types.ts:355
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:354
+network/types.ts:354
 
 ___
 
@@ -45,7 +45,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:350
+network/types.ts:350
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:353
+network/types.ts:353
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:352
+network/types.ts:352
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:357
+network/types.ts:357
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:356
+network/types.ts:356
 
 ___
 
@@ -95,4 +95,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:351
+network/types.ts:351

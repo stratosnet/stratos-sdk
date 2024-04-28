@@ -42,4 +42,4 @@
 
 #### Defined in
 
-services/network/types.ts:370
+network/types.ts:370

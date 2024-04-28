@@ -29,7 +29,7 @@
 
 #### Defined in
 
-services/network/types.ts:186
+network/types.ts:186
 
 ___
 
@@ -39,7 +39,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:185
+network/types.ts:185
 
 ___
 
@@ -49,4 +49,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:184
+network/types.ts:184

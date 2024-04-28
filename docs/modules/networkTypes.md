@@ -143,7 +143,7 @@
 
 #### Defined in
 
-services/network/types.ts:129
+network/types.ts:129
 
 ___
 
@@ -153,7 +153,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:119
+network/types.ts:119
 
 ___
 
@@ -170,7 +170,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:53
+network/types.ts:53
 
 ___
 
@@ -180,7 +180,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:157
+network/types.ts:157
 
 ___
 
@@ -190,7 +190,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:181
+network/types.ts:181
 
 ___
 
@@ -200,7 +200,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:848
+network/types.ts:850
 
 ___
 
@@ -210,7 +210,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:847
+network/types.ts:849
 
 ## Variables
 
@@ -227,4 +227,4 @@ services/network/types.ts:847
 
 #### Defined in
 
-services/network/types.ts:850
+network/types.ts:852

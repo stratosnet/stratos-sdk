@@ -37,7 +37,7 @@
 
 #### Defined in
 
-services/network/types.ts:263
+network/types.ts:263
 
 ___
 
@@ -47,7 +47,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:249
+network/types.ts:249
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:253
+network/types.ts:253
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:254
+network/types.ts:254
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:250
+network/types.ts:250
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:270
+network/types.ts:270
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:248
+network/types.ts:248
 
 ___
 
@@ -117,7 +117,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:251
+network/types.ts:251
 
 ___
 
@@ -127,7 +127,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:252
+network/types.ts:252
 
 ___
 
@@ -137,7 +137,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:261
+network/types.ts:261
 
 ___
 
@@ -147,4 +147,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:262
+network/types.ts:262

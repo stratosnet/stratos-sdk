@@ -32,4 +32,4 @@
 
 #### Defined in
 
-services/network/types.ts:677
+network/types.ts:682

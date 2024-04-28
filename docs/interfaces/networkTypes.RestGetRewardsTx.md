@@ -18,4 +18,4 @@
 
 #### Defined in
 
-services/network/types.ts:724
+network/types.ts:729

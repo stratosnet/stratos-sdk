@@ -25,4 +25,4 @@
 
 #### Defined in
 
-services/network/types.ts:287
+network/types.ts:287

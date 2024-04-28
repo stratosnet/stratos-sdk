@@ -1,8 +1,28 @@
 import _get from 'lodash/get';
+import * as TxTypes from '../chain/transactions/types';
+// import { type TxHistoryUserType, TxHistoryUser, RestTxHistoryResponse } from '../services/network/types';
+import {
+  getBalanceCardMetricDinamicValue,
+  getBalanceCardMetricValue,
+  getOzoneMetricValue,
+} from '../chain/transformers/balanceValues';
+import { transformTx } from '../chain/transformers/transactions';
+import { FormattedBlockChainTx, ParsedTxData } from '../chain/transformers/transactions/types';
 import { hdVault } from '../config';
 import { stratosTopDenom, stratosUozDenom } from '../config/hdVault';
 import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
-import * as ApiUtils from '../services/apiUtils';
+import {
+  // getAvailableBalance,
+  // getDelegatedBalance,
+  // getRewardBalance,
+  // getTxListBlockchain,
+  // getUnboundingBalance,
+  networkTypes,
+  networkApi,
+  networkHelpers, // requestBalanceIncrease,
+  // sendUserRequestGetOzone,
+} from '../network';
+// import * as ApiUtils from '../net /apiUtils';
 import {
   type BigNumberValue,
   type BigNumberType,
@@ -11,25 +31,6 @@ import {
   plus as plusBigNumber,
   ROUND_DOWN,
 } from '../services/bigNumber';
-import {
-  getAvailableBalance,
-  getDelegatedBalance,
-  getRewardBalance,
-  getTxListBlockchain,
-  getUnboundingBalance,
-  networkTypes,
-  requestBalanceIncrease,
-  sendUserRequestGetOzone,
-} from '../services/network';
-import { type TxHistoryUserType, TxHistoryUser, RestTxHistoryResponse } from '../services/network/types';
-import {
-  getBalanceCardMetricDinamicValue,
-  getBalanceCardMetricValue,
-  getOzoneMetricValue,
-} from '../services/transformers/balanceValues';
-import { transformTx } from '../services/transformers/transactions';
-import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
-import * as TxTypes from '../transactions/types';
 
 export interface OtherBalanceCardMetrics {
   ozone?: string;

@@ -19,7 +19,7 @@
 
 #### Defined in
 
-services/network/types.ts:293
+network/types.ts:293
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:294
+network/types.ts:294

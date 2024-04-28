@@ -26,4 +26,4 @@
 
 #### Defined in
 
-services/network/types.ts:195
+network/types.ts:195

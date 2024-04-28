@@ -22,7 +22,7 @@
 
 #### Defined in
 
-services/network/types.ts:761
+network/types.ts:766
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:760
+network/types.ts:765
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:759
+network/types.ts:764
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-services/network/types.ts:763
+network/types.ts:768
 
 ___
 
@@ -62,4 +62,4 @@ ___
 
 #### Defined in
 
-services/network/types.ts:762
+network/types.ts:767
