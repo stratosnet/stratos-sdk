@@ -167,7 +167,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:286
+chain/transactions/transactions.ts:276
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:251
+chain/transactions/transactions.ts:241
 
 ___
 
@@ -209,7 +209,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:221
+chain/transactions/transactions.ts:211
 
 ___
 
@@ -265,7 +265,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:323
+chain/transactions/transactions.ts:313
 
 ___
 
@@ -285,7 +285,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:385
+chain/transactions/transactions.ts:375
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:356
+chain/transactions/transactions.ts:346
 
 ___
 
