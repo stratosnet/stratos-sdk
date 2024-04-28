@@ -6,4 +6,5 @@
 
 ### Namespaces
 
+- [remoteFileSystem](sds.remoteFileSystem.md)
 - [transactions](sds.transactions.md)

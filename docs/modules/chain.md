@@ -10,3 +10,4 @@
 - [evm](chain.evm.md)
 - [transactions](chain.transactions.md)
 - [trasformers](chain.trasformers.md)
+- [validators](chain.validators.md)
