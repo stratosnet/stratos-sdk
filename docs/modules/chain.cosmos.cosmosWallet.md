@@ -20,7 +20,7 @@
 
 ### createWalletAtPath
 
-▸ **createWalletAtPath**(`hdPathIndex`, `mnemonic`): `Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+▸ **createWalletAtPath**(`hdPathIndex`, `mnemonic`): `Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Parameters
 
@@ -31,17 +31,17 @@
 
 #### Returns
 
-`Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+`Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:56
+chain/cosmos/cosmosWallet.ts:52
 
 ___
 
 ### deserializeEncryptedWallet
 
-▸ **deserializeEncryptedWallet**(`serializedWallet`, `password`): `Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+▸ **deserializeEncryptedWallet**(`serializedWallet`, `password`): `Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Parameters
 
@@ -52,11 +52,11 @@ ___
 
 #### Returns
 
-`Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+`Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:16
+chain/cosmos/cosmosWallet.ts:12
 
 ___
 
@@ -76,13 +76,13 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:84
+chain/cosmos/cosmosWallet.ts:80
 
 ___
 
 ### getMasterKeySeedPublicKey
 
-▸ **getMasterKeySeedPublicKey**(`masterKeySeed`): `Promise`\<`PubKey`\>
+▸ **getMasterKeySeedPublicKey**(`masterKeySeed`): `Promise`\<[`PubKey`](../interfaces/chain.cosmos.cosmosTypes.PubKey.md)\>
 
 #### Parameters
 
@@ -92,11 +92,11 @@ ___
 
 #### Returns
 
-`Promise`\<`PubKey`\>
+`Promise`\<[`PubKey`](../interfaces/chain.cosmos.cosmosTypes.PubKey.md)\>
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:105
+chain/cosmos/cosmosWallet.ts:101
 
 ___
 
@@ -116,13 +116,13 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:113
+chain/cosmos/cosmosWallet.ts:109
 
 ___
 
 ### getPublicKeyFromPrivKey
 
-▸ **getPublicKeyFromPrivKey**(`privkey`): `Promise`\<`PubKey`\>
+▸ **getPublicKeyFromPrivKey**(`privkey`): `Promise`\<[`PubKey`](../interfaces/chain.cosmos.cosmosTypes.PubKey.md)\>
 
 #### Parameters
 
@@ -132,11 +132,11 @@ ___
 
 #### Returns
 
-`Promise`\<`PubKey`\>
+`Promise`\<[`PubKey`](../interfaces/chain.cosmos.cosmosTypes.PubKey.md)\>
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:92
+chain/cosmos/cosmosWallet.ts:88
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `wallet` | [`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md) |
+| `wallet` | [`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md) |
 | `password` | `string` |
 
 #### Returns
@@ -157,4 +157,4 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:35
+chain/cosmos/cosmosWallet.ts:31

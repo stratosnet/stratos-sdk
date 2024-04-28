@@ -6,11 +6,12 @@ import * as accounts from './accounts';
 import * as chain from './chain';
 // import * as evm from './chain/evm';
 import * as crypto from './crypto';
-import { networkApi, networkTypes } from './network';
+import * as network from './network';
 import Sdk from './Sdk';
+import * as sds from './sds';
 
 // export * as cosmosService from './services/cosmos';
-export { Sdk, chain, accounts, networkApi, networkTypes, crypto };
+export { Sdk, sds, chain, accounts, network, crypto };
 // export * as networkService from './services/network/network';
 // export * as networkTypes from './services/network/types';
 // export * as Transformers from './services/transformers';

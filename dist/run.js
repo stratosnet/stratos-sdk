@@ -148,7 +148,7 @@ const main = async () => {
     // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     stratos.Sdk.init(Object.assign({}, sdkEnv));
-    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.networkApi.getChainAndProtocolDetails();
+    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
     stratos.Sdk.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
         // devnet
         // ppNodeUrl: 'http://35.187.47.46',

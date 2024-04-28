@@ -9,6 +9,7 @@
 ### Functions
 
 - [deriveKeyPair](crypto.hdVault.wallet.md#derivekeypair)
+- [deriveKeyPairFromMnemonic](crypto.hdVault.wallet.md#derivekeypairfrommnemonic)
 
 ## Functions
 
@@ -30,4 +31,26 @@
 
 #### Defined in
 
-crypto/hdVault/wallet.ts:13
+crypto/hdVault/wallet.ts:14
+
+___
+
+### deriveKeyPairFromMnemonic
+
+▸ **deriveKeyPairFromMnemonic**(`givenMnemonic`, `hdPathIndex?`, `password?`): `Promise`\<``false`` \| [`KeyPairInfo`](../interfaces/crypto.hdVault.hdVaultTypes.KeyPairInfo.md)\>
+
+#### Parameters
+
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `givenMnemonic` | `string` | `undefined` |
+| `hdPathIndex` | `number` | `0` |
+| `password` | `string` | `''` |
+
+#### Returns
+
+`Promise`\<``false`` \| [`KeyPairInfo`](../interfaces/crypto.hdVault.hdVaultTypes.KeyPairInfo.md)\>
+
+#### Defined in
+
+crypto/hdVault/wallet.ts:54

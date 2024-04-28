@@ -1,8 +1,7 @@
 import { StdFee } from '@cosmjs/amino';
 import { ExtendedSecp256k1Signature } from '@cosmjs/crypto';
 import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
-import { SigningStargateClient, SignerData, // AccountParser,
-SigningStargateClientOptions } from '@cosmjs/stargate';
+import { SigningStargateClient, SignerData, SigningStargateClientOptions } from '@cosmjs/stargate';
 import { HttpEndpoint } from '@cosmjs/tendermint-rpc';
 import { ServiceClientImpl } from 'cosmjs-types/cosmos/tx/v1beta1/service';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';

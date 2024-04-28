@@ -181,7 +181,7 @@ const main = async () => {
   stratos.Sdk.init({ ...sdkEnv });
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
-    await stratos.networkApi.getChainAndProtocolDetails();
+    await stratos.network.networkApi.getChainAndProtocolDetails();
 
   stratos.Sdk.init({
     ...sdkEnv,

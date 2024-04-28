@@ -38,7 +38,7 @@
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:49
+chain/cosmos/cosmos.ts:48
 
 ## Methods
 
@@ -59,7 +59,7 @@ chain/cosmos/cosmos.ts:49
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:74
+chain/cosmos/cosmos.ts:73
 
 ___
 
@@ -80,7 +80,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:51
+chain/cosmos/cosmos.ts:50
 
 ___
 
@@ -94,4 +94,4 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:91
+chain/cosmos/cosmos.ts:90

@@ -19,7 +19,7 @@
 
 ### deserializeWithEncryptionKey
 
-▸ **deserializeWithEncryptionKey**(`password`, `serialization`): `Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+▸ **deserializeWithEncryptionKey**(`password`, `serialization`): `Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Parameters
 
@@ -30,11 +30,11 @@
 
 #### Returns
 
-`Promise`\<[`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)\>
+`Promise`\<[`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)\>
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:86
+chain/cosmos/cosmosUtils.ts:75
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:54
+chain/cosmos/cosmosUtils.ts:43
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:48
+chain/cosmos/cosmosUtils.ts:37
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:35
+chain/cosmos/cosmosUtils.ts:24
 
 ___
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:39
+chain/cosmos/cosmosUtils.ts:28
 
 ___
 
@@ -129,7 +129,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `password` | `string` |
-| `wallet` | [`default`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md) |
+| `wallet` | [`StratosDirectSecp256k1HdWallet`](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md) |
 
 #### Returns
 
@@ -137,4 +137,4 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:117
+chain/cosmos/cosmosUtils.ts:106

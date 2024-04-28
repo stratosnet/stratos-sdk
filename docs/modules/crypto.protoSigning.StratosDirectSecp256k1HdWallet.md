@@ -8,7 +8,7 @@
 
 ### Classes
 
-- [default](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.default.md)
+- [StratosDirectSecp256k1HdWallet](../classes/crypto.protoSigning.StratosDirectSecp256k1HdWallet.StratosDirectSecp256k1HdWallet.md)
 
 ### Interfaces
 

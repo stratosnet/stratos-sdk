@@ -9,5 +9,6 @@
 ### Namespaces
 
 - [cosmosService](chain.cosmos.cosmosService.md)
+- [cosmosTypes](chain.cosmos.cosmosTypes.md)
 - [cosmosUtils](chain.cosmos.cosmosUtils.md)
 - [cosmosWallet](chain.cosmos.cosmosWallet.md)

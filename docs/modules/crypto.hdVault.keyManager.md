@@ -10,6 +10,7 @@
 
 - [createMasterKeySeed](crypto.hdVault.keyManager.md#createmasterkeyseed)
 - [createMasterKeySeedFromGivenSeed](crypto.hdVault.keyManager.md#createmasterkeyseedfromgivenseed)
+- [getMasterKeySeedFromPhrase](crypto.hdVault.keyManager.md#getmasterkeyseedfromphrase)
 - [getSerializedWalletFromPhrase](crypto.hdVault.keyManager.md#getserializedwalletfromphrase)
 - [unlockMasterKeySeed](crypto.hdVault.keyManager.md#unlockmasterkeyseed)
 
@@ -55,6 +56,28 @@ ___
 #### Defined in
 
 crypto/hdVault/keyManager.ts:23
+
+___
+
+### getMasterKeySeedFromPhrase
+
+▸ **getMasterKeySeedFromPhrase**(`userMnemonic`, `password`, `hdPathIndex?`): `Promise`\<`SjclCipherEncrypted`\>
+
+#### Parameters
+
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `userMnemonic` | `string` | `undefined` |
+| `password` | `string` | `undefined` |
+| `hdPathIndex` | `number` | `0` |
+
+#### Returns
+
+`Promise`\<`SjclCipherEncrypted`\>
+
+#### Defined in
+
+crypto/hdVault/keyManager.ts:106
 
 ___
 

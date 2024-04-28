@@ -42,7 +42,7 @@
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:197
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:190
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:107
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:100
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:181
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:174
 
 ___
 
@@ -106,7 +106,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:212
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:205
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:100
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:93
 
 ___
 
@@ -149,7 +149,7 @@ SigningStargateClient.sign
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:145
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:138
 
 ___
 
@@ -170,7 +170,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:305
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:298
 
 ___
 
@@ -196,7 +196,7 @@ SigningStargateClient.connectWithSigner
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:43
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:36
 
 ___
 
@@ -225,4 +225,4 @@ SigningStargateClient.createWithSigner
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosSigningStargateClient.ts:69
+crypto/stratos-proto-signing/StratosSigningStargateClient.ts:62

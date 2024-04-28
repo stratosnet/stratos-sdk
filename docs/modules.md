@@ -6,10 +6,11 @@
 
 ### Namespaces
 
+- [accounts](modules/accounts.md)
 - [chain](modules/chain.md)
 - [crypto](modules/crypto.md)
-- [networkApi](modules/networkApi.md)
-- [networkTypes](modules/networkTypes.md)
+- [network](modules/network.md)
+- [sds](modules/sds.md)
 
 ### Classes
 

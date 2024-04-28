@@ -181,7 +181,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `pubkey` | `PubKey` |
+| `pubkey` | [`PubKey`](../interfaces/chain.cosmos.cosmosTypes.PubKey.md) |
 
 #### Returns
 

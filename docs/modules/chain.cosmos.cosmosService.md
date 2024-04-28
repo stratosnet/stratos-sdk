@@ -35,7 +35,7 @@
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:112
+chain/cosmos/cosmos.ts:111
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:100
+chain/cosmos/cosmos.ts:99
 
 ___
 
@@ -70,4 +70,4 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmos.ts:96
+chain/cosmos/cosmos.ts:95
