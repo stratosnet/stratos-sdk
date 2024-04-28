@@ -1,1 +1,0 @@
-{"version":3,"file":"extensions.js","sourceRoot":"","sources":["../../../../src/chain/evm/transactions/extensions.ts"],"names":[],"mappings":";;;AAAA,0DAAuD;AACvD,mCAA+D;AAElD,QAAA,mBAAmB,GAAG;IACjC,SAAG,CAAC,WAAW,CAAC;QACd,KAAK,EAAE,kCAA0B,CAAC,MAAM,CAAC,EAAE,CAAC,CAAC,MAAM,EAAE;QACrD,OAAO,EAAE,gBAAQ,CAAC,6BAA6B;KAChD,CAAC;CACH,CAAC"}

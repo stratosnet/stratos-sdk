@@ -208,16 +208,6 @@ export const sign = async (
   return signedTx;
 };
 
-// common, move
-// export const getStandardAmount = (amounts: number[]): CommonTypes.AmountType[] => {
-//   const result = amounts.map(amount => ({
-//     amount: toWei(amount, decimalPrecision).toFixed(),
-//     denom: stratosDenom,
-//   }));
-//
-//   return result;
-// };
-
 export const getSendTx = async (
   keyPairAddress: string,
   sendPayload: Types.SendTxPayload[],
