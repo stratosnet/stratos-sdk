@@ -8,11 +8,6 @@ import multihashing from 'multihashing-async';
 import { delay } from '../services/helpers';
 import { type OpenedFileInfo } from './types';
 
-// export interface OpenedFileInfo {
-//   size: number;
-//   filehash: string;
-// }
-
 export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   try {
     const fileBuffer = fs.readFileSync(filePath);
@@ -50,29 +45,12 @@ export const calculateFileHashFromBuffer = async (fileBuffer: Buffer): Promise<s
   const cid = CID.create(1, 0x66, encodedHashO);
   const realFileHash = cid.toString(base32hex);
 
-  // const expectedHash = 'v05j1m54m3u86goe92lh6tilhp0jqibi0rpa7o00';
-
   return realFileHash;
 };
 
 export const calculateFileHash = async (filePath: string): Promise<string> => {
   const fileBuffer = await getFileBuffer(filePath);
   return calculateFileHashFromBuffer(fileBuffer);
-  // const firstKeccak = await multihashing(fileBuffer, 'keccak-256', 20);
-  // const secondKeccak = await multihashing(firstKeccak, 'keccak-256', 20);
-  //
-  // const keccak256Hasher = hasher.from({
-  //   name: 'keccak-256',
-  //   code: 0x1b,
-  //   encode: input => input.slice(-20),
-  // });
-  //
-  // const encodedHashO = await keccak256Hasher.digest(secondKeccak);
-  //
-  // const cid = CID.create(1, 0x66, encodedHashO);
-  // const realFileHash = cid.toString(base32hex);
-  //
-  // return realFileHash;
 };
 
 export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => {
@@ -111,7 +89,6 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
   try {
     const fileStream = fs.createReadStream(filePath);
     const stats = fs.statSync(filePath);
-    // console.log('🚀 ~ file: filesystem.ts ~ line 46 ~ getFileChunks ~ stats', stats);
 
     chunksList = await new Promise((resolve, reject) => {
       let bytesRead = 0;
@@ -167,15 +144,13 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
 
 export async function encodeBuffer(chunk: Buffer): Promise<string> {
   await delay(100);
-  //  Cannot create a string longer than 0x1fffffe8 characters
+  // NOTE: Cannot create a string longer than 0x1fffffe8 characters
   const base64data = chunk.toString('base64');
-  // console.log('good 1');
   return base64data;
 }
 
 export const encodeFile = async (fileBuffer: Buffer) => {
   const encodedFile = await encodeBuffer(fileBuffer);
-  console.log('good 2');
   return encodedFile;
 };
 

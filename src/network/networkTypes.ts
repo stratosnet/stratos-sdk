@@ -25,49 +25,12 @@ export interface NetworkAxiosConfig {
   params?: any;
 }
 
-// export interface CosmosBaseAccount {
-//   address: string;
-//   pu_key: string;
-//   account_number: string;
-//   sequence: string;
-// }
-
-// export interface CosmosAccount {
-//   '@type': string;
-//   base_account: CosmosBaseAccount;
-//   code_hash: string;
-//   address: string;
-//   pub_key: string;
-//   account_number: string;
-//   sequence: string;
-// }
-
 export interface AccountsDataResult extends NetworkAxiosDataResult {}
-
-// export interface CosmosAccountsDataResult extends NetworkAxiosDataResult {
-//   response?: {
-//     account: CosmosAccount;
-//   };
-// }
 
 export type RestPagination = {
   next_key: null | number;
-  // page: number;
   total: string;
 };
-
-// replaced with new api account balance
-// export interface CosmosAccountBalanceResponse {
-//   balances: Amount[];
-//   pagination: {
-//     next_key: string;
-//     total: string;
-//   };
-// }
-//
-// export interface CosmosAccountBalanceDataResult extends NetworkAxiosDataResult {
-//   response?: CosmosAccountBalanceResponse;
-// }
 
 export interface DelegatedBalanceResult {
   delegation: {
@@ -130,16 +93,12 @@ export type AvailableBalanceDataResult = AvailableBalanceDataResultO | Available
 
 export interface DelegatedBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    // height: number;
-    // result: DelegatedBalanceResult[];
     delegation_responses: DelegatedBalanceResult[];
     pagination: RestPagination | null;
   };
 }
 export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    // height: number;
-    // result: RewardBalanceResult;
     rewards: Rewards[];
     total: Amount[];
   };
@@ -147,8 +106,6 @@ export interface RewardBalanceDataResult extends NetworkAxiosDataResult {
 
 export interface UnboundingBalanceDataResult extends NetworkAxiosDataResult {
   response?: {
-    // height: number;
-    // result: UnboundingBalanceResult[];
     unbonding_responses: UnboundingBalanceResult[];
     pagination: RestPagination | null;
   };
@@ -162,23 +119,17 @@ export interface SubmitTransactionDataResult extends NetworkAxiosDataResult {
   response?: string;
 }
 
-// @depricated
-export interface TxAmount {
-  denom: string;
-  amount: number;
-}
-
 export interface Amount {
   denom: string;
   amount: string;
 }
 
 export interface TxFee {
-  amount: TxAmount[];
+  amount: Amount[];
   gas: string;
 }
 
-export type TxDataDataAmount = TxAmount[] | TxAmount;
+export type TxDataDataAmount = Amount[] | Amount;
 
 export interface TxData {
   sender: string;
@@ -195,7 +146,7 @@ export interface TxOriginMsg {
   value: {
     from_address: string;
     to_address: string;
-    amount: TxAmount[];
+    amount: Amount[];
   };
 }
 
@@ -216,33 +167,6 @@ export interface TxOrigin {
     signatures: TxSignature[];
   };
 }
-
-// export interface ExplorerTxData {
-//   txType: string;
-//   txData: TxData;
-//   fee: TxFee;
-//   hash: string;
-//   memo: string;
-// }
-//
-// export interface ExplorerTxItem {
-//   account: string;
-//   block_height: number;
-//   tx_type: string;
-//   tx_info: {
-//     tx_hash: string;
-//     tx_type: string;
-//     time: string;
-//     transaction_data: ExplorerTxData;
-//   };
-// }
-
-// export interface ExplorerTxListResponse {
-//   msg: string;
-//   code: number;
-//   data: ExplorerTxItem[];
-//   total: number;
-// }
 
 export interface ValidatorItem {
   operator_address: string;
@@ -273,10 +197,6 @@ export interface ValidatorItem {
 export interface ValidatorListResponse {
   validators: ValidatorItem[];
   pagination: RestPagination | null;
-  // pagination: {
-  //   next_key: string;
-  //   total: string;
-  // };
 }
 
 export interface ValidatorResponse {
@@ -316,7 +236,7 @@ export interface BlockChainTxMessage {
     from?: string;
     validator_address?: string;
     to_address?: string;
-    amount: TxAmount | TxAmount[];
+    amount: Amount | Amount[];
   };
 }
 
@@ -324,7 +244,7 @@ export interface BlockChainSentTxMessage extends BlockChainTxMessage {
   value: {
     from_address: string;
     to_address: string;
-    amount: TxAmount[];
+    amount: Amount[];
   };
 }
 
@@ -332,7 +252,7 @@ export interface BlockChainDelegatedTxMessage extends BlockChainTxMessage {
   value: {
     delegator_address: string;
     validator_address: string;
-    amount: TxAmount;
+    amount: Amount;
   };
 }
 
@@ -394,10 +314,6 @@ export interface RpcStatusResponse {
   };
 }
 
-// export interface ExplorerTxListDataResult extends NetworkAxiosDataResult {
-//   response?: ExplorerTxListResponse;
-// }
-
 export interface ValidatorListDataResult extends NetworkAxiosDataResult {
   response?: ValidatorListResponse;
 }
@@ -417,7 +333,6 @@ export interface RestTxListDataResult extends NetworkAxiosDataResult {
   response?: RestTxListResponse;
 }
 
-// eth main
 export interface MainRpcResponse {
   id: string;
   jsonrpc: string;
@@ -428,7 +343,6 @@ export interface MainRpcResponse {
   };
 }
 
-// eth_protocolVersion
 export interface EthProtocolRpcResponse extends MainRpcResponse {
   result: string;
 }
@@ -442,7 +356,6 @@ export interface FileUserRequestResult<T> extends NetworkAxiosDataResult {
   response?: T;
 }
 
-// request list
 export interface FileUserRequestListParams {
   walletaddr: string;
   page: number;
@@ -471,7 +384,6 @@ export interface FileUserRequestListResponse extends MainRpcResponse {
   };
 }
 
-// request upload
 export interface FileUserRequestUploadParams {
   filename: string;
   filesize: number;
@@ -558,7 +470,6 @@ export interface FileUserRequestUploadResponse extends MainRpcResponse {
   };
 }
 
-// upload data
 export interface FileUserUploadDataParams {
   filehash: string;
   data: string;
@@ -587,8 +498,6 @@ export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
     sequencynumber?: string;
   };
 }
-
-// / new tx history (from cosmos)
 
 export interface RestTxFeeInfo {
   amount: Amount[];
@@ -621,10 +530,6 @@ export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
 
 export interface RestTxHistoryResponse {
   pagination: RestPagination | null;
-  // pagination: {
-  //   next_key: string;
-  //   total: string;
-  // } | null;
   txs: RestTx[];
   tx_responses: RestTxResponse[];
 }
@@ -710,7 +615,6 @@ export interface RestGetRewardsTxBodyMessage extends RestTxBodyMessage {
 
 export interface RestSdsPrepayTxBodyMessage extends RestTxBodyMessage {
   sender: string;
-  // coins: Amount[];
   amount: Amount[];
 }
 export interface RestSendTx extends RestTx {

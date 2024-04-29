@@ -4,19 +4,10 @@ import { getStratosTransactionRegistryTypes } from '../../crypto/stratos-proto-s
 import { StratosSigningStargateClient } from '../../crypto/stratos-proto-signing/StratosSigningStargateClient';
 import { accountFromAnyStratos } from '../../crypto/stratos-proto-signing/StratosStargateAccounts';
 import Sdk from '../../Sdk';
-import { deserializeEncryptedWallet, createWalletAtPath } from './cosmosWallet';
+import { createWalletAtPath, deserializeEncryptedWallet } from './cosmosWallet';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const proto_signing_1 = require('@cosmjs/proto-signing');
-
-// @todo clean up this interface
-// export interface CosmosInstance {
-//   url: string;
-//   chainId: string;
-//   path: string;
-//   bech32MainPrefix: string;
-//   getAccounts(address: string): Promise<AccountsData>;
-// }
 
 const getCosmosClient = async (
   rpcEndpoint: string,
@@ -28,7 +19,6 @@ const getCosmosClient = async (
 
   const options: typeof proto_signing_1.SigningStargateClientOptions = {
     registry: clientRegistry,
-    // in order to be able to decode `ethSecp256k1` pubkey
     accountParser: accountFromAnyStratos,
   };
 

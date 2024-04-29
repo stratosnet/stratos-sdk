@@ -16,29 +16,20 @@ import { MnemonicPhrase } from './mnemonic';
 export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<string> => {
   const masterKeySeed = await generateMasterKeySeed(phrase);
 
-  // new, eth address
   const pubkey = await getMasterKeySeedPublicKeyWithKeccak(masterKeySeed);
   const address = getAddressFromPubKeyWithKeccak(pubkey);
 
-  // old address
-  // const pubkeyOld = await getMasterKeySeedPublicKey(masterKeySeed);
-  // const addressOld = getAddressFromPubKey(pubkeyOld);
   return address;
 };
 
 export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Promise<KeyPair> => {
   const pubkeyMine = await getPublicKeyFromPrivKey(privkey);
 
-  const encodeAminoPub = await getAminoPublicKey(pubkeyMine); // 1 amino dep - amino encodeAminoPubkey
+  const encodeAminoPub = await getAminoPublicKey(pubkeyMine);
 
-  // new, eth address
   const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);
   const address = getAddressFromPubKeyWithKeccak(pubkey);
 
-  // old address
-  // const addressOld = getAddressFromPubKey(pubkeyMine);
-
-  // console.log('old add 2', addressOld);
   const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
 
   return {

@@ -8,22 +8,21 @@ import {
   Slip10Curve,
   Slip10RawIndex,
 } from '@cosmjs/crypto';
-import { toBech32 } from '@cosmjs/encoding';
-import { toBase64 } from '@cosmjs/encoding';
+import { toBase64, toBech32 } from '@cosmjs/encoding';
 import {
   DirectSecp256k1HdWallet,
   DirectSecp256k1HdWalletOptions,
   DirectSignResponse,
+  executeKdf,
   KdfConfiguration,
   makeSignBytes,
-  executeKdf,
 } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import createKeccakHash from 'keccak';
 import {
-  stratosAddressPrefix,
-  slip10RawIndexes as slip10RawIndexesDefault,
   bip39Password as bip39PasswordDefaut,
+  slip10RawIndexes as slip10RawIndexesDefault,
+  stratosAddressPrefix,
 } from '../../config/hdVault';
 import Sdk from '../../Sdk';
 
@@ -53,14 +52,6 @@ export function pubkeyToRawAddressWithKeccak(pubkey: Uint8Array): Uint8Array {
   const fullRawAddress = new Uint8Array(keccak256HashOfPubkeyBuffer);
 
   const addressChunkOfBytes = fullRawAddress.slice(-20);
-
-  // const hexAddress = toHex(addressChunkOfBytes);
-  // console.log('hex address', hexAddress);
-
-  // const prefix = stratosAddressPrefix;
-  // const address = toBech32(prefix, addressChunkOfBytes);
-
-  // console.log('bench32 address', address);
 
   return addressChunkOfBytes;
 }
@@ -92,8 +83,6 @@ export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
   const { slip10RawIndexes: slip10RawIndexesToUse } = keyPathParameters;
 
   try {
-    // console.log('using slip10RawIndexesToUse', slip10RawIndexesToUse);
-
     return [
       Slip10RawIndex.hardened(slip10RawIndexesToUse[0]),
       Slip10RawIndex.hardened(slip10RawIndexesToUse[1]),
@@ -181,7 +170,6 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
   }
 
   public async getAccounts(): Promise<readonly AccountData[]> {
-    // console.log('stratos DirectSecp256k1HdWallet  getAccounts was called');
     const accountsWithPrivkeys = await this.getMyAccountsWithPrivkeys();
     return accountsWithPrivkeys.map(({ algo, pubkey, address }) => ({
       algo: algo,
@@ -192,7 +180,6 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
 
   public async signDirect(signerAddress: string, signDoc: SignDoc): Promise<DirectSignResponse> {
     const accounts = await this.getMyAccountsWithPrivkeys();
-    // console.log('stratos DirectSecp256k1HdWallet  sign direct was called', signDoc);
 
     const account = accounts.find(({ address }) => address === signerAddress);
 
@@ -210,7 +197,6 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes);
 
     const hashedMessage = signBytesWithKeccak;
-    // const hashedMessage = sha256(signBytes);
 
     const signature = await Secp256k1.createSignature(hashedMessage, privkey);
 
@@ -236,11 +222,6 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       type: '/stratos.crypto.v1.ethsecp256k1.PubKey' as const,
       value: base64ofPubkey,
     };
-
-    // console.log(
-    //   'from DirectSecp256k1HdWallet - pubkeyEncodedStratos (must have stratos type now)',
-    //   pubkeyEncodedStratos,
-    // );
 
     return {
       pub_key: pubkeyEncodedStratos,
@@ -269,22 +250,8 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
       this.myAccounts.map(async ({ hdPath, prefix }) => {
         const { privkey, pubkey } = await this.getMyKeyPair(hdPath);
 
-        // console.log('stratos DirectSecp256k1HdWallet fullPubkeyHex 1', pubkey);
         const { pubkey: fullPubkey } = await Secp256k1.makeKeypair(privkey);
-
-        // const fullPubkeyHex = Buffer.from(fullPubkey).toString('hex');
-
-        // const compressedPub = Secp256k1.compressPubkey(fullPubkey);
-        // const compressedPubHex = Buffer.from(compressedPub).toString('hex');
-
-        // console.log('from DirectSecp256k1HdWallet pub compressedPub ', compressedPub);
-        // console.log('from DirectSecp256k1HdWallet pub compressedPub compressedPubHex ', compressedPubHex);
-
-        // const addressOld = toBech32(prefix, rawSecp256k1PubkeyToRawAddress(pubkey));
         const address = toBech32(prefix, pubkeyToRawAddressWithKeccak(fullPubkey));
-
-        // console.log('from DirectSecp256k1HdWallet old address ', addressOld);
-        // console.log('from DirectSecp256k1HdWallet new address ', address);
 
         return {
           algo: 'secp256k1' as const,
@@ -296,5 +263,3 @@ export class StratosDirectSecp256k1HdWallet extends DirectSecp256k1HdWallet {
     );
   }
 }
-
-// export default StratosDirectSecp256k1HdWallet;

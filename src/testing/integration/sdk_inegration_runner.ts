@@ -11,7 +11,7 @@ import { networkApi } from '../../network';
 import Sdk from '../../Sdk';
 import { remoteFileSystemApi } from '../../sds/remoteFileSystem';
 import * as transactionsSds from '../../sds/transactions/transactions';
-import { log, delay, dirLog } from '../../services/helpers';
+import { delay, dirLog, log } from '../../services/helpers';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 
 /* eslint-disable @typescript-eslint/naming-convention */

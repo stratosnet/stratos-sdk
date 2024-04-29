@@ -1,5 +1,5 @@
 import { Any } from 'cosmjs-types/google/protobuf/any';
-import { MsgTypes, ExtensionOptionsEthereumTx } from './types';
+import { ExtensionOptionsEthereumTx, MsgTypes } from './types';
 
 export const evmExtensionOptions = [
   Any.fromPartial({

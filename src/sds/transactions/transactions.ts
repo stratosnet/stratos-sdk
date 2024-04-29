@@ -20,8 +20,6 @@ export const getSdsPrepayTx = async (
       value: {
         sender: senderAddress,
         beneficiary: senderAddress,
-        // NOTE: this is still coins on tropos and it is amount on devnet
-        // coins: getStandardAmount([amount]),
         amount: transactionsCommon.getStandardAmount([amount]),
       },
     };

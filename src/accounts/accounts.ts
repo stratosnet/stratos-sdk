@@ -32,7 +32,7 @@ export const increaseBalance = async (walletAddress: string, faucetUrl: string, 
       return { result: false, errorMessage: `Could not increase balance: Error: "${faucetError.message}"` };
     }
 
-    console.log('🚀 ~ file: accounts.ts ~ line 45 ~ increaseBalance ~ result', result);
+    console.log('🚀 ~ file: accounts.ts ~  increaseBalance ~ result', result);
   } catch (error) {
     console.log('Error: Faucet returns:', (error as Error).message);
     return {
@@ -244,7 +244,6 @@ export const getMaxAvailableBalance = async (
   const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = await getBalanceInWei(keyPairAddress, requestedDenom);
 
-  // NOTE: Do we need this?
   if (balanceInWei.gt(0)) {
     const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
     return balance;

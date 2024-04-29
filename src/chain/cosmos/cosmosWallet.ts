@@ -6,8 +6,8 @@ import {
   makeStratosHubPath,
   StratosDirectSecp256k1HdWallet,
 } from '../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet';
-import { Slip10Result, PubKey } from './cosmosTypes';
-import { isGteN, isZero, deserializeWithEncryptionKey, serializeWithEncryptionKey } from './cosmosUtils';
+import { PubKey, Slip10Result } from './cosmosTypes';
+import { deserializeWithEncryptionKey, isGteN, isZero, serializeWithEncryptionKey } from './cosmosUtils';
 
 export const deserializeEncryptedWallet = async (serializedWallet: string, password: string) => {
   let deserializedWallet;
@@ -32,14 +32,10 @@ export const serializeWallet = async (
   wallet: StratosDirectSecp256k1HdWallet,
   password: string,
 ): Promise<string> => {
-  // log('Beginning serializing..');
-
   let encryptedWalletInfoFour;
 
   try {
-    // encryptedWalletInfoFour = await serializeWithEncryptionKey(password, wallet);
     encryptedWalletInfoFour = serializeWithEncryptionKey(password, wallet);
-    // log('Serialization with prepared cryptoJs data Uint8 is done. ');
   } catch (error) {
     throw new Error(
       `Could not serialize a wallet with the encryption key. Error4 - ${(error as Error).message}`,

@@ -1,19 +1,10 @@
-import { stringToPath } from '@cosmjs/crypto';
-import {
-  Bip39,
-  EnglishMnemonic,
-  HdPath, // ripemd160,
-  Secp256k1,
-  Secp256k1Signature, // sha256, // Slip10RawIndex,
-} from '@cosmjs/crypto';
-import { fromBase64, fromHex, toBase64, toBech32, toHex, fromBech32 } from '@cosmjs/encoding';
-// import CryptoJS from 'crypto-js';
+import { Bip39, EnglishMnemonic, HdPath, Secp256k1, Secp256k1Signature, stringToPath } from '@cosmjs/crypto';
+import { fromBase64, fromBech32, fromHex, toBech32, toHex } from '@cosmjs/encoding';
 import createKeccakHash from 'keccak';
 import sjcl from 'sjcl';
 import { PubKey } from '../../chain/cosmos/cosmosTypes';
 import {
-  bip39Password as bip39PasswordDefault, // encryptionIterations,
-  // encryptionKeyLength,
+  bip39Password as bip39PasswordDefault,
   stratosAddressPrefix,
   stratosPubkeyPrefix,
 } from '../../config/hdVault';
@@ -65,15 +56,8 @@ export const getAddressFromPubKeyWithKeccak = (pubkey: Uint8Array): string => {
   const prefix = stratosAddressPrefix;
 
   const addressChunkOfBytes = pubkeyToRawAddressWithKeccak(pubkey);
-  // console.log('addressChunkOfBytes', addressChunkOfBytes);
-
-  // const hexAddress = toHex(addressChunkOfBytes);
-  // console.log('kk hex address', hexAddress);
 
   const address = toBech32(prefix, addressChunkOfBytes);
-  // console.log('kk bench32 address', address);
-  // const fAddress = fromBech32(address);
-  // console.log('fAddress', fAddress);
   return address;
 };
 
@@ -92,26 +76,6 @@ export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<
 
   return encodedPubKey;
 };
-
-// only used in keyManager but we have it in cosmosUtils
-// export const encryptMasterKeySeed = (
-//   password: string,
-//   masterKeySeed: Uint8Array,
-// ): sjcl.SjclCipherEncrypted => {
-//   const strMasterKey = toBase64(masterKeySeed);
-//   const saltBits = sjcl.random.randomWords(4);
-//   const encryptParams = {
-//     v: 1,
-//     iter: 1000,
-//     ks: 128,
-//     mode: 'gcm',
-//     adata: '',
-//     cipher: 'aes',
-//     salt: saltBits,
-//     iv: saltBits,
-//   };
-//   return sjcl.encrypt(password, strMasterKey, encryptParams);
-// };
 
 // used in unlockMasterKeySeed and getMasterKeySeed - here
 export const decryptMasterKeySeed = async (
@@ -183,25 +147,15 @@ export const encodeSignatureMessage = (message: string) => {
   const signBytesBuffer = Buffer.from(message);
   const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
   const signHashBuf = keccak256HashOfSigningBytes;
-  // keep this implementation as an example of the sha256 signing
-  // const signBytesWithKeccak = new Uint8Array(keccak256HashOfSigningBytes)
-  // const messageHash = signBytesWithKeccak;
-  // const messageHash = CryptoJS.SHA256(message).toString();
-  // const messageHash2 = CryptoJS.SHA256(message).toString();
-  // const signHashBuf = Buffer.from(messageHash, `hex`);
   const encodedMessage = Uint8Array.from(signHashBuf);
   return encodedMessage;
 };
 
 export const signWithPrivateKey = async (signMessageString: string, privateKey: string): Promise<string> => {
   const defaultPrivkey = fromHex(privateKey);
-
   const encodedMessage = encodeSignatureMessage(signMessageString);
-
   const signature = await Secp256k1.createSignature(encodedMessage, defaultPrivkey);
-
   const signatureBytes = signature.toFixedLength().slice(0, -1);
-
   const sigString = toHex(signatureBytes);
 
   return sigString;

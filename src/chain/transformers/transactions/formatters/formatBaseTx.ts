@@ -31,9 +31,7 @@ export const formatBaseTx = (
   const sender = '';
   const msgTo = '';
   const txType = txResponseItemTxBodyMessage['@type'];
-  // console.log('txType', txType);
   const resolvedType = TxTypes.TxHistoryTypesMap.get(txType) || TxTypes.HistoryTxType.All;
-  // console.log('resolvedType', resolvedType);
 
   const res = {
     eventSender,

@@ -1,5 +1,5 @@
 import { GeneratedType } from '@cosmjs/proto-signing';
-import { MsgTypes, MsgEthereumTx, DynamicFeeTx, ExtensionOptionsEthereumTx } from './types';
+import { DynamicFeeTx, ExtensionOptionsEthereumTx, MsgEthereumTx, MsgTypes } from './types';
 
 export const registryTypes: ReadonlyArray<[string, GeneratedType]> = [
   [MsgTypes.EvmMsgEthereumTx, MsgEthereumTx],

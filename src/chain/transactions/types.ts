@@ -48,17 +48,6 @@ export enum HistoryTxType {
   BeginRedelegate = 17,
 }
 
-// we dont need it?
-// export enum TxHistoryTypes {
-// SdsAll = '',
-// Transfer = 'cosmos-sdk/MsgSend',
-// Delegate = 'cosmos-sdk/MsgDelegate',
-// Undelegate = 'cosmos-sdk/MsgUndelegate',
-// GetReward = 'cosmos-sdk/MsgWithdrawDelegationReward',
-// SdsPrepay = 'sds/PrepayTx',
-// BeginRedelegate = 'cosmos-sdk/MsgBeginRedelegate',
-// }
-
 export const TxMsgTypesMap = new Map<number, string>([
   [HistoryTxType.All, TxMsgTypes.All],
   [HistoryTxType.Account, TxMsgTypes.Account],
@@ -99,10 +88,6 @@ export const TxHistoryTypesMap = new Map<string, number>([
   [TxMsgTypes.WithdrawRewards, HistoryTxType.GetReward],
   [sdsTxTypes.TxMsgTypes.SdsPrepay, sdsTxTypes.HistoryTxType.SdsPrepay],
 ]);
-
-// export interface EmptyObject {
-//   [key: string]: any;
-// }
 
 export interface BroadcastResult extends DeliverTxResponse {}
 

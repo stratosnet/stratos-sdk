@@ -4,7 +4,6 @@ import qs from 'qs';
 import { hdVault, chain } from '../config';
 import Sdk from '../Sdk';
 import { getNewProtocolFlag } from './helpers';
-// import { log, getNewProtocolFlag } from '../../services/helpers';
 import * as Types from './networkTypes';
 import { TxHistoryUser } from './networkTypes';
 
@@ -45,14 +44,6 @@ const getPpNodeRoute = (): string => {
   return ppNodeUrlRes;
 };
 
-// const getExplorerRoute = (): string => {
-//   const { explorerUrl } = Sdk.environment;
-//
-//   const url = `${explorerUrl}`;
-//
-//   return url;
-// };
-
 export const apiPost = async (
   url: string,
   data?: Types.ParsedTransactionData,
@@ -61,7 +52,6 @@ export const apiPost = async (
   const myConfig = {
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
-    // timeout: 31000,
     // timeout: 31000,
   };
 
@@ -123,9 +113,6 @@ export const sendRpcCall = async <N>(
 
   const payload = { ...defaultPayload, ...givenPayload };
 
-  // log('from network ~ rpc call url', url);
-  // log('from network ~ rpc call payload', payload);
-  // dirLog('from network ~ rpc call payload', payload);
   const dataResult = await apiPost(url, payload, { ...config });
 
   return dataResult;
@@ -153,7 +140,6 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   data?: T,
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.SubmitTransactionDataResult> => {
-  // @todo - move it to submitDelegate
   const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
   console.log('url to broadcast the tx (POST)');
 
@@ -171,7 +157,6 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   return dataResult;
 };
 
-// done
 export const getTxListBlockchain = async (
   address: string,
   type: string,
@@ -215,7 +200,6 @@ export const getTxListBlockchain = async (
   return dataResult;
 };
 
-// done
 export const getValidatorsList = async (
   status: string,
   page = 1,
@@ -228,7 +212,6 @@ export const getValidatorsList = async (
   return dataResult;
 };
 
-// done
 export const getValidatorsBondedToDelegatorList = async (
   status: string,
   delegatorAddress: string,
@@ -241,7 +224,6 @@ export const getValidatorsBondedToDelegatorList = async (
   return dataResult;
 };
 
-// done
 export const getValidator = async (
   address: string,
   config?: Types.NetworkAxiosConfig,
@@ -291,7 +273,6 @@ export const getAvailableBalance = async (
   return getAvailableBalance_n(address, config);
 };
 
-// done
 export const getDelegatedBalance = async (
   delegatorAddr: string,
   config?: Types.NetworkAxiosConfig,
@@ -344,7 +325,6 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  // log('rpc status url ', url);
 
   const dataResult = await apiGet(url, config);
 

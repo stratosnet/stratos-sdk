@@ -1,7 +1,7 @@
 import {
   type AvailableBalanceResponse,
-  type AvailableBalanceResponseO,
   type AvailableBalanceResponseN,
+  type AvailableBalanceResponseO,
   type RestPagination,
 } from './networkTypes';
 

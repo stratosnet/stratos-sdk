@@ -1,7 +1,4 @@
-import {
-  encodeSecp256k1Pubkey, // isEd25519Pubkey,
-  Pubkey, // SinglePubkey,
-} from '@cosmjs/amino';
+import { encodeSecp256k1Pubkey, Pubkey } from '@cosmjs/amino';
 import { toBase64 } from '@cosmjs/encoding';
 import { Uint64 } from '@cosmjs/math';
 import { decodePubkey as decodePubkeyOriginal } from '@cosmjs/proto-signing';
@@ -34,7 +31,6 @@ export function encodeEthSecp256k1Pubkey(pubkey: Uint8Array): Pubkey {
 
   return {
     type: 'stratos/PubKeyEthSecp256k1',
-    // type: pubkeyType.secp256k1,
     value: toBase64(pubkey),
   };
 }
@@ -50,11 +46,6 @@ export function anyToStratosSinglePubkey(pubkey: Any): Pubkey {
       const { key } = CosmosCryptoSecp256k1Pubkey.decode(pubkey.value);
       return encodeSecp256k1Pubkey(key);
     }
-    // we need to update amino since encodeEd25519Pubkey is not exported in version we use here
-    // case '/cosmos.crypto.ed25519.PubKey': {
-    //   const { key } = CosmosCryptoEd25519Pubkey.decode(pubkey.value);
-    //   return encodeEd25519Pubkey(key);
-    // }
     default:
       throw new Error(`Pubkey type_url ${pubkey.typeUrl} not recognized as single public key type`);
   }
@@ -97,13 +88,9 @@ export type AccountParser = (any: Any) => Account;
 export function accountFromAnyStratos(input: Any): Account {
   const { typeUrl, value } = input;
 
-  // console.log('StratosStargateAccounts - accountFromAnyStratos was called ,input ', input);
-
   switch (typeUrl) {
-    // stratos
     case '/cosmos.auth.v1beta1.BaseAccount': {
       const baseAccount = accountFromBaseAccount(BaseAccount.decode(value));
-      // console.log('StratosStargateAccounts - got baseAccount', baseAccount);
 
       assert(baseAccount);
       return baseAccount;
@@ -113,7 +100,6 @@ export function accountFromAnyStratos(input: Any): Account {
       const account = accountFromAnyOriginal(input);
 
       if (!account) {
-        // console.log(`Stratos Account was not parsed`, account);
         throw new Error(`Unsupported type: '${typeUrl}'`);
       }
       return account;

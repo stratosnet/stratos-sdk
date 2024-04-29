@@ -1,11 +1,11 @@
 import path from 'path';
 import { accountsApi } from '../../accounts';
-import { FILE_STATUS_CHECK_WAIT_TIME, FILE_STATUS_CHECK_MAX_ATTEMPTS } from '../../config/remotefs';
+import { FILE_STATUS_CHECK_MAX_ATTEMPTS, FILE_STATUS_CHECK_WAIT_TIME } from '../../config/remotefs';
 import * as WalletTypes from '../../crypto/hdVault/hdVaultTypes';
 import * as keyUtils from '../../crypto/hdVault/keyUtils';
 import { filesystemApi } from '../../filesystem';
 import { networkApi, networkTypes } from '../../network';
-import { delay, log, dirLog, getTimestampInSeconds } from '../../services/helpers';
+import { delay, dirLog, getTimestampInSeconds, log } from '../../services/helpers';
 import * as SdsTypes from './types';
 import { UPLOAD_CODES } from './types';
 
@@ -1067,7 +1067,6 @@ export const downloadSharedFile = async (
     throw new Error('required fields "reqid" or "filehash" or "sequencenumber" are missing in the response');
   }
 
-  // const timestamp = getTimestampInSeconds();
   const messageToSign = `${filehash}${address}${sequencenumber}${timestampA}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);

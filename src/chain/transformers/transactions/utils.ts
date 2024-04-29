@@ -5,7 +5,6 @@ import * as TxTypesPrepay from '../../../sds/transactions/types';
 export const isSendTxBodyMessage = (
   bodyMessage: NetworkTypes.RestTxBodyMessage,
 ): bodyMessage is NetworkTypes.RestSendTxBodyMessage => {
-  // return 'from_address' in bodyMessage;
   return bodyMessage['@type'] === TxTypes.TxMsgTypes.Send;
 };
 

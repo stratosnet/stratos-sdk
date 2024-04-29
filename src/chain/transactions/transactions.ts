@@ -32,24 +32,6 @@ interface JsonizedTx {
   signatures: string[];
 }
 
-// function* payloadGenerator(dataList: Types.TxPayload[]) {
-//   while (dataList.length) {
-//     yield dataList.shift();
-//   }
-// }
-
-// declare global {
-//   interface Window {
-//     encoder: any;
-//   }
-//   /* eslint-disable-next-line @typescript-eslint/no-namespace */
-//   namespace NodeJS {
-//     interface Global {
-//       encoder: any;
-//     }
-//   }
-// }
-
 export const assembleTxRawFromTx = (tx: Tx) => {
   const txR = TxRaw.fromPartial({
     bodyBytes: TxBody.encode(tx.body!).finish(),
@@ -126,10 +108,8 @@ export const broadcast = async (signedTx: TxRaw): Promise<DeliverTxResponse> => 
 };
 
 export const getStandardDefaultFee = (): Types.TransactionFee => {
-  const gas = baseGasAmount + perMsgGasAmount; // i.e. 500_000 + 100_000 * 1 = 600_000_000_000gas
+  const gas = baseGasAmount + perMsgGasAmount;
 
-  // for min gas price in the chain of 0.01gwei/10_000_000wei and 600_000gas, the fee would be 6_000gwei / 6_000_000_000_000wei
-  // for min gas price in tropos-5 of 1gwei/1_000_000_000wei and 600_000gas, the fee would be 600_000gwei / 600_000_000_000_000wei, or 0.006stos
   const dynamicFeeAmount = standardFeeAmount(gas);
 
   const feeAmount = [{ amount: String(dynamicFeeAmount), denom: stratosDenom }];
@@ -150,8 +130,6 @@ export const getStandardFee = async (
   if (!txMessages || !signerAddress) {
     return getStandardDefaultFee();
   }
-
-  // dirLog('from getStandardFee txMessages', txMessages);
 
   if (txMessages.length > maxMessagesPerTx) {
     throw new Error(
@@ -197,13 +175,10 @@ export const sign = async (
 ): Promise<TxRaw> => {
   // eslint-disable-next-line @typescript-eslint/await-thenable
   const fee = givenFee ? givenFee : await getStandardFee(address, txMessages);
-  // const fee = givenFee ? givenFee : getStandardDefaultFee();
 
   const client = await cosmosService.getCosmos();
 
   const signedTx = await client.sign(address, txMessages, fee, memo);
-
-  // const txBytes = encodeTxRawToEncodedTx(signedTx);
 
   return signedTx;
 };
@@ -299,8 +274,6 @@ export const getBeginRedelegateTx = async (
         validatorDstAddress: validatorDstAddress,
       },
     };
-
-    console.log('message to ReDelegate', message);
 
     messagesList.push(message);
 

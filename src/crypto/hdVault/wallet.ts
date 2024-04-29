@@ -1,8 +1,8 @@
 import {
-  maxHdPathKeyindex,
   keyPath as keyPathDefault,
-  slip10RawIndexes,
   masterkey as masterkeyDefault,
+  maxHdPathKeyindex,
+  slip10RawIndexes,
 } from '../../config/hdVault';
 import Sdk from '../../Sdk';
 import { deriveKeyPairFromPrivateKeySeed, derivePrivateKeySeed } from './deriveManager';

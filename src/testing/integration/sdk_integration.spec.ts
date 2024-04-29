@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-// import path from 'path';
 import { FILE_STATUS_CHECK_WAIT_TIME } from '../../config/remotefs';
 import { mnemonic } from '../../crypto/hdVault';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';

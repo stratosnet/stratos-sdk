@@ -1,7 +1,5 @@
-import { pathToString, stringToPath } from '@cosmjs/crypto';
-import { Slip10Curve } from '@cosmjs/crypto';
-import { fromBase64, toBase64 } from '@cosmjs/encoding';
-import { fromUtf8, toUtf8 } from '@cosmjs/encoding';
+import { pathToString, Slip10Curve, stringToPath } from '@cosmjs/crypto';
+import { fromBase64, fromUtf8, toBase64, toUtf8 } from '@cosmjs/encoding';
 import { assert, isNonNullObject } from '@cosmjs/utils';
 import BN from 'bn.js';
 import sjcl from 'sjcl';
@@ -59,16 +57,14 @@ export const encryptMasterKeySeed = (
   return sjcl.encrypt(password, strMasterKey, encryptParams);
 };
 
-// export function encrypt(password: string, plaintext: Uint8Array): sjcl.SjclCipherEncrypted {
 function encrypt(password: string, plaintext: Uint8Array): sjcl.SjclCipherEncrypted {
   const encripted = encryptMasterKeySeed(password, plaintext);
   return encripted;
 }
 
-// export function decrypt(password: string, encryptedMasterKeySeed: string): Uint8Array {
 function decrypt(password: string, encryptedMasterKeySeed: string): Uint8Array {
   const decrypteCypherText = sjcl.decrypt(password, encryptedMasterKeySeed);
-  const decryptedMasterKeySeed = fromBase64(decrypteCypherText); // switch (config.algorithm) {
+  const decryptedMasterKeySeed = fromBase64(decrypteCypherText);
   return decryptedMasterKeySeed;
 }
 
@@ -126,16 +122,3 @@ export const serializeWithEncryptionKey = (
   };
   return JSON.stringify(out);
 };
-
-// export async function createWalletAtPath(
-//   hdPathIndex: number,
-//   mnemonic: string,
-// ): Promise<StratosDirectSecp256k1HdWallet> {
-//   const hdPaths = [makeStratosHubPath(hdPathIndex)];
-//
-//   const options: DirectSecp256k1HdWalletOptions = { ...hdWalletDefaultOptions, hdPaths };
-//
-//   const wallet = await StratosDirectSecp256k1HdWallet.fromMnemonic(mnemonic, options);
-//
-//   return wallet;
-// }
