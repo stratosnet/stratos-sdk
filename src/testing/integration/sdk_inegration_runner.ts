@@ -15,9 +15,6 @@ import { log, delay, dirLog } from '../../services/helpers';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 
 /* eslint-disable @typescript-eslint/naming-convention */
-
-console.log('__dirname', __dirname);
-
 interface DetailedDelegationInfo {
   [key: string]: string;
 }
