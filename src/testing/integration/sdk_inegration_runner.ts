@@ -1,19 +1,20 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { exit } from 'process';
-import * as accounts from '../../accounts';
-import { options } from '../../config';
-import { mnemonic, wallet } from '../../hdVault';
-import { createMasterKeySeed } from '../../hdVault/keyManager';
+import { accountsApi } from '../../accounts';
+import { cosmosService } from '../../chain/cosmos';
+import * as transactions from '../../chain/transactions/transactions';
+import { validatorsApi as validators } from '../../chain/validators';
+import { mnemonic, wallet } from '../../crypto/hdVault';
+import * as WalletTypes from '../../crypto/hdVault/hdVaultTypes';
+import { createMasterKeySeed } from '../../crypto/hdVault/keyManager';
+import { filesystemApi } from '../../filesystem';
+import { networkApi } from '../../network';
 import Sdk from '../../Sdk';
-import * as RemoteFilesystem from '../../sds/remoteFile';
-import { getCosmos, resetCosmos } from '../../services/cosmos';
-import * as FilesystemService from '../../services/filesystem/filesystem';
-import { log, delay, dirLog } from '../../services/helpers';
-import * as Network from '../../services/network';
-import * as transactions from '../../transactions';
-import * as validators from '../../validators';
+import { remoteFileSystemApi } from '../../sds/remoteFileSystem';
+import * as transactionsSds from '../../sds/transactions/transactions';
+import { delay, dirLog, log } from '../../services/helpers';
 import { OZONE_BALANCE_CHECK_WAIT_TIME } from '../config';
 
+/* eslint-disable @typescript-eslint/naming-convention */
 interface DetailedDelegationInfo {
   [key: string]: string;
 }
@@ -93,7 +94,7 @@ async function createLocalTestFile(
 
   let completedProgress = 0;
 
-  const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+  const readBinaryFile = await filesystemApi.getFileBuffer(fileReadPath);
 
   while (readSize < fileSize) {
     const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
@@ -102,7 +103,7 @@ async function createLocalTestFile(
       break;
     }
 
-    const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+    const encodedFileChunk = await filesystemApi.encodeBuffer(fileChunk);
     readSize = readSize + fileChunk.length;
 
     completedProgress = (100 * readSize) / fileSize;
@@ -122,10 +123,10 @@ async function createLocalTestFile(
     encodedFileChunks.push(randomPrefix);
   }
 
-  const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
+  const decodedChunksList = await filesystemApi.decodeFileChunks(encodedFileChunks);
 
-  const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-  FilesystemService.writeFile(fileWritePath, decodedFile);
+  const decodedFile = filesystemApi.combineDecodedChunks(decodedChunksList);
+  filesystemApi.writeFile(fileWritePath, decodedFile);
   log('write of the decoded file is done');
   return true;
 }
@@ -180,13 +181,13 @@ const password = 'yourSecretPassword';
 const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean> => {
   const sdkEnv = sdkEnvDev;
 
-  resetCosmos();
+  cosmosService.resetCosmos();
 
   Sdk.init({ ...sdkEnv });
 
   if (!GLOBAL_CHAIN_ID) {
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
-      await Network.getChainAndProtocolDetails();
+      await networkApi.getChainAndProtocolDetails();
 
     GLOBAL_CHAIN_ID = resolvedChainID;
     GLOBAL_CHAIN_VERSION = resolvedChainVersion;
@@ -214,7 +215,7 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
 
   const serialized = masterKeySeedInfo.encryptedWalletInfo;
 
-  const _cosmosClient = await getCosmos(serialized, password);
+  await cosmosService.getCosmos(serialized, password);
 
   return true;
 };
@@ -222,7 +223,7 @@ const main = async (zeroUserMnemonic: string, hdPathIndex = 0): Promise<boolean>
 const createKeypairFromMnemonic = async (
   phrase: mnemonic.MnemonicPhrase,
   hdPathIndex = 0,
-): Promise<wallet.KeyPairInfo> => {
+): Promise<WalletTypes.KeyPairInfo> => {
   const masterKeySeed = await createMasterKeySeed(phrase, password, hdPathIndex);
   const encryptedMasterKeySeedString = masterKeySeed.encryptedMasterKeySeed.toString();
   let keyPairZero;
@@ -305,7 +306,7 @@ export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolea
 
   const { address } = keyPairZero;
 
-  const b = await accounts.getBalanceCardMetrics(address);
+  const b = await accountsApi.getBalanceCardMetrics(address);
 
   const { available } = b;
 
@@ -331,7 +332,7 @@ export const getFaucetAvailableBalance = async (hdPathIndex = 0): Promise<boolea
 
 const sendFromFaucetToReceiver = async (
   senderHdPathIndex: number,
-  keyPairReceiver: wallet.KeyPairInfo,
+  keyPairReceiver: WalletTypes.KeyPairInfo,
   amount: number,
 ): Promise<boolean> => {
   const senderPhrase = mnemonic.convertStringToArray(faucetMnemonic);
@@ -373,7 +374,7 @@ export const sendTransferTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
 
   await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
 
-  const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
+  const b = await accountsApi.getBalanceCardMetrics(keyPairReceiver.address);
 
   const { available } = b;
 
@@ -459,7 +460,7 @@ export const sendDelegateTx = async (
     throw new Error('Could not broadcast the delegate transaction');
   }
 
-  const b = await accounts.getBalanceCardMetrics(address);
+  const b = await accountsApi.getBalanceCardMetrics(address);
 
   dirLog('balance from delegated', b);
 
@@ -569,7 +570,7 @@ export const sendBeginRedelegateTx = async (
     throw new Error('Could not broadcast the redelegate transaction');
   }
 
-  const b = await accounts.getBalanceCardMetrics(address);
+  const b = await accountsApi.getBalanceCardMetrics(address);
 
   dirLog('balance from re-delegated', b);
 
@@ -794,7 +795,7 @@ export const sendUndelegateTx = async (
     throw new Error('Could not broadcast the undelegate transaction');
   }
 
-  const b1 = await accounts.getBalanceCardMetrics(address);
+  const b1 = await accountsApi.getBalanceCardMetrics(address);
   const { unbounding } = b1;
 
   if (!unbounding) {
@@ -842,7 +843,7 @@ export const sendSdsPrepayTx = async (
 
   const { address } = keyPairReceiver;
 
-  const sendTxMessages = await transactions.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
+  const sendTxMessages = await transactionsSds.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
   const signedTx = await transactions.sign(address, sendTxMessages);
 
   if (!signedTx) {
@@ -888,7 +889,7 @@ export const getAccountOzoneBalance = async (
 
   const { address } = keyPairReceiver;
 
-  const b = await accounts.getOtherBalanceCardMetrics(address);
+  const b = await accountsApi.getOtherBalanceCardMetrics(address);
   log('balance from other', b);
 
   const { ozone } = b;
@@ -950,9 +951,9 @@ export const uploadFileToRemote = async (
     throw new Error(m);
   }
 
-  const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
+  const targetHash = await filesystemApi.calculateFileHash(fileWritePath);
 
-  const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+  const uploadResult = await remoteFileSystemApi.updloadFile(keypair, fileWritePath);
 
   const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
 
@@ -965,7 +966,7 @@ export const uploadFileToRemote = async (
   }
   await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
 
-  const userFileList = await RemoteFilesystem.getUploadedFileList(keypair, 0);
+  const userFileList = await remoteFileSystemApi.getUploadedFileList(keypair, 0);
 
   const { files } = userFileList;
 
@@ -1008,13 +1009,13 @@ export const downloadFileFromRemote = async (
 
   await main(receiverMnemonic, hdPathIndex);
 
-  const uploadedLocalFileHash = await FilesystemService.calculateFileHash(uploadedFileWritePath);
+  const uploadedLocalFileHash = await filesystemApi.calculateFileHash(uploadedFileWritePath);
 
   const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
 
   const filesize = 10_000_001;
 
-  const downloadResult = await RemoteFilesystem.downloadFile(
+  const downloadResult = await remoteFileSystemApi.downloadFile(
     keypair,
     filePathToSaveDownloadedTo,
     uploadedLocalFileHash,
@@ -1023,7 +1024,7 @@ export const downloadFileFromRemote = async (
 
   const { filePathToSave } = downloadResult;
 
-  const downloadedFileHash = await FilesystemService.calculateFileHash(filePathToSave);
+  const downloadedFileHash = await filesystemApi.calculateFileHash(filePathToSave);
 
   if (downloadedFileHash !== uploadedLocalFileHash) {
     throw new Error(

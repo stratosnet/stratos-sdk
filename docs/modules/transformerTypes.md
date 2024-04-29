@@ -18,7 +18,7 @@
 
 ### TxFormatter
 
-Ƭ **TxFormatter**: (`txResponseItemTxBodyMessage`: [`RestTxBodyMessage`](../interfaces/networkTypes.RestTxBodyMessage.md), `txResponseItemLogEntry?`: [`RestTxResponseLog`](../interfaces/networkTypes.RestTxResponseLog.md)) => [`FormattedBlockChainTxMessage`](../interfaces/transformerTypes.FormattedBlockChainTxMessage.md)
+Ƭ **TxFormatter**: (`txResponseItemTxBodyMessage`: [`RestTxBodyMessage`](../interfaces/network.networkTypes.RestTxBodyMessage.md), `txResponseItemLogEntry?`: [`RestTxResponseLog`](../interfaces/network.networkTypes.RestTxResponseLog.md)) => [`FormattedBlockChainTxMessage`](../interfaces/transformerTypes.FormattedBlockChainTxMessage.md)
 
 #### Type declaration
 
@@ -28,8 +28,8 @@
 
 | Name | Type |
 | :------ | :------ |
-| `txResponseItemTxBodyMessage` | [`RestTxBodyMessage`](../interfaces/networkTypes.RestTxBodyMessage.md) |
-| `txResponseItemLogEntry?` | [`RestTxResponseLog`](../interfaces/networkTypes.RestTxResponseLog.md) |
+| `txResponseItemTxBodyMessage` | [`RestTxBodyMessage`](../interfaces/network.networkTypes.RestTxBodyMessage.md) |
+| `txResponseItemLogEntry?` | [`RestTxResponseLog`](../interfaces/network.networkTypes.RestTxResponseLog.md) |
 
 ##### Returns
 
@@ -37,4 +37,4 @@
 
 #### Defined in
 
-services/transformers/transactions/types.ts:4
+chain/transformers/transactions/types.ts:4

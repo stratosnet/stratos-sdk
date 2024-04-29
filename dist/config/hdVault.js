@@ -8,25 +8,20 @@ exports.slip10RawIndexes = [44, 606, 0, 0];
 const masterkey = (givenM) => (givenM ? `${givenM}/` : 'm/');
 exports.masterkey = masterkey;
 // bip44purpose = "44'/";
-// export const bip44purpose = `${slip10RawIndexes[0]}'/`;
 const bip44purpose = (slipList = exports.slip10RawIndexes) => `${slipList[0]}'/`;
 exports.bip44purpose = bip44purpose;
 // stratosCoinType = "606'/0'/0/";
-// export const stratosCoinType = `${slip10RawIndexes[1]}'/${slip10RawIndexes[2]}'/${slip10RawIndexes[3]}/`;
 const stratosCoinType = (slipList = exports.slip10RawIndexes) => `${slipList[1]}'/${slipList[2]}'/${slipList[3]}/`;
 exports.stratosCoinType = stratosCoinType;
 // fullKeyPath: "'m/44'/606'/0'/0/",
-// export const keyPath = `${masterkey}${bip44purpose}${stratosCoinType}`;
 const keyPath = (slipList = exports.slip10RawIndexes, givenM) => `${(0, exports.masterkey)(givenM)}${(0, exports.bip44purpose)(slipList)}${(0, exports.stratosCoinType)(slipList)}`;
 exports.keyPath = keyPath;
 exports.stratosAddressPrefix = 'st';
 exports.stratosPubkeyPrefix = 'stpub';
-// export const stratosDenom = 'ustos';
 exports.stratosDenom = 'wei';
 exports.stratosTopDenom = 'stos';
 exports.stratosUozDenom = 'uoz';
 exports.stratosOzDenom = 'oz';
-// export const keyPathPattern = `${keyPath}a`;
 exports.kdfConfiguration = {
     algorithm: 'argon2id',
     params: {

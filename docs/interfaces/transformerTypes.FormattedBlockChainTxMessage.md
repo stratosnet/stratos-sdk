@@ -20,11 +20,11 @@
 
 ### amounts
 
-• **amounts**: [`Amount`](networkTypes.Amount.md)[]
+• **amounts**: [`Amount`](network.networkTypes.Amount.md)[]
 
 #### Defined in
 
-services/transformers/transactions/types.ts:16
+chain/transformers/transactions/types.ts:16
 
 ___
 
@@ -34,7 +34,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:10
+chain/transformers/transactions/types.ts:10
 
 ___
 
@@ -44,7 +44,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:13
+chain/transformers/transactions/types.ts:13
 
 ___
 
@@ -54,7 +54,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:11
+chain/transformers/transactions/types.ts:11
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:12
+chain/transformers/transactions/types.ts:12
 
 ___
 
@@ -74,14 +74,14 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:15
+chain/transformers/transactions/types.ts:15
 
 ___
 
 ### type
 
-• **type**: [`HistoryTxType`](../enums/transactionTypes.HistoryTxType.md)
+• **type**: [`HistoryTxType`](../enums/chain.transactions.chainTxTypes.HistoryTxType.md)
 
 #### Defined in
 
-services/transformers/transactions/types.ts:14
+chain/transformers/transactions/types.ts:14

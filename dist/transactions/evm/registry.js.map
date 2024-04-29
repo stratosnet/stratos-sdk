@@ -1,1 +1,0 @@
-{"version":3,"file":"registry.js","sourceRoot":"","sources":["../../../src/transactions/evm/registry.ts"],"names":[],"mappings":";;;AACA,mCAA4F;AAE/E,QAAA,aAAa,GAA2C;IACnE,CAAC,gBAAQ,CAAC,gBAAgB,EAAE,qBAAa,CAAC;IAC1C,CAAC,gBAAQ,CAAC,eAAe,EAAE,oBAAY,CAAC;IACxC,CAAC,gBAAQ,CAAC,6BAA6B,EAAE,kCAA0B,CAAC;CACrE,CAAC"}
