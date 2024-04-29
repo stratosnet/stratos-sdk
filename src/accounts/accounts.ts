@@ -1,52 +1,30 @@
 import _get from 'lodash/get';
-import { hdVault } from '../config';
-import { stratosTopDenom, stratosUozDenom } from '../config/hdVault';
-import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
-import * as ApiUtils from '../services/apiUtils';
-import {
-  type BigNumberValue,
-  type BigNumberType,
-  create as createBigNumber,
-  fromWei,
-  plus as plusBigNumber,
-  ROUND_DOWN,
-} from '../services/bigNumber';
-import {
-  getAvailableBalance,
-  getDelegatedBalance,
-  getRewardBalance,
-  getTxListBlockchain,
-  getUnboundingBalance,
-  networkTypes,
-  requestBalanceIncrease,
-  sendUserRequestGetOzone,
-} from '../services/network';
-import { type TxHistoryUserType, TxHistoryUser, RestTxHistoryResponse } from '../services/network/types';
+import * as TxTypes from '../chain/transactions/types';
 import {
   getBalanceCardMetricDinamicValue,
   getBalanceCardMetricValue,
   getOzoneMetricValue,
-} from '../services/transformers/balanceValues';
-import { transformTx } from '../services/transformers/transactions';
-import { FormattedBlockChainTx, ParsedTxData } from '../services/transformers/transactions/types';
-import * as TxTypes from '../transactions/types';
-
-export interface OtherBalanceCardMetrics {
-  ozone?: string;
-  detailedBalance?: any;
-}
-
-export interface BalanceCardMetrics {
-  available: string;
-  delegated: string;
-  unbounding: string;
-  reward: string;
-  detailedBalance?: any;
-}
+} from '../chain/transformers/balanceValues';
+import { transformTx } from '../chain/transformers/transactions';
+import { FormattedBlockChainTx, ParsedTxData } from '../chain/transformers/transactions/types';
+import * as CommontTxTypes from '../common/types/transactionTypes';
+import { hdVault } from '../config';
+import { stratosTopDenom, stratosUozDenom } from '../config/hdVault';
+import { decimalPrecision, decimalShortPrecision, standardFeeAmount } from '../config/tokens';
+import { networkApi, networkHelpers, networkTypes } from '../network';
+import {
+  create as createBigNumber,
+  fromWei,
+  plus as plusBigNumber,
+  ROUND_DOWN,
+  type BigNumberType,
+  type BigNumberValue,
+} from '../services/bigNumber';
+import { type BalanceCardMetrics, type OtherBalanceCardMetrics } from './accountsTypes';
 
 export const increaseBalance = async (walletAddress: string, faucetUrl: string, denom?: string) => {
   try {
-    const result = await requestBalanceIncrease(walletAddress, faucetUrl, denom);
+    const result = await networkApi.requestBalanceIncrease(walletAddress, faucetUrl, denom);
 
     const { error: faucetError } = result;
 
@@ -54,7 +32,7 @@ export const increaseBalance = async (walletAddress: string, faucetUrl: string, 
       return { result: false, errorMessage: `Could not increase balance: Error: "${faucetError.message}"` };
     }
 
-    console.log('🚀 ~ file: accounts.ts ~ line 45 ~ increaseBalance ~ result', result);
+    console.log('🚀 ~ file: accounts.ts ~  increaseBalance ~ result', result);
   } catch (error) {
     console.log('Error: Faucet returns:', (error as Error).message);
     return {
@@ -69,9 +47,9 @@ export const getBalanceInWei = async (
   keyPairAddress: string,
   requestedDenom: string,
 ): Promise<BigNumberType> => {
-  const accountBalanceData = await getAvailableBalance(keyPairAddress);
+  const accountBalanceData = await networkApi.getAvailableBalance(keyPairAddress);
 
-  const coins = _get(accountBalanceData, 'response.balances', []) as TxTypes.AmountType[];
+  const coins = _get(accountBalanceData, 'response.balances', []) as CommontTxTypes.AmountType[];
 
   const coin = coins.find(item => item.denom === requestedDenom);
 
@@ -121,7 +99,7 @@ export const getOtherBalanceCardMetrics = async (
   };
 
   try {
-    const ozoneBalanceResult = await sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
+    const ozoneBalanceResult = await networkApi.sendUserRequestGetOzone([{ walletaddr: keyPairAddress }]);
 
     const { response: ozoneBalanceRespone, error: ozoneBalanceError } = ozoneBalanceResult;
 
@@ -158,25 +136,25 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     unbounding: {},
   };
 
-  const availableBalanceResult = await getAvailableBalance(keyPairAddress);
+  const availableBalanceResult = await networkApi.getAvailableBalance(keyPairAddress);
 
   const { response: availableBalanceResponse, error: availableBalanceError } = availableBalanceResult;
 
   if (!availableBalanceError && availableBalanceResponse) {
-    if (ApiUtils.isNewBalanceVersion(availableBalanceResponse)) {
+    if (networkHelpers.isNewBalanceVersion(availableBalanceResponse)) {
       const amount = availableBalanceResponse.balances?.[0]?.amount;
       const denom = availableBalanceResponse.balances?.[0]?.denom;
       cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
     }
 
-    if (ApiUtils.isOldBalanceVersion(availableBalanceResponse)) {
+    if (networkHelpers.isOldBalanceVersion(availableBalanceResponse)) {
       const amount = availableBalanceResponse.result?.[0]?.amount;
       const denom = availableBalanceResponse.result?.[0]?.denom;
       cardMetricsResult.available = getBalanceCardMetricValue(denom, amount);
     }
   }
 
-  const delegatedBalanceResult = await getDelegatedBalance(keyPairAddress);
+  const delegatedBalanceResult = await networkApi.getDelegatedBalance(keyPairAddress);
 
   const { response: delegatedBalanceResponse, error: delegatedBalanceError } = delegatedBalanceResult;
 
@@ -199,7 +177,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     cardMetricsResult.delegated = myDelegated;
   }
 
-  const unboundingBalanceResult = await getUnboundingBalance(keyPairAddress);
+  const unboundingBalanceResult = await networkApi.getUnboundingBalance(keyPairAddress);
 
   const { response: unboundingBalanceResponse, error: unboundingBalanceError } = unboundingBalanceResult;
 
@@ -230,7 +208,7 @@ export const getBalanceCardMetrics = async (keyPairAddress: string): Promise<Bal
     cardMetricsResult.unbounding = unboundingBalance;
   }
 
-  const rewardBalanceResult = await getRewardBalance(keyPairAddress);
+  const rewardBalanceResult = await networkApi.getRewardBalance(keyPairAddress);
   const { response: rewardBalanceResponse, error: rewardBalanceError } = rewardBalanceResult;
 
   if (!rewardBalanceError) {
@@ -266,7 +244,6 @@ export const getMaxAvailableBalance = async (
   const feeAmount = createBigNumber(standardFeeAmount());
   const balanceInWei = await getBalanceInWei(keyPairAddress, requestedDenom);
 
-  // NOTE: Do we need this?
   if (balanceInWei.gt(0)) {
     const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
     return balance;
@@ -282,11 +259,11 @@ export const getAccountTrasactions = async (
   type = TxTypes.HistoryTxType.All,
   page = 1,
   pageLimit = 5,
-  userType: TxHistoryUserType = TxHistoryUser.TxHistorySenderUser,
+  userType: networkTypes.TxHistoryUserType = networkTypes.TxHistoryUser.TxHistorySenderUser,
 ): Promise<ParsedTxData> => {
   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
 
-  const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, userType);
+  const txListResult = await networkApi.getTxListBlockchain(address, txType, page, pageLimit, userType);
 
   const { response, error } = txListResult;
 
@@ -303,7 +280,7 @@ export const getAccountTrasactions = async (
   const { tx_responses: data = [], pagination } = response;
   let total = '0';
 
-  if (ApiUtils.isValidPagination(pagination)) {
+  if (networkHelpers.isValidPagination(pagination)) {
     const { total: totalPages } = pagination;
     total = totalPages;
   }
@@ -324,93 +301,3 @@ export const getAccountTrasactions = async (
 
   return result;
 };
-
-/**
- * @deprecated
- */
-// export const getAccountSenderTrasactions = async (
-//   address: string,
-//   type = TxTypes.HistoryTxType.All,
-//   page = 1,
-//   pageLimit = 5,
-// ): Promise<ParsedTxData> => {
-//   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-//
-//   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 1);
-//
-//   const { response, error } = txListResult;
-//
-//   if (error) {
-//     throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
-//   }
-//
-//   if (!response) {
-//     throw new Error('Could not fetch tx history');
-//   }
-//
-//   const parsedData: FormattedBlockChainTx[] = [];
-//
-//   const { tx_responses: data = [], pagination } = response;
-//   const { total } = pagination;
-//
-//   data.forEach(txResponseItem => {
-//     try {
-//       const parsed = transformTx(txResponseItem);
-//       parsedData.push(parsed);
-//     } catch (err) {
-//       console.log(`Parsing error: ${(err as Error).message}`);
-//     }
-//   });
-//
-//   const totalUnformatted = parseInt(total) / pageLimit;
-//   const totalPages = Math.ceil(totalUnformatted);
-//
-//   const result = { data: parsedData, total, page: page || 1, totalPages };
-//
-//   return result;
-// };
-
-/**
- * @deprecated
- */
-// export const getAccountReceiverTrasactions = async (
-//   address: string,
-//   type = TxTypes.HistoryTxType.All,
-//   page = 1,
-//   pageLimit = 5,
-// ): Promise<ParsedTxData> => {
-//   const txType = TxTypes.BlockChainTxMsgTypesMap.get(type) || '';
-//
-//   const txListResult = await getTxListBlockchain(address, txType, page, pageLimit, 2);
-//
-//   const { response, error } = txListResult;
-//
-//   if (error) {
-//     throw new Error(`Could not fetch tx history. Details: "${error.message}"`);
-//   }
-//
-//   if (!response) {
-//     throw new Error('Could not fetch tx history');
-//   }
-//
-//   const parsedData: FormattedBlockChainTx[] = [];
-//
-//   const { tx_responses: data = [], pagination } = response;
-//   const { total } = pagination;
-//
-//   data.forEach(txResponseItem => {
-//     try {
-//       const parsed = transformTx(txResponseItem);
-//       parsedData.push(parsed);
-//     } catch (err) {
-//       console.log(`Parsing error: ${(err as Error).message}`);
-//     }
-//   });
-//
-//   const totalUnformatted = parseInt(total) / pageLimit;
-//   const totalPages = Math.ceil(totalUnformatted);
-//
-//   const result = { data: parsedData, total, page: page || 1, totalPages };
-//
-//   return result;
-// };

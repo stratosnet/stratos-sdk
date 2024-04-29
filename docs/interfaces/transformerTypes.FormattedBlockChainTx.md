@@ -26,7 +26,7 @@
 
 #### Defined in
 
-services/transformers/transactions/types.ts:20
+chain/transformers/transactions/types.ts:20
 
 ___
 
@@ -36,7 +36,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:22
+chain/transformers/transactions/types.ts:22
 
 ___
 
@@ -46,27 +46,27 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:24
+chain/transformers/transactions/types.ts:24
 
 ___
 
 ### originalTransactionData
 
-• **originalTransactionData**: [`RestTxResponseTx`](networkTypes.RestTxResponseTx.md)
+• **originalTransactionData**: [`RestTxResponseTx`](network.networkTypes.RestTxResponseTx.md)
 
 #### Defined in
 
-services/transformers/transactions/types.ts:26
+chain/transformers/transactions/types.ts:26
 
 ___
 
 ### originalTxResponse
 
-• **originalTxResponse**: [`RestTxResponse`](networkTypes.RestTxResponse.md)
+• **originalTxResponse**: [`RestTxResponse`](network.networkTypes.RestTxResponse.md)
 
 #### Defined in
 
-services/transformers/transactions/types.ts:27
+chain/transformers/transactions/types.ts:27
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:25
+chain/transformers/transactions/types.ts:25
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:21
+chain/transformers/transactions/types.ts:21
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:23
+chain/transformers/transactions/types.ts:23
 
 ___
 
@@ -106,4 +106,4 @@ ___
 
 #### Defined in
 
-services/transformers/transactions/types.ts:28
+chain/transformers/transactions/types.ts:28

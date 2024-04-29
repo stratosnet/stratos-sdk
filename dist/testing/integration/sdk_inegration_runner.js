@@ -27,19 +27,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadFileFromRemote = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
-/* eslint-disable @typescript-eslint/naming-convention */
 const process_1 = require("process");
-const accounts = __importStar(require("../../accounts"));
-const hdVault_1 = require("../../hdVault");
-const keyManager_1 = require("../../hdVault/keyManager");
+const accounts_1 = require("../../accounts");
+const cosmos_1 = require("../../chain/cosmos");
+const transactions = __importStar(require("../../chain/transactions/transactions"));
+const validators_1 = require("../../chain/validators");
+const hdVault_1 = require("../../crypto/hdVault");
+const keyManager_1 = require("../../crypto/hdVault/keyManager");
+const filesystem_1 = require("../../filesystem");
+const network_1 = require("../../network");
 const Sdk_1 = __importDefault(require("../../Sdk"));
-const RemoteFilesystem = __importStar(require("../../sds/remoteFile"));
-const cosmos_1 = require("../../services/cosmos");
-const FilesystemService = __importStar(require("../../services/filesystem/filesystem"));
+const remoteFileSystem_1 = require("../../sds/remoteFileSystem");
+const transactionsSds = __importStar(require("../../sds/transactions/transactions"));
 const helpers_1 = require("../../services/helpers");
-const Network = __importStar(require("../../services/network"));
-const transactions = __importStar(require("../../transactions"));
-const validators = __importStar(require("../../validators"));
 const config_1 = require("../config");
 const isDetailedDelegateTxResponse = (delegateTxResponse) => {
     return (typeof delegateTxResponse !== 'boolean' &&
@@ -88,13 +88,13 @@ async function createLocalTestFile(fileReadPath, fileWritePath, randomPrefix) {
     let offsetEnd = step;
     const encodedFileChunks = [];
     let completedProgress = 0;
-    const readBinaryFile = await FilesystemService.getFileBuffer(fileReadPath);
+    const readBinaryFile = await filesystem_1.filesystemApi.getFileBuffer(fileReadPath);
     while (readSize < fileSize) {
         const fileChunk = readBinaryFile.slice(offsetStart, offsetEnd);
         if (!fileChunk) {
             break;
         }
-        const encodedFileChunk = await FilesystemService.encodeBuffer(fileChunk);
+        const encodedFileChunk = await filesystem_1.filesystemApi.encodeBuffer(fileChunk);
         readSize = readSize + fileChunk.length;
         completedProgress = (100 * readSize) / fileSize;
         (0, helpers_1.log)(`completed ${readSize} from ${fileSize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`);
@@ -106,9 +106,9 @@ async function createLocalTestFile(fileReadPath, fileWritePath, randomPrefix) {
     if (randomPrefix) {
         encodedFileChunks.push(randomPrefix);
     }
-    const decodedChunksList = await FilesystemService.decodeFileChunks(encodedFileChunks);
-    const decodedFile = FilesystemService.combineDecodedChunks(decodedChunksList);
-    FilesystemService.writeFile(fileWritePath, decodedFile);
+    const decodedChunksList = await filesystem_1.filesystemApi.decodeFileChunks(encodedFileChunks);
+    const decodedFile = filesystem_1.filesystemApi.combineDecodedChunks(decodedChunksList);
+    filesystem_1.filesystemApi.writeFile(fileWritePath, decodedFile);
     (0, helpers_1.log)('write of the decoded file is done');
     return true;
 }
@@ -150,10 +150,10 @@ const sdkEnvDev = sdkEnvTest;
 const password = 'yourSecretPassword';
 const main = async (zeroUserMnemonic, hdPathIndex = 0) => {
     const sdkEnv = sdkEnvDev;
-    (0, cosmos_1.resetCosmos)();
+    cosmos_1.cosmosService.resetCosmos();
     Sdk_1.default.init(Object.assign({}, sdkEnv));
     if (!GLOBAL_CHAIN_ID) {
-        const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await Network.getChainAndProtocolDetails();
+        const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await network_1.networkApi.getChainAndProtocolDetails();
         GLOBAL_CHAIN_ID = resolvedChainID;
         GLOBAL_CHAIN_VERSION = resolvedChainVersion;
         GLOBAL_IS_NEW_PROTOCOL = isNewProtocol;
@@ -166,7 +166,7 @@ const main = async (zeroUserMnemonic, hdPathIndex = 0) => {
     const masterKeySeedInfo = await (0, keyManager_1.createMasterKeySeed)(phrase, password, hdPathIndex);
     (0, helpers_1.log)('main - sdk initialized user mnemonic', zeroUserMnemonic);
     const serialized = masterKeySeedInfo.encryptedWalletInfo;
-    const _cosmosClient = await (0, cosmos_1.getCosmos)(serialized, password);
+    await cosmos_1.cosmosService.getCosmos(serialized, password);
     return true;
 };
 const createKeypairFromMnemonic = async (phrase, hdPathIndex = 0) => {
@@ -231,7 +231,7 @@ const getFaucetAvailableBalance = async (hdPathIndex = 0) => {
     const phrase = hdVault_1.mnemonic.convertStringToArray(faucetMnemonic);
     const keyPairZero = await createKeypairFromMnemonic(phrase, hdPathIndex);
     const { address } = keyPairZero;
-    const b = await accounts.getBalanceCardMetrics(address);
+    const b = await accounts_1.accountsApi.getBalanceCardMetrics(address);
     const { available } = b;
     if (!available) {
         (0, helpers_1.log)('Balances', b);
@@ -282,7 +282,7 @@ const sendTransferTx = async (hdPathIndex = 0, givenReceiverMnemonic = '') => {
         : hdVault_1.mnemonic.generateMnemonicPhrase(24);
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
-    const b = await accounts.getBalanceCardMetrics(keyPairReceiver.address);
+    const b = await accounts_1.accountsApi.getBalanceCardMetrics(keyPairReceiver.address);
     const { available } = b;
     if (!available) {
         (0, helpers_1.log)('Balances', b);
@@ -313,7 +313,7 @@ const sendDelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expec
     await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, 0.5);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const validatorsInfo = await validators.getValidators();
+    const validatorsInfo = await validators_1.validatorsApi.getValidators();
     if (!validatorsInfo) {
         throw new Error('validatorsInfo is empty');
     }
@@ -340,7 +340,7 @@ const sendDelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expec
         (0, helpers_1.log)('Error', error);
         throw new Error('Could not broadcast the delegate transaction');
     }
-    const b = await accounts.getBalanceCardMetrics(address);
+    const b = await accounts_1.accountsApi.getBalanceCardMetrics(address);
     (0, helpers_1.dirLog)('balance from delegated', b);
     const { delegated, detailedBalance } = b;
     if (!delegated) {
@@ -416,7 +416,7 @@ const sendBeginRedelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
         (0, helpers_1.log)('Error', error);
         throw new Error('Could not broadcast the redelegate transaction');
     }
-    const b = await accounts.getBalanceCardMetrics(address);
+    const b = await accounts_1.accountsApi.getBalanceCardMetrics(address);
     (0, helpers_1.dirLog)('balance from re-delegated', b);
     const { delegated: delegatedAfter, detailedBalance: detailedBalanceAfter } = b;
     if (!delegatedAfter) {
@@ -469,7 +469,7 @@ const sendWithdrawRewardsTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const validatorsInfo = await validators.getValidators();
+    const validatorsInfo = await validators_1.validatorsApi.getValidators();
     if (!validatorsInfo) {
         throw new Error('validatorsInfo is empty');
     }
@@ -508,7 +508,7 @@ const sendWithdrawAllRewardsTx = async (hdPathIndex = 0, givenReceiverMnemonic =
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const validatorsInfo = await validators.getValidators();
+    const validatorsInfo = await validators_1.validatorsApi.getValidators();
     if (!validatorsInfo) {
         throw new Error('validatorsInfo is empty');
     }
@@ -545,7 +545,7 @@ const sendUndelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', exp
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const validatorsInfo = await validators.getValidators();
+    const validatorsInfo = await validators_1.validatorsApi.getValidators();
     if (!validatorsInfo) {
         throw new Error('validatorsInfo is empty');
     }
@@ -572,7 +572,7 @@ const sendUndelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', exp
         (0, helpers_1.log)('Error', error);
         throw new Error('Could not broadcast the undelegate transaction');
     }
-    const b1 = await accounts.getBalanceCardMetrics(address);
+    const b1 = await accounts_1.accountsApi.getBalanceCardMetrics(address);
     const { unbounding } = b1;
     if (!unbounding) {
         (0, helpers_1.log)('Balances', b1);
@@ -604,7 +604,7 @@ const sendSdsPrepayTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expe
     await sendFromFaucetToReceiver(hdPathIndex, keyPairReceiver, expectedToSend + 0.2);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const sendTxMessages = await transactions.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
+    const sendTxMessages = await transactionsSds.getSdsPrepayTx(address, [{ amount: expectedToSend }]);
     const signedTx = await transactions.sign(address, sendTxMessages);
     if (!signedTx) {
         throw new Error('Could not sign the sds prepay transaction');
@@ -636,7 +636,7 @@ const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '
     const keyPairReceiver = await createKeypairFromMnemonic(receiverPhrase);
     await main(receiverMnemonic, hdPathIndex);
     const { address } = keyPairReceiver;
-    const b = await accounts.getOtherBalanceCardMetrics(address);
+    const b = await accounts_1.accountsApi.getOtherBalanceCardMetrics(address);
     (0, helpers_1.log)('balance from other', b);
     const { ozone } = b;
     if (!ozone) {
@@ -677,8 +677,8 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
         (0, helpers_1.log)(m);
         throw new Error(m);
     }
-    const targetHash = await FilesystemService.calculateFileHash(fileWritePath);
-    const uploadResult = await RemoteFilesystem.updloadFile(keypair, fileWritePath);
+    const targetHash = await filesystem_1.filesystemApi.calculateFileHash(fileWritePath);
+    const uploadResult = await remoteFileSystem_1.remoteFileSystemApi.updloadFile(keypair, fileWritePath);
     const { filehash: calculatedFileHash, uploadReturn } = uploadResult;
     if (+uploadReturn !== 0) {
         throw new Error(`Upload did not return expected return code 0, and instead we have "${uploadReturn}"`);
@@ -687,7 +687,7 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
         throw new Error(`Upload did not return expected filehash, ${targetHash}`);
     }
     await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
-    const userFileList = await RemoteFilesystem.getUploadedFileList(keypair, 0);
+    const userFileList = await remoteFileSystem_1.remoteFileSystemApi.getUploadedFileList(keypair, 0);
     const { files } = userFileList;
     if (!files.length) {
         throw new Error(`The remote file list is empty for address "${address}"`);
@@ -712,12 +712,12 @@ const downloadFileFromRemote = async (fileReadName, randomTestPreffix, hdPathInd
     const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
     const keypair = await createKeypairFromMnemonic(receiverPhrase);
     await main(receiverMnemonic, hdPathIndex);
-    const uploadedLocalFileHash = await FilesystemService.calculateFileHash(uploadedFileWritePath);
+    const uploadedLocalFileHash = await filesystem_1.filesystemApi.calculateFileHash(uploadedFileWritePath);
     const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
     const filesize = 10000001;
-    const downloadResult = await RemoteFilesystem.downloadFile(keypair, filePathToSaveDownloadedTo, uploadedLocalFileHash, filesize);
+    const downloadResult = await remoteFileSystem_1.remoteFileSystemApi.downloadFile(keypair, filePathToSaveDownloadedTo, uploadedLocalFileHash, filesize);
     const { filePathToSave } = downloadResult;
-    const downloadedFileHash = await FilesystemService.calculateFileHash(filePathToSave);
+    const downloadedFileHash = await filesystem_1.filesystemApi.calculateFileHash(filePathToSave);
     if (downloadedFileHash !== uploadedLocalFileHash) {
         throw new Error(`downloadedFileHash "${downloadedFileHash}" must be equal uploadedLocalFileHash "${uploadedLocalFileHash}" `);
     }
