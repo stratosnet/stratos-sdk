@@ -37,6 +37,20 @@ export const isGteN = (curve: Slip10Curve, privkey: Uint8Array): boolean => {
   return keyAsNumber.gte(n(curve));
 };
 
+// used in unlockMasterKeySeed and getMasterKeySeed - here
+export const decryptMasterKeySeed = async (
+  password: string,
+  encryptedMasterKeySeed: string,
+): Promise<Uint8Array | false> => {
+  try {
+    const decrypteCypherText = sjcl.decrypt(password, encryptedMasterKeySeed);
+    const decryptedMasterKeySeed = fromBase64(decrypteCypherText);
+    return decryptedMasterKeySeed;
+  } catch (err) {
+    return Promise.reject(false);
+  }
+};
+
 // used in keymanager
 export const encryptMasterKeySeed = (
   password: string,

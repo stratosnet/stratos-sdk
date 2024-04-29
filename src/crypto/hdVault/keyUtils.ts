@@ -1,8 +1,8 @@
 import { Bip39, EnglishMnemonic, HdPath, Secp256k1, Secp256k1Signature, stringToPath } from '@cosmjs/crypto';
 import { fromBase64, fromBech32, fromHex, toBech32, toHex } from '@cosmjs/encoding';
 import createKeccakHash from 'keccak';
-import sjcl from 'sjcl';
 import { PubKey } from '../../chain/cosmos/cosmosTypes';
+import { decryptMasterKeySeed } from '../../chain/cosmos/cosmosUtils';
 import {
   bip39Password as bip39PasswordDefault,
   stratosAddressPrefix,
@@ -75,20 +75,6 @@ export const getEncodedPublicKey = async (encodedAminoPub: Uint8Array): Promise<
   const encodedPubKey = toBech32(stratosPubkeyPrefix, encodedAminoPub);
 
   return encodedPubKey;
-};
-
-// used in unlockMasterKeySeed and getMasterKeySeed - here
-export const decryptMasterKeySeed = async (
-  password: string,
-  encryptedMasterKeySeed: string,
-): Promise<Uint8Array | false> => {
-  try {
-    const decrypteCypherText = sjcl.decrypt(password, encryptedMasterKeySeed);
-    const decryptedMasterKeySeed = fromBase64(decrypteCypherText);
-    return decryptedMasterKeySeed;
-  } catch (err) {
-    return Promise.reject(false);
-  }
 };
 
 // used in keyManager to call unlockMasterKeySeed

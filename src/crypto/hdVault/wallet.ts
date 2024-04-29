@@ -10,6 +10,8 @@ import { type KeyPairInfo } from './hdVaultTypes';
 import * as keyManager from './keyManager';
 import * as keyUtils from './keyUtils';
 
+export { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../../config/hdVault';
+
 // used in externally to switch between keypairs and during create wallet
 export const deriveKeyPair = async (
   keyIndex: number,
