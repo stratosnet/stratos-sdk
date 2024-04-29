@@ -35,7 +35,7 @@ Omit.createtime
 
 #### Defined in
 
-network/networkTypes.ts:457
+network/networkTypes.ts:370
 
 ___
 
@@ -49,7 +49,7 @@ Omit.filehash
 
 #### Defined in
 
-network/networkTypes.ts:454
+network/networkTypes.ts:367
 
 ___
 
@@ -63,7 +63,7 @@ Omit.filename
 
 #### Defined in
 
-network/networkTypes.ts:456
+network/networkTypes.ts:369
 
 ___
 
@@ -77,7 +77,7 @@ Omit.filesize
 
 #### Defined in
 
-network/networkTypes.ts:455
+network/networkTypes.ts:368
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:461
+network/networkTypes.ts:374
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:462
+network/networkTypes.ts:375
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:463
+network/networkTypes.ts:376
 
 ___
 
@@ -117,4 +117,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:464
+network/networkTypes.ts:377

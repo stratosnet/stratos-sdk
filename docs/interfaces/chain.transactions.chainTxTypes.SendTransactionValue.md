@@ -40,7 +40,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:118
+chain/transactions/types.ts:103
 
 ___
 
@@ -50,4 +50,4 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:119
+chain/transactions/types.ts:104

@@ -38,7 +38,7 @@
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:41
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:40
 
 ## Variables
 
@@ -48,7 +48,7 @@ crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:41
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:123
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:112
 
 ## Functions
 
@@ -72,7 +72,7 @@ typeof `crypto_1.HdPath`
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:77
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:68
 
 ___
 
@@ -92,4 +92,4 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:49
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:48

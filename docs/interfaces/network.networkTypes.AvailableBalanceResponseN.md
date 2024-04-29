@@ -19,7 +19,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:115
+network/networkTypes.ts:78
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:116
+network/networkTypes.ts:79

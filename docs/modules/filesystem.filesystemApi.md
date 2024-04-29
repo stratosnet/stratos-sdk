@@ -44,7 +44,7 @@
 
 #### Defined in
 
-filesystem/filesystem.ts:58
+filesystem/filesystem.ts:51
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:38
+filesystem/filesystem.ts:33
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:25
+filesystem/filesystem.ts:20
 
 ___
 
@@ -104,7 +104,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:189
+filesystem/filesystem.ts:164
 
 ___
 
@@ -124,7 +124,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:204
+filesystem/filesystem.ts:179
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:168
+filesystem/filesystem.ts:145
 
 ___
 
@@ -164,7 +164,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:176
+filesystem/filesystem.ts:152
 
 ___
 
@@ -184,7 +184,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:194
+filesystem/filesystem.ts:169
 
 ___
 
@@ -204,7 +204,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:182
+filesystem/filesystem.ts:157
 
 ___
 
@@ -225,7 +225,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:210
+filesystem/filesystem.ts:185
 
 ___
 
@@ -245,7 +245,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:16
+filesystem/filesystem.ts:11
 
 ___
 
@@ -266,7 +266,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:152
+filesystem/filesystem.ts:129
 
 ___
 
@@ -287,7 +287,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:109
+filesystem/filesystem.ts:87
 
 ___
 
@@ -307,7 +307,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:78
+filesystem/filesystem.ts:56
 
 ___
 
@@ -327,7 +327,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:216
+filesystem/filesystem.ts:191
 
 ___
 
@@ -348,7 +348,7 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:238
+filesystem/filesystem.ts:213
 
 ___
 
@@ -369,4 +369,4 @@ ___
 
 #### Defined in
 
-filesystem/filesystem.ts:246
+filesystem/filesystem.ts:221

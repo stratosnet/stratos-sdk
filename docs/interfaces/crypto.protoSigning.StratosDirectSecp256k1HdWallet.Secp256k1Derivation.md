@@ -21,7 +21,7 @@ Derivation information required to derive a keypair and an address from a mnemon
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:37
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:36
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:38
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:37

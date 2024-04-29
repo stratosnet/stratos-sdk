@@ -19,7 +19,7 @@
 
 #### Defined in
 
-sds/transactions/types.ts:36
+sds/transactions/types.ts:32
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-sds/transactions/types.ts:35
+sds/transactions/types.ts:31

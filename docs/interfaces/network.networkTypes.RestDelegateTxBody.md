@@ -32,7 +32,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:658
+network/networkTypes.ts:563
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:656
+network/networkTypes.ts:561
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:667
+network/networkTypes.ts:572
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:659
+network/networkTypes.ts:564
 
 ___
 
@@ -88,4 +88,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:657
+network/networkTypes.ts:562

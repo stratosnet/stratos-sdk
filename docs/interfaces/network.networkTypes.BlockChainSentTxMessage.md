@@ -29,7 +29,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:309
+network/networkTypes.ts:229
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `amount` | [`TxAmount`](network.networkTypes.TxAmount.md)[] |
+| `amount` | [`Amount`](network.networkTypes.Amount.md)[] |
 | `from_address` | `string` |
 | `to_address` | `string` |
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:324
+network/networkTypes.ts:244

@@ -18,4 +18,4 @@
 
 #### Defined in
 
-sds/transactions/types.ts:20
+sds/transactions/types.ts:18

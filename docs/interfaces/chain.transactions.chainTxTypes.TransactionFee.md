@@ -19,7 +19,7 @@
 
 #### Defined in
 
-chain/transactions/types.ts:113
+chain/transactions/types.ts:98
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:114
+chain/transactions/types.ts:99

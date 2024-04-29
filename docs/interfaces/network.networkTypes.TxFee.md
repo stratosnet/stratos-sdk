@@ -15,11 +15,11 @@
 
 ### amount
 
-• **amount**: [`TxAmount`](network.networkTypes.TxAmount.md)[]
+• **amount**: [`Amount`](network.networkTypes.Amount.md)[]
 
 #### Defined in
 
-network/networkTypes.ts:177
+network/networkTypes.ts:128
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:178
+network/networkTypes.ts:129

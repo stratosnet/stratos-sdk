@@ -46,7 +46,7 @@ and extracts some common `Account` information from it.
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:90
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:81
 
 ## Functions
 
@@ -70,7 +70,7 @@ you'll need to write your own account decoder.
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:97
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:88
 
 ___
 
@@ -90,7 +90,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:43
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:39
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:64
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:55
 
 ___
 
@@ -130,4 +130,4 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:30
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:27

@@ -29,7 +29,7 @@
 
 #### Defined in
 
-chain/transactions/types.ts:156
+chain/transactions/types.ts:141
 
 ___
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:157
+chain/transactions/types.ts:142

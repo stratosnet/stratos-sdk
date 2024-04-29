@@ -27,7 +27,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:309
+network/networkTypes.ts:229
 
 ___
 
@@ -40,7 +40,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `address?` | `string` |
-| `amount` | [`TxAmount`](network.networkTypes.TxAmount.md) \| [`TxAmount`](network.networkTypes.TxAmount.md)[] |
+| `amount` | [`Amount`](network.networkTypes.Amount.md) \| [`Amount`](network.networkTypes.Amount.md)[] |
 | `delegator_address?` | `string` |
 | `from?` | `string` |
 | `from_address?` | `string` |
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:310
+network/networkTypes.ts:230

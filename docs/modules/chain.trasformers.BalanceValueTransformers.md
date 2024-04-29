@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-chain/transformers/balanceValues.ts:40
+chain/transformers/balanceValues.ts:39
 
 ___
 
@@ -73,4 +73,4 @@ ___
 
 #### Defined in
 
-chain/transformers/balanceValues.ts:57
+chain/transformers/balanceValues.ts:56

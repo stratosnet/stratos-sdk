@@ -40,7 +40,7 @@ ___
 
 #### Defined in
 
-sds/transactions/types.ts:25
+sds/transactions/types.ts:23
 
 ___
 
@@ -50,4 +50,4 @@ ___
 
 #### Defined in
 
-sds/transactions/types.ts:24
+sds/transactions/types.ts:22

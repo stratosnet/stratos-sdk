@@ -33,7 +33,7 @@
 
 #### Defined in
 
-chain/transactions/types.ts:136
+chain/transactions/types.ts:121
 
 ___
 
@@ -47,7 +47,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:135
+chain/transactions/types.ts:120
 
 ___
 
@@ -61,7 +61,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:139
+chain/transactions/types.ts:124
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:138
+chain/transactions/types.ts:123
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:143
+chain/transactions/types.ts:128
 
 ___
 
@@ -99,4 +99,4 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:137
+chain/transactions/types.ts:122

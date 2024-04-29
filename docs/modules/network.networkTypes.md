@@ -104,7 +104,6 @@
 - [StakingPoolDataResult](../interfaces/network.networkTypes.StakingPoolDataResult.md)
 - [StakingPoolResponse](../interfaces/network.networkTypes.StakingPoolResponse.md)
 - [SubmitTransactionDataResult](../interfaces/network.networkTypes.SubmitTransactionDataResult.md)
-- [TxAmount](../interfaces/network.networkTypes.TxAmount.md)
 - [TxData](../interfaces/network.networkTypes.TxData.md)
 - [TxFee](../interfaces/network.networkTypes.TxFee.md)
 - [TxOrigin](../interfaces/network.networkTypes.TxOrigin.md)
@@ -142,7 +141,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:129
+network/networkTypes.ts:92
 
 ___
 
@@ -152,7 +151,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:119
+network/networkTypes.ts:82
 
 ___
 
@@ -169,7 +168,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:53
+network/networkTypes.ts:30
 
 ___
 
@@ -179,17 +178,17 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:157
+network/networkTypes.ts:114
 
 ___
 
 ### TxDataDataAmount
 
-Ƭ **TxDataDataAmount**: [`TxAmount`](../interfaces/network.networkTypes.TxAmount.md)[] \| [`TxAmount`](../interfaces/network.networkTypes.TxAmount.md)
+Ƭ **TxDataDataAmount**: [`Amount`](../interfaces/network.networkTypes.Amount.md)[] \| [`Amount`](../interfaces/network.networkTypes.Amount.md)
 
 #### Defined in
 
-network/networkTypes.ts:181
+network/networkTypes.ts:132
 
 ___
 
@@ -199,7 +198,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:850
+network/networkTypes.ts:754
 
 ___
 
@@ -209,7 +208,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:849
+network/networkTypes.ts:753
 
 ## Variables
 
@@ -226,4 +225,4 @@ network/networkTypes.ts:849
 
 #### Defined in
 
-network/networkTypes.ts:852
+network/networkTypes.ts:756

@@ -20,7 +20,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:305
+network/networkTypes.ts:225
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:304
+network/networkTypes.ts:224
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:303
+network/networkTypes.ts:223

@@ -34,7 +34,7 @@
 
 #### Defined in
 
-crypto/hdVault/keyManager.ts:52
+crypto/hdVault/keyManager.ts:33
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyManager.ts:23
+crypto/hdVault/keyManager.ts:8
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyManager.ts:106
+crypto/hdVault/keyManager.ts:82
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyManager.ts:93
+crypto/hdVault/keyManager.ts:69
 
 ___
 
@@ -120,4 +120,4 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyManager.ts:85
+crypto/hdVault/keyManager.ts:61

@@ -35,7 +35,7 @@
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:52
+chain/cosmos/cosmosWallet.ts:48
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:80
+chain/cosmos/cosmosWallet.ts:76
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:101
+chain/cosmos/cosmosWallet.ts:97
 
 ___
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:109
+chain/cosmos/cosmosWallet.ts:105
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosWallet.ts:88
+chain/cosmos/cosmosWallet.ts:84
 
 ___
 

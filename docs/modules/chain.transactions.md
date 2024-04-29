@@ -46,7 +46,7 @@
 
 #### Defined in
 
-chain/transactions/transactions.ts:53
+chain/transactions/transactions.ts:35
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:112
+chain/transactions/transactions.ts:94
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:77
+chain/transactions/transactions.ts:59
 
 ___
 
@@ -106,7 +106,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:91
+chain/transactions/transactions.ts:73
 
 ___
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:63
+chain/transactions/transactions.ts:45
 
 ___
 
@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:107
+chain/transactions/transactions.ts:89
 
 ___
 
@@ -167,7 +167,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:276
+chain/transactions/transactions.ts:251
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:241
+chain/transactions/transactions.ts:216
 
 ___
 
@@ -209,7 +209,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:211
+chain/transactions/transactions.ts:186
 
 ___
 
@@ -223,7 +223,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:128
+chain/transactions/transactions.ts:110
 
 ___
 
@@ -244,7 +244,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:146
+chain/transactions/transactions.ts:126
 
 ___
 
@@ -265,7 +265,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:313
+chain/transactions/transactions.ts:286
 
 ___
 
@@ -285,7 +285,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:375
+chain/transactions/transactions.ts:348
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:346
+chain/transactions/transactions.ts:319
 
 ___
 
@@ -329,4 +329,4 @@ ___
 
 #### Defined in
 
-chain/transactions/transactions.ts:192
+chain/transactions/transactions.ts:170

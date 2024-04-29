@@ -50,7 +50,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/deriveManager.ts:29
+crypto/hdVault/deriveManager.ts:25
 
 ___
 
@@ -72,4 +72,4 @@ ___
 
 #### Defined in
 
-crypto/hdVault/deriveManager.ts:56
+crypto/hdVault/deriveManager.ts:47

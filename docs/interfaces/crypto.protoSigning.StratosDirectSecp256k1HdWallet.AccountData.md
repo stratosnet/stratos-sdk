@@ -20,7 +20,7 @@
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:44
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:43
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:45
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:44
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:46
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:45

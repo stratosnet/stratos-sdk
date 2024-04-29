@@ -48,7 +48,7 @@
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:163
+crypto/hdVault/keyUtils.ts:127
 
 ## Functions
 
@@ -68,7 +68,7 @@ crypto/hdVault/keyUtils.ts:163
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:85
+crypto/hdVault/keyUtils.ts:69
 
 ___
 
@@ -88,7 +88,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:80
+crypto/hdVault/keyUtils.ts:64
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:117
+crypto/hdVault/keyUtils.ts:81
 
 ___
 
@@ -129,7 +129,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:182
+crypto/hdVault/keyUtils.ts:146
 
 ___
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:24
+crypto/hdVault/keyUtils.ts:15
 
 ___
 
@@ -169,7 +169,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:64
+crypto/hdVault/keyUtils.ts:55
 
 ___
 
@@ -189,7 +189,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:58
+crypto/hdVault/keyUtils.ts:49
 
 ___
 
@@ -209,7 +209,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:90
+crypto/hdVault/keyUtils.ts:74
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:144
+crypto/hdVault/keyUtils.ts:108
 
 ___
 
@@ -250,7 +250,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:165
+crypto/hdVault/keyUtils.ts:129
 
 ___
 
@@ -271,7 +271,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:196
+crypto/hdVault/keyUtils.ts:154
 
 ___
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:131
+crypto/hdVault/keyUtils.ts:95
 
 ___
 
@@ -314,4 +314,4 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:210
+crypto/hdVault/keyUtils.ts:164

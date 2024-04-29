@@ -39,7 +39,7 @@ DirectSecp256k1HdWallet.mnemonic
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:179
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:168
 
 ## Methods
 
@@ -57,7 +57,7 @@ DirectSecp256k1HdWallet.getAccounts
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:183
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:172
 
 ___
 
@@ -81,7 +81,7 @@ DirectSecp256k1HdWallet.serialize
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:251
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:232
 
 ___
 
@@ -106,7 +106,7 @@ DirectSecp256k1HdWallet.signDirect
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:193
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:181
 
 ___
 
@@ -131,4 +131,4 @@ DirectSecp256k1HdWallet.fromMnemonic
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:147
+crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet.ts:136

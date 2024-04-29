@@ -52,7 +52,7 @@
 
 #### Defined in
 
-chain/transactions/types.ts:184
+chain/transactions/types.ts:169
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:213
+chain/transactions/types.ts:198
 
 ## Variables
 
@@ -72,7 +72,7 @@ chain/transactions/types.ts:213
 
 #### Defined in
 
-chain/transactions/types.ts:83
+chain/transactions/types.ts:72
 
 ___
 
@@ -82,7 +82,7 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:93
+chain/transactions/types.ts:82
 
 ___
 
@@ -92,4 +92,4 @@ ___
 
 #### Defined in
 
-chain/transactions/types.ts:62
+chain/transactions/types.ts:51

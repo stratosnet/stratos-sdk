@@ -21,7 +21,7 @@
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:21
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:18
 
 ___
 
@@ -31,7 +31,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:19
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:16
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:20
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:17
 
 ___
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-crypto/stratos-proto-signing/StratosStargateAccounts.ts:22
+crypto/stratos-proto-signing/StratosStargateAccounts.ts:19

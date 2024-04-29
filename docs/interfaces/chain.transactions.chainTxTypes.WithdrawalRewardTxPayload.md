@@ -18,4 +18,4 @@
 
 #### Defined in
 
-chain/transactions/types.ts:210
+chain/transactions/types.ts:195

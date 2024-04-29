@@ -20,10 +20,10 @@
 
 | Name | Type |
 | :------ | :------ |
-| `amount` | [`TxAmount`](network.networkTypes.TxAmount.md)[] |
+| `amount` | [`Amount`](network.networkTypes.Amount.md)[] |
 | `from_address` | `string` |
 | `to_address` | `string` |
 
 #### Defined in
 
-network/networkTypes.ts:195
+network/networkTypes.ts:146
