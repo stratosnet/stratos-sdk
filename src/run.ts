@@ -188,7 +188,7 @@ const main = async () => {
   // 1 Check balance
   await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
 
-  await runFaucet(hdPathIndex, zeroUserMnemonic);
+  // await runFaucet(hdPathIndex, zeroUserMnemonic);
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
 
