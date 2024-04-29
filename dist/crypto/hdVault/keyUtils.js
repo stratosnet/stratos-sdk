@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.decryptMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAminoPublicKey = exports.generateMasterKeySeed = void 0;
+exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAminoPublicKey = exports.generateMasterKeySeed = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const keccak_1 = __importDefault(require("keccak"));
-const sjcl_1 = __importDefault(require("sjcl"));
+const cosmosUtils_1 = require("../../chain/cosmos/cosmosUtils");
 const hdVault_1 = require("../../config/hdVault");
 const StratosDirectSecp256k1HdWallet_1 = require("../../crypto/stratos-proto-signing/StratosDirectSecp256k1HdWallet");
 const Sdk_1 = __importDefault(require("../../Sdk"));
@@ -62,22 +62,10 @@ const getEncodedPublicKey = async (encodedAminoPub) => {
     return encodedPubKey;
 };
 exports.getEncodedPublicKey = getEncodedPublicKey;
-// used in unlockMasterKeySeed and getMasterKeySeed - here
-const decryptMasterKeySeed = async (password, encryptedMasterKeySeed) => {
-    try {
-        const decrypteCypherText = sjcl_1.default.decrypt(password, encryptedMasterKeySeed);
-        const decryptedMasterKeySeed = (0, encoding_1.fromBase64)(decrypteCypherText);
-        return decryptedMasterKeySeed;
-    }
-    catch (err) {
-        return Promise.reject(false);
-    }
-};
-exports.decryptMasterKeySeed = decryptMasterKeySeed;
 // used in keyManager to call unlockMasterKeySeed
 const unlockMasterKeySeed = async (password, encryptedMasterKeySeed) => {
     try {
-        await (0, exports.decryptMasterKeySeed)(password, encryptedMasterKeySeed);
+        await (0, cosmosUtils_1.decryptMasterKeySeed)(password, encryptedMasterKeySeed);
         return true;
     }
     catch (e) {
@@ -89,7 +77,7 @@ exports.unlockMasterKeySeed = unlockMasterKeySeed;
 const getMasterKeySeed = async (password, encryptedMasterKeySeed) => {
     let decryptedMasterKeySeed;
     try {
-        decryptedMasterKeySeed = await (0, exports.decryptMasterKeySeed)(password, encryptedMasterKeySeed);
+        decryptedMasterKeySeed = await (0, cosmosUtils_1.decryptMasterKeySeed)(password, encryptedMasterKeySeed);
     }
     catch (e) {
         return Promise.reject(false);

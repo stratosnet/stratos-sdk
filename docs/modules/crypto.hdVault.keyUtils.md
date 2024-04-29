@@ -14,7 +14,6 @@
 
 - [convertEvmToNativeToAddress](crypto.hdVault.keyUtils.md#convertevmtonativetoaddress)
 - [convertNativeToEvmAddress](crypto.hdVault.keyUtils.md#convertnativetoevmaddress)
-- [decryptMasterKeySeed](crypto.hdVault.keyUtils.md#decryptmasterkeyseed)
 - [encodeSignatureMessage](crypto.hdVault.keyUtils.md#encodesignaturemessage)
 - [generateMasterKeySeed](crypto.hdVault.keyUtils.md#generatemasterkeyseed)
 - [getAddressFromPubKeyWithKeccak](crypto.hdVault.keyUtils.md#getaddressfrompubkeywithkeccak)
@@ -48,7 +47,7 @@
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:127
+crypto/hdVault/keyUtils.ts:113
 
 ## Functions
 
@@ -92,27 +91,6 @@ crypto/hdVault/keyUtils.ts:64
 
 ___
 
-### decryptMasterKeySeed
-
-▸ **decryptMasterKeySeed**(`password`, `encryptedMasterKeySeed`): `Promise`\<``false`` \| `Uint8Array`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `password` | `string` |
-| `encryptedMasterKeySeed` | `string` |
-
-#### Returns
-
-`Promise`\<``false`` \| `Uint8Array`\>
-
-#### Defined in
-
-crypto/hdVault/keyUtils.ts:81
-
-___
-
 ### encodeSignatureMessage
 
 ▸ **encodeSignatureMessage**(`message`): `Uint8Array`
@@ -129,7 +107,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:146
+crypto/hdVault/keyUtils.ts:132
 
 ___
 
@@ -230,7 +208,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:108
+crypto/hdVault/keyUtils.ts:94
 
 ___
 
@@ -250,7 +228,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:129
+crypto/hdVault/keyUtils.ts:115
 
 ___
 
@@ -271,7 +249,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:154
+crypto/hdVault/keyUtils.ts:140
 
 ___
 
@@ -292,7 +270,7 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:95
+crypto/hdVault/keyUtils.ts:81
 
 ___
 
@@ -314,4 +292,4 @@ ___
 
 #### Defined in
 
-crypto/hdVault/keyUtils.ts:164
+crypto/hdVault/keyUtils.ts:150

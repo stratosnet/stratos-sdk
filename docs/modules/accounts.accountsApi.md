@@ -43,7 +43,7 @@ ___
 
 ### getAccountTrasactions
 
-▸ **getAccountTrasactions**(`address`, `type?`, `page?`, `pageLimit?`, `userType?`): `Promise`\<`ParsedTxData`\>
+▸ **getAccountTrasactions**(`address`, `type?`, `page?`, `pageLimit?`, `userType?`): `Promise`\<[`ParsedTxData`](../interfaces/transformerTypes.ParsedTxData.md)\>
 
 #### Parameters
 
@@ -57,7 +57,7 @@ ___
 
 #### Returns
 
-`Promise`\<`ParsedTxData`\>
+`Promise`\<[`ParsedTxData`](../interfaces/transformerTypes.ParsedTxData.md)\>
 
 #### Defined in
 

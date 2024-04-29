@@ -5,6 +5,7 @@ import { StratosDirectSecp256k1HdWallet } from '../../crypto/stratos-proto-signi
 export declare const isZero: (privkey: Uint8Array) => boolean;
 export declare const n: (curve: Slip10Curve) => BN;
 export declare const isGteN: (curve: Slip10Curve, privkey: Uint8Array) => boolean;
+export declare const decryptMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array | false>;
 export declare const encryptMasterKeySeed: (password: string, masterKeySeed: Uint8Array) => sjcl.SjclCipherEncrypted;
 export declare const deserializeWithEncryptionKey: (password: string, serialization: string) => Promise<StratosDirectSecp256k1HdWallet>;
 export declare const serializeWithEncryptionKey: (password: string, wallet: StratosDirectSecp256k1HdWallet) => string;

@@ -6,10 +6,57 @@
 
 ## Table of contents
 
+### Variables
+
+- [stratosDenom](crypto.hdVault.wallet.md#stratosdenom)
+- [stratosOzDenom](crypto.hdVault.wallet.md#stratosozdenom)
+- [stratosTopDenom](crypto.hdVault.wallet.md#stratostopdenom)
+- [stratosUozDenom](crypto.hdVault.wallet.md#stratosuozdenom)
+
 ### Functions
 
 - [deriveKeyPair](crypto.hdVault.wallet.md#derivekeypair)
 - [deriveKeyPairFromMnemonic](crypto.hdVault.wallet.md#derivekeypairfrommnemonic)
+
+## Variables
+
+### stratosDenom
+
+• `Const` **stratosDenom**: ``"wei"``
+
+#### Defined in
+
+config/hdVault.ts:24
+
+___
+
+### stratosOzDenom
+
+• `Const` **stratosOzDenom**: ``"oz"``
+
+#### Defined in
+
+config/hdVault.ts:29
+
+___
+
+### stratosTopDenom
+
+• `Const` **stratosTopDenom**: ``"stos"``
+
+#### Defined in
+
+config/hdVault.ts:26
+
+___
+
+### stratosUozDenom
+
+• `Const` **stratosUozDenom**: ``"uoz"``
+
+#### Defined in
+
+config/hdVault.ts:28
 
 ## Functions
 
@@ -31,7 +78,7 @@
 
 #### Defined in
 
-crypto/hdVault/wallet.ts:14
+crypto/hdVault/wallet.ts:16
 
 ___
 
@@ -53,4 +100,4 @@ ___
 
 #### Defined in
 
-crypto/hdVault/wallet.ts:54
+crypto/hdVault/wallet.ts:56

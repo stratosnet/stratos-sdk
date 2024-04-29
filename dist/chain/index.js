@@ -23,10 +23,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validators = exports.trasformers = exports.transactions = exports.evm = exports.cosmos = void 0;
+exports.validators = exports.transformers = exports.transactions = exports.evm = exports.cosmos = void 0;
 exports.cosmos = __importStar(require("./cosmos"));
 exports.evm = __importStar(require("./evm"));
 exports.transactions = __importStar(require("./transactions"));
-exports.trasformers = __importStar(require("./transformers"));
+exports.transformers = __importStar(require("./transformers"));
 exports.validators = __importStar(require("./validators"));
 //# sourceMappingURL=index.js.map

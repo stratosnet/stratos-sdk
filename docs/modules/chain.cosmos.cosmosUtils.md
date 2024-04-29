@@ -8,6 +8,7 @@
 
 ### Functions
 
+- [decryptMasterKeySeed](chain.cosmos.cosmosUtils.md#decryptmasterkeyseed)
 - [deserializeWithEncryptionKey](chain.cosmos.cosmosUtils.md#deserializewithencryptionkey)
 - [encryptMasterKeySeed](chain.cosmos.cosmosUtils.md#encryptmasterkeyseed)
 - [isGteN](chain.cosmos.cosmosUtils.md#isgten)
@@ -16,6 +17,27 @@
 - [serializeWithEncryptionKey](chain.cosmos.cosmosUtils.md#serializewithencryptionkey)
 
 ## Functions
+
+### decryptMasterKeySeed
+
+▸ **decryptMasterKeySeed**(`password`, `encryptedMasterKeySeed`): `Promise`\<``false`` \| `Uint8Array`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `password` | `string` |
+| `encryptedMasterKeySeed` | `string` |
+
+#### Returns
+
+`Promise`\<``false`` \| `Uint8Array`\>
+
+#### Defined in
+
+chain/cosmos/cosmosUtils.ts:41
+
+___
 
 ### deserializeWithEncryptionKey
 
@@ -34,7 +56,7 @@
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:71
+chain/cosmos/cosmosUtils.ts:85
 
 ___
 
@@ -55,7 +77,7 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:41
+chain/cosmos/cosmosUtils.ts:55
 
 ___
 
@@ -137,4 +159,4 @@ ___
 
 #### Defined in
 
-chain/cosmos/cosmosUtils.ts:102
+chain/cosmos/cosmosUtils.ts:116

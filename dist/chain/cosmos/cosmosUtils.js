@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serializeWithEncryptionKey = exports.deserializeWithEncryptionKey = exports.encryptMasterKeySeed = exports.isGteN = exports.n = exports.isZero = void 0;
+exports.serializeWithEncryptionKey = exports.deserializeWithEncryptionKey = exports.encryptMasterKeySeed = exports.decryptMasterKeySeed = exports.isGteN = exports.n = exports.isZero = void 0;
 const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const utils_1 = require("@cosmjs/utils");
@@ -39,6 +39,18 @@ const isGteN = (curve, privkey) => {
     return keyAsNumber.gte((0, exports.n)(curve));
 };
 exports.isGteN = isGteN;
+// used in unlockMasterKeySeed and getMasterKeySeed - here
+const decryptMasterKeySeed = async (password, encryptedMasterKeySeed) => {
+    try {
+        const decrypteCypherText = sjcl_1.default.decrypt(password, encryptedMasterKeySeed);
+        const decryptedMasterKeySeed = (0, encoding_1.fromBase64)(decrypteCypherText);
+        return decryptedMasterKeySeed;
+    }
+    catch (err) {
+        return Promise.reject(false);
+    }
+};
+exports.decryptMasterKeySeed = decryptMasterKeySeed;
 // used in keymanager
 const encryptMasterKeySeed = (password, masterKeySeed) => {
     const strMasterKey = (0, encoding_1.toBase64)(masterKeySeed);

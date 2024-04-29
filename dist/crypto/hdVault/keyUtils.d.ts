@@ -7,7 +7,6 @@ export declare const getAddressFromPubKeyWithKeccak: (pubkey: Uint8Array) => str
 export declare const convertNativeToEvmAddress: (nativeAddress: string) => string;
 export declare const convertEvmToNativeToAddress: (evmAddress: string) => string;
 export declare const getEncodedPublicKey: (encodedAminoPub: Uint8Array) => Promise<string>;
-export declare const decryptMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array | false>;
 export declare const unlockMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<boolean>;
 export declare const getMasterKeySeed: (password: string, encryptedMasterKeySeed: string) => Promise<Uint8Array>;
 export type PathBuilder = (account_index: number) => HdPath;

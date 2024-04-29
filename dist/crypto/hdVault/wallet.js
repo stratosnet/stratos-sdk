@@ -26,12 +26,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deriveKeyPairFromMnemonic = exports.deriveKeyPair = void 0;
+exports.deriveKeyPairFromMnemonic = exports.deriveKeyPair = exports.stratosUozDenom = exports.stratosTopDenom = exports.stratosOzDenom = exports.stratosDenom = void 0;
 const hdVault_1 = require("../../config/hdVault");
 const Sdk_1 = __importDefault(require("../../Sdk"));
 const deriveManager_1 = require("./deriveManager");
 const keyManager = __importStar(require("./keyManager"));
 const keyUtils = __importStar(require("./keyUtils"));
+var hdVault_2 = require("../../config/hdVault");
+Object.defineProperty(exports, "stratosDenom", { enumerable: true, get: function () { return hdVault_2.stratosDenom; } });
+Object.defineProperty(exports, "stratosOzDenom", { enumerable: true, get: function () { return hdVault_2.stratosOzDenom; } });
+Object.defineProperty(exports, "stratosTopDenom", { enumerable: true, get: function () { return hdVault_2.stratosTopDenom; } });
+Object.defineProperty(exports, "stratosUozDenom", { enumerable: true, get: function () { return hdVault_2.stratosUozDenom; } });
 // used in externally to switch between keypairs and during create wallet
 const deriveKeyPair = async (keyIndex, password, encryptedMasterKeySeed) => {
     var _a, _b;

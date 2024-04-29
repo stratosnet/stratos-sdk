@@ -1,16 +1,16 @@
-[Stratos SDK](../README.md) / [Exports](../modules.md) / [chain](chain.md) / [trasformers](chain.trasformers.md) / BalanceValueTransformers
+[Stratos SDK](../README.md) / [Exports](../modules.md) / [chain](chain.md) / [transformers](chain.transformers.md) / BalanceValueTransformers
 
 # Namespace: BalanceValueTransformers
 
-[chain](chain.md).[trasformers](chain.trasformers.md).BalanceValueTransformers
+[chain](chain.md).[transformers](chain.transformers.md).BalanceValueTransformers
 
 ## Table of contents
 
 ### Functions
 
-- [getBalanceCardMetricDinamicValue](chain.trasformers.BalanceValueTransformers.md#getbalancecardmetricdinamicvalue)
-- [getBalanceCardMetricValue](chain.trasformers.BalanceValueTransformers.md#getbalancecardmetricvalue)
-- [getOzoneMetricValue](chain.trasformers.BalanceValueTransformers.md#getozonemetricvalue)
+- [getBalanceCardMetricDinamicValue](chain.transformers.BalanceValueTransformers.md#getbalancecardmetricdinamicvalue)
+- [getBalanceCardMetricValue](chain.transformers.BalanceValueTransformers.md#getbalancecardmetricvalue)
+- [getOzoneMetricValue](chain.transformers.BalanceValueTransformers.md#getozonemetricvalue)
 
 ## Functions
 
