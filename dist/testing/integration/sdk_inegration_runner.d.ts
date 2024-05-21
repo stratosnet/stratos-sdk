@@ -24,5 +24,7 @@ export declare const sendUndelegateTx: (hdPathIndex?: number, givenReceiverMnemo
 export declare const sendSdsPrepayTx: (hdPathIndex?: number, givenReceiverMnemonic?: string, expectedToSend?: number) => Promise<boolean>;
 export declare const getAccountOzoneBalance: (hdPathIndex?: number, givenReceiverMnemonic?: string, minExpectedOzone?: string) => Promise<boolean>;
 export declare const uploadFileToRemote: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
+export declare const createSharedLinkForFile: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
+export declare const getSharedFilesListAndCheckShare: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export declare const downloadFileFromRemote: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export {};

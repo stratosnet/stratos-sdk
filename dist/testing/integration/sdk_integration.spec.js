@@ -89,7 +89,7 @@ describe(`Stratos SDK integration (integration test)`, () => {
             }, extendedExecutionTimeout);
         });
     });
-    describe('Prepay OZONE, upload and download', () => {
+    describe('Prepay OZONE, SDS Remote file system', () => {
         const receiverPhrase = hdVault_1.mnemonic.generateMnemonicPhrase(24);
         const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
         describe('Prepay and OZONE', () => {
@@ -115,6 +115,18 @@ describe(`Stratos SDK integration (integration test)`, () => {
                     done();
                 });
             }, extendedExecutionTimeout * 3 + remotefs_1.FILE_STATUS_CHECK_WAIT_TIME);
+            it('Creates the remote file shared link from filehash', done => {
+                void Integration.createSharedLinkForFile(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
+            it('Check the get shared files list works and contains the shared file info.', done => {
+                void Integration.getSharedFilesListAndCheckShare(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
             it('Downloads the remote file to local file and compares its hash', done => {
                 void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);

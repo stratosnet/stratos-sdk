@@ -683,6 +683,7 @@ const getSharedFileList = async (keypair, page = 0) => {
         req_time: timestamp,
     };
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
+    console.log('callResultRequestListShare result', callResultRequestListShare);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);

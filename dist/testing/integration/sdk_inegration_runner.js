@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadFileFromRemote = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
+exports.downloadFileFromRemote = exports.getSharedFilesListAndCheckShare = exports.createSharedLinkForFile = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
 const process_1 = require("process");
 const accounts_1 = require("../../accounts");
 const cosmos_1 = require("../../chain/cosmos");
@@ -701,6 +701,65 @@ const uploadFileToRemote = async (fileReadName, randomTestPreffix, hdPathIndex =
     return true;
 };
 exports.uploadFileToRemote = uploadFileToRemote;
+const createSharedLinkForFile = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// createSharedLinkForFile //////////////// ');
+    const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+    const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const targetHash = await filesystem_1.filesystemApi.calculateFileHash(fileWritePath);
+    const shareResult = await remoteFileSystem_1.remoteFileSystemApi.shareFile(keypair, targetHash);
+    const { filehash: remoteHash, shareid } = shareResult;
+    console.log('shareResult', shareResult);
+    if (!shareid) {
+        throw new Error(`Shareid is empty. Expected to have a value. We have "${shareid}"`);
+    }
+    if (remoteHash !== targetHash) {
+        throw new Error(`File share request did not return expected filehash which is "${targetHash}", and instead we got "${remoteHash}"`);
+    }
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
+    return true;
+};
+exports.createSharedLinkForFile = createSharedLinkForFile;
+const getSharedFilesListAndCheckShare = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// getSharedFilesListAndCheckShare //////////////// ');
+    const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+    const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+    const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const targetHash = await filesystem_1.filesystemApi.calculateFileHash(fileWritePath);
+    const shareListResult = await remoteFileSystem_1.remoteFileSystemApi.getSharedFileList(keypair, 0);
+    const { files: remoteFilesList, totalnumber } = shareListResult;
+    if (+totalnumber !== 1) {
+        console.log('shareListResult', shareListResult);
+        throw new Error(`Total number of shares for the previously shared file must be = 1. Instead we have "${totalnumber}"`);
+    }
+    if (!remoteFilesList) {
+        throw new Error(`Expected to have an array of files in the "files" field of the response. We have "${remoteFilesList}"`);
+    }
+    if (!remoteFilesList.length) {
+        throw new Error(`Expected to have an non-empty array of files in the "files" field of the response. We have "${remoteFilesList}"`);
+    }
+    const [firstUploadedFileInfo] = remoteFilesList;
+    const { filehash: remoteFileHash, filename: remoteFileName } = firstUploadedFileInfo;
+    if (remoteFileHash !== targetHash || remoteFileName !== expectedRemoteFileName) {
+        const errorMsg = `Remote file name "${remoteFileName}" of the shared file must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}"`;
+        throw new Error(errorMsg);
+    }
+    return true;
+};
+exports.getSharedFilesListAndCheckShare = getSharedFilesListAndCheckShare;
 const downloadFileFromRemote = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
     (0, helpers_1.log)('//////////////// downloadFileFromRemote //////////////// ');
     const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
