@@ -26,5 +26,6 @@ export declare const getAccountOzoneBalance: (hdPathIndex?: number, givenReceive
 export declare const uploadFileToRemote: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export declare const createSharedLinkForFile: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export declare const getSharedFilesListAndCheckShare: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
+export declare const stopFileSharingWithSharedId: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export declare const downloadFileFromRemote: (fileReadName: string, randomTestPreffix: string, hdPathIndex?: number, givenReceiverMnemonic?: string) => Promise<boolean>;
 export {};

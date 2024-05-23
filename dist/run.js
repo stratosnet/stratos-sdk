@@ -212,6 +212,14 @@ const testRequestUserFileShare = async (hdPathIndex, filehash, givenReceiverMnem
     const userShareFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.shareFile(keyPairZero, filehash);
     console.log('retrieved user shared file result', userShareFileResult);
 };
+const testRequestUserStopFileShare = async (hdPathIndex, shareid, givenReceiverMnemonic = zeroUserMnemonic) => {
+    const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
+    if (!keyPairZero) {
+        return;
+    }
+    const userStopFileShareResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.stopFileSharing(keyPairZero, shareid);
+    console.log('retrieved user sotp share file result', userStopFileShareResult);
+};
 const main = async () => {
     const sdkEnv = sdkEnvDev;
     // const sdkEnv = sdkEnvTest;
@@ -254,6 +262,9 @@ const main = async () => {
     // 5a
     // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
     // await testRequestUserFileShare(hdPathIndex, filehash);
+    // 6a
+    const shareid = '6455bd1063ca7769';
+    // await testRequestUserStopFileShare(hdPathIndex, shareid);
 };
 main();
 //# sourceMappingURL=run.js.map

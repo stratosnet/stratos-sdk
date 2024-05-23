@@ -1087,6 +1087,122 @@ export const getSharedFilesListAndCheckShare = async (
     throw new Error(errorMsg);
   }
 
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+
+  return true;
+};
+
+export const stopFileSharingWithSharedId = async (
+  fileReadName: string,
+  randomTestPreffix: string,
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// stopFileSharingWithSharedId //////////////// ');
+
+  const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+  const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+  const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keypair = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const targetHash = await filesystemApi.calculateFileHash(fileWritePath);
+
+  const shareListResult = await remoteFileSystemApi.getSharedFileList(keypair, 0);
+
+  const { files: remoteFilesList, totalnumber } = shareListResult;
+
+  if (+totalnumber !== 1) {
+    console.log('shareListResult', shareListResult);
+    throw new Error(
+      `Total number of shares before running stop share must be = 1. Instead we have "${totalnumber}"`,
+    );
+  }
+
+  if (!remoteFilesList) {
+    throw new Error(
+      `Expected to have an array of files in the "files" field of the response before proceeding with stop share. We have "${remoteFilesList}"`,
+    );
+  }
+
+  if (!remoteFilesList.length) {
+    throw new Error(
+      `Expected to have an non-empty array of files in the "files" field of the response before proceeding with stop share. We have "${remoteFilesList}"`,
+    );
+  }
+
+  const [firstUploadedFileInfo] = remoteFilesList;
+
+  const { filehash: remoteFileHash, filename: remoteFileName, shareid } = firstUploadedFileInfo;
+
+  if (remoteFileHash !== targetHash || remoteFileName !== expectedRemoteFileName) {
+    const errorMsg = `Remote file name "${remoteFileName}" of the shared file must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}". Cant proceed with stop sharing`;
+    throw new Error(errorMsg);
+  }
+
+  const userStopFileShareResult = await remoteFileSystemApi.stopFileSharing(keypair, shareid);
+
+  if (userStopFileShareResult !== true) {
+    const errorMsg = `Could not stop sharing shareid "${shareid}" for the filehash "${targetHash}" of user "${keypair.address}". We got result "${userStopFileShareResult}" instead of expected "true"`;
+    throw new Error(errorMsg);
+  }
+
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+
+  return true;
+};
+
+export const checkIfFileDoesntHaveSharesAfterStop = async (
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// checkIfFileDoesntHaveSharesAfterStop //////////////// ');
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keypair = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const shareListResultAfterStop = await remoteFileSystemApi.getSharedFileList(keypair, 0);
+
+  const { files: remoteFilesListAfter, totalnumber: totalnumberAfter } = shareListResultAfterStop;
+
+  if (+totalnumberAfter !== 0) {
+    console.log('shareListResult', shareListResultAfterStop);
+    throw new Error(
+      `Total number of shares after running stop share must be = 0. Instead we have "${totalnumberAfter}"`,
+    );
+  }
+
+  if (!remoteFilesListAfter) {
+    throw new Error(
+      `Expected to have an array of files in the "files" field of the response after stop share. We have "${remoteFilesListAfter}"`,
+    );
+  }
+
+  if (remoteFilesListAfter.length > 0) {
+    throw new Error(
+      `Expected to have an empty array of files in the "files" field of the response after stop share. We have "${remoteFilesListAfter}"`,
+    );
+  }
+
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+
   return true;
 };
 
