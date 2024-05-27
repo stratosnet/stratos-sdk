@@ -1092,6 +1092,77 @@ export const getSharedFilesListAndCheckShare = async (
   return true;
 };
 
+export const downloadFileFromRemoteBySharedLink = async (
+  fileReadName: string,
+  randomTestPreffix: string,
+  hdPathIndex = 0,
+  givenReceiverMnemonic = '',
+): Promise<boolean> => {
+  log('//////////////// downloadFileFromRemoteBySharedLink //////////////// ');
+
+  const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+
+  const uploadedFileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+
+  await main(faucetMnemonic, hdPathIndex);
+
+  const receiverPhrase = givenReceiverMnemonic
+    ? mnemonic.convertStringToArray(givenReceiverMnemonic)
+    : mnemonic.generateMnemonicPhrase(24);
+
+  const receiverMnemonic = mnemonic.convertArrayToString(receiverPhrase);
+  const keypair = await createKeypairFromMnemonic(receiverPhrase);
+
+  await main(receiverMnemonic, hdPathIndex);
+
+  const uploadedLocalFileHash = await filesystemApi.calculateFileHash(uploadedFileWritePath);
+
+  const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
+
+  const filesize = 10_000_001;
+
+  const shareListResult = await remoteFileSystemApi.getSharedFileList(keypair, 0);
+
+  const { files: remoteFilesList } = shareListResult;
+
+  if (!remoteFilesList.length) {
+    throw new Error(
+      `Expected to have an non-empty array of files in the "files" field of the response before proceeding with stop share. We have "${remoteFilesList}"`,
+    );
+  }
+
+  const [firstUploadedFileInfo] = remoteFilesList;
+
+  const { filename: remoteFileName, sharelink } = firstUploadedFileInfo;
+
+  const downloadResult = await remoteFileSystemApi.downloadSharedFile(
+    keypair,
+    filePathToSaveDownloadedTo + '_' + remoteFileName,
+    sharelink,
+    filesize,
+  );
+
+  const { filePathToSave } = downloadResult;
+
+  const downloadedFileHash = await filesystemApi.calculateFileHash(filePathToSave);
+
+  if (downloadedFileHash !== uploadedLocalFileHash) {
+    throw new Error(
+      `downloadedFileHash "${downloadedFileHash}" must be equal uploadedLocalFileHash "${uploadedLocalFileHash}" `,
+    );
+  }
+
+  fs.unlinkSync(filePathToSave, function (err: Error) {
+    if (err) {
+      throw err;
+    }
+  });
+
+  await delay(OZONE_BALANCE_CHECK_WAIT_TIME);
+
+  return true;
+};
+
 export const stopFileSharingWithSharedId = async (
   fileReadName: string,
   randomTestPreffix: string,
