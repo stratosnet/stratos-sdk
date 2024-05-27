@@ -21,7 +21,7 @@
 
 #### Defined in
 
-network/networkTypes.ts:503
+network/networkTypes.ts:501
 
 ___
 
@@ -31,7 +31,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:504
+network/networkTypes.ts:502
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:506
+network/networkTypes.ts:504
 
 ___
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:505
+network/networkTypes.ts:503

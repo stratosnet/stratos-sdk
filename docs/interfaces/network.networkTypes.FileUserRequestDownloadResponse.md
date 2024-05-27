@@ -10,8 +10,6 @@
 
   ↳ **`FileUserRequestDownloadResponse`**
 
-  ↳↳ [`FileUserRequestDownloadSharedResponse`](network.networkTypes.FileUserRequestDownloadSharedResponse.md)
-
 ## Table of contents
 
 ### Properties

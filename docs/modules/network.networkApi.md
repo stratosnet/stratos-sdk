@@ -31,7 +31,6 @@
 - [sendUserDownloadData](network.networkApi.md#senduserdownloaddata)
 - [sendUserDownloadedFileInfo](network.networkApi.md#senduserdownloadedfileinfo)
 - [sendUserRequestDownload](network.networkApi.md#senduserrequestdownload)
-- [sendUserRequestDownloadShared](network.networkApi.md#senduserrequestdownloadshared)
 - [sendUserRequestGetFileStatus](network.networkApi.md#senduserrequestgetfilestatus)
 - [sendUserRequestGetOzone](network.networkApi.md#senduserrequestgetozone)
 - [sendUserRequestGetShared](network.networkApi.md#senduserrequestgetshared)
@@ -141,7 +140,7 @@ ___
 
 #### Defined in
 
-network/network.ts:554
+network/network.ts:540
 
 ___
 
@@ -155,7 +154,7 @@ ___
 
 #### Defined in
 
-network/network.ts:536
+network/network.ts:522
 
 ___
 
@@ -190,7 +189,7 @@ ___
 
 #### Defined in
 
-network/network.ts:545
+network/network.ts:531
 
 ___
 
@@ -539,33 +538,6 @@ network/network.ts:382
 
 ___
 
-### sendUserRequestDownloadShared
-
-▸ **sendUserRequestDownloadShared**\<`T`\>(`extraParams`, `config?`): `Promise`\<[`FileUserRequestResult`](../interfaces/network.networkTypes.FileUserRequestResult.md)\<[`FileUserRequestDownloadSharedResponse`](../interfaces/network.networkTypes.FileUserRequestDownloadSharedResponse.md)\>\>
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | [`FileUserRequestDownloadSharedParams`](../interfaces/network.networkTypes.FileUserRequestDownloadSharedParams.md) |
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `extraParams` | `T`[] |
-| `config?` | [`NetworkAxiosConfig`](../interfaces/network.networkTypes.NetworkAxiosConfig.md) |
-
-#### Returns
-
-`Promise`\<[`FileUserRequestResult`](../interfaces/network.networkTypes.FileUserRequestResult.md)\<[`FileUserRequestDownloadSharedResponse`](../interfaces/network.networkTypes.FileUserRequestDownloadSharedResponse.md)\>\>
-
-#### Defined in
-
-network/network.ts:508
-
-___
-
 ### sendUserRequestGetFileStatus
 
 ▸ **sendUserRequestGetFileStatus**\<`T`\>(`extraParams`, `config?`): `Promise`\<[`FileUserRequestResult`](../interfaces/network.networkTypes.FileUserRequestResult.md)\<[`FileUserRequestGetFileStatusResponse`](../interfaces/network.networkTypes.FileUserRequestGetFileStatusResponse.md)\>\>
@@ -589,7 +561,7 @@ ___
 
 #### Defined in
 
-network/network.ts:522
+network/network.ts:508
 
 ___
 

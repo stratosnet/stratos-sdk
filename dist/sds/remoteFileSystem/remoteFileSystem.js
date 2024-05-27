@@ -98,10 +98,10 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             },
         ];
         const callResultDownloadFileInfo = await network_1.networkApi.sendUserDownloadedFileInfo(extraParamsForUserDownload);
-        (0, helpers_1.dirLog)('Call result download', callResultDownloadFileInfo);
+        // dirLog('Call result download', callResultDownloadFileInfo);
         const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
         downloadConfirmed = ((_a = responseDownloadFileInfo === null || responseDownloadFileInfo === void 0 ? void 0 : responseDownloadFileInfo.result) === null || _a === void 0 ? void 0 : _a.return) || '-1';
-        (0, helpers_1.log)('ResponseDownloadFileInfo', responseDownloadFileInfo);
+        // log('ResponseDownloadFileInfo', responseDownloadFileInfo);
     }
     if (+downloadConfirmed !== 0) {
         throw new Error('could not get download confirmation');
@@ -683,7 +683,6 @@ const getSharedFileList = async (keypair, page = 0) => {
         req_time: timestamp,
     };
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
-    console.log('callResultRequestListShare result', callResultRequestListShare);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);
@@ -710,15 +709,11 @@ const getSharedFileList = async (keypair, page = 0) => {
 };
 exports.getSharedFileList = getSharedFileList;
 const downloadSharedFile = async (keypair, filePathToSave, sharelink, filesize) => {
-    (0, helpers_1.log)(filePathToSave);
     const { address, publicKey } = keypair;
-    const ozoneBalance = await accounts_1.accountsApi.getOtherBalanceCardMetrics(address);
-    const { detailedBalance } = ozoneBalance;
-    if (!detailedBalance) {
-        throw new Error('no sequence is presented in the ozone balance response');
-    }
+    const sequence = await getCurrentSequenceString(address);
+    const filelink = `sds://${sharelink.trim()}`;
     const timestampA = (0, helpers_1.getTimestampInSeconds)();
-    const messageToSignA = `${sharelink}${address}${timestampA}`;
+    const messageToSignA = `${sharelink}${address}${sequence}${timestampA}`;
     const signatureA = await keyUtils.signWithPrivateKey(messageToSignA, keypair.privateKey);
     const extraParams = {
         signature: {
@@ -727,7 +722,7 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink, filesize) 
             signature: signatureA,
         },
         req_time: timestampA,
-        sharelink,
+        sharelink: filelink,
     };
     const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
@@ -735,63 +730,37 @@ const downloadSharedFile = async (keypair, filePathToSave, sharelink, filesize) 
         (0, helpers_1.dirLog)('we dont have response for dl request. it might be an error', callResultRequestGetShared);
         throw new Error('We dont have response to request get shared call');
     }
-    const { return: requestGetSharedReturn, reqid, filehash, sequencenumber } = responseRequestGetShared.result;
+    const { return: requestGetSharedReturn, reqid: reqidDownloadFile, filehash, filename: originalFileName, offsetstart: offsetstartInit, offsetend: offsetendInit, } = responseRequestGetShared.result;
     if (parseInt(requestGetSharedReturn, 10) < 0) {
         throw new Error(`return field in the request get shared response contains an error. Error code "${requestGetSharedReturn}"`);
     }
-    if (parseInt(requestGetSharedReturn, 10) !== 4) {
+    if (parseInt(requestGetSharedReturn, 10) !== 2) {
         throw new Error(`return field in the response to request get shared has an unexpected code "${requestGetSharedReturn}". Expected code was "4"`);
     }
-    if (!reqid || !filehash || !sequencenumber) {
+    if (!filehash) {
         (0, helpers_1.dirLog)('we dont have required fields in the response ', responseRequestGetShared);
-        throw new Error('required fields "reqid" or "filehash" or "sequencenumber" are missing in the response');
+        throw new Error('required fields "filehash"  are missing in the response');
     }
-    const messageToSign = `${filehash}${address}${sequencenumber}${timestampA}`;
-    const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
-    const extraParamsForDownload = {
-        filehash,
-        signature: {
-            address,
-            pubkey: publicKey,
-            signature,
-        },
-        reqid,
-        req_time: timestampA,
-    };
-    const callResultRequestDownloadShared = await network_1.networkApi.sendUserRequestDownloadShared([
-        extraParamsForDownload,
-    ]);
-    const { response: responseRequestDownloadShared } = callResultRequestDownloadShared;
-    if (!responseRequestDownloadShared) {
-        (0, helpers_1.dirLog)('we dont have response for download shared request. it might be an error', callResultRequestDownloadShared);
-        throw new Error('We dont have response to request download shared call');
-    }
-    const { result: resultWithOffesets } = responseRequestDownloadShared;
-    const { return: requestDownloadSharedReturn, reqid: reqidDownloadShared, offsetstart: offsetstartInit, offsetend: offsetendInit, } = resultWithOffesets;
-    if (parseInt(requestDownloadSharedReturn, 10) < 0) {
-        throw new Error(`return field in the request download shared response contains an error. Error code "${requestDownloadSharedReturn}"`);
-    }
-    if (parseInt(requestDownloadSharedReturn, 10) !== 2) {
-        throw new Error(`return field in the response to request download shared has an unexpected code "${requestDownloadSharedReturn}". Expected code was "4"`);
-    }
-    if (!reqidDownloadShared) {
-        (0, helpers_1.dirLog)('we dont have required fields in the download shared response ', responseRequestDownloadShared);
+    if (!reqidDownloadFile) {
+        (0, helpers_1.dirLog)('we dont have required fields in the download shared response ', responseRequestGetShared);
         throw new Error('required fields "reqid"  is missing in the response');
     }
     if (offsetendInit === undefined) {
-        (0, helpers_1.dirLog)('a we dont have an offest. could be an error. response is', responseRequestDownloadShared);
-        return;
+        (0, helpers_1.dirLog)('--- ERROR a we dont have an offest. could be an error. response is', responseRequestGetShared);
+        throw new Error('a we dont have an offest. could be an error. response is');
     }
     if (offsetstartInit === undefined) {
-        (0, helpers_1.dirLog)('b we dont have an offest. could be an error. response is', responseRequestDownloadShared);
-        return;
+        (0, helpers_1.dirLog)('--- ERROR b we dont have an offest. could be an error. response is', responseRequestGetShared);
+        throw new Error('b we dont have an offest. could be an error. response is');
     }
-    const decodedFile = await processUsedFileDownload(responseRequestDownloadShared, filehash, filesize);
+    const decodedFile = await processUsedFileDownload(responseRequestGetShared, filehash, filesize);
     if (!decodedFile) {
         throw new Error(`Could not process download of the user shared file for the "${filehash}" into "${filePathToSave}"`);
     }
-    (0, helpers_1.log)(`downloaded shared file will be saved into ${filePathToSave}`, filePathToSave);
-    filesystem_1.filesystemApi.writeFile(filePathToSave, decodedFile);
+    const filePathToSaveWithOriginalName = `${filePathToSave}_${originalFileName}`;
+    (0, helpers_1.log)(`Downloaded shared file will be saved into ${filePathToSaveWithOriginalName}`, filePathToSaveWithOriginalName);
+    filesystem_1.filesystemApi.writeFile(filePathToSaveWithOriginalName, decodedFile);
+    return { filePathToSave: filePathToSaveWithOriginalName };
 };
 exports.downloadSharedFile = downloadSharedFile;
 //# sourceMappingURL=remoteFileSystem.js.map
