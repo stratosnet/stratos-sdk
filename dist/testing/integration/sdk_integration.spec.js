@@ -127,6 +127,12 @@ describe(`Stratos SDK integration (integration test)`, () => {
                     done();
                 });
             }, extendedExecutionTimeout);
+            it('Downloads the remote file by a given shared link, and compares its hash', done => {
+                void Integration.downloadFileFromRemoteBySharedLink(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
             it('Stop sharing the file by a given sharedId', done => {
                 void Integration.stopFileSharingWithSharedId(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);

@@ -35,8 +35,6 @@
 - [FileUserDownloadedFileInfoResponse](../interfaces/network.networkTypes.FileUserDownloadedFileInfoResponse.md)
 - [FileUserRequestDownloadParams](../interfaces/network.networkTypes.FileUserRequestDownloadParams.md)
 - [FileUserRequestDownloadResponse](../interfaces/network.networkTypes.FileUserRequestDownloadResponse.md)
-- [FileUserRequestDownloadSharedParams](../interfaces/network.networkTypes.FileUserRequestDownloadSharedParams.md)
-- [FileUserRequestDownloadSharedResponse](../interfaces/network.networkTypes.FileUserRequestDownloadSharedResponse.md)
 - [FileUserRequestGetFileStatusParams](../interfaces/network.networkTypes.FileUserRequestGetFileStatusParams.md)
 - [FileUserRequestGetFileStatusResponse](../interfaces/network.networkTypes.FileUserRequestGetFileStatusResponse.md)
 - [FileUserRequestGetOzoneParams](../interfaces/network.networkTypes.FileUserRequestGetOzoneParams.md)
@@ -198,7 +196,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:754
+network/networkTypes.ts:748
 
 ___
 
@@ -208,7 +206,7 @@ ___
 
 #### Defined in
 
-network/networkTypes.ts:753
+network/networkTypes.ts:747
 
 ## Variables
 
@@ -225,4 +223,4 @@ network/networkTypes.ts:753
 
 #### Defined in
 
-network/networkTypes.ts:756
+network/networkTypes.ts:750

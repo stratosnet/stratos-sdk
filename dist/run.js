@@ -252,7 +252,7 @@ const main = async () => {
     // const a = await wallet.getAccounts();
     // console.log('a', a);
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
-    await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
+    // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
     // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);

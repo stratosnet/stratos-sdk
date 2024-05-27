@@ -79,11 +79,14 @@ ___
 
 | Name | Type |
 | :------ | :------ |
+| `filedata` | `string` |
 | `filehash` | `string` |
+| `filename` | `string` |
+| `offsetend` | `string` |
+| `offsetstart` | `string` |
 | `reqid` | `string` |
 | `return` | ``"0"`` \| ``"1"`` \| ``"2"`` \| ``"3"`` \| ``"4"`` |
-| `sequencenumber` | `string` |
 
 #### Defined in
 
-network/networkTypes.ts:716
+network/networkTypes.ts:714

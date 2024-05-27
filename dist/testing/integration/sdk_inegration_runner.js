@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadFileFromRemote = exports.checkIfFileDoesntHaveSharesAfterStop = exports.stopFileSharingWithSharedId = exports.getSharedFilesListAndCheckShare = exports.createSharedLinkForFile = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
+exports.downloadFileFromRemote = exports.checkIfFileDoesntHaveSharesAfterStop = exports.stopFileSharingWithSharedId = exports.downloadFileFromRemoteBySharedLink = exports.getSharedFilesListAndCheckShare = exports.createSharedLinkForFile = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
 const process_1 = require("process");
 const accounts_1 = require("../../accounts");
 const cosmos_1 = require("../../chain/cosmos");
@@ -761,6 +761,42 @@ const getSharedFilesListAndCheckShare = async (fileReadName, randomTestPreffix, 
     return true;
 };
 exports.getSharedFilesListAndCheckShare = getSharedFilesListAndCheckShare;
+const downloadFileFromRemoteBySharedLink = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// downloadFileFromRemoteBySharedLink //////////////// ');
+    const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
+    const uploadedFileWritePath = `${fileReadPath}_${randomTestPreffix}`;
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const uploadedLocalFileHash = await filesystem_1.filesystemApi.calculateFileHash(uploadedFileWritePath);
+    const filePathToSaveDownloadedTo = `${uploadedFileWritePath}_downloaded`;
+    const filesize = 10000001;
+    const shareListResult = await remoteFileSystem_1.remoteFileSystemApi.getSharedFileList(keypair, 0);
+    const { files: remoteFilesList } = shareListResult;
+    if (!remoteFilesList.length) {
+        throw new Error(`Expected to have an non-empty array of files in the "files" field of the response before proceeding with stop share. We have "${remoteFilesList}"`);
+    }
+    const [firstUploadedFileInfo] = remoteFilesList;
+    const { filename: remoteFileName, sharelink } = firstUploadedFileInfo;
+    const downloadResult = await remoteFileSystem_1.remoteFileSystemApi.downloadSharedFile(keypair, filePathToSaveDownloadedTo + '_' + remoteFileName, sharelink, filesize);
+    const { filePathToSave } = downloadResult;
+    const downloadedFileHash = await filesystem_1.filesystemApi.calculateFileHash(filePathToSave);
+    if (downloadedFileHash !== uploadedLocalFileHash) {
+        throw new Error(`downloadedFileHash "${downloadedFileHash}" must be equal uploadedLocalFileHash "${uploadedLocalFileHash}" `);
+    }
+    fs.unlinkSync(filePathToSave, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
+    return true;
+};
+exports.downloadFileFromRemoteBySharedLink = downloadFileFromRemoteBySharedLink;
 const stopFileSharingWithSharedId = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
     (0, helpers_1.log)('//////////////// stopFileSharingWithSharedId //////////////// ');
     const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;

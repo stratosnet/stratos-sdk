@@ -45,7 +45,7 @@ ___
 
 ### downloadSharedFile
 
-▸ **downloadSharedFile**(`keypair`, `filePathToSave`, `sharelink`, `filesize`): `Promise`\<`void`\>
+▸ **downloadSharedFile**(`keypair`, `filePathToSave`, `sharelink`, `filesize`): `Promise`\<\{ `filePathToSave`: `string`  }\>
 
 #### Parameters
 
@@ -58,11 +58,11 @@ ___
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\<\{ `filePathToSave`: `string`  }\>
 
 #### Defined in
 
-sds/remoteFileSystem/remoteFileSystem.ts:1010
+sds/remoteFileSystem/remoteFileSystem.ts:1009
 
 ___
 
