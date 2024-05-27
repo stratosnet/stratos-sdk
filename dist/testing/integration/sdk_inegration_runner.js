@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadFileFromRemote = exports.stopFileSharingWithSharedId = exports.getSharedFilesListAndCheckShare = exports.createSharedLinkForFile = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
+exports.downloadFileFromRemote = exports.checkIfFileDoesntHaveSharesAfterStop = exports.stopFileSharingWithSharedId = exports.getSharedFilesListAndCheckShare = exports.createSharedLinkForFile = exports.uploadFileToRemote = exports.getAccountOzoneBalance = exports.sendSdsPrepayTx = exports.sendUndelegateTx = exports.sendWithdrawAllRewardsTx = exports.sendWithdrawRewardsTx = exports.sendBeginRedelegateTx = exports.sendDelegateTx = exports.sendTransferTx = exports.getFaucetAvailableBalance = exports.restoreAccount = exports.createAnAccount = exports.isDetailedDelegateTxResponse = void 0;
 const process_1 = require("process");
 const accounts_1 = require("../../accounts");
 const cosmos_1 = require("../../chain/cosmos");
@@ -757,11 +757,12 @@ const getSharedFilesListAndCheckShare = async (fileReadName, randomTestPreffix, 
         const errorMsg = `Remote file name "${remoteFileName}" of the shared file must match with the expected file name "${expectedRemoteFileName}" and remote file hash "${remoteFileHash}" must match to expected file hash "${targetHash}"`;
         throw new Error(errorMsg);
     }
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
     return true;
 };
 exports.getSharedFilesListAndCheckShare = getSharedFilesListAndCheckShare;
 const stopFileSharingWithSharedId = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
-    (0, helpers_1.log)('//////////////// getSharedFilesListAndCheckShare //////////////// ');
+    (0, helpers_1.log)('//////////////// stopFileSharingWithSharedId //////////////// ');
     const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;
     const fileWritePath = `${fileReadPath}_${randomTestPreffix}`;
     const expectedRemoteFileName = `${fileReadName}_${randomTestPreffix}`;
@@ -796,9 +797,35 @@ const stopFileSharingWithSharedId = async (fileReadName, randomTestPreffix, hdPa
         const errorMsg = `Could not stop sharing shareid "${shareid}" for the filehash "${targetHash}" of user "${keypair.address}". We got result "${userStopFileShareResult}" instead of expected "true"`;
         throw new Error(errorMsg);
     }
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
     return true;
 };
 exports.stopFileSharingWithSharedId = stopFileSharingWithSharedId;
+const checkIfFileDoesntHaveSharesAfterStop = async (hdPathIndex = 0, givenReceiverMnemonic = '') => {
+    (0, helpers_1.log)('//////////////// checkIfFileDoesntHaveSharesAfterStop //////////////// ');
+    await main(faucetMnemonic, hdPathIndex);
+    const receiverPhrase = givenReceiverMnemonic
+        ? hdVault_1.mnemonic.convertStringToArray(givenReceiverMnemonic)
+        : hdVault_1.mnemonic.generateMnemonicPhrase(24);
+    const receiverMnemonic = hdVault_1.mnemonic.convertArrayToString(receiverPhrase);
+    const keypair = await createKeypairFromMnemonic(receiverPhrase);
+    await main(receiverMnemonic, hdPathIndex);
+    const shareListResultAfterStop = await remoteFileSystem_1.remoteFileSystemApi.getSharedFileList(keypair, 0);
+    const { files: remoteFilesListAfter, totalnumber: totalnumberAfter } = shareListResultAfterStop;
+    if (+totalnumberAfter !== 0) {
+        console.log('shareListResult', shareListResultAfterStop);
+        throw new Error(`Total number of shares after running stop share must be = 0. Instead we have "${totalnumberAfter}"`);
+    }
+    if (!remoteFilesListAfter) {
+        throw new Error(`Expected to have an array of files in the "files" field of the response after stop share. We have "${remoteFilesListAfter}"`);
+    }
+    if (remoteFilesListAfter.length > 0) {
+        throw new Error(`Expected to have an empty array of files in the "files" field of the response after stop share. We have "${remoteFilesListAfter}"`);
+    }
+    await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
+    return true;
+};
+exports.checkIfFileDoesntHaveSharesAfterStop = checkIfFileDoesntHaveSharesAfterStop;
 const downloadFileFromRemote = async (fileReadName, randomTestPreffix, hdPathIndex = 0, givenReceiverMnemonic = '') => {
     (0, helpers_1.log)('//////////////// downloadFileFromRemote //////////////// ');
     const fileReadPath = `${APP_ROOT_DIR}/src/testing/integration/test_files/${fileReadName}`;

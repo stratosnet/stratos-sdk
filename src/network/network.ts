@@ -505,20 +505,6 @@ export const sendUserRequestGetShared = async <T = Types.FileUserRequestGetShare
   return dataResult;
 };
 
-export const sendUserRequestDownloadShared = async <T = Types.FileUserRequestDownloadSharedParams>(
-  extraParams: T[],
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadSharedResponse>> => {
-  const msgId = 1;
-  const method = 'user_requestDownloadShared';
-
-  const payload = getRpcPayload<T[]>(msgId, method, extraParams);
-
-  const dataResult = await sendRpcCall<typeof payload>(payload, config);
-
-  return dataResult;
-};
-
 export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetFileStatusParams>(
   extraParams: T[],
   config?: Types.NetworkAxiosConfig,

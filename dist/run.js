@@ -220,6 +220,17 @@ const testRequestUserStopFileShare = async (hdPathIndex, shareid, givenReceiverM
     const userStopFileShareResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.stopFileSharing(keyPairZero, shareid);
     console.log('retrieved user sotp share file result', userStopFileShareResult);
 };
+const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesize, givenReceiverMnemonic = zeroUserMnemonic) => {
+    const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
+    const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
+    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+    const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
+    if (!keyPairZero) {
+        return;
+    }
+    const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, sharelink, filesize);
+    console.log('retrieved user download shared file list', userDownloadSharedFileResult);
+};
 const main = async () => {
     const sdkEnv = sdkEnvDev;
     // const sdkEnv = sdkEnvTest;
@@ -241,30 +252,33 @@ const main = async () => {
     // const a = await wallet.getAccounts();
     // console.log('a', a);
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
-    // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
+    await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
-    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
     // 2a - that is the file name - it has to be in ./src
-    const filename = 'file10M_May_21_v1.bin';
+    const filename = 'file10M_May_27_v1.bin';
     // await testItFileUpFromBuffer(hdPathIndex, filename);
     // 3a
-    const filehash = 'v05j1m52f1862ohm438vtt2rgpgq49hramfrrsqo';
+    const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
     const filesize = 10000001;
     // filename: 'file10M_May_21_v1.bin',
     // await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
     // await testRequestUserSharedFileList(hdPathIndex, 0);
     // 5a
-    // const filehash = 'v05ahm504fq2q53pucu87do4cdcurggsoonhsmfo';
+    // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
     // await testRequestUserFileShare(hdPathIndex, filehash);
     // 6a
-    const shareid = '6455bd1063ca7769';
+    // const shareid = '2d44dc5f3f8ac6b1';
     // await testRequestUserStopFileShare(hdPathIndex, shareid);
+    // 7a
+    const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
+    // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
 };
 main();
 //# sourceMappingURL=run.js.map

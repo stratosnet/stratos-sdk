@@ -133,6 +133,12 @@ describe(`Stratos SDK integration (integration test)`, () => {
                     done();
                 });
             }, extendedExecutionTimeout);
+            it('Verifies that there is no shares aftrer the file stoped sharing', done => {
+                void Integration.checkIfFileDoesntHaveSharesAfterStop(0, receiverMnemonic).then(result => {
+                    expect(result).toBe(true);
+                    done();
+                });
+            }, extendedExecutionTimeout);
             it('Downloads the remote file to local file and compares its hash', done => {
                 void Integration.downloadFileFromRemote(fileReadName, randomPrefix, 0, receiverMnemonic).then(result => {
                     expect(result).toBe(true);

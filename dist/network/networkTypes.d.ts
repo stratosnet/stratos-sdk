@@ -357,8 +357,6 @@ export interface FileUserRequestDownloadResponse extends MainRpcResponse {
         filedata: string;
     };
 }
-export interface FileUserRequestDownloadSharedResponse extends FileUserRequestDownloadResponse {
-}
 export interface FileUserDownloadDataParams {
     filehash: string;
     reqid: string;
@@ -596,15 +594,12 @@ export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
     result: {
         return: '0' | '1' | '2' | '3' | '4';
         reqid: string;
+        offsetstart: string;
+        offsetend: string;
         filehash: string;
-        sequencenumber: string;
+        filename: string;
+        filedata: string;
     };
-}
-export interface FileUserRequestDownloadSharedParams {
-    filehash: string;
-    reqid: string;
-    signature: UserFileSignature;
-    req_time: number;
 }
 export interface FileUserRequestGetFileStatusParams {
     filehash: string;
