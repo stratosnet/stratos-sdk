@@ -1,6 +1,6 @@
 import { stratosDenom, stratosOzDenom, stratosTopDenom, stratosUozDenom } from '../../config/hdVault';
 import { decimalPrecision, decimalShortPrecision } from '../../config/tokens';
-import { create as createBigNumber, fromWei, ROUND_DOWN } from '../../services/bigNumber';
+import { create as createBigNumber, fromWei, ROUND_DOWN, ROUND_UP } from '../../services/bigNumber';
 
 export const getBalanceCardMetricDinamicValue = (denom?: string | undefined, amount?: string | undefined) => {
   const isStratosDenom = denom === stratosDenom;
@@ -24,7 +24,7 @@ export const getBalanceCardMetricDinamicValue = (denom?: string | undefined, amo
   let isStillZero = counter < maxAdditionalDigits;
 
   do {
-    balance = fromWei(balanceInWei, decimalPrecision).toFormat(dynamicPrecision, ROUND_DOWN);
+    balance = fromWei(balanceInWei, decimalPrecision).toFixed(dynamicPrecision, ROUND_DOWN);
     const parsetBalance = parseFloat(balance);
     isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
     dynamicPrecision++;
@@ -47,8 +47,9 @@ export const getBalanceCardMetricValue = (denom?: string | undefined, amount?: s
   }
   const balanceInWei = createBigNumber(amount);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimalShortPrecision, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFixed(decimalShortPrecision, ROUND_UP);
   const balanceToReturn = `${balance} ${stratosTopDenom.toUpperCase()}`;
+
   return balanceToReturn;
 };
 
@@ -67,7 +68,7 @@ export const getOzoneMetricValue = (denom?: string | undefined, amount?: string 
 
   const balanceInWei = createBigNumber(amount);
 
-  const balance = fromWei(balanceInWei, 9).toFormat(decimalShortPrecision, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, 9).toFixed(decimalShortPrecision, ROUND_DOWN);
   const balanceToReturn = `${balance} ${printableDenome}`;
   return balanceToReturn;
 };

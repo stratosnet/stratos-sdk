@@ -19,7 +19,7 @@ exports.fromWei = fromWei;
 const calDecimalPrecision = (val, num) => {
     const x = new bignumber_js_1.default(val);
     const y = new bignumber_js_1.default(10 ** num);
-    const newAmount = x.dividedBy(y).toFormat();
+    const newAmount = x.dividedBy(y).toFixed();
     return newAmount;
 };
 exports.calDecimalPrecision = calDecimalPrecision;

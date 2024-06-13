@@ -231,9 +231,16 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesiz
     const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, sharelink, filesize);
     console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
-const main = async () => {
-    const sdkEnv = sdkEnvDev;
-    // const sdkEnv = sdkEnvTest;
+const testBalanceRound = async () => {
+    const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
+    const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
+    (0, helpers_1.dirLog)('balance from re-delegated', b);
+    const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
+    (0, helpers_1.dirLog)('delegatedBalanceResult', delegatedBalanceResult);
+};
+async function main() {
+    // const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     stratos.Sdk.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
@@ -243,7 +250,10 @@ const main = async () => {
         // devnet
         // ppNodeUrl: 'http://35.187.47.46',
         // ppNodePort: '8142',
-        ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
+        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+        // ppNodePort: '',
+        // mesos - we connect to mesos pp
+        ppNodeUrl: 'http://34.195.137.237', ppNodePort: '8142' }));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // Create a wallet and show accounts
@@ -279,6 +289,7 @@ const main = async () => {
     // 7a
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
-};
-main();
+    void testBalanceRound();
+}
+void main();
 //# sourceMappingURL=run.js.map

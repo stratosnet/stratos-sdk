@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { hdVault } from './config';
 import * as stratos from './index';
-import { delay, log, dirLog } from './services/helpers';
+import { delay, dirLog, log } from './services/helpers';
 
 dotenv.config();
 
@@ -397,12 +397,21 @@ const testRequestUserDownloadSharedFile = async (
   console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 
-const main = async () => {
-  const sdkEnv = sdkEnvDev;
+const testBalanceRound = async () => {
+  const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
 
-  // const sdkEnv = sdkEnvTest;
+  const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
+
+  dirLog('balance from re-delegated', b);
+
+  const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
+  dirLog('delegatedBalanceResult', delegatedBalanceResult);
+};
+
+async function main(): Promise<void> {
+  // const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvMainNet;
-
   stratos.Sdk.init({ ...sdkEnv });
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
@@ -416,16 +425,14 @@ const main = async () => {
 
     // optional
     // keyPathParameters: keyPathParametersForSdk,
-
     // devnet
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
-    ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
     // ppNodePort: '',
-
     // mesos - we connect to mesos pp
-    // ppNodeUrl: 'http://34.78.29.120',
-    // ppNodePort: '8142',
+    ppNodeUrl: 'http://34.195.137.237',
+    ppNodePort: '8142',
   });
 
   const hdPathIndex = 0;
@@ -437,44 +444,35 @@ const main = async () => {
   // console.log('wallet', wallet);
   // const a = await wallet.getAccounts();
   // console.log('a', a);
-
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
-
   // 1 Check balance
   // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
-
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
-
   // 1a
   // await testRequestUserFileList(hdPathIndex, 0);
-
   // 2a - that is the file name - it has to be in ./src
   const filename = 'file10M_May_27_v1.bin';
   // await testItFileUpFromBuffer(hdPathIndex, filename);
-
   // 3a
   const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
   const filesize = 10000001;
   // filename: 'file10M_May_21_v1.bin',
   // await testFileDl(hdPathIndex, filename, filehash, filesize);
-
   // 4a
   // await testRequestUserSharedFileList(hdPathIndex, 0);
-
   // 5a
   // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
   // await testRequestUserFileShare(hdPathIndex, filehash);
-
   // 6a
   // const shareid = '2d44dc5f3f8ac6b1';
   // await testRequestUserStopFileShare(hdPathIndex, shareid);
-
   // 7a
   const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
-};
+  void testBalanceRound();
+}
 
-main();
+void main();

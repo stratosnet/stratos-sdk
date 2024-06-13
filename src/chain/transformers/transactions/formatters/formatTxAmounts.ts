@@ -8,7 +8,7 @@ export const emptyAmounts = [{ amount: '0', denom: 'n/a' }];
 export const caclulateAmount = (singleAmount: string) => {
   const balanceInWei = createBigNumber(singleAmount);
 
-  const txAmount = fromWei(balanceInWei, decimalPrecision).toFormat(4, ROUND_DOWN);
+  const txAmount = fromWei(balanceInWei, decimalPrecision).toFixed(4, ROUND_DOWN);
   const currentAmount = `${txAmount} ${stratosTopDenom.toUpperCase()}`;
 
   return currentAmount || '0';

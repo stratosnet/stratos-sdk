@@ -18,7 +18,7 @@ export const fromWei = (value: BigNumberValue, precision = tokens.decimalPrecisi
 export const calDecimalPrecision = (val: BigNumberValue, num: number): string => {
   const x = new BigNumber(val);
   const y = new BigNumber(10 ** num);
-  const newAmount = x.dividedBy(y).toFormat();
+  const newAmount = x.dividedBy(y).toFixed();
   return newAmount;
 };
 
