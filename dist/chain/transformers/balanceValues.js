@@ -19,7 +19,7 @@ const getBalanceCardMetricDinamicValue = (denom, amount) => {
     const maxAdditionalDigits = 4;
     let isStillZero = counter < maxAdditionalDigits;
     do {
-        balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(dynamicPrecision, bigNumber_1.ROUND_DOWN);
+        balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(dynamicPrecision, bigNumber_1.ROUND_DOWN);
         const parsetBalance = parseFloat(balance);
         isStillZero = parsetBalance === 0 && counter < maxAdditionalDigits;
         dynamicPrecision++;
@@ -38,7 +38,7 @@ const getBalanceCardMetricValue = (denom, amount) => {
         return '0.0000 STOS';
     }
     const balanceInWei = (0, bigNumber_1.create)(amount);
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_UP);
     const balanceToReturn = `${balance} ${hdVault_1.stratosTopDenom.toUpperCase()}`;
     return balanceToReturn;
 };
@@ -54,7 +54,7 @@ const getOzoneMetricValue = (denom, amount) => {
         return `0.0000 ${printableDenome}`;
     }
     const balanceInWei = (0, bigNumber_1.create)(amount);
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, 9).toFormat(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, 9).toFixed(tokens_1.decimalShortPrecision, bigNumber_1.ROUND_DOWN);
     const balanceToReturn = `${balance} ${printableDenome}`;
     return balanceToReturn;
 };

@@ -67,7 +67,7 @@ export const getBalance = async (
 ): Promise<string> => {
   const balanceInWei = await getBalanceInWei(keyPairAddress, requestedDenom);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFixed(decimals, ROUND_DOWN);
 
   return balance;
 };
@@ -75,7 +75,7 @@ export const getBalance = async (
 export const formatBalanceFromWei = (amount: string, requiredPrecision: number, appendDenom = false) => {
   const balanceInWei = createBigNumber(amount);
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(requiredPrecision, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFixed(requiredPrecision, ROUND_DOWN);
 
   if (!appendDenom) {
     return balance;
@@ -245,11 +245,11 @@ export const getMaxAvailableBalance = async (
   const balanceInWei = await getBalanceInWei(keyPairAddress, requestedDenom);
 
   if (balanceInWei.gt(0)) {
-    const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFormat(decimals, ROUND_DOWN);
+    const balance = fromWei(balanceInWei.minus(feeAmount), decimalPrecision).toFixed(decimals, ROUND_DOWN);
     return balance;
   }
 
-  const balance = fromWei(balanceInWei, decimalPrecision).toFormat(decimals, ROUND_DOWN);
+  const balance = fromWei(balanceInWei, decimalPrecision).toFixed(decimals, ROUND_DOWN);
 
   return balance;
 };

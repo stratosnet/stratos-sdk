@@ -66,13 +66,13 @@ const getBalanceInWei = async (keyPairAddress, requestedDenom) => {
 exports.getBalanceInWei = getBalanceInWei;
 const getBalance = async (keyPairAddress, requestedDenom, decimals = tokens_1.decimalShortPrecision) => {
     const balanceInWei = await (0, exports.getBalanceInWei)(keyPairAddress, requestedDenom);
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(decimals, bigNumber_1.ROUND_DOWN);
     return balance;
 };
 exports.getBalance = getBalance;
 const formatBalanceFromWei = (amount, requiredPrecision, appendDenom = false) => {
     const balanceInWei = (0, bigNumber_1.create)(amount);
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(requiredPrecision, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(requiredPrecision, bigNumber_1.ROUND_DOWN);
     if (!appendDenom) {
         return balance;
     }
@@ -196,10 +196,10 @@ const getMaxAvailableBalance = async (keyPairAddress, requestedDenom, decimals =
     const feeAmount = (0, bigNumber_1.create)((0, tokens_1.standardFeeAmount)());
     const balanceInWei = await (0, exports.getBalanceInWei)(keyPairAddress, requestedDenom);
     if (balanceInWei.gt(0)) {
-        const balance = (0, bigNumber_1.fromWei)(balanceInWei.minus(feeAmount), tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
+        const balance = (0, bigNumber_1.fromWei)(balanceInWei.minus(feeAmount), tokens_1.decimalPrecision).toFixed(decimals, bigNumber_1.ROUND_DOWN);
         return balance;
     }
-    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(decimals, bigNumber_1.ROUND_DOWN);
+    const balance = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(decimals, bigNumber_1.ROUND_DOWN);
     return balance;
 };
 exports.getMaxAvailableBalance = getMaxAvailableBalance;

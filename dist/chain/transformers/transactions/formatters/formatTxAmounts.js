@@ -7,7 +7,7 @@ const bigNumber_1 = require("../../../../services/bigNumber");
 exports.emptyAmounts = [{ amount: '0', denom: 'n/a' }];
 const caclulateAmount = (singleAmount) => {
     const balanceInWei = (0, bigNumber_1.create)(singleAmount);
-    const txAmount = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFormat(4, bigNumber_1.ROUND_DOWN);
+    const txAmount = (0, bigNumber_1.fromWei)(balanceInWei, tokens_1.decimalPrecision).toFixed(4, bigNumber_1.ROUND_DOWN);
     const currentAmount = `${txAmount} ${hdVault_1.stratosTopDenom.toUpperCase()}`;
     return currentAmount || '0';
 };
