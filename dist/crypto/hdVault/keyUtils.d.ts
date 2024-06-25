@@ -13,4 +13,6 @@ export type PathBuilder = (account_index: number) => HdPath;
 export declare function makePathBuilder(pattern: string): PathBuilder;
 export declare const encodeSignatureMessage: (message: string) => Uint8Array;
 export declare const signWithPrivateKey: (signMessageString: string, privateKey: string) => Promise<string>;
+export declare const signWithPrivateKeyInBase64: (signMessageString: string, privateKey: string) => Promise<string>;
 export declare const verifySignature: (signatureMessage: string, signature: string, publicKey: string) => Promise<boolean>;
+export declare const verifySignatureInBase64: (signatureMessage: string, signature: string, publicKey: string) => Promise<boolean>;

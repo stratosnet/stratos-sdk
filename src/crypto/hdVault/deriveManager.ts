@@ -25,11 +25,11 @@ export const deriveAddressFromPhrase = async (phrase: MnemonicPhrase): Promise<s
 export const deriveKeyPairFromPrivateKeySeed = async (privkey: Uint8Array): Promise<KeyPair> => {
   const pubkeyMine = await getPublicKeyFromPrivKey(privkey);
 
+  // is used to verify the signature
   const encodeAminoPub = await getAminoPublicKey(pubkeyMine);
 
   const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);
   const address = getAddressFromPubKeyWithKeccak(pubkey);
-
   const encodedPublicKey = await getEncodedPublicKey(encodeAminoPub);
 
   return {
