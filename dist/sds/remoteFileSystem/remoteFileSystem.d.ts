@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import * as WalletTypes from '../../crypto/hdVault/hdVaultTypes';
 import { networkTypes } from '../../network';
 import * as SdsTypes from './types';

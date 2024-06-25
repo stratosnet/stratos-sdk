@@ -1,5 +1,5 @@
 import { Bip39, EnglishMnemonic, HdPath, Secp256k1, Secp256k1Signature, stringToPath } from '@cosmjs/crypto';
-import { fromBase64, fromBech32, fromHex, toBech32, toHex } from '@cosmjs/encoding';
+import { fromBase64, fromBech32, fromHex, toBase64, toBech32, toHex } from '@cosmjs/encoding';
 import createKeccakHash from 'keccak';
 import { PubKey } from '../../chain/cosmos/cosmosTypes';
 import { decryptMasterKeySeed } from '../../chain/cosmos/cosmosUtils';
@@ -147,16 +147,51 @@ export const signWithPrivateKey = async (signMessageString: string, privateKey: 
   return sigString;
 };
 
+export const signWithPrivateKeyInBase64 = async (
+  signMessageString: string,
+  privateKey: string,
+): Promise<string> => {
+  const defaultPrivkey = fromHex(privateKey);
+  const encodedMessage = encodeSignatureMessage(signMessageString);
+  const signature = await Secp256k1.createSignature(encodedMessage, defaultPrivkey);
+  const signatureBytes = signature.toFixedLength().slice(0, -1);
+  const sigString = toBase64(signatureBytes);
+
+  return sigString;
+};
+
 export const verifySignature = async (
   signatureMessage: string,
   signature: string,
-  publicKey: string,
+  publicKey: string, // begins with stpub and it is hex
 ): Promise<boolean> => {
   try {
-    const compressedPubkey = fromBase64(publicKey);
+    // 33 bytes of encodedPublicKey
+    const compressedPubkey = fromBech32(publicKey).data;
 
     const encodedMessage = encodeSignatureMessage(signatureMessage);
     const signatureData = fromHex(signature);
+
+    const restoredSignature = Secp256k1Signature.fromFixedLength(signatureData);
+
+    const verifyResult = await Secp256k1.verifySignature(restoredSignature, encodedMessage, compressedPubkey);
+    return verifyResult;
+  } catch (err) {
+    return Promise.reject(false);
+  }
+};
+
+export const verifySignatureInBase64 = async (
+  signatureMessage: string,
+  signature: string,
+  publicKey: string, // begins with stpub and it is base64
+): Promise<boolean> => {
+  try {
+    // 33 bytes of encodedPublicKey
+    const compressedPubkey = fromBech32(publicKey).data;
+
+    const encodedMessage = encodeSignatureMessage(signatureMessage);
+    const signatureData = fromBase64(signature);
 
     const restoredSignature = Secp256k1Signature.fromFixedLength(signatureData);
 
