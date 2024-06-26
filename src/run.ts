@@ -1,9 +1,5 @@
-import { stratosPubkeyPrefix } from 'config/hdVault';
-import { deriveKeyPair } from 'crypto/hdVault/wallet';
 import dotenv from 'dotenv';
-import createKeccakHash from 'keccak';
 import path from 'path';
-import { createClient } from 'redis';
 import { hdVault } from './config';
 import * as stratos from './index';
 import { toWei } from './services/bigNumber';
@@ -438,206 +434,96 @@ const testBalanceRound = async () => {
 };
 
 async function testRedis() {
-  const usr = 'default';
-  const pwd = 'p@sSW0rd';
-
-  // const usr = 'alice';
-  // const pwd = 'p1pp0';
-
-  // const usr = 'antirez';
-  // const pwd = 'p2pp0';
-
-  const redisUrl = `redis://${usr}:${pwd}@localhost:6379`;
-  const redis = createClient({ url: redisUrl });
-  redis.on('error', err => console.log('Redis Client Error', err));
-  await redis.connect();
-
-  const aString = await redis.ping(); // 'PONG'
-  console.log('aString', aString);
-  const aNumber = await redis.hSet('foo', 'alfa', '42'); // 2
-  const aNumber2 = await redis.hSet('foo', 'bravo', '23'); // 2
-  const aHash = await redis.hGetAll('foo'); // { alfa: '42', bravo: '23' }
-  console.log('aHash', aHash);
-  // await redis.flushDb();
-  // await redis.flushAll();
-}
-
-export const humanStringToHexString = (input: string): string => Buffer.from(input).toString('hex');
-
-export const hexStringToHumanString = (input: string): string => Buffer.from(input, 'hex').toString();
-
-export const humanStringToBase64String = (input: string): string => Buffer.from(input).toString('base64');
-
-export const base64StringToHumanString = (input: string): string => Buffer.from(input, 'base64').toString();
-
-export const uint8arrayToHexStr = (input: Uint8Array): string => Buffer.from(input).toString('hex');
-
-export const uint8arrayToBase64Str = (input: Uint8Array): string => Buffer.from(input).toString('base64');
-
-export const hexToBytes = (input: string): Uint8Array => new Uint8Array(Buffer.from(input, 'hex'));
-
-export const encodeSignatureMessage = (message: string): Uint8Array => {
-  const signBytesBuffer = Buffer.from(message);
-  const keccak256HashOfSigningBytes = createKeccakHash('keccak256').update(signBytesBuffer).digest();
-  const signHashBuf = keccak256HashOfSigningBytes;
-  const encodedMessage = Uint8Array.from(signHashBuf);
-  return encodedMessage;
-};
-
-async function testEnc(): Promise<void> {
   const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
-  // console.log('derivedKeyPair', derivedKeyPair);
 
   if (!derivedKeyPair) {
     return;
   }
-  // const myTextToEncode = '123456789012345678901234567890';
-  const myTextToEncode = derivedKeyPair.address;
-  const sampleData = myTextToEncode;
 
-  // const id = 0;
-  // const sampleData = new Array(230_000).fill({ id: id + 1, derivedKeyPair });
-  // console.log('sampleData', '\n', sampleData, '\n');
+  const data = [
+    {
+      id: 1,
+      foo: {
+        bar: 'aa barfoo',
+        foobar: true,
+      },
+      children: ['nope', 'yeah'],
+    },
 
-  const encodedHexString = humanStringToHexString(myTextToEncode);
-  console.log('encodedHexString', encodedHexString, encodedHexString.length);
+    {
+      id: 2,
+      foo: {
+        bar: 'barfoo then and now',
+        foobar: false,
+      },
+      children: null,
+      anotherthing: 'cool',
+    },
+  ];
 
-  const encodedBase64String = humanStringToBase64String(myTextToEncode);
-  console.log('encodedBase64String', encodedBase64String, encodedBase64String.length);
-  console.log('\n');
+  const sampleData = data;
 
-  // always 32 bites array
-  const encodedStAddress = stratos.crypto.hdVault.keyUtils.encodeSignatureMessage(myTextToEncode);
+  const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
 
-  const encodedStAddressStringBase64 = uint8arrayToBase64Str(encodedStAddress);
-  console.log(
-    'encodedStAddressStringBase64',
-    encodedStAddressStringBase64,
-    encodedStAddressStringBase64.length,
-  );
+  const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
+  console.log('decoded user data from redis', decodedOriginal);
+}
 
-  // const encodedStAddressStringHex = uint8arrayToHexStr(encodedStAddress);
+async function testEnc(): Promise<void> {
+  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
 
-  // console.log('encodedStAddressStringHex', encodedStAddressStringHex, encodedStAddressStringHex.length);
-
-  console.log('\n');
-
-  const encodedStAddressStringSignedBase64 = await stratos.crypto.hdVault.keyUtils.signWithPrivateKeyInBase64(
-    encodedStAddressStringBase64,
-    derivedKeyPair.privateKey,
-  );
-
-  console.log(
-    'encodedStAddressStringSignedBase64 (will be a redis key?)',
-    encodedStAddressStringSignedBase64,
-    encodedStAddressStringSignedBase64.length,
-  );
-
-  // length is 128
-  // const encodedStAddressStringSignedHex = await stratos.crypto.hdVault.keyUtils.signWithPrivateKey(
-  //   encodedStAddressStringHex,
-  //   derivedKeyPair.privateKey,
-  // );
-
-  // console.log(
-  //   'encodedStAddressStringSignedHex (will be a redis key?)',
-  //   encodedStAddressStringSignedHex,
-  //   encodedStAddressStringSignedHex.length,
-  // );
-  //
-  console.log('\n');
-
-  const signVerificationResult = await stratos.crypto.hdVault.keyUtils.verifySignatureInBase64(
-    encodedStAddressStringBase64,
-    encodedStAddressStringSignedBase64,
-    derivedKeyPair.publicKey,
-  );
-
-  console.log('signVerificationResult base64!', signVerificationResult);
-
-  // const signVerificationResult2 = await stratos.crypto.hdVault.keyUtils.verifySignature(
-  //   encodedStAddressStringHex,
-  //   encodedStAddressStringSignedHex,
-  //   derivedKeyPair.publicKey,
-  // );
-
-  // console.log('signVerificationResult hex!', signVerificationResult2);
-
-  console.log('\n');
-
-  // console.log('sampleData', sampleData);
-  // const sampleDataJsonStringified = JSON.stringify(sampleData);
-
-  const sampleDataBuff = Buffer.from(JSON.stringify(sampleData));
-  // console.log('sampleDataBuff', sampleDataBuff.length);
-
-  const sampleDataBuffUint8 = Uint8Array.from(sampleDataBuff);
-  // console.log('sampleDataBuffUint8', sampleDataBuffUint8, sampleDataBuffUint8.length);
-
-  // const sampleDataJsonStringified = Buffer.from(JSON.stringify(sampleData)).toString('base64');
-  // console.log('sampleDataJsonStringified', sampleDataJsonStringified.length);
-
-  // const sampleDataJsonStringified2 = Buffer.from(sampleDataBuffUint8).toString('base64');
-  // console.log('sampleDataJsonStringified2', sampleDataJsonStringified2.length);
-
-  // keccak256 hash of the private key , it will give 32 bytes
-  const passwordTestBytes = stratos.crypto.hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.privateKey);
-  // console.log('passwordTestBytes', passwordTestBytes);
-
-  const passwordTest = Buffer.from(passwordTestBytes).toString('base64');
-  console.log('passwordTest', passwordTest);
-  console.log('\n');
-
-  const sampleDataJsonStringifiedEncrypted = stratos.chain.cosmos.cosmosUtils.encryptMasterKeySeed(
-    passwordTest,
-    sampleDataBuffUint8,
-  );
-
-  console.log('sampleDataJsonStringifiedEncrypted', sampleDataJsonStringifiedEncrypted.toString().length);
-  // console.log('sampleDataJsonStringifiedEncrypted', sampleDataJsonStringifiedEncrypted.toString());
-
-  // const sampleDataEncripytedEncoded = humanStringToHexString(sampleDataJsonStringifiedEncrypted.toString());
-  const sampleDataEncripytedEncoded = humanStringToBase64String(
-    sampleDataJsonStringifiedEncrypted.toString(),
-  );
-
-  console.log('sampleDataEncripytedEncoded', sampleDataEncripytedEncoded.length);
-
-  console.log('\n');
-  // / reverse
-
-  const decodedFromBase64ToEncrypted = base64StringToHumanString(sampleDataEncripytedEncoded);
-
-  console.log('decodedFromBase64ToEncrypted', decodedFromBase64ToEncrypted.length);
-
-  const decodedDecrypted = await stratos.chain.cosmos.cosmosUtils.decryptMasterKeySeed(
-    passwordTest,
-    decodedFromBase64ToEncrypted,
-  );
-
-  if (!decodedDecrypted) {
+  if (!derivedKeyPair) {
     return;
   }
 
-  console.log('decodedDecrypted', decodedDecrypted.length);
-  console.log('\n');
+  const data = [
+    {
+      id: 1,
+      foo: {
+        bar: 'barfoo',
+        foobar: true,
+      },
+      children: ['nope', 'yeah'],
+    },
 
-  const decodedReadable = Buffer.from(decodedDecrypted).toString();
+    {
+      id: 2,
+      foo: {
+        bar: 'barfoo then',
+        foobar: false,
+      },
+      children: null,
+      anotherthing: 'cool',
+    },
+  ];
 
-  const decodedOriginal = JSON.parse(decodedReadable);
+  const sampleData = data;
+  // const sampleData = new Array(2).fill({ id: id + 1, derivedKeyPair });
+  console.log('sampleData to store', '\n', sampleData, '\n');
+
+  const dataKey = await FileDrive.getDataItemKey(derivedKeyPair);
+  console.log('dataKey', dataKey);
+  const signedDataKey = await FileDrive.getSignedDataItemKey(derivedKeyPair);
+  console.log('signedDataKey', signedDataKey);
+
+  const passwordTest = FileDrive.getEncodingPassword(derivedKeyPair);
+
+  const redisDataEntity = await FileDrive.buildEncryptedDataEntity(sampleData, derivedKeyPair);
+
+  console.log('redisDataEntity', redisDataEntity);
+
+  const decodedOriginal = await FileDrive.decryptDataItem(redisDataEntity.data, passwordTest);
   console.log('decodedOriginal', decodedOriginal);
-  //  end
 
-  // console.log('sampleDataDecrypted', sampleDataDecrypted);
+  const res = await FileDrive.verifyDataSignature(
+    derivedKeyPair,
+    redisDataEntity.data,
+    redisDataEntity.dataSig,
+  );
 
-  // console.log('setOfUint8BitesThree', setOfUint8BitesThree);
-  // const myTxInJson = transactionBuilder.transaction();
-
-  // const myTxInBase64 = Buffer.from(myTxInJson).toString('base64');
-  // const base64data = bufferchunk.toString('base64');
-  // const decodedFileBuffer = Buffer.from(econdedFileContent, 'base64');
-
-  // const a = stratos.chain.cosmos.cosmosUtils.encryptMasterKeySeed('123')
+  if (!res) {
+    console.log('SIGNATURE VERIFICATION HAS FAILED. Data might be compomised');
+  }
 }
 
 async function main(): Promise<void> {
@@ -705,8 +591,8 @@ async function main(): Promise<void> {
   const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
-  // void testRedis();
-  void testEnc();
+  void testRedis();
+  // void testEnc();
 }
 
 void main();

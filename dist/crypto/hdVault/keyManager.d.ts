@@ -1,3 +1,4 @@
+/// <reference types="sjcl" />
 import { type LegacyMasterKeyInfo, type MasterKeyInfo } from './hdVaultTypes';
 import { MnemonicPhrase } from './mnemonic';
 export declare const createMasterKeySeedFromGivenSeed: (derivedMasterKeySeed: Uint8Array, password: string) => Promise<LegacyMasterKeyInfo>;

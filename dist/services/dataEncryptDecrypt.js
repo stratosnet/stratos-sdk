@@ -40,4 +40,4 @@ const getDataKey = async (derivedKeyPair) => {
     return encodedStAddressStringSignedBase64;
 };
 exports.getDataKey = getDataKey;
-//# sourceMappingURL=dataEncrypt.js.map
+//# sourceMappingURL=dataEncryptDecrypt.js.map

@@ -53,3 +53,12 @@ export function toBuffer(arrayBuffer: ArrayBuffer) {
   }
   return buffer;
 }
+
+export const humanStringToHexString = (input: string): string => Buffer.from(input).toString('hex');
+export const hexStringToHumanString = (input: string): string => Buffer.from(input, 'hex').toString();
+export const humanStringToBase64String = (input: string): string => Buffer.from(input).toString('base64');
+export const base64StringToHumanString = (input: string): string => Buffer.from(input, 'base64').toString();
+export const uint8arrayToHexStr = (input: Uint8Array): string => Buffer.from(input).toString('hex');
+export const uint8arrayToBase64Str = (input: Uint8Array): string => Buffer.from(input).toString('base64');
+export const hexToBytes = (input: string): Uint8Array => new Uint8Array(Buffer.from(input, 'hex'));
+export const uint8arrayToHumanString = (input: Uint8Array): string => Buffer.from(input).toString();

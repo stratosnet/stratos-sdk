@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toBuffer = exports.toArrayBuffer = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
+exports.uint8arrayToHumanString = exports.hexToBytes = exports.uint8arrayToBase64Str = exports.uint8arrayToHexStr = exports.base64StringToHumanString = exports.humanStringToBase64String = exports.hexStringToHumanString = exports.humanStringToHexString = exports.toBuffer = exports.toArrayBuffer = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
 const now = () => new Date().toLocaleString();
 exports.now = now;
 // NOTE - did log for console output -
@@ -52,4 +52,20 @@ function toBuffer(arrayBuffer) {
     return buffer;
 }
 exports.toBuffer = toBuffer;
+const humanStringToHexString = (input) => Buffer.from(input).toString('hex');
+exports.humanStringToHexString = humanStringToHexString;
+const hexStringToHumanString = (input) => Buffer.from(input, 'hex').toString();
+exports.hexStringToHumanString = hexStringToHumanString;
+const humanStringToBase64String = (input) => Buffer.from(input).toString('base64');
+exports.humanStringToBase64String = humanStringToBase64String;
+const base64StringToHumanString = (input) => Buffer.from(input, 'base64').toString();
+exports.base64StringToHumanString = base64StringToHumanString;
+const uint8arrayToHexStr = (input) => Buffer.from(input).toString('hex');
+exports.uint8arrayToHexStr = uint8arrayToHexStr;
+const uint8arrayToBase64Str = (input) => Buffer.from(input).toString('base64');
+exports.uint8arrayToBase64Str = uint8arrayToBase64Str;
+const hexToBytes = (input) => new Uint8Array(Buffer.from(input, 'hex'));
+exports.hexToBytes = hexToBytes;
+const uint8arrayToHumanString = (input) => Buffer.from(input).toString();
+exports.uint8arrayToHumanString = uint8arrayToHumanString;
 //# sourceMappingURL=helpers.js.map
