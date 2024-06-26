@@ -363,8 +363,8 @@ async function main() {
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
-    void testRedis();
-    // void testEnc();
+    // void testRedis();
+    void testEnc();
 }
 void main();
 //# sourceMappingURL=run.js.map
