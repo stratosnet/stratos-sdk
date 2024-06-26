@@ -31,7 +31,6 @@ const helpers_1 = require("./helpers");
 const verifyDataSignature = async (derivedKeyPair, data, dataSignature) => {
     try {
         const res = await stratos.crypto.hdVault.keyUtils.verifySignatureInBase64(data, dataSignature, derivedKeyPair.publicKey);
-        // console.log('res sss ', res);
         return res;
     }
     catch (err) {
