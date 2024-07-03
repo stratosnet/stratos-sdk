@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { hdVault } from './config';
 import * as stratos from './index';
+import { toWei } from './services/bigNumber';
 import { delay, dirLog, log } from './services/helpers';
 
 dotenv.config();
@@ -398,14 +399,36 @@ const testRequestUserDownloadSharedFile = async (
 };
 
 const testBalanceRound = async () => {
-  const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
+  // const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
+  // const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
+  // dirLog('balance from re-delegated', b);
+  // const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
+  // dirLog('delegatedBalanceResult', delegatedBalanceResult);
 
-  const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
+  const nozPriceResult = await stratos.network.networkApi.getNozPrice();
 
-  dirLog('balance from re-delegated', b);
+  console.log('nozPrice', nozPriceResult);
 
-  const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
-  dirLog('delegatedBalanceResult', delegatedBalanceResult);
+  const { response: nozPriceResponse } = nozPriceResult;
+
+  if (!nozPriceResponse) {
+    return;
+  }
+
+  console.log('response', nozPriceResponse);
+
+  const { price: nozPrice } = nozPriceResponse;
+
+  console.log('price', nozPrice);
+
+  const spentStos = 0.1;
+  const expectedOzBalance = spentStos / +nozPrice;
+
+  console.log(expectedOzBalance);
+  const amount = toWei(expectedOzBalance, 9).toFixed();
+  console.log('amount', amount);
+  const amount2 = +amount * 0.99;
+  console.log('amount2', amount2);
 };
 
 async function main(): Promise<void> {

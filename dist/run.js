@@ -30,6 +30,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const stratos = __importStar(require("./index"));
+const bigNumber_1 = require("./services/bigNumber");
 const helpers_1 = require("./services/helpers");
 dotenv_1.default.config();
 const password = 'XXXX';
@@ -232,11 +233,27 @@ const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesiz
     console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 const testBalanceRound = async () => {
-    const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
-    const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
-    (0, helpers_1.dirLog)('balance from re-delegated', b);
-    const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
-    (0, helpers_1.dirLog)('delegatedBalanceResult', delegatedBalanceResult);
+    // const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
+    // const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
+    // dirLog('balance from re-delegated', b);
+    // const delegatedBalanceResult = await stratos.network.networkApi.getDelegatedBalance(address);
+    // dirLog('delegatedBalanceResult', delegatedBalanceResult);
+    const nozPriceResult = await stratos.network.networkApi.getNozPrice();
+    console.log('nozPrice', nozPriceResult);
+    const { response: nozPriceResponse } = nozPriceResult;
+    if (!nozPriceResponse) {
+        return;
+    }
+    console.log('response', nozPriceResponse);
+    const { price: nozPrice } = nozPriceResponse;
+    console.log('price', nozPrice);
+    const spentStos = 0.1;
+    const expectedOzBalance = spentStos / +nozPrice;
+    console.log(expectedOzBalance);
+    const amount = (0, bigNumber_1.toWei)(expectedOzBalance, 9).toFixed();
+    console.log('amount', amount);
+    const amount2 = +amount * 0.99;
+    console.log('amount2', amount2);
 };
 async function main() {
     // const sdkEnv = sdkEnvDev;

@@ -178,6 +178,9 @@ export interface StakingPoolResponse {
         bonded_tokens: string;
     };
 }
+export interface NozPriceResponse {
+    price: string;
+}
 export interface BlockChainTxEventAttribute {
     key: string;
     value: string;
@@ -281,6 +284,9 @@ export interface ValidatorDataResult extends NetworkAxiosDataResult {
 }
 export interface StakingPoolDataResult extends NetworkAxiosDataResult {
     response?: StakingPoolResponse;
+}
+export interface NozPriceDataResult extends NetworkAxiosDataResult {
+    response?: NozPriceResponse;
 }
 export interface RpcStatusDataResult extends NetworkAxiosDataResult {
     response?: RpcStatusResponse;

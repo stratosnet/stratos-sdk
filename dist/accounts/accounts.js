@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.getBalanceInWei = exports.increaseBalance = void 0;
+exports.getOzValueForStos = exports.getAccountTrasactions = exports.getMaxAvailableBalance = exports.getBalanceCardMetrics = exports.getOtherBalanceCardMetrics = exports.formatBalanceFromWei = exports.getBalance = exports.getBalanceInWei = exports.increaseBalance = void 0;
 const get_1 = __importDefault(require("lodash/get"));
 const TxTypes = __importStar(require("../chain/transactions/types"));
 const balanceValues_1 = require("../chain/transformers/balanceValues");
@@ -235,4 +235,16 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
     return result;
 };
 exports.getAccountTrasactions = getAccountTrasactions;
+const getOzValueForStos = async (stosAmount) => {
+    const nozPriceResult = await network_1.networkApi.getNozPrice();
+    const { response: nozPriceResponse } = nozPriceResult;
+    if (!nozPriceResponse) {
+        return 0;
+    }
+    const { price: nozPrice } = nozPriceResponse;
+    const expectedOzBalance = +stosAmount / +nozPrice;
+    const ozValue = +(0, bigNumber_1.toWei)(expectedOzBalance, 9).toFixed();
+    return ozValue;
+};
+exports.getOzValueForStos = getOzValueForStos;
 //# sourceMappingURL=accounts.js.map

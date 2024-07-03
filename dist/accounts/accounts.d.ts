@@ -17,3 +17,4 @@ export declare const getOtherBalanceCardMetrics: (keyPairAddress: string) => Pro
 export declare const getBalanceCardMetrics: (keyPairAddress: string) => Promise<BalanceCardMetrics>;
 export declare const getMaxAvailableBalance: (keyPairAddress: string, requestedDenom: string, decimals?: number) => Promise<string>;
 export declare const getAccountTrasactions: (address: string, type?: TxTypes.HistoryTxType, page?: number, pageLimit?: number, userType?: networkTypes.TxHistoryUserType) => Promise<ParsedTxData>;
+export declare const getOzValueForStos: (stosAmount: string) => Promise<number>;
