@@ -624,7 +624,7 @@ const sendSdsPrepayTx = async (hdPathIndex = 0, givenReceiverMnemonic = '', expe
     return true;
 };
 exports.sendSdsPrepayTx = sendSdsPrepayTx;
-const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '', minExpectedOzone = '98') => {
+const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '') => {
     (0, helpers_1.log)('//////////////// getAccountOzoneBalance //////////////// ');
     (0, helpers_1.log)(`We need to wait for ${config_1.OZONE_BALANCE_CHECK_WAIT_TIME} ms before checing the balance to ensure it is updated`);
     await (0, helpers_1.delay)(config_1.OZONE_BALANCE_CHECK_WAIT_TIME);
@@ -643,9 +643,12 @@ const getAccountOzoneBalance = async (hdPathIndex = 0, givenReceiverMnemonic = '
         (0, helpers_1.log)('Balances', b);
         throw new Error(`receiver account "${keyPairReceiver.address}" have not received prepay transaction or its ozone balance was not updated `);
     }
+    const ozValueForStos = await accounts_1.accountsApi.getOzValueForStos('0.1'); // 98.81 for 0.1 stos
+    const roundCoeff = 0.99; // an arbitraty value, which is just to get a bit smaller number
+    const minExpectedOzone = ozValueForStos * roundCoeff;
     try {
         const [balanceValue] = ozone.split(' ');
-        const a = parseFloat(balanceValue).toFixed(4);
+        const a = +parseFloat(balanceValue).toFixed(4);
         if (a >= minExpectedOzone) {
             return true;
         }

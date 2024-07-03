@@ -9,6 +9,7 @@ export declare const getValidatorsList: (status: string, page?: number, config?:
 export declare const getValidatorsBondedToDelegatorList: (status: string, delegatorAddress: string, config?: Types.NetworkAxiosConfig) => Promise<Types.ValidatorListDataResult>;
 export declare const getValidator: (address: string, config?: Types.NetworkAxiosConfig) => Promise<Types.ValidatorDataResult>;
 export declare const getStakingPool: (config?: Types.NetworkAxiosConfig) => Promise<Types.StakingPoolDataResult>;
+export declare const getNozPrice: (config?: Types.NetworkAxiosConfig) => Promise<Types.NozPriceDataResult>;
 export declare const getAvailableBalance_n: (address: string, config?: Types.NetworkAxiosConfig) => Promise<Types.AvailableBalanceDataResultN>;
 export declare const getAvailableBalance: (address: string, config?: Types.NetworkAxiosConfig) => Promise<Types.AvailableBalanceDataResult>;
 export declare const getDelegatedBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig) => Promise<Types.DelegatedBalanceDataResult>;

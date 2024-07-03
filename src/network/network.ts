@@ -245,6 +245,14 @@ export const getStakingPool = async (
   return dataResult;
 };
 
+export const getNozPrice = async (config?: Types.NetworkAxiosConfig): Promise<Types.NozPriceDataResult> => {
+  const url = `${getRestRoute()}/stratos/sds/v1/noz_price`;
+
+  const dataResult = await apiGet(url, config);
+
+  return dataResult;
+};
+
 export const getAvailableBalance_n = async (
   address: string,
   config?: Types.NetworkAxiosConfig,

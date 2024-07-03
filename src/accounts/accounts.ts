@@ -15,6 +15,7 @@ import { networkApi, networkHelpers, networkTypes } from '../network';
 import {
   create as createBigNumber,
   fromWei,
+  toWei,
   plus as plusBigNumber,
   ROUND_DOWN,
   type BigNumberType,
@@ -300,4 +301,22 @@ export const getAccountTrasactions = async (
   const result = { data: parsedData, total, page: page || 1, totalPages };
 
   return result;
+};
+
+export const getOzValueForStos = async (stosAmount: string): Promise<number> => {
+  const nozPriceResult = await networkApi.getNozPrice();
+
+  const { response: nozPriceResponse } = nozPriceResult;
+
+  if (!nozPriceResponse) {
+    return 0;
+  }
+
+  const { price: nozPrice } = nozPriceResponse;
+
+  const expectedOzBalance = +stosAmount / +nozPrice;
+
+  const ozValue = +toWei(expectedOzBalance, 9).toFixed();
+
+  return ozValue;
 };

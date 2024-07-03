@@ -867,7 +867,7 @@ export const sendSdsPrepayTx = async (
 export const getAccountOzoneBalance = async (
   hdPathIndex = 0,
   givenReceiverMnemonic = '',
-  minExpectedOzone = '98', // 98.81 for 0.1 stos
+  // minExpectedOzone = '98', // 98.81 for 0.1 stos
 ): Promise<boolean> => {
   log('//////////////// getAccountOzoneBalance //////////////// ');
 
@@ -901,9 +901,14 @@ export const getAccountOzoneBalance = async (
     );
   }
 
+  const ozValueForStos = await accountsApi.getOzValueForStos('0.1'); // 98.81 for 0.1 stos
+
+  const roundCoeff = 0.99; // an arbitraty value, which is just to get a bit smaller number
+  const minExpectedOzone = ozValueForStos * roundCoeff;
+
   try {
     const [balanceValue] = ozone.split(' ');
-    const a = parseFloat(balanceValue).toFixed(4);
+    const a = +parseFloat(balanceValue).toFixed(4);
     if (a >= minExpectedOzone) {
       return true;
     }
