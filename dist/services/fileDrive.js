@@ -25,12 +25,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDataFromRedis = exports.sendDataToRedis = exports.getRedisClientInstance = exports.buildEncryptedDataEntity = exports.getSignedDataItemKey = exports.encryptGivedDataItem = exports.getDataItemKey = exports.getEncodingPassword = exports.decryptDataItem = exports.getSignedData = exports.verifyDataSignature = void 0;
 const redis_1 = require("redis");
+const cosmosUtils = __importStar(require("../chain/cosmos/cosmosUtils"));
 const REDIS = __importStar(require("../config/redis"));
-const stratos = __importStar(require("../index"));
+const hdVault = __importStar(require("../crypto/hdVault"));
 const helpers_1 = require("./helpers");
 const verifyDataSignature = async (derivedKeyPair, data, dataSignature) => {
     try {
-        const res = await stratos.crypto.hdVault.keyUtils.verifySignatureInBase64(data, dataSignature, derivedKeyPair.publicKey);
+        const res = await hdVault.keyUtils.verifySignatureInBase64(data, dataSignature, derivedKeyPair.publicKey);
         return res;
     }
     catch (err) {
@@ -43,7 +44,7 @@ const verifyDataSignature = async (derivedKeyPair, data, dataSignature) => {
 exports.verifyDataSignature = verifyDataSignature;
 const getSignedData = async (derivedKeyPair, data) => {
     // 88 characters long base64 string (basically a signed message, to make sure the user in fact created that key)
-    const encodedStAddressStringSignedBase64 = await stratos.crypto.hdVault.keyUtils.signWithPrivateKeyInBase64(data, derivedKeyPair.privateKey);
+    const encodedStAddressStringSignedBase64 = await hdVault.keyUtils.signWithPrivateKeyInBase64(data, derivedKeyPair.privateKey);
     try {
         // just in case verification of that signature
         await (0, exports.verifyDataSignature)(derivedKeyPair, data, encodedStAddressStringSignedBase64);
@@ -65,7 +66,7 @@ const decryptDataItem = async (encryptedEncodedData, password) => {
     let decodedDecrypted;
     try {
         // Uint8Array of decrypted bytes
-        decodedDecrypted = await stratos.chain.cosmos.cosmosUtils.decryptMasterKeySeed(password, decodedFromBase64ToEncrypted);
+        decodedDecrypted = await cosmosUtils.decryptMasterKeySeed(password, decodedFromBase64ToEncrypted);
     }
     catch (error) {
         const msg = `Could not decrypt data with a given password. Error - ${(_a = error === null || error === void 0 ? void 0 : error.message) !== null && _a !== void 0 ? _a : error}`;
@@ -84,14 +85,14 @@ const decryptDataItem = async (encryptedEncodedData, password) => {
 exports.decryptDataItem = decryptDataItem;
 const getEncodingPassword = (derivedKeyPair) => {
     // keccak256 hash of the private key , it will give 32 bytes of hash to be used, to the whole pk will be used
-    const passwordTestBytes = stratos.crypto.hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.privateKey);
+    const passwordTestBytes = hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.privateKey);
     const passwordTest = (0, helpers_1.uint8arrayToBase64Str)(passwordTestBytes);
     return passwordTest;
 };
 exports.getEncodingPassword = getEncodingPassword;
 const getDataItemKey = async (derivedKeyPair) => {
     // 32 bytes length
-    const encodedStAddress = stratos.crypto.hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.address);
+    const encodedStAddress = hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.address);
     const encodedStAddressStringBase64 = (0, helpers_1.uint8arrayToBase64Str)(encodedStAddress);
     // so, the key here is created from the user address, which was used to get keccak hash (32bytes)
     // then those bytes were converted to base64
@@ -102,7 +103,8 @@ const encryptGivedDataItem = (sampleData, password) => {
     const sampleDataBuff = Buffer.from(JSON.stringify(sampleData));
     const sampleDataBuffUint8 = Uint8Array.from(sampleDataBuff);
     // sampleDataJsonStringifiedEncrypted is an sjcl.SjclCipherEncrypted object
-    const sampleDataJsonStringifiedEncrypted = stratos.chain.cosmos.cosmosUtils.encryptMasterKeySeed(password, sampleDataBuffUint8);
+    // const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
+    const sampleDataJsonStringifiedEncrypted = cosmosUtils.encryptMasterKeySeed(password, sampleDataBuffUint8);
     const sampleDataEncripytedEncoded = (0, helpers_1.humanStringToBase64String)(sampleDataJsonStringifiedEncrypted.toString());
     return sampleDataEncripytedEncoded;
 };
