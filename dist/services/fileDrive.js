@@ -151,7 +151,6 @@ const getDataFromRedis = async (derivedKeyPair) => {
     }
     const signedDataKey = await (0, exports.getSignedDataItemKey)(derivedKeyPair);
     const res = await network_1.networkApi.getFilesDataFromRedis(signedDataKey, REDIS.fileDriveDataPrefix);
-    console.log('res get is', res);
     if (res.error) {
         throw Error('could not get data from Redis. Error is - ' + JSON.stringify(res.error));
     }
