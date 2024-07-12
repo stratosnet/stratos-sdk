@@ -12,6 +12,7 @@ export interface SdkEnvironmentConfig {
     chainId: string;
     explorerUrl: string;
     ppNodeUrl?: string;
+    restRedisUrl?: string;
     ppNodePort?: string;
     faucetUrl?: string;
     nodeProtocolVersion?: string;
@@ -25,6 +26,7 @@ export default class Sdk {
         chainId: string;
         explorerUrl: string;
         ppNodeUrl?: string | undefined;
+        restRedisUrl?: string | undefined;
         ppNodePort?: string | undefined;
         faucetUrl?: string | undefined;
         nodeProtocolVersion?: string | undefined;

@@ -22,6 +22,10 @@ _axios.defaults.transformResponse = [
         }
     },
 ];
+const getRestRedisRoute = () => {
+    const { restRedisUrl } = Sdk_1.default.environment;
+    return restRedisUrl || '';
+};
 const getRestRoute = () => {
     const { restUrl } = Sdk_1.default.environment;
     return restUrl;
@@ -391,4 +395,24 @@ const getChainAndProtocolDetails = async () => {
     };
 };
 exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
-//# sourceMappingURL=network.js.map
+const getFilesDataFromRedis = async (dataKey, keyPrefix, config) => {
+    const url = `${getRestRedisRoute()}/api/get_key_value`;
+    console.log('given keyPrefix for get', keyPrefix);
+    const payload = {
+        data_key: dataKey,
+    };
+    const dataResult = await (0, exports.apiPost)(url, payload, config);
+    return dataResult;
+};
+exports.getFilesDataFromRedis = getFilesDataFromRedis;
+const setFilesDataToRedis = async (dataKey, dataValue, keyPrefix, config) => {
+    const url = `${getRestRedisRoute()}/api/set_key_value`;
+    console.log('given keyPrefix for set', keyPrefix);
+    const payload = {
+        data_key: dataKey,
+        data_value: dataValue,
+    };
+    const dataResult = await (0, exports.apiPost)(url, payload, config);
+    return dataResult;
+};
+exports.setFilesDataToRedis = setFilesDataToRedis;

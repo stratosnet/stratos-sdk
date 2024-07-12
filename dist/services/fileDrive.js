@@ -23,11 +23,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDataFromRedis = exports.sendDataToRedis = exports.getRedisClientInstance = exports.buildEncryptedDataEntity = exports.getSignedDataItemKey = exports.encryptGivedDataItem = exports.getDataItemKey = exports.getEncodingPassword = exports.decryptDataItem = exports.getSignedData = exports.verifyDataSignature = void 0;
-const redis_1 = require("redis");
+exports.getDataFromRedis = exports.sendDataToRedis = exports.buildEncryptedDataEntity = exports.getSignedDataItemKey = exports.encryptGivedDataItem = exports.getDataItemKey = exports.getEncodingPassword = exports.decryptDataItem = exports.getSignedData = exports.verifyDataSignature = void 0;
 const cosmosUtils = __importStar(require("../chain/cosmos/cosmosUtils"));
 const REDIS = __importStar(require("../config/redis"));
 const hdVault = __importStar(require("../crypto/hdVault"));
+const network_1 = require("../network");
 const helpers_1 = require("./helpers");
 const verifyDataSignature = async (derivedKeyPair, data, dataSignature) => {
     try {
@@ -128,48 +128,45 @@ const buildEncryptedDataEntity = async (sampleData, derivedKeyPair) => {
     return resultToBeTransmitted;
 };
 exports.buildEncryptedDataEntity = buildEncryptedDataEntity;
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-async function getRedisClientInstance() {
-    const redisUrl = REDIS.redisConnectionString;
-    const redis = (0, redis_1.createClient)({ url: redisUrl });
-    redis.on('error', err => {
-        // eslint-disable-next-line no-console
-        console.log('ERROR - Redis Client Error', err);
-        throw Error(`Redis Client Error - ${err.message} `);
-    });
-    await redis.connect();
-    const aString = await redis.ping(); // 'PONG'
-    // eslint-disable-next-line no-console
-    console.log('aString', aString);
-    return redis;
-    // await redis.flushDb();
-    // await redis.flushAll();
-}
-exports.getRedisClientInstance = getRedisClientInstance;
 const sendDataToRedis = async (derivedKeyPair, sampleData) => {
     if (!derivedKeyPair) {
         return;
     }
-    const redis = await getRedisClientInstance();
     const redisDataEntity = await (0, exports.buildEncryptedDataEntity)(sampleData, derivedKeyPair);
-    const res = await redis.hSet(REDIS.fileDriveDataPrefix, redisDataEntity.key, `${redisDataEntity.data}:${redisDataEntity.dataSig}`);
-    await redis.disconnect();
-    return res;
+    const res = await network_1.networkApi.setFilesDataToRedis(redisDataEntity.key, `${redisDataEntity.data}:${redisDataEntity.dataSig}`, REDIS.fileDriveDataPrefix);
+    if (res.error) {
+        throw Error('could not set data to Redis. Error is - ' + JSON.stringify(res.error));
+    }
+    if (!res.response) {
+        throw Error('could not set data to Redis. No response in the result');
+    }
+    const { response } = res;
+    const [redisResponse] = response;
+    return redisResponse;
 };
 exports.sendDataToRedis = sendDataToRedis;
 const getDataFromRedis = async (derivedKeyPair) => {
     if (!derivedKeyPair) {
         return;
     }
-    const redis = await getRedisClientInstance();
     const signedDataKey = await (0, exports.getSignedDataItemKey)(derivedKeyPair);
-    const userData = (await redis.hGet(REDIS.fileDriveDataPrefix, signedDataKey)) || '';
-    await redis.disconnect();
+    const res = await network_1.networkApi.getFilesDataFromRedis(signedDataKey, REDIS.fileDriveDataPrefix);
+    console.log('res get is', res);
+    if (res.error) {
+        throw Error('could not get data from Redis. Error is - ' + JSON.stringify(res.error));
+    }
+    if (!res.response) {
+        throw Error('could not get data from Redis. No response in the result');
+    }
+    const { response } = res;
+    const [userData] = response;
+    if (userData === 'error') {
+        throw Error('Response from Redis has an error. Data with this key might not be yet set');
+    }
     const [dataPortion, dataSig] = userData.split(':');
     const passwordTest = (0, exports.getEncodingPassword)(derivedKeyPair);
-    const res = await (0, exports.verifyDataSignature)(derivedKeyPair, dataPortion, dataSig);
-    if (!res) {
-        // eslint-disable-next-line no-console
+    const result = await (0, exports.verifyDataSignature)(derivedKeyPair, dataPortion, dataSig);
+    if (!result) {
         console.log('!!!! SIGNATURE VERIFICATION HAS FAILED. Data might be compomised  !!!!!');
     }
     const decodedOriginal = await (0, exports.decryptDataItem)(dataPortion !== null && dataPortion !== void 0 ? dataPortion : '', passwordTest);
