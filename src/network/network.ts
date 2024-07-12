@@ -19,6 +19,12 @@ _axios.defaults.transformResponse = [
   },
 ];
 
+const getRestRedisRoute = (): string => {
+  const { restRedisUrl } = Sdk.environment;
+
+  return restRedisUrl || '';
+};
+
 const getRestRoute = (): string => {
   const { restUrl } = Sdk.environment;
 
@@ -573,4 +579,42 @@ export const getChainAndProtocolDetails = async () => {
     resolvedChainVersion,
     isNewProtocol,
   };
+};
+
+export const getFilesDataFromRedis = async (
+  dataKey: string,
+  keyPrefix: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.GetDataFromRedisResult> => {
+  const url = `${getRestRedisRoute()}/api/get_key_value`;
+
+  console.log('given keyPrefix for get', keyPrefix);
+
+  const payload = {
+    data_key: dataKey,
+  };
+
+  const dataResult = await apiPost(url, payload, config);
+
+  return dataResult;
+};
+
+export const setFilesDataToRedis = async (
+  dataKey: string,
+  dataValue: string,
+  keyPrefix: string,
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.SetDataToRedisResult> => {
+  const url = `${getRestRedisRoute()}/api/set_key_value`;
+
+  console.log('given keyPrefix for set', keyPrefix);
+
+  const payload = {
+    data_key: dataKey,
+    data_value: dataValue,
+  };
+
+  const dataResult = await apiPost(url, payload, config);
+
+  return dataResult;
 };

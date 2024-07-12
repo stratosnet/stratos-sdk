@@ -250,7 +250,7 @@ async function testRedis() {
         {
             id: 1,
             foo: {
-                bar: 'aa barfoo',
+                bar: 'aa barfoo aa',
                 foobar: true,
             },
             children: ['nope', 'yeah'],
@@ -267,6 +267,7 @@ async function testRedis() {
     ];
     const sampleData = data;
     const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
     console.log('decoded user data from redis', decodedOriginal);
 }
@@ -363,8 +364,8 @@ async function main() {
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
-    // void testRedis();
-    void testEnc();
+    void testRedis();
+    // void testEnc();
 }
 void main();
 //# sourceMappingURL=run.js.map

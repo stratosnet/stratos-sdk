@@ -41,3 +41,5 @@ export declare const getChainAndProtocolDetails: () => Promise<{
     resolvedChainVersion: string;
     isNewProtocol: boolean;
 }>;
+export declare const getFilesDataFromRedis: (dataKey: string, keyPrefix: string, config?: Types.NetworkAxiosConfig) => Promise<Types.GetDataFromRedisResult>;
+export declare const setFilesDataToRedis: (dataKey: string, dataValue: string, keyPrefix: string, config?: Types.NetworkAxiosConfig) => Promise<Types.SetDataToRedisResult>;

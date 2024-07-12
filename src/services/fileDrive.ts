@@ -1,8 +1,8 @@
 import { type KeyPairInfo } from 'crypto/hdVault/hdVaultTypes';
-import { createClient } from 'redis';
 import * as cosmosUtils from '../chain/cosmos/cosmosUtils';
 import * as REDIS from '../config/redis';
 import * as hdVault from '../crypto/hdVault';
+import { networkApi } from '../network';
 import {
   uint8arrayToBase64Str,
   humanStringToBase64String,
@@ -138,49 +138,35 @@ export const buildEncryptedDataEntity = async <T>(
   return resultToBeTransmitted;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-export async function getRedisClientInstance() {
-  const redisUrl = REDIS.redisConnectionString;
-  const redis = createClient({ url: redisUrl });
-
-  redis.on('error', err => {
-    // eslint-disable-next-line no-console
-    console.log('ERROR - Redis Client Error', err);
-    throw Error(`Redis Client Error - ${err.message} `);
-  });
-
-  await redis.connect();
-
-  const aString = await redis.ping(); // 'PONG'
-  // eslint-disable-next-line no-console
-  console.log('aString', aString);
-  return redis;
-
-  // await redis.flushDb();
-  // await redis.flushAll();
-}
-
 export const sendDataToRedis = async <T>(
   derivedKeyPair: KeyPairInfo,
   sampleData: T,
-): Promise<number | undefined> => {
+): Promise<string | undefined> => {
   if (!derivedKeyPair) {
     return;
   }
 
-  const redis = await getRedisClientInstance();
-
   const redisDataEntity = await buildEncryptedDataEntity(sampleData, derivedKeyPair);
 
-  const res = await redis.hSet(
-    REDIS.fileDriveDataPrefix,
+  const res = await networkApi.setFilesDataToRedis(
     redisDataEntity.key,
     `${redisDataEntity.data}:${redisDataEntity.dataSig}`,
+    REDIS.fileDriveDataPrefix,
   );
 
-  await redis.disconnect();
+  if (res.error) {
+    throw Error('could not set data to Redis. Error is - ' + JSON.stringify(res.error));
+  }
 
-  return res;
+  if (!res.response) {
+    throw Error('could not set data to Redis. No response in the result');
+  }
+
+  const { response } = res;
+
+  const [redisResponse] = response;
+
+  return redisResponse;
 };
 
 export const getDataFromRedis = async (derivedKeyPair: KeyPairInfo): Promise<unknown> => {
@@ -188,21 +174,33 @@ export const getDataFromRedis = async (derivedKeyPair: KeyPairInfo): Promise<unk
     return;
   }
 
-  const redis = await getRedisClientInstance();
   const signedDataKey = await getSignedDataItemKey(derivedKeyPair);
 
-  const userData = (await redis.hGet(REDIS.fileDriveDataPrefix, signedDataKey)) || '';
+  const res = await networkApi.getFilesDataFromRedis(signedDataKey, REDIS.fileDriveDataPrefix);
 
-  await redis.disconnect();
+  if (res.error) {
+    throw Error('could not get data from Redis. Error is - ' + JSON.stringify(res.error));
+  }
+
+  if (!res.response) {
+    throw Error('could not get data from Redis. No response in the result');
+  }
+
+  const { response } = res;
+
+  const [userData] = response;
+
+  if (userData === 'error') {
+    throw Error('Response from Redis has an error. Data with this key might not be yet set');
+  }
 
   const [dataPortion, dataSig] = userData.split(':');
 
   const passwordTest = getEncodingPassword(derivedKeyPair);
 
-  const res = await verifyDataSignature(derivedKeyPair, dataPortion, dataSig);
+  const result = await verifyDataSignature(derivedKeyPair, dataPortion, dataSig);
 
-  if (!res) {
-    // eslint-disable-next-line no-console
+  if (!result) {
     console.log('!!!! SIGNATURE VERIFICATION HAS FAILED. Data might be compomised  !!!!!');
   }
 
