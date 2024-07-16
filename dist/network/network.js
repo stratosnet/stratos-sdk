@@ -24,7 +24,7 @@ _axios.defaults.transformResponse = [
 ];
 const getRestRedisRoute = () => {
     const { restRedisUrl } = Sdk_1.default.environment;
-    return restRedisUrl || '';
+    return restRedisUrl || 'http://localhost:8080';
 };
 const getRestRoute = () => {
     const { restUrl } = Sdk_1.default.environment;
@@ -392,6 +392,7 @@ exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
 const getFilesDataFromRedis = async (dataKey, keyPrefix, config) => {
     const url = `${getRestRedisRoute()}/api/get_key_value`;
     console.log('given keyPrefix for get', keyPrefix);
+    console.log('getFilesDataFromRedis url', url);
     const payload = {
         data_key: dataKey,
     };

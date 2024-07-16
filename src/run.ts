@@ -439,13 +439,13 @@ async function testRedis() {
     },
   ];
 
-  const sampleData = data;
+  // const sampleData = data;
 
-  const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-  console.log('setRes', setRes);
+  // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+  // console.log('setRes', setRes);
 
   const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
-  console.log('decoded user data from redis', decodedOriginal);
+  console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
 
 async function testEnc(): Promise<void> {
