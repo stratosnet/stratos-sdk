@@ -281,11 +281,11 @@ async function testRedis() {
             anotherthing: 'cool',
         },
     ];
-    const sampleData = data;
-    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-    console.log('setRes', setRes);
+    // const sampleData = data;
+    // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    // console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
-    console.log('decoded user data from redis', decodedOriginal);
+    console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
 async function testEnc() {
     const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
