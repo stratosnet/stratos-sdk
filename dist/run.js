@@ -31,6 +31,7 @@ const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const stratos = __importStar(require("./index"));
 const bigNumber_1 = require("./services/bigNumber");
+const FileDrive = __importStar(require("./services/fileDrive"));
 const helpers_1 = require("./services/helpers");
 dotenv_1.default.config();
 const password = 'XXXX';
@@ -68,6 +69,7 @@ const runFaucet = async (hdPathIndex, givenMnemonic) => {
     }
     const walletAddress = derivedKeyPair.address;
     console.log('walletAddress', walletAddress);
+    console.log('walletAddress', derivedKeyPair.privateKey);
     const faucetUrl = stratos.Sdk.environment.faucetUrl || '';
     (0, helpers_1.log)(`will be useing faucetUrl - "${faucetUrl}"`);
     const result = await stratos.accounts.accountsApi.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
@@ -82,6 +84,7 @@ const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
         return;
     }
     const balanaces = await stratos.accounts.accountsApi.getBalanceCardMetrics(derivedKeyPair.address);
+    // console.log('d', derivedKeyPair.privateKey)
     console.log('balanace card metrics ', balanaces);
 };
 const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
@@ -255,9 +258,89 @@ const testBalanceRound = async () => {
     const amount2 = +amount * 0.99;
     console.log('amount2', amount2);
 };
+async function testRedis() {
+    const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
+    if (!derivedKeyPair) {
+        return;
+    }
+    const data = [
+        {
+            id: 1,
+            foo: {
+                bar: 'aa barfoo aa',
+                foobar: true,
+            },
+            children: ['nope', 'yeah'],
+        },
+        {
+            id: 3,
+            foo: {
+                bar: '2barfoo then and now',
+                foobar: false,
+            },
+            children: null,
+            anotherthing: 'cool',
+        },
+        {
+            id: 2,
+            foo: {
+                bar: 'barfoo then and now',
+                foobar: false,
+            },
+            children: null,
+            anotherthing: 'cool',
+        },
+    ];
+    const sampleData = data;
+    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    console.log('setRes', setRes);
+    const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
+    console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
+}
+async function testEnc() {
+    const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
+    if (!derivedKeyPair) {
+        return;
+    }
+    const data = [
+        {
+            id: 1,
+            foo: {
+                bar: 'barfoo',
+                foobar: true,
+            },
+            children: ['nope', 'yeah'],
+        },
+        {
+            id: 2,
+            foo: {
+                bar: 'barfoo then',
+                foobar: false,
+            },
+            children: null,
+            anotherthing: 'cool',
+        },
+    ];
+    const sampleData = data;
+    // const sampleData = new Array(2).fill({ id: id + 1, derivedKeyPair });
+    console.log('sampleData to store', '\n', sampleData, '\n');
+    const dataKey = await FileDrive.getDataItemKey(derivedKeyPair);
+    console.log('dataKey', dataKey);
+    const signedDataKey = await FileDrive.getSignedDataItemKey(derivedKeyPair);
+    console.log('signedDataKey', signedDataKey);
+    const passwordTest = FileDrive.getEncodingPassword(derivedKeyPair);
+    const redisDataEntity = await FileDrive.buildEncryptedDataEntity(sampleData, derivedKeyPair);
+    console.log('redisDataEntity', redisDataEntity);
+    const decodedOriginal = await FileDrive.decryptDataItem(redisDataEntity.data, passwordTest);
+    console.log('decodedOriginal', decodedOriginal);
+    const res = await FileDrive.verifyDataSignature(derivedKeyPair, redisDataEntity.data, redisDataEntity.dataSig);
+    if (!res) {
+        console.log('SIGNATURE VERIFICATION HAS FAILED. Data might be compomised');
+    }
+}
 async function main() {
-    // const sdkEnv = sdkEnvDev;
-    const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
+    // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     stratos.Sdk.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
@@ -306,7 +389,9 @@ async function main() {
     // 7a
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
-    void testBalanceRound();
+    // void testBalanceRound();
+    void testRedis();
+    // void testEnc();
 }
 void main();
 //# sourceMappingURL=run.js.map

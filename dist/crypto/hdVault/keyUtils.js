@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySignature = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAminoPublicKey = exports.generateMasterKeySeed = void 0;
+exports.verifySignatureInBase64 = exports.verifySignature = exports.signWithPrivateKeyInBase64 = exports.signWithPrivateKey = exports.encodeSignatureMessage = exports.makePathBuilder = exports.getMasterKeySeed = exports.unlockMasterKeySeed = exports.getEncodedPublicKey = exports.convertEvmToNativeToAddress = exports.convertNativeToEvmAddress = exports.getAddressFromPubKeyWithKeccak = exports.getAminoPublicKey = exports.generateMasterKeySeed = void 0;
 const crypto_1 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const keccak_1 = __importDefault(require("keccak"));
@@ -120,9 +120,19 @@ const signWithPrivateKey = async (signMessageString, privateKey) => {
     return sigString;
 };
 exports.signWithPrivateKey = signWithPrivateKey;
+const signWithPrivateKeyInBase64 = async (signMessageString, privateKey) => {
+    const defaultPrivkey = (0, encoding_1.fromHex)(privateKey);
+    const encodedMessage = (0, exports.encodeSignatureMessage)(signMessageString);
+    const signature = await crypto_1.Secp256k1.createSignature(encodedMessage, defaultPrivkey);
+    const signatureBytes = signature.toFixedLength().slice(0, -1);
+    const sigString = (0, encoding_1.toBase64)(signatureBytes);
+    return sigString;
+};
+exports.signWithPrivateKeyInBase64 = signWithPrivateKeyInBase64;
 const verifySignature = async (signatureMessage, signature, publicKey) => {
     try {
-        const compressedPubkey = (0, encoding_1.fromBase64)(publicKey);
+        // 33 bytes of encodedPublicKey
+        const compressedPubkey = (0, encoding_1.fromBech32)(publicKey).data;
         const encodedMessage = (0, exports.encodeSignatureMessage)(signatureMessage);
         const signatureData = (0, encoding_1.fromHex)(signature);
         const restoredSignature = crypto_1.Secp256k1Signature.fromFixedLength(signatureData);
@@ -134,4 +144,19 @@ const verifySignature = async (signatureMessage, signature, publicKey) => {
     }
 };
 exports.verifySignature = verifySignature;
+const verifySignatureInBase64 = async (signatureMessage, signature, publicKey) => {
+    try {
+        // 33 bytes of encodedPublicKey
+        const compressedPubkey = (0, encoding_1.fromBech32)(publicKey).data;
+        const encodedMessage = (0, exports.encodeSignatureMessage)(signatureMessage);
+        const signatureData = (0, encoding_1.fromBase64)(signature);
+        const restoredSignature = crypto_1.Secp256k1Signature.fromFixedLength(signatureData);
+        const verifyResult = await crypto_1.Secp256k1.verifySignature(restoredSignature, encodedMessage, compressedPubkey);
+        return verifyResult;
+    }
+    catch (err) {
+        return Promise.reject(false);
+    }
+};
+exports.verifySignatureInBase64 = verifySignatureInBase64;
 //# sourceMappingURL=keyUtils.js.map

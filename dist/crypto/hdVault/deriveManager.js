@@ -37,6 +37,7 @@ const deriveAddressFromPhrase = async (phrase) => {
 exports.deriveAddressFromPhrase = deriveAddressFromPhrase;
 const deriveKeyPairFromPrivateKeySeed = async (privkey) => {
     const pubkeyMine = await (0, cosmosWallet_1.getPublicKeyFromPrivKey)(privkey);
+    // is used to verify the signature
     const encodeAminoPub = await (0, keyUtils_1.getAminoPublicKey)(pubkeyMine);
     const { pubkey } = await CosmosCrypto.Secp256k1.makeKeypair(privkey);
     const address = (0, keyUtils_1.getAddressFromPubKeyWithKeccak)(pubkey);
