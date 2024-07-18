@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { hdVault } from './config';
 import * as stratos from './index';
-import { toWei } from './services/bigNumber';
+import * as FileDrive from './services/fileDrive';
 import { delay, dirLog, log } from './services/helpers';
 
 dotenv.config();

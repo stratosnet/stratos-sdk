@@ -30,7 +30,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const stratos = __importStar(require("./index"));
-const bigNumber_1 = require("./services/bigNumber");
+const FileDrive = __importStar(require("./services/fileDrive"));
 const helpers_1 = require("./services/helpers");
 dotenv_1.default.config();
 const password = 'XXXX';
