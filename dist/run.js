@@ -256,6 +256,15 @@ async function testRedis() {
             children: ['nope', 'yeah'],
         },
         {
+            id: 3,
+            foo: {
+                bar: '2barfoo then and now',
+                foobar: false,
+            },
+            children: null,
+            anotherthing: 'cool',
+        },
+        {
             id: 2,
             foo: {
                 bar: 'barfoo then and now',
@@ -265,9 +274,9 @@ async function testRedis() {
             anotherthing: 'cool',
         },
     ];
-    // const sampleData = data;
-    // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-    // console.log('setRes', setRes);
+    const sampleData = data;
+    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
     console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
