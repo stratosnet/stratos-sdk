@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadSharedFile = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
+exports.downloadSharedFile = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
 const path_1 = __importDefault(require("path"));
 const accounts_1 = require("../../accounts");
 const remotefs_1 = require("../../config/remotefs");
@@ -34,8 +34,9 @@ const keyUtils = __importStar(require("../../crypto/hdVault/keyUtils"));
 const filesystem_1 = require("../../filesystem");
 const network_1 = require("../../network");
 const helpers_1 = require("../../services/helpers");
+const SdsTypes = __importStar(require("./types"));
 const types_1 = require("./types");
-const processUsedFileDownload = async (responseRequestDownloadShared, filehash, filesize) => {
+const processUsedFileDownload = async (responseRequestDownloadShared, filehash, filesize, progressCb = () => { }) => {
     var _a;
     const { result: resultWithOffesets } = responseRequestDownloadShared;
     let offsetStartGlobal = 0;
@@ -53,8 +54,19 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
     let dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
     readSize = readSize + dlPartSize;
     completedProgress = (100 * readSize) / filesize;
-    const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
-    (0, helpers_1.log)('2 We have a correct responseRequestDownload', completedProgressMessage);
+    const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+    //   const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${
+    // ( Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
+    const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
+    // log('2 We have a correct responseRequestDownload', completedProgressMessage);
+    const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+    progressCb({
+        result: {
+            success: true,
+            message: resMsg,
+            code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+        },
+    });
     while (isContinueGlobal === 2) {
         const extraParamsForUserDownload = [
             {
@@ -65,12 +77,26 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
         const callResultDownload = await network_1.networkApi.sendUserDownloadData(extraParamsForUserDownload);
         const { response: responseDownload } = callResultDownload;
         if (!responseDownload) {
-            (0, helpers_1.dirLog)('-- ERROR processUsedFileDownload - we dont have response. it might be an error', callResultDownload);
+            // dirLog(
+            //   '-- ERROR processUsedFileDownload - we dont have response. it might be an error',
+            //   callResultDownload,
+            // );
+            const errorMsg = '-- ERROR processUsedFileDownload - we dont have response. it might be an error';
+            progressCb({
+                result: {
+                    success: false,
+                    code: SdsTypes.DOWNLOAD_CODES.PROCESS_USER_FILE_DOWNLOAD,
+                },
+                error: {
+                    message: errorMsg,
+                    details: { callResultDownload },
+                },
+            });
             return;
         }
-        const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-        const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-        (0, helpers_1.dirLog)('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
+        // const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
+        // const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
+        // dirLog('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
         const { result: { offsetend: offsetendDownload, offsetstart: offsetstartDownload, return: isContinueDownload, filedata: downloadedFileData, }, } = responseDownload;
         isContinueGlobal = +isContinueDownload;
         if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
@@ -85,11 +111,21 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
             readSize = readSize + dlPartSize;
             completedProgress = (100 * readSize) / filesize;
-            const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${(Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
-            (0, helpers_1.log)('3 We have a correct responseDownload', completedProgressMessage);
+            const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+            const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
+            // log('3 We have a correct responseDownload', completedProgressMessage);
+            const resMsg = `b. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+            progressCb({
+                result: {
+                    success: true,
+                    message: resMsg,
+                    code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+                },
+            });
         }
     }
     let downloadConfirmed = '-1';
+    let callResultDownloadFileInfoDebug;
     if (isContinueGlobal === 3) {
         const extraParamsForUserDownload = [
             {
@@ -98,13 +134,23 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             },
         ];
         const callResultDownloadFileInfo = await network_1.networkApi.sendUserDownloadedFileInfo(extraParamsForUserDownload);
-        // dirLog('Call result download', callResultDownloadFileInfo);
+        callResultDownloadFileInfoDebug = callResultDownloadFileInfo;
         const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
         downloadConfirmed = ((_a = responseDownloadFileInfo === null || responseDownloadFileInfo === void 0 ? void 0 : responseDownloadFileInfo.result) === null || _a === void 0 ? void 0 : _a.return) || '-1';
-        // log('ResponseDownloadFileInfo', responseDownloadFileInfo);
     }
     if (+downloadConfirmed !== 0) {
-        throw new Error('could not get download confirmation');
+        const errorMsg = 'could not get download confirmation';
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.COULD_NOT_GET_DOWNLOAD_CONFIRMATION,
+            },
+            error: {
+                message: errorMsg,
+                details: { callResultDownloadFileInfoDebug },
+            },
+        });
+        throw new Error(errorMsg);
     }
     const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
         const res = a.offsetstart - b.offsetstart;
@@ -208,14 +254,37 @@ const getUploadedFileList = async (keypair, page = 0) => {
     }
     const userFiles = response.result.fileinfo;
     return {
-        originalResponse: response,
+        originalResponse: callResult.response,
         files: userFiles,
     };
 };
 exports.getUploadedFileList = getUploadedFileList;
-const downloadFile = async (keypair, filePathToSave, filehash, filesize) => {
+const getAllUploadedFileList = async (keypair) => {
+    var _a;
+    let currentPage = 0;
+    const resultFileList = [];
+    let weContinue = true;
+    do {
+        const userFileList = await (0, exports.getUploadedFileList)(keypair, currentPage);
+        const { originalResponse, files } = userFileList;
+        const totalNumber = (_a = originalResponse === null || originalResponse === void 0 ? void 0 : originalResponse.result) === null || _a === void 0 ? void 0 : _a.totalnumber;
+        console.log('number!!', totalNumber);
+        const weHaveDataOnThisPage = !!files && !!totalNumber;
+        if (weHaveDataOnThisPage) {
+            currentPage += 1;
+            resultFileList.push(...files);
+        }
+        if (resultFileList.length >= totalNumber) {
+            weContinue = false;
+        }
+    } while (weContinue);
+    return resultFileList;
+};
+exports.getAllUploadedFileList = getAllUploadedFileList;
+const downloadFileOriginal = async (keypair, filePathToSave, filehash, filesize) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
+    console.log('sequence', sequence);
     const filehandle = `sdm://${address}/${filehash}`;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
@@ -263,6 +332,141 @@ const downloadFile = async (keypair, filePathToSave, filehash, filesize) => {
     }
     (0, helpers_1.log)(`Downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
     filesystem_1.filesystemApi.writeFile(filePathToSave, decodedFile);
+    return { filePathToSave };
+};
+exports.downloadFileOriginal = downloadFileOriginal;
+const downloadFileToBuffer = async (keypair, filehash, filesize, progressCb = () => { }) => {
+    const { address, publicKey } = keypair;
+    const sequence = await getCurrentSequenceString(address);
+    console.log('sequence', sequence);
+    const filehandle = `sdm://${address}/${filehash}`;
+    const timestamp = (0, helpers_1.getTimestampInSeconds)();
+    const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+    const extraParams = [
+        {
+            filehandle,
+            signature: {
+                address,
+                pubkey: publicKey,
+                signature,
+            },
+            req_time: timestamp,
+        },
+    ];
+    const callResultRequestDl = await network_1.networkApi.sendUserRequestDownload(extraParams);
+    const { response: responseRequestDl } = callResultRequestDl;
+    if (!responseRequestDl) {
+        const errorMsg = 'Error. There is no response for download request.';
+        // dirLog('-- ERROR - we dont have response for dl request.', callResultRequestDl);
+        progressCb({
+            result: { success: false, code: SdsTypes.DOWNLOAD_CODES.NO_RESPONSE_TO_DOWNLOAD_REQUEST },
+            error: {
+                message: errorMsg,
+                details: { callResultRequestDl },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    const { result: resultWithOffesets } = responseRequestDl;
+    const { return: requestDownloadFileReturn, reqid: reqidDownloadFile, offsetstart: offsetstartInit, offsetend: offsetendInit, } = resultWithOffesets;
+    if (parseInt(requestDownloadFileReturn, 10) < 0) {
+        const errorMsg = `return field in the request download shared response contains an error. Error code "${requestDownloadFileReturn}"`;
+        progressCb({
+            result: { success: false, code: SdsTypes.DOWNLOAD_CODES.RETURN_FIELD_OF_REQUEST_DOWNLOAD_HAS_ERROR },
+            error: {
+                message: errorMsg,
+                details: { responseRequestDl },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    if (parseInt(requestDownloadFileReturn, 10) !== 2) {
+        const errorMsg = `return field in the response to request download shared has an unexpected code "${requestDownloadFileReturn}". Expected code was "4"`;
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.UNEXPECTED_CODE_IN_RETURN_FIELD_OF_REQUEST_DOWNLOAD,
+            },
+            error: {
+                message: errorMsg,
+                details: { responseRequestDl },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    if (!reqidDownloadFile) {
+        const errorMsg = 'required fields "reqid"  is missing in the response';
+        // dirLog('we dont have required fields in the download shared response ', responseRequestDl);
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.REQUIRED_REQID_IS_MISSING_IN_THE_RESPONSE,
+            },
+            error: {
+                message: errorMsg,
+                details: { responseRequestDl },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    if (offsetendInit === undefined) {
+        // dirLog('--- ERROR a we dont have an offest. could be an error. response is', responseRequestDl);
+        const errorMsg = 'Error A. we dont have an offest. could be an error.';
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.NO_OFFSET_ERROR_A,
+            },
+            error: {
+                message: errorMsg,
+                details: { responseRequestDl },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    if (offsetstartInit === undefined) {
+        // dirLog('--- ERROR b we dont have an offest. could be an error. response is', responseRequestDl);
+        const errorMsg = 'Error B. we dont have an offest. could be an error. ';
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.NO_OFFSET_ERROR_B,
+            },
+            error: {
+                message: errorMsg,
+                details: { responseRequestDl },
+            },
+        });
+        throw new Error();
+    }
+    const decodedFile = await processUsedFileDownload(responseRequestDl, filehash, filesize, progressCb);
+    if (!decodedFile) {
+        const errorMsg = `Could not process download of the user file for the "${filehash}" into buffer`;
+        progressCb({
+            result: {
+                success: false,
+                code: SdsTypes.DOWNLOAD_CODES.COULD_NOT_PROCESS_DOWNLOAD_TO_BUFFER,
+            },
+            error: {
+                message: errorMsg,
+                details: { decodedFile },
+            },
+        });
+        throw new Error();
+    }
+    return { downloadedFile: decodedFile };
+};
+exports.downloadFileToBuffer = downloadFileToBuffer;
+const downloadFile = async (keypair, filePathToSave, filehash, filesize, progressCb = (data) => {
+    console.log('data passed to callback', data);
+}) => {
+    const { downloadedFile } = await (0, exports.downloadFileToBuffer)(keypair, filehash, filesize, progressCb);
+    if (!downloadedFile) {
+        throw new Error(`Could not process download of the user file for the "${filehash}" into "${filePathToSave}"`);
+    }
+    (0, helpers_1.log)(`Downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
+    filesystem_1.filesystemApi.writeFile(filePathToSave, downloadedFile);
     return { filePathToSave };
 };
 exports.downloadFile = downloadFile;
@@ -373,7 +577,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             },
         });
         const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
-        let callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
+        const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
         const { response: responseUploadToTest } = callResultUpload;
         const resMsg = 'responseUploadToTest after sending the stop to sendUserUploadData';
         progressCb({
@@ -474,7 +678,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             let responseUpload;
             do {
                 const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
-                let callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
+                const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {
                     const errorMsg = '-- ERROR 1 we dont have upload response. it might be an error';

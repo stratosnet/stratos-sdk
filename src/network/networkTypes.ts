@@ -399,6 +399,7 @@ export interface FileUserRequestListResponse extends MainRpcResponse {
   result: {
     return: '0' | '1';
     fileinfo: FileInfoItem[];
+    totalnumber: number;
   };
 }
 

@@ -126,7 +126,7 @@ const mainSdsPrepay = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemon
     if (!keyPairZero) {
         return;
     }
-    const sendTxMessages = await stratos.sds.transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 10 }]);
+    const sendTxMessages = await stratos.sds.transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 20 }]);
     (0, helpers_1.dirLog)('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
     const signedTx = await stratos.chain.transactions.sign(keyPairZero.address, sendTxMessages);
     let attempts = 0;
@@ -154,6 +154,14 @@ const testRequestUserFileList = async (hdPathIndex, page, givenReceiverMnemonic 
     }
     const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getUploadedFileList(keyPairZero, page);
     console.log('retrieved user file list', userFileList);
+};
+const testRequestAllUserFileList = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic) => {
+    const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
+    if (!keyPairZero) {
+        return;
+    }
+    const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllUploadedFileList(keyPairZero);
+    console.log('retrieved all user file list', userFileList);
 };
 const testItFileUpFromBuffer = async (hdPathIndex, filename, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -197,6 +205,23 @@ const testFileDl = async (hdPathIndex, filename, filehash, filesize, givenReceiv
         return;
     }
     const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_buff_${filename}`);
+    const myCb = (data) => {
+        const { result: { success, code, details, message }, error, } = data;
+        if (error) {
+            (0, helpers_1.dirLog)('we have an error. data from myCb', data);
+        }
+        else if (success === false) {
+            (0, helpers_1.log)('success is false. data from myCb', data);
+        }
+        else if (code ===
+            stratos.sds.remoteFileSystem.remoteFileSystemTypes.DOWNLOAD_CODES
+                .WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD) {
+            (0, helpers_1.log)('message -', message);
+        }
+        else {
+            (0, helpers_1.dirLog)('unknown response', data);
+        }
+    };
     await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadFile(keyPairZero, filePathToSave, filehash, filesize);
     (0, helpers_1.log)('Done. filePathToSave', filePathToSave);
 };
@@ -263,6 +288,7 @@ async function testRedis() {
     if (!derivedKeyPair) {
         return;
     }
+    const dataE = [];
     const data = [
         {
             id: 1,
@@ -292,8 +318,8 @@ async function testRedis() {
         },
     ];
     const sampleData = data;
-    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-    console.log('setRes', setRes);
+    // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    // console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
     console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
@@ -350,10 +376,7 @@ async function main() {
         // devnet
         // ppNodeUrl: 'http://35.187.47.46',
         // ppNodePort: '8142',
-        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-        // ppNodePort: '',
-        // mesos - we connect to mesos pp
-        ppNodeUrl: 'http://34.195.137.237', ppNodePort: '8142' }));
+        ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // Create a wallet and show accounts
@@ -370,14 +393,72 @@ async function main() {
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
+    // await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
-    const filename = 'file10M_May_27_v1.bin';
+    // const filename = 'file10M_May_27_v1.bin';
+    const filesToUpload = [
+        // 'file20M_1_Jul_18.bin',
+        'file20M_2_Jul_18.bin',
+        'file20M_3_Jul_18.bin',
+        'file20M_4_Jul_18.bin',
+        'file20M_5_Jul_18.bin',
+        'file20M_6_Jul_18.bin',
+        'file20M_7_Jul_18.bin',
+        'file20M_8_Jul_18.bin',
+        'file20M_9_Jul_18.bin',
+        'file20M_10_Jul_18.bin',
+        'file20M_11_Jul_18.bin',
+        'file20M_12_Jul_18.bin',
+        'file20M_13_Jul_18.bin',
+        'file20M_14_Jul_18.bin',
+        'file20M_15_Jul_18.bin',
+        'file20M_16_Jul_18.bin',
+        'file20M_17_Jul_18.bin',
+        'file20M_18_Jul_18.bin',
+        'file20M_19_Jul_18.bin',
+        'file20M_20_Jul_18.bin',
+        'file20M_21_Jul_18.bin',
+        'file20M_22_Jul_18.bin',
+        'file20M_23_Jul_18.bin',
+        'file20M_24_Jul_18.bin',
+        'file20M_25_Jul_18.bin',
+        'file20M_26_Jul_18.bin',
+        'file20M_27_Jul_18.bin',
+        'file20M_28_Jul_18.bin',
+        'file20M_29_Jul_18.bin',
+        'file20M_30_Jul_18.bin',
+        'file20M_31_Jul_18.bin',
+        'file20M_32_Jul_18.bin',
+        'file20M_33_Jul_18.bin',
+        'file20M_34_Jul_18.bin',
+        'file20M_35_Jul_18.bin',
+        'file20M_36_Jul_18.bin',
+        'file20M_37_Jul_18.bin',
+        'file20M_38_Jul_18.bin',
+        'file20M_39_Jul_18.bin',
+        'file20M_40_Jul_18.bin',
+        'file20M_41_Jul_18.bin',
+        'file20M_42_Jul_18.bin',
+        'file20M_43_Jul_18.bin',
+        'file20M_44_Jul_18.bin',
+        'file20M_45_Jul_18.bin',
+    ];
+    // for (const myFileName of filesToUpload) {
+    //   console.log('myFileName NOW ', myFileName);
+    //   await testItFileUpFromBuffer(hdPathIndex, myFileName);
+    // }
+    // let filename = 'file20M_1_Jul_18.bin';
+    // await testItFileUpFromBuffer(hdPathIndex, filename);
+    // filename = 'file20M_1_Jul_18.bin';
     // await testItFileUpFromBuffer(hdPathIndex, filename);
     // 3a
-    const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
-    const filesize = 10000001;
+    // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
+    // const filesize = 10_000_001;
+    const filename = 'file20M_3_Jul_20.bin';
+    const filehash = 'v05j1m50abbkpfmb9o9oc8mgiegcuorfo52l0rv8';
+    const filesize = 20000001;
     // filename: 'file10M_May_21_v1.bin',
-    // await testFileDl(hdPathIndex, filename, filehash, filesize);
+    await testFileDl(hdPathIndex, filename, filehash, filesize);
     // 4a
     // await testRequestUserSharedFileList(hdPathIndex, 0);
     // 5a
@@ -390,7 +471,7 @@ async function main() {
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
-    void testRedis();
+    // void testRedis();
     // void testEnc();
 }
 void main();
