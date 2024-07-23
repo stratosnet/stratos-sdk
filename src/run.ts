@@ -510,8 +510,8 @@ async function testRedis() {
 
   const sampleData = data;
 
-  // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-  // console.log('setRes', setRes);
+  const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+  console.log('setRes', setRes);
 
   const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
   console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
@@ -688,7 +688,7 @@ async function main(): Promise<void> {
   const filehash = 'v05j1m50abbkpfmb9o9oc8mgiegcuorfo52l0rv8';
   const filesize = 20_000_001;
   // filename: 'file10M_May_21_v1.bin',
-  await testFileDl(hdPathIndex, filename, filehash, filesize);
+  // await testFileDl(hdPathIndex, filename, filehash, filesize);
   // 4a
   // await testRequestUserSharedFileList(hdPathIndex, 0);
   // 5a
@@ -701,7 +701,7 @@ async function main(): Promise<void> {
   const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
-  // void testRedis();
+  void testRedis();
   // void testEnc();
 }
 
