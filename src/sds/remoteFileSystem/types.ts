@@ -11,7 +11,8 @@ export type RequestUserFilesResponse =
 
 export interface UserFileListResponse {
   files: NetworkTypes.FileInfoItem[];
-  originalResponse: RequestUserFilesResponse;
+  // originalResponse: RequestUserFilesResponse;
+  originalResponse: NetworkTypes.FileUserRequestListResponse;
 }
 
 export interface UploadedFileStatusInfo {
@@ -21,6 +22,19 @@ export interface UploadedFileStatusInfo {
   replicas: number;
   requestGetFileStatusReturn: string;
 }
+
+export const DOWNLOAD_CODES = {
+  NO_RESPONSE_TO_DOWNLOAD_REQUEST: 1,
+  RETURN_FIELD_OF_REQUEST_DOWNLOAD_HAS_ERROR: 2,
+  UNEXPECTED_CODE_IN_RETURN_FIELD_OF_REQUEST_DOWNLOAD: 3,
+  REQUIRED_REQID_IS_MISSING_IN_THE_RESPONSE: 4,
+  NO_OFFSET_ERROR_A: 5,
+  NO_OFFSET_ERROR_B: 6,
+  COULD_NOT_GET_DOWNLOAD_CONFIRMATION: 7,
+  WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD: 8,
+  PROCESS_USER_FILE_DOWNLOAD: 10,
+  COULD_NOT_PROCESS_DOWNLOAD_TO_BUFFER: 20,
+};
 
 export const UPLOAD_CODES = {
   GET_FILE_STATUS: 1,

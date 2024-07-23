@@ -13,6 +13,7 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
   responseRequestDownloadShared: T,
   filehash: string,
   filesize: number,
+  progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
 ): Promise<Buffer | undefined> => {
   const { result: resultWithOffesets } = responseRequestDownloadShared;
 
@@ -48,11 +49,23 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
 
   completedProgress = (100 * readSize) / filesize;
 
-  const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${(
-    Math.round(completedProgress * 100) / 100
-  ).toFixed(2)}%`;
+  const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+  //   const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${
+  // ( Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
 
-  log('2 We have a correct responseRequestDownload', completedProgressMessage);
+  const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
+
+  // log('2 We have a correct responseRequestDownload', completedProgressMessage);
+
+  const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+
+  progressCb({
+    result: {
+      success: true,
+      message: resMsg,
+      code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+    },
+  });
 
   while (isContinueGlobal === 2) {
     const extraParamsForUserDownload = [
@@ -67,17 +80,30 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
     const { response: responseDownload } = callResultDownload;
 
     if (!responseDownload) {
-      dirLog(
-        '-- ERROR processUsedFileDownload - we dont have response. it might be an error',
-        callResultDownload,
-      );
+      // dirLog(
+      //   '-- ERROR processUsedFileDownload - we dont have response. it might be an error',
+      //   callResultDownload,
+      // );
 
+      const errorMsg = '-- ERROR processUsedFileDownload - we dont have response. it might be an error';
+
+      progressCb({
+        result: {
+          success: false,
+          code: SdsTypes.DOWNLOAD_CODES.PROCESS_USER_FILE_DOWNLOAD,
+        },
+        error: {
+          message: errorMsg,
+          details: { callResultDownload },
+        },
+      });
       return;
     }
 
-    const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-    const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-    dirLog('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
+    // const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
+
+    // const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
+    // dirLog('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
 
     const {
       result: {
@@ -107,16 +133,25 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
       readSize = readSize + dlPartSize;
       completedProgress = (100 * readSize) / filesize;
 
-      const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${(
-        Math.round(completedProgress * 100) / 100
-      ).toFixed(2)}%`;
+      const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+      const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
 
-      log('3 We have a correct responseDownload', completedProgressMessage);
+      // log('3 We have a correct responseDownload', completedProgressMessage);
+      const resMsg = `b. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+
+      progressCb({
+        result: {
+          success: true,
+          message: resMsg,
+          code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+        },
+      });
     }
   }
 
   let downloadConfirmed = '-1';
 
+  let callResultDownloadFileInfoDebug;
   if (isContinueGlobal === 3) {
     const extraParamsForUserDownload = [
       {
@@ -129,17 +164,25 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
       extraParamsForUserDownload,
     );
 
-    // dirLog('Call result download', callResultDownloadFileInfo);
-
+    callResultDownloadFileInfoDebug = callResultDownloadFileInfo;
     const { response: responseDownloadFileInfo } = callResultDownloadFileInfo;
 
     downloadConfirmed = responseDownloadFileInfo?.result?.return || '-1';
-
-    // log('ResponseDownloadFileInfo', responseDownloadFileInfo);
   }
 
   if (+downloadConfirmed !== 0) {
-    throw new Error('could not get download confirmation');
+    const errorMsg = 'could not get download confirmation';
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.COULD_NOT_GET_DOWNLOAD_CONFIRMATION,
+      },
+      error: {
+        message: errorMsg,
+        details: { callResultDownloadFileInfoDebug },
+      },
+    });
+    throw new Error(errorMsg);
   }
 
   const sortedFileInfoChunks = fileInfoChunks.sort((a, b) => {
@@ -286,12 +329,42 @@ export const getUploadedFileList = async (
   const userFiles = response.result.fileinfo;
 
   return {
-    originalResponse: response,
+    originalResponse: callResult.response!,
     files: userFiles,
   };
 };
 
-export const downloadFile = async (
+export const getAllUploadedFileList = async (
+  keypair: WalletTypes.KeyPairInfo,
+): Promise<networkTypes.FileInfoItem[]> => {
+  let currentPage = 0;
+  const resultFileList: networkTypes.FileInfoItem[] = [];
+  let weContinue = true;
+
+  do {
+    const userFileList = await getUploadedFileList(keypair, currentPage);
+
+    const { originalResponse, files } = userFileList;
+
+    const totalNumber = originalResponse?.result?.totalnumber;
+
+    console.log('number!!', totalNumber);
+    const weHaveDataOnThisPage = !!files && !!totalNumber;
+
+    if (weHaveDataOnThisPage) {
+      currentPage += 1;
+      resultFileList.push(...files);
+    }
+
+    if (resultFileList.length >= totalNumber) {
+      weContinue = false;
+    }
+  } while (weContinue);
+
+  return resultFileList;
+};
+
+export const downloadFileOriginal = async (
   keypair: WalletTypes.KeyPairInfo,
   filePathToSave: string,
   filehash: string,
@@ -300,6 +373,7 @@ export const downloadFile = async (
   const { address, publicKey } = keypair;
 
   const sequence = await getCurrentSequenceString(address);
+  console.log('sequence', sequence);
 
   const filehandle = `sdm://${address}/${filehash}`;
 
@@ -384,6 +458,195 @@ export const downloadFile = async (
   return { filePathToSave };
 };
 
+export const downloadFileToBuffer = async (
+  keypair: WalletTypes.KeyPairInfo,
+  filehash: string,
+  filesize: number,
+  progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
+): Promise<{ downloadedFile: Buffer }> => {
+  const { address, publicKey } = keypair;
+
+  const sequence = await getCurrentSequenceString(address);
+  console.log('sequence', sequence);
+
+  const filehandle = `sdm://${address}/${filehash}`;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const extraParams: networkTypes.FileUserRequestDownloadParams[] = [
+    {
+      filehandle,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
+    },
+  ];
+
+  const callResultRequestDl = await networkApi.sendUserRequestDownload(extraParams);
+
+  const { response: responseRequestDl } = callResultRequestDl;
+
+  if (!responseRequestDl) {
+    const errorMsg = 'Error. There is no response for download request.';
+
+    // dirLog('-- ERROR - we dont have response for dl request.', callResultRequestDl);
+
+    progressCb({
+      result: { success: false, code: SdsTypes.DOWNLOAD_CODES.NO_RESPONSE_TO_DOWNLOAD_REQUEST },
+      error: {
+        message: errorMsg,
+        details: { callResultRequestDl },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  const { result: resultWithOffesets } = responseRequestDl;
+
+  const {
+    return: requestDownloadFileReturn,
+    reqid: reqidDownloadFile,
+    offsetstart: offsetstartInit,
+    offsetend: offsetendInit,
+  } = resultWithOffesets;
+
+  if (parseInt(requestDownloadFileReturn, 10) < 0) {
+    const errorMsg = `return field in the request download shared response contains an error. Error code "${requestDownloadFileReturn}"`;
+    progressCb({
+      result: { success: false, code: SdsTypes.DOWNLOAD_CODES.RETURN_FIELD_OF_REQUEST_DOWNLOAD_HAS_ERROR },
+      error: {
+        message: errorMsg,
+        details: { responseRequestDl },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  if (parseInt(requestDownloadFileReturn, 10) !== 2) {
+    const errorMsg = `return field in the response to request download shared has an unexpected code "${requestDownloadFileReturn}". Expected code was "4"`;
+
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.UNEXPECTED_CODE_IN_RETURN_FIELD_OF_REQUEST_DOWNLOAD,
+      },
+      error: {
+        message: errorMsg,
+        details: { responseRequestDl },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  if (!reqidDownloadFile) {
+    const errorMsg = 'required fields "reqid"  is missing in the response';
+    // dirLog('we dont have required fields in the download shared response ', responseRequestDl);
+
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.REQUIRED_REQID_IS_MISSING_IN_THE_RESPONSE,
+      },
+      error: {
+        message: errorMsg,
+        details: { responseRequestDl },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  if (offsetendInit === undefined) {
+    // dirLog('--- ERROR a we dont have an offest. could be an error. response is', responseRequestDl);
+
+    const errorMsg = 'Error A. we dont have an offest. could be an error.';
+
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.NO_OFFSET_ERROR_A,
+      },
+      error: {
+        message: errorMsg,
+        details: { responseRequestDl },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  if (offsetstartInit === undefined) {
+    // dirLog('--- ERROR b we dont have an offest. could be an error. response is', responseRequestDl);
+
+    const errorMsg = 'Error B. we dont have an offest. could be an error. ';
+
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.NO_OFFSET_ERROR_B,
+      },
+      error: {
+        message: errorMsg,
+        details: { responseRequestDl },
+      },
+    });
+    throw new Error();
+  }
+
+  const decodedFile = await processUsedFileDownload<networkTypes.FileUserRequestDownloadResponse>(
+    responseRequestDl,
+    filehash,
+    filesize,
+    progressCb,
+  );
+
+  if (!decodedFile) {
+    const errorMsg = `Could not process download of the user file for the "${filehash}" into buffer`;
+
+    progressCb({
+      result: {
+        success: false,
+        code: SdsTypes.DOWNLOAD_CODES.COULD_NOT_PROCESS_DOWNLOAD_TO_BUFFER,
+      },
+      error: {
+        message: errorMsg,
+        details: { decodedFile },
+      },
+    });
+    throw new Error();
+  }
+
+  return { downloadedFile: decodedFile };
+};
+
+export const downloadFile = async (
+  keypair: WalletTypes.KeyPairInfo,
+  filePathToSave: string,
+  filehash: string,
+  filesize: number,
+  progressCb: (data: SdsTypes.ProgressCbData) => void = (data: unknown) => {
+    console.log('data passed to callback', data);
+  },
+): Promise<{ filePathToSave: string }> => {
+  const { downloadedFile } = await downloadFileToBuffer(keypair, filehash, filesize, progressCb);
+
+  if (!downloadedFile) {
+    throw new Error(
+      `Could not process download of the user file for the "${filehash}" into "${filePathToSave}"`,
+    );
+  }
+
+  log(`Downloaded user file will be saved into ${filePathToSave}`, filePathToSave);
+
+  filesystemApi.writeFile(filePathToSave, downloadedFile);
+
+  return { filePathToSave };
+};
+
 const getCurrentSequenceString = async (address: string) => {
   const ozoneBalance = await accountsApi.getOtherBalanceCardMetrics(address);
 
@@ -437,7 +700,7 @@ const getOffsetsAndResultFromRequestUpload = async (
 
   const { response: responseInit } = callResultInit;
 
-  const errorsList: String[] = [];
+  const errorsList: string[] = [];
 
   if (!responseInit) {
     errorsList.push(
@@ -559,7 +822,7 @@ export const updloadFileFromBuffer = async (
 
     const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
 
-    let callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
+    const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
     const { response: responseUploadToTest } = callResultUpload;
 
@@ -688,7 +951,7 @@ export const updloadFileFromBuffer = async (
       do {
         const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
 
-        let callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
+        const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
         const { response: responseUploadToTest } = callResultUpload;
 
