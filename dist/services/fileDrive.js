@@ -159,6 +159,7 @@ const getDataFromRedis = async (derivedKeyPair) => {
     }
     const { response } = res;
     const [userData] = response;
+    console.log("data from redis is", userData);
     if (userData === 'error') {
         throw Error('Response from Redis has an error. Data with this key might not be yet set');
     }

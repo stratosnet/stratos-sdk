@@ -44,6 +44,15 @@ const sdkEnvDev = {
     explorerUrl: 'https://explorer-dev.thestratos.org',
     faucetUrl: 'https://faucet-dev.thestratos.org/credit',
 };
+const sdkEnvLoc = {
+    restUrl: '37.53.21.76:26657',
+    rpcUrl: '37.53.21.76:26657',
+    ppNodeUrl: 'http://52.14.0.146',
+    ppNodePort: '8135',
+    chainId: 'testchain',
+    explorerUrl: 'https://explorer-dev.thestratos.org',
+    faucetUrl: 'https://faucet-dev.thestratos.org/credit',
+};
 const sdkEnvTest = {
     key: 'testnet',
     name: 'Mesos',
@@ -318,8 +327,8 @@ async function testRedis() {
         },
     ];
     const sampleData = data;
-    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-    console.log('setRes', setRes);
+    //const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    //console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
     console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
@@ -365,18 +374,13 @@ async function testEnc() {
     }
 }
 async function main() {
-    const sdkEnv = sdkEnvDev;
+    const sdkEnv = sdkEnvLoc;
     // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     stratos.Sdk.init(Object.assign({}, sdkEnv));
-    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
-    stratos.Sdk.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
-        // optional
-        // keyPathParameters: keyPathParametersForSdk,
-        // devnet
-        // ppNodeUrl: 'http://35.187.47.46',
-        // ppNodePort: '8142',
-        ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
+    //const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
+    //  await stratos.network.networkApi.getChainAndProtocolDetails();
+    stratos.Sdk.init(Object.assign({}, sdkEnv));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // Create a wallet and show accounts
@@ -387,13 +391,13 @@ async function main() {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    //await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    //await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    // await testRequestAllUserFileList(hdPathIndex);
+    //await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file10M_May_27_v1.bin';
     const filesToUpload = [

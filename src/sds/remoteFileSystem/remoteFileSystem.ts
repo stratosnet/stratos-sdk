@@ -666,9 +666,9 @@ const getUserRequestUploadParams = async (
   filehash: string,
   filename: string,
   filesize: number,
+  sequence: string,
 ): Promise<networkTypes.FileUserRequestUploadParams[]> => {
   const { address, publicKey } = keypair;
-  const sequence = await getCurrentSequenceString(address);
 
   const timestamp = getTimestampInSeconds();
   const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
@@ -724,12 +724,12 @@ const getOffsetsAndResultFromRequestUpload = async (
 const getUserUploadDataParams = async (
   keypair: WalletTypes.KeyPairInfo,
   filehash: string,
+  sequenceUpload: string,
   encodedFileChunk: string,
   stop = false,
 ): Promise<networkTypes.FileUserUploadDataParams[]> => {
   const { address, publicKey } = keypair;
   const timestampForUpload = getTimestampInSeconds();
-  const sequenceUpload = await getCurrentSequenceString(address);
   const messageToSignForUpload = `${filehash}${address}${sequenceUpload}${timestampForUpload}`;
 
   const signatureForUpload = await keyUtils.signWithPrivateKey(messageToSignForUpload, keypair.privateKey);
@@ -776,7 +776,16 @@ export const updloadFileFromBuffer = async (
   fileSize: number,
   progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
 ): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
-  const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize);
+  const { address, publicKey } = keypair;
+
+  const sequenceUpload = await getCurrentSequenceString(address);
+  const extraParams = await getUserRequestUploadParams(
+    keypair,
+    fileHash,
+    resolvedFileName,
+    fileSize,
+    sequenceUpload,
+  );
 
   const {
     errorsList: initErrorsList,
@@ -820,7 +829,7 @@ export const updloadFileFromBuffer = async (
       },
     });
 
-    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
+    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequenceUpload, '', true);
 
     const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
@@ -949,7 +958,12 @@ export const updloadFileFromBuffer = async (
       let responseUpload;
 
       do {
-        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
+        const extraParamsForUpload = await getUserUploadDataParams(
+          keypair,
+          fileHash,
+          encodedFileChunk,
+          sequenceUpload,
+        );
 
         const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 

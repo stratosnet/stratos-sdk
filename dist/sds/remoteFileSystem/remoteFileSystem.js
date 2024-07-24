@@ -479,9 +479,8 @@ const getCurrentSequenceString = async (address) => {
     const { sequence } = detailedBalance;
     return sequence;
 };
-const getUserRequestUploadParams = async (keypair, filehash, filename, filesize) => {
+const getUserRequestUploadParams = async (keypair, filehash, filename, filesize, sequence) => {
     const { address, publicKey } = keypair;
-    const sequence = await getCurrentSequenceString(address);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
@@ -514,10 +513,9 @@ const getOffsetsAndResultFromRequestUpload = async (extraParams) => {
     const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
     return { offsetstartInit, offsetendInit, isContinueInit, responseInit, callResultInit, errorsList };
 };
-const getUserUploadDataParams = async (keypair, filehash, encodedFileChunk, stop = false) => {
+const getUserUploadDataParams = async (keypair, filehash, sequenceUpload, encodedFileChunk, stop = false) => {
     const { address, publicKey } = keypair;
     const timestampForUpload = (0, helpers_1.getTimestampInSeconds)();
-    const sequenceUpload = await getCurrentSequenceString(address);
     const messageToSignForUpload = `${filehash}${address}${sequenceUpload}${timestampForUpload}`;
     const signatureForUpload = await keyUtils.signWithPrivateKey(messageToSignForUpload, keypair.privateKey);
     const extraParamsForUpload = [
@@ -547,7 +545,9 @@ const updloadFile = async (keypair, fileReadPath) => {
 exports.updloadFile = updloadFile;
 const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, fileHash, fileSize, progressCb = () => { }) => {
     var _a;
-    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize);
+    const { address, publicKey } = keypair;
+    const sequenceUpload = await getCurrentSequenceString(address);
+    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize, sequenceUpload);
     const { errorsList: initErrorsList, responseInit, callResultInit, offsetstartInit, offsetendInit, isContinueInit, } = await getOffsetsAndResultFromRequestUpload(extraParams);
     if (initErrorsList.length) {
         const errorMsg = 'sendUserRequestUpload has returned an error';
@@ -576,7 +576,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                 details: { isContinueGlobal },
             },
         });
-        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
+        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequenceUpload, '', true);
         const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
         const { response: responseUploadToTest } = callResultUpload;
         const resMsg = 'responseUploadToTest after sending the stop to sendUserUploadData';
@@ -677,7 +677,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             });
             let responseUpload;
             do {
-                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
+                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk, sequenceUpload);
                 const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {
