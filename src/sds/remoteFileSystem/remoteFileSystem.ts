@@ -778,8 +778,8 @@ export const updloadFileFromBuffer = async (
 ): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
   const { address, publicKey } = keypair;
 
-  //const sequenceUpload = await getCurrentSequenceString(address);
-  const sequenceUpload = 'SN:0000000000000000005';
+  const sequenceUpload = await getCurrentSequenceString(address);
+  console.log('sequence:', sequenceUpload);
   const extraParams = await getUserRequestUploadParams(
     keypair,
     fileHash,
