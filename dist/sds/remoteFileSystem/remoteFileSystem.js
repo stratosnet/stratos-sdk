@@ -477,7 +477,7 @@ const getCurrentSequenceString = async (address) => {
         throw new Error('no sequence is presented in the ozone balance response');
     }
     const { sequence } = detailedBalance;
-    return "SN:0000000000000000005";
+    return sequence;
 };
 const getUserRequestUploadParams = async (keypair, filehash, filename, filesize, sequence) => {
     const { address, publicKey } = keypair;
@@ -677,7 +677,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             });
             let responseUpload;
             do {
-                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk, sequence);
+                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequence, encodedFileChunk);
                 const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {
