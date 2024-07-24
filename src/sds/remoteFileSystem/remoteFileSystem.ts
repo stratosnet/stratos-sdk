@@ -658,7 +658,7 @@ const getCurrentSequenceString = async (address: string) => {
 
   const { sequence } = detailedBalance;
 
-  return 'SN:0000000000000000005';
+  return sequence;
 };
 
 const getUserRequestUploadParams = async (
@@ -962,8 +962,8 @@ export const updloadFileFromBuffer = async (
         const extraParamsForUpload = await getUserUploadDataParams(
           keypair,
           fileHash,
-          encodedFileChunk,
           sequence,
+          encodedFileChunk,
         );
 
         const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
