@@ -477,7 +477,7 @@ const getCurrentSequenceString = async (address) => {
         throw new Error('no sequence is presented in the ozone balance response');
     }
     const { sequence } = detailedBalance;
-    return sequence;
+    return "SN:0000000000000000005";
 };
 const getUserRequestUploadParams = async (keypair, filehash, filename, filesize, sequence) => {
     const { address, publicKey } = keypair;
@@ -546,8 +546,8 @@ exports.updloadFile = updloadFile;
 const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, fileHash, fileSize, progressCb = () => { }) => {
     var _a;
     const { address, publicKey } = keypair;
-    const sequenceUpload = await getCurrentSequenceString(address);
-    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize, sequenceUpload);
+    const sequence = await getCurrentSequenceString(address);
+    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize, sequence);
     const { errorsList: initErrorsList, responseInit, callResultInit, offsetstartInit, offsetendInit, isContinueInit, } = await getOffsetsAndResultFromRequestUpload(extraParams);
     if (initErrorsList.length) {
         const errorMsg = 'sendUserRequestUpload has returned an error';
@@ -576,7 +576,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                 details: { isContinueGlobal },
             },
         });
-        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequenceUpload, '', true);
+        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequence, '', true);
         const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
         const { response: responseUploadToTest } = callResultUpload;
         const resMsg = 'responseUploadToTest after sending the stop to sendUserUploadData';
@@ -677,7 +677,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             });
             let responseUpload;
             do {
-                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk, sequenceUpload);
+                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk, sequence);
                 const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {

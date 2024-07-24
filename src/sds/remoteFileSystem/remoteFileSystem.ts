@@ -658,7 +658,7 @@ const getCurrentSequenceString = async (address: string) => {
 
   const { sequence } = detailedBalance;
 
-  return sequence;
+  return 'SN:0000000000000000005';
 };
 
 const getUserRequestUploadParams = async (
@@ -778,14 +778,14 @@ export const updloadFileFromBuffer = async (
 ): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
   const { address, publicKey } = keypair;
 
-  const sequenceUpload = await getCurrentSequenceString(address);
-  console.log('sequence:', sequenceUpload);
+  const sequence = await getCurrentSequenceString(address);
+
   const extraParams = await getUserRequestUploadParams(
     keypair,
     fileHash,
     resolvedFileName,
     fileSize,
-    sequenceUpload,
+    sequence,
   );
 
   const {
@@ -830,7 +830,7 @@ export const updloadFileFromBuffer = async (
       },
     });
 
-    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequenceUpload, '', true);
+    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, sequence, '', true);
 
     const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
@@ -963,7 +963,7 @@ export const updloadFileFromBuffer = async (
           keypair,
           fileHash,
           encodedFileChunk,
-          sequenceUpload,
+          sequence,
         );
 
         const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);

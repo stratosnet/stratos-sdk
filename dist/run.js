@@ -102,7 +102,12 @@ const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
         return;
     }
     const balance = await stratos.accounts.accountsApi.getOtherBalanceCardMetrics(keyPairZero.address);
-    console.log(' new other balanace card metrics ', balance);
+    const { detailedBalance } = balance;
+    if (!detailedBalance) {
+        throw new Error('no sequence is presented in the ozone balance response');
+    }
+    const { sequence } = detailedBalance;
+    console.log(' new other balanace card metrics ', sequence);
 };
 const mainSend = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic, hdPathIndexReceiver = 0) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -392,7 +397,7 @@ async function main() {
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
     //await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    //await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
@@ -475,7 +480,7 @@ async function main() {
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
-    void testRedis();
+    // void testRedis();
     // void testEnc();
 }
 void main();
