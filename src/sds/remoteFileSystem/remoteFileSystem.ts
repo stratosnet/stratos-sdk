@@ -348,7 +348,7 @@ export const getAllUploadedFileList = async (
 
     const totalNumber = originalResponse?.result?.totalnumber;
 
-    console.log('number!!', totalNumber);
+    console.log(`number files on page ${currentPage}`, totalNumber);
     const weHaveDataOnThisPage = !!files && !!totalNumber;
 
     if (weHaveDataOnThisPage) {
@@ -357,6 +357,10 @@ export const getAllUploadedFileList = async (
     }
 
     if (resultFileList.length >= totalNumber) {
+      weContinue = false;
+    }
+
+    if (totalNumber === undefined) {
       weContinue = false;
     }
   } while (weContinue);

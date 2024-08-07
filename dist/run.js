@@ -92,6 +92,7 @@ const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
     if (!keyPairZero) {
         return;
     }
+    console.log('keyPairZero in getOzoneBalance', keyPairZero);
     const balance = await stratos.accounts.accountsApi.getOtherBalanceCardMetrics(keyPairZero.address);
     console.log(' new other balanace card metrics ', balance);
 };
@@ -318,8 +319,8 @@ async function testRedis() {
         },
     ];
     const sampleData = data;
-    const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-    console.log('setRes', setRes);
+    // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+    // console.log('setRes', setRes);
     const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
     console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
 }
@@ -379,6 +380,7 @@ async function main() {
         ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
+    // const a = await stratos.chain.cosmos.cosmosService.getCosmos();
     // Create a wallet and show accounts
     // const wallet = await stratos.chain.cosmos.cosmosWallet.createWalletAtPath(hdPathIndex, zeroUserMnemonic);
     // console.log('wallet', wallet);
@@ -387,62 +389,15 @@ async function main() {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-    // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    // await testRequestAllUserFileList(hdPathIndex);
+    await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file10M_May_27_v1.bin';
-    const filesToUpload = [
-        // 'file20M_1_Jul_18.bin',
-        'file20M_2_Jul_18.bin',
-        'file20M_3_Jul_18.bin',
-        'file20M_4_Jul_18.bin',
-        'file20M_5_Jul_18.bin',
-        'file20M_6_Jul_18.bin',
-        'file20M_7_Jul_18.bin',
-        'file20M_8_Jul_18.bin',
-        'file20M_9_Jul_18.bin',
-        'file20M_10_Jul_18.bin',
-        'file20M_11_Jul_18.bin',
-        'file20M_12_Jul_18.bin',
-        'file20M_13_Jul_18.bin',
-        'file20M_14_Jul_18.bin',
-        'file20M_15_Jul_18.bin',
-        'file20M_16_Jul_18.bin',
-        'file20M_17_Jul_18.bin',
-        'file20M_18_Jul_18.bin',
-        'file20M_19_Jul_18.bin',
-        'file20M_20_Jul_18.bin',
-        'file20M_21_Jul_18.bin',
-        'file20M_22_Jul_18.bin',
-        'file20M_23_Jul_18.bin',
-        'file20M_24_Jul_18.bin',
-        'file20M_25_Jul_18.bin',
-        'file20M_26_Jul_18.bin',
-        'file20M_27_Jul_18.bin',
-        'file20M_28_Jul_18.bin',
-        'file20M_29_Jul_18.bin',
-        'file20M_30_Jul_18.bin',
-        'file20M_31_Jul_18.bin',
-        'file20M_32_Jul_18.bin',
-        'file20M_33_Jul_18.bin',
-        'file20M_34_Jul_18.bin',
-        'file20M_35_Jul_18.bin',
-        'file20M_36_Jul_18.bin',
-        'file20M_37_Jul_18.bin',
-        'file20M_38_Jul_18.bin',
-        'file20M_39_Jul_18.bin',
-        'file20M_40_Jul_18.bin',
-        'file20M_41_Jul_18.bin',
-        'file20M_42_Jul_18.bin',
-        'file20M_43_Jul_18.bin',
-        'file20M_44_Jul_18.bin',
-        'file20M_45_Jul_18.bin',
-    ];
     // for (const myFileName of filesToUpload) {
     //   console.log('myFileName NOW ', myFileName);
     //   await testItFileUpFromBuffer(hdPathIndex, myFileName);
@@ -471,7 +426,7 @@ async function main() {
     const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
-    void testRedis();
+    // void testRedis();
     // void testEnc();
 }
 void main();

@@ -268,13 +268,16 @@ const getAllUploadedFileList = async (keypair) => {
         const userFileList = await (0, exports.getUploadedFileList)(keypair, currentPage);
         const { originalResponse, files } = userFileList;
         const totalNumber = (_a = originalResponse === null || originalResponse === void 0 ? void 0 : originalResponse.result) === null || _a === void 0 ? void 0 : _a.totalnumber;
-        console.log('number!!', totalNumber);
+        console.log(`number files on page ${currentPage}`, totalNumber);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
             currentPage += 1;
             resultFileList.push(...files);
         }
         if (resultFileList.length >= totalNumber) {
+            weContinue = false;
+        }
+        if (totalNumber === undefined) {
             weContinue = false;
         }
     } while (weContinue);
