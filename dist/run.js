@@ -395,7 +395,7 @@ async function main() {
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    // await testRequestAllUserFileList(hdPathIndex);
+    await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file10M_May_27_v1.bin';
     // for (const myFileName of filesToUpload) {
