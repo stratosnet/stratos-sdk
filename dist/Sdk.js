@@ -10,6 +10,7 @@ const SdkDefaultEnvironment = {
     ppNodePort: '',
     faucetUrl: '',
     restRedisUrl: 'http://localhost:8080',
+    gatewayToken: '',
     isNewProtocol: true,
     keyPathParameters: {
         masterkey: (0, hdVault_1.masterkey)(),

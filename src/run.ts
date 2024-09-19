@@ -160,7 +160,7 @@ const mainSdsPrepay = async (hdPathIndex: number, givenReceiverMnemonic = zeroUs
     return;
   }
 
-  const sendTxMessages = await stratos.sds.transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 20 }]);
+  const sendTxMessages = await stratos.sds.transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 10 }]);
 
   dirLog('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
   const signedTx = await stratos.chain.transactions.sign(keyPairZero.address, sendTxMessages);
@@ -511,7 +511,7 @@ async function testRedis() {
 
   const sampleData = data;
 
-  // const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+  const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
   // console.log('setRes', setRes);
 
   const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
@@ -576,8 +576,8 @@ async function testEnc(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const sdkEnv = sdkEnvDev;
-  // const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvMainNet;
   stratos.Sdk.init({ ...sdkEnv });
 
@@ -595,8 +595,9 @@ async function main(): Promise<void> {
     // devnet
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
-    ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-    // ppNodePort: '',
+    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    ppNodeUrl: 'http://35.233.211.175',
+    ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.195.137.237',
     // ppNodePort: '8142',
@@ -621,9 +622,9 @@ async function main(): Promise<void> {
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
   // await testRequestUserFileList(hdPathIndex, 0);
-  await testRequestAllUserFileList(hdPathIndex);
+  // await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
-  // const filename = 'file10M_May_27_v1.bin';
+  // const filename = 'file25M_1_Aug_7.bin';
 
   // for (const myFileName of filesToUpload) {
   //   console.log('myFileName NOW ', myFileName);
@@ -632,15 +633,15 @@ async function main(): Promise<void> {
   // let filename = 'file20M_1_Jul_18.bin';
   // await testItFileUpFromBuffer(hdPathIndex, filename);
 
-  // filename = 'file20M_1_Jul_18.bin';
+  const filename = 'file100K_Aug_21_v1.bin';
   // await testItFileUpFromBuffer(hdPathIndex, filename);
 
   // 3a
   // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
   // const filesize = 10_000_001;
-  const filename = 'file20M_3_Jul_20.bin';
-  const filehash = 'v05j1m50abbkpfmb9o9oc8mgiegcuorfo52l0rv8';
-  const filesize = 20_000_001;
+  // const filename = 'file20M_3_Jul_20.bin';
+  // const filehash = 'v05j1m50abbkpfmb9o9oc8mgiegcuorfo52l0rv8';
+  // const filesize = 20_000_001;
   // filename: 'file10M_May_21_v1.bin',
   // await testFileDl(hdPathIndex, filename, filehash, filesize);
   // 4a
@@ -652,7 +653,7 @@ async function main(): Promise<void> {
   // const shareid = '2d44dc5f3f8ac6b1';
   // await testRequestUserStopFileShare(hdPathIndex, shareid);
   // 7a
-  const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
+  // const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
   // void testRedis();
