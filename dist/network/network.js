@@ -26,6 +26,12 @@ const getRestRedisRoute = () => {
     const { restRedisUrl } = Sdk_1.default.environment;
     return restRedisUrl || 'http://localhost:8080';
 };
+const getGatewayToken = () => {
+    const { gatewayToken } = Sdk_1.default.environment;
+    if (!gatewayToken)
+        return '';
+    return `?token=${gatewayToken.trim()}`;
+};
 const getRestRoute = () => {
     const { restUrl } = Sdk_1.default.environment;
     return restUrl;
@@ -396,7 +402,8 @@ const getChainAndProtocolDetails = async () => {
 };
 exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
 const getFilesDataFromRedis = async (dataKey, keyPrefix, config) => {
-    const url = `${getRestRedisRoute()}/api/get_key_value`;
+    // const url = `${getRestRedisRoute()}/api/get_key_value`;
+    const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
     console.log('given keyPrefix for get', keyPrefix);
     console.log('getFilesDataFromRedis url', url);
     const payload = {
@@ -407,7 +414,8 @@ const getFilesDataFromRedis = async (dataKey, keyPrefix, config) => {
 };
 exports.getFilesDataFromRedis = getFilesDataFromRedis;
 const setFilesDataToRedis = async (dataKey, dataValue, keyPrefix, config) => {
-    const url = `${getRestRedisRoute()}/api/set_key_value`;
+    // const url = `${getRestRedisRoute()}/api/set_key_value`;
+    const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
     console.log('given keyPrefix for set', keyPrefix);
     const payload = {
         data_key: dataKey,
