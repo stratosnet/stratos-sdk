@@ -13,5 +13,4 @@ export * as chainTxTypes from './chain/transactions/types';
 export * as validatorsTypes from './chain/validators/validatorsTypes';
 export * as networkTypes from './network/networkTypes';
 export * as accountsTypes from './accounts/accountsTypes';
-export * as FileDrive from './services/fileDrive';
 export * as WalletService from './services/walletService';

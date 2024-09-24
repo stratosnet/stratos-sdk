@@ -119,13 +119,13 @@ export interface SubmitTransactionDataResult extends NetworkAxiosDataResult {
   response?: string;
 }
 
-export interface SetDataToRedisResult extends NetworkAxiosDataResult {
-  response?: string[];
-}
+// export interface SetDataToRedisResult extends NetworkAxiosDataResult {
+//   response?: string[];
+// }
 
-export interface GetDataFromRedisResult extends NetworkAxiosDataResult {
-  response?: string[];
-}
+// export interface GetDataFromRedisResult extends NetworkAxiosDataResult {
+//   response?: string[];
+// }
 
 export interface Amount {
   denom: string;

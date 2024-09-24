@@ -125,6 +125,7 @@ export const sendRpcCall = async <N>(
   };
   const url = `${getPpNodeRoute()}`;
 
+  console.log('url for the rpc call', url);
   const payload = { ...defaultPayload, ...givenPayload };
 
   const dataResult = await apiPost(url, payload, { ...config });
@@ -597,43 +598,43 @@ export const getChainAndProtocolDetails = async () => {
   };
 };
 
-export const getFilesDataFromRedis = async (
-  dataKey: string,
-  keyPrefix: string,
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.GetDataFromRedisResult> => {
-  // const url = `${getRestRedisRoute()}/api/get_key_value`;
-  const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
+// export const getFilesDataFromRedis = async (
+//   dataKey: string,
+//   keyPrefix: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.GetDataFromRedisResult> => {
+//   // const url = `${getRestRedisRoute()}/api/get_key_value`;
+//   const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
+//
+//   console.log('given keyPrefix for get', keyPrefix);
+//   console.log('getFilesDataFromRedis url', url);
+//
+//   const payload = {
+//     data_key: dataKey,
+//   };
+//
+//   const dataResult = await apiPost(url, payload, config);
+//
+//   return dataResult;
+// };
 
-  console.log('given keyPrefix for get', keyPrefix);
-  console.log('getFilesDataFromRedis url', url);
-
-  const payload = {
-    data_key: dataKey,
-  };
-
-  const dataResult = await apiPost(url, payload, config);
-
-  return dataResult;
-};
-
-export const setFilesDataToRedis = async (
-  dataKey: string,
-  dataValue: string,
-  keyPrefix: string,
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.SetDataToRedisResult> => {
-  // const url = `${getRestRedisRoute()}/api/set_key_value`;
-  const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
-
-  console.log('given keyPrefix for set', keyPrefix);
-
-  const payload = {
-    data_key: dataKey,
-    data_value: dataValue,
-  };
-
-  const dataResult = await apiPost(url, payload, config);
-
-  return dataResult;
-};
+// export const setFilesDataToRedis = async (
+//   dataKey: string,
+//   dataValue: string,
+//   keyPrefix: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.SetDataToRedisResult> => {
+//   // const url = `${getRestRedisRoute()}/api/set_key_value`;
+//   const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
+//
+//   console.log('given keyPrefix for set', keyPrefix);
+//
+//   const payload = {
+//     data_key: dataKey,
+//     data_value: dataValue,
+//   };
+//
+//   const dataResult = await apiPost(url, payload, config);
+//
+//   return dataResult;
+// };

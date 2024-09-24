@@ -3,7 +3,7 @@ import path from 'path';
 import { hdVault } from './config';
 import * as stratos from './index';
 import { toWei } from './services/bigNumber';
-import * as FileDrive from './services/fileDrive';
+// import * as FileDrive from './services/fileDrive';
 import { delay, dirLog, log } from './services/helpers';
 
 dotenv.config();
@@ -470,110 +470,110 @@ const testBalanceRound = async () => {
   console.log('amount2', amount2);
 };
 
-async function testRedis() {
-  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
+// async function testRedis() {
+//   const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
+//
+//   if (!derivedKeyPair) {
+//     return;
+//   }
+//
+//   const dataE: Array<{ id: string }> = [];
+//   const data = [
+//     {
+//       id: 1,
+//       foo: {
+//         bar: 'aa barfoo aa',
+//         foobar: true,
+//       },
+//       children: ['nope', 'yeah'],
+//     },
+//
+//     {
+//       id: 3,
+//       foo: {
+//         bar: '2barfoo then and now',
+//         foobar: false,
+//       },
+//       children: null,
+//       anotherthing: 'cool',
+//     },
+//
+//     {
+//       id: 2,
+//       foo: {
+//         bar: 'barfoo then and now',
+//         foobar: false,
+//       },
+//       children: null,
+//       anotherthing: 'cool',
+//     },
+//   ];
+//
+//   const sampleData = data;
+//
+//   const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
+//   // console.log('setRes', setRes);
+//
+//   const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
+//   console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
+// }
 
-  if (!derivedKeyPair) {
-    return;
-  }
-
-  const dataE: Array<{ id: string }> = [];
-  const data = [
-    {
-      id: 1,
-      foo: {
-        bar: 'aa barfoo aa',
-        foobar: true,
-      },
-      children: ['nope', 'yeah'],
-    },
-
-    {
-      id: 3,
-      foo: {
-        bar: '2barfoo then and now',
-        foobar: false,
-      },
-      children: null,
-      anotherthing: 'cool',
-    },
-
-    {
-      id: 2,
-      foo: {
-        bar: 'barfoo then and now',
-        foobar: false,
-      },
-      children: null,
-      anotherthing: 'cool',
-    },
-  ];
-
-  const sampleData = data;
-
-  const setRes = await FileDrive.sendDataToRedis(derivedKeyPair, sampleData);
-  // console.log('setRes', setRes);
-
-  const decodedOriginal = await FileDrive.getDataFromRedis(derivedKeyPair);
-  console.log('decoded user data from redis', JSON.stringify(decodedOriginal));
-}
-
-async function testEnc(): Promise<void> {
-  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
-
-  if (!derivedKeyPair) {
-    return;
-  }
-
-  const data = [
-    {
-      id: 1,
-      foo: {
-        bar: 'barfoo',
-        foobar: true,
-      },
-      children: ['nope', 'yeah'],
-    },
-
-    {
-      id: 2,
-      foo: {
-        bar: 'barfoo then',
-        foobar: false,
-      },
-      children: null,
-      anotherthing: 'cool',
-    },
-  ];
-
-  const sampleData = data;
-  // const sampleData = new Array(2).fill({ id: id + 1, derivedKeyPair });
-  console.log('sampleData to store', '\n', sampleData, '\n');
-
-  const dataKey = await FileDrive.getDataItemKey(derivedKeyPair);
-  console.log('dataKey', dataKey);
-  const signedDataKey = await FileDrive.getSignedDataItemKey(derivedKeyPair);
-  console.log('signedDataKey', signedDataKey);
-
-  const passwordTest = FileDrive.getEncodingPassword(derivedKeyPair);
-
-  const redisDataEntity = await FileDrive.buildEncryptedDataEntity(sampleData, derivedKeyPair);
-
-  console.log('redisDataEntity', redisDataEntity);
-
-  const decodedOriginal = await FileDrive.decryptDataItem(redisDataEntity.data, passwordTest);
-  console.log('decodedOriginal', decodedOriginal);
-
-  const res = await FileDrive.verifyDataSignature(
-    derivedKeyPair,
-    redisDataEntity.data,
-    redisDataEntity.dataSig,
-  );
-
-  if (!res) {
-    console.log('SIGNATURE VERIFICATION HAS FAILED. Data might be compomised');
-  }
-}
+// async function testEnc(): Promise<void> {
+//   const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
+//
+//   if (!derivedKeyPair) {
+//     return;
+//   }
+//
+//   const data = [
+//     {
+//       id: 1,
+//       foo: {
+//         bar: 'barfoo',
+//         foobar: true,
+//       },
+//       children: ['nope', 'yeah'],
+//     },
+//
+//     {
+//       id: 2,
+//       foo: {
+//         bar: 'barfoo then',
+//         foobar: false,
+//       },
+//       children: null,
+//       anotherthing: 'cool',
+//     },
+//   ];
+//
+//   const sampleData = data;
+//   // const sampleData = new Array(2).fill({ id: id + 1, derivedKeyPair });
+//   console.log('sampleData to store', '\n', sampleData, '\n');
+//
+//   const dataKey = await FileDrive.getDataItemKey(derivedKeyPair);
+//   console.log('dataKey', dataKey);
+//   const signedDataKey = await FileDrive.getSignedDataItemKey(derivedKeyPair);
+//   console.log('signedDataKey', signedDataKey);
+//
+//   const passwordTest = FileDrive.getEncodingPassword(derivedKeyPair);
+//
+//   const redisDataEntity = await FileDrive.buildEncryptedDataEntity(sampleData, derivedKeyPair);
+//
+//   console.log('redisDataEntity', redisDataEntity);
+//
+//   const decodedOriginal = await FileDrive.decryptDataItem(redisDataEntity.data, passwordTest);
+//   console.log('decodedOriginal', decodedOriginal);
+//
+//   const res = await FileDrive.verifyDataSignature(
+//     derivedKeyPair,
+//     redisDataEntity.data,
+//     redisDataEntity.dataSig,
+//   );
+//
+//   if (!res) {
+//     console.log('SIGNATURE VERIFICATION HAS FAILED. Data might be compomised');
+//   }
+// }
 
 async function main(): Promise<void> {
   // const sdkEnv = sdkEnvDev;
@@ -596,8 +596,10 @@ async function main(): Promise<void> {
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
     // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-    ppNodeUrl: 'http://35.233.211.175',
-    ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodeUrl: 'http://35.233.211.175',
+    // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.195.137.237',
     // ppNodePort: '8142',

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setFilesDataToRedis = exports.getFilesDataFromRedis = exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
+exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
@@ -101,6 +101,7 @@ const sendRpcCall = async (givenPayload, config) => {
         params: [],
     };
     const url = `${getPpNodeRoute()}`;
+    console.log('url for the rpc call', url);
     const payload = Object.assign(Object.assign({}, defaultPayload), givenPayload);
     const dataResult = await (0, exports.apiPost)(url, payload, Object.assign({}, config));
     return dataResult;
@@ -401,28 +402,43 @@ const getChainAndProtocolDetails = async () => {
     };
 };
 exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
-const getFilesDataFromRedis = async (dataKey, keyPrefix, config) => {
-    // const url = `${getRestRedisRoute()}/api/get_key_value`;
-    const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
-    console.log('given keyPrefix for get', keyPrefix);
-    console.log('getFilesDataFromRedis url', url);
-    const payload = {
-        data_key: dataKey,
-    };
-    const dataResult = await (0, exports.apiPost)(url, payload, config);
-    return dataResult;
-};
-exports.getFilesDataFromRedis = getFilesDataFromRedis;
-const setFilesDataToRedis = async (dataKey, dataValue, keyPrefix, config) => {
-    // const url = `${getRestRedisRoute()}/api/set_key_value`;
-    const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
-    console.log('given keyPrefix for set', keyPrefix);
-    const payload = {
-        data_key: dataKey,
-        data_value: dataValue,
-    };
-    const dataResult = await (0, exports.apiPost)(url, payload, config);
-    return dataResult;
-};
-exports.setFilesDataToRedis = setFilesDataToRedis;
+// export const getFilesDataFromRedis = async (
+//   dataKey: string,
+//   keyPrefix: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.GetDataFromRedisResult> => {
+//   // const url = `${getRestRedisRoute()}/api/get_key_value`;
+//   const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
+//
+//   console.log('given keyPrefix for get', keyPrefix);
+//   console.log('getFilesDataFromRedis url', url);
+//
+//   const payload = {
+//     data_key: dataKey,
+//   };
+//
+//   const dataResult = await apiPost(url, payload, config);
+//
+//   return dataResult;
+// };
+// export const setFilesDataToRedis = async (
+//   dataKey: string,
+//   dataValue: string,
+//   keyPrefix: string,
+//   config?: Types.NetworkAxiosConfig,
+// ): Promise<Types.SetDataToRedisResult> => {
+//   // const url = `${getRestRedisRoute()}/api/set_key_value`;
+//   const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
+//
+//   console.log('given keyPrefix for set', keyPrefix);
+//
+//   const payload = {
+//     data_key: dataKey,
+//     data_value: dataValue,
+//   };
+//
+//   const dataResult = await apiPost(url, payload, config);
+//
+//   return dataResult;
+// };
 //# sourceMappingURL=network.js.map
