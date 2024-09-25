@@ -104,7 +104,7 @@
     "@cosmjs/proto-signing": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
     "@stratos-network/stratos-cosmosjs-types": "https://github.com/stratosnet/stratos-cosmosjs-types.git#develop",
-    "@stratos-network/stratos-sdk.js": "../stratos-sdk-v2",
+    "@stratos-network/stratos-sdk.js": "https://github.com/stratosnet/stratos-sdk.git#feat_split_redis",
     "@types/bn.js": "5.1.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
