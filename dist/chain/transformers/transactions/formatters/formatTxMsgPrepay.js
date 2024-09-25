@@ -33,7 +33,7 @@ const formatTxMsgPrepay = (txResponseItemTxBodyMessage, txResponseItemLogEntry) 
     const { sender, amount: coins } = txResponseItemTxBodyMessage;
     const amounts = (0, formatTxAmounts_1.formatTxMultipleAmounts)(coins);
     const toAddress = findPrepayReciever(txResponseItemLogEntry);
-    console.log('prepay amounts', amounts);
+    // console.log('prepay amounts', amounts);
     return Object.assign(Object.assign({}, baseTx), { sender, to: toAddress, amounts });
 };
 exports.formatTxMsgPrepay = formatTxMsgPrepay;

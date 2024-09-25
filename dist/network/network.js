@@ -157,7 +157,7 @@ const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, 
         order_by: 'ORDER_BY_DESC',
     };
     const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
-    console.log('TxHistory data result ', dataResult);
+    // console.log('TxHistory data result ', dataResult);
     return dataResult;
 };
 exports.getTxListBlockchain = getTxListBlockchain;

@@ -210,7 +210,7 @@ export const getTxListBlockchain = async (
     ...config,
     params,
   });
-  console.log('TxHistory data result ', dataResult);
+  // console.log('TxHistory data result ', dataResult);
 
   return dataResult;
 };
