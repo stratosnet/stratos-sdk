@@ -136,10 +136,11 @@ const submitTransaction = async (delegatorAddr, data, config) => {
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;
+// is in use by the wallet
 const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = networkTypes_1.TxHistoryUser.TxHistorySenderUser, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
-    console.log('url', url);
-    console.log('given page', givenPage, pageLimit);
+    // console.log('url', url);
+    // console.log('given page', givenPage, pageLimit);
     const userQueryType = userType === networkTypes_1.TxHistoryUser.TxHistorySenderUser
         ? `message.sender='${address}'`
         : `transfer.recipient='${address}'`;

@@ -172,6 +172,7 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   return dataResult;
 };
 
+// is in use by the wallet
 export const getTxListBlockchain = async (
   address: string,
   type: string,
@@ -181,8 +182,8 @@ export const getTxListBlockchain = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.RestTxHistoryDataResult> => {
   const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
-  console.log('url', url);
-  console.log('given page', givenPage, pageLimit);
+  // console.log('url', url);
+  // console.log('given page', givenPage, pageLimit);
 
   const userQueryType =
     userType === TxHistoryUser.TxHistorySenderUser
