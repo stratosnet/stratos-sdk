@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WalletService = exports.accountsTypes = exports.networkTypes = exports.validatorsTypes = exports.chainTxTypes = exports.transformerTypes = exports.filesystem = exports.crypto = exports.network = exports.accounts = exports.chain = exports.sds = exports.Sdk = void 0;
+exports.BignumberService = exports.WalletService = exports.accountsTypes = exports.networkTypes = exports.validatorsTypes = exports.chainTxTypes = exports.transformerTypes = exports.filesystem = exports.crypto = exports.network = exports.accounts = exports.chain = exports.sds = exports.Sdk = void 0;
 const accounts = __importStar(require("./accounts"));
 exports.accounts = accounts;
 const chain = __importStar(require("./chain"));
@@ -47,4 +47,5 @@ exports.validatorsTypes = __importStar(require("./chain/validators/validatorsTyp
 exports.networkTypes = __importStar(require("./network/networkTypes"));
 exports.accountsTypes = __importStar(require("./accounts/accountsTypes"));
 exports.WalletService = __importStar(require("./services/walletService"));
+exports.BignumberService = __importStar(require("./services/bigNumber"));
 //# sourceMappingURL=index.js.map
