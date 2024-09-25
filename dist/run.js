@@ -26,11 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// import * as stratos from './index';
+const stratos = __importStar(require("@stratos-network/stratos-sdk.js"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
-const config_1 = require("./config");
-const stratos = __importStar(require("./index"));
-const bigNumber_1 = require("./services/bigNumber");
+// import { hdVault } from './config';
+// import { toWei } from './services/bigNumber';
 const FileDrive = __importStar(require("./services/fileDrive"));
 const helpers_1 = require("./services/helpers");
 dotenv_1.default.config();
@@ -61,19 +62,6 @@ const sdkEnvMainNet = {
     rpcUrl: 'https://rpc.thestratos.org',
     chainId: 'stratos-1',
     explorerUrl: 'https://big-dipper.thestratos.org',
-};
-const runFaucet = async (hdPathIndex, givenMnemonic) => {
-    const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenMnemonic, hdPathIndex);
-    if (!derivedKeyPair) {
-        return;
-    }
-    const walletAddress = derivedKeyPair.address;
-    console.log('walletAddress', walletAddress);
-    console.log('walletAddress', derivedKeyPair.privateKey);
-    const faucetUrl = stratos.Sdk.environment.faucetUrl || '';
-    (0, helpers_1.log)(`will be useing faucetUrl - "${faucetUrl}"`);
-    const result = await stratos.accounts.accountsApi.increaseBalance(walletAddress, faucetUrl, config_1.hdVault.stratosTopDenom);
-    console.log('faucet result', result);
 };
 const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
     const phrase = stratos.crypto.hdVault.mnemonic.convertStringToArray(givenMnemonic);
@@ -279,7 +267,7 @@ const testBalanceRound = async () => {
     const spentStos = 0.1;
     const expectedOzBalance = spentStos / +nozPrice;
     console.log(expectedOzBalance);
-    const amount = (0, bigNumber_1.toWei)(expectedOzBalance, 9).toFixed();
+    const amount = stratos.BignumberService.toWei(expectedOzBalance, 9).toFixed();
     console.log('amount', amount);
     const amount2 = +amount * 0.99;
     console.log('amount2', amount2);
@@ -378,7 +366,9 @@ async function main() {
         // ppNodeUrl: 'http://35.187.47.46',
         // ppNodePort: '8142',
         // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-        ppNodeUrl: 'http://35.233.211.175', ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=' }));
+        // ppNodeUrl: 'http://35.233.211.175',
+        // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+        ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=' }));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // const a = await stratos.chain.cosmos.cosmosService.getCosmos();

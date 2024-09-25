@@ -1,8 +1,9 @@
+// import * as stratos from './index';
+import * as stratos from '@stratos-network/stratos-sdk.js';
 import dotenv from 'dotenv';
 import path from 'path';
-import { hdVault } from './config';
-import * as stratos from './index';
-import { toWei } from './services/bigNumber';
+// import { hdVault } from './config';
+// import { toWei } from './services/bigNumber';
 import * as FileDrive from './services/fileDrive';
 import { delay, dirLog, log } from './services/helpers';
 
@@ -39,32 +40,6 @@ const sdkEnvMainNet = {
   rpcUrl: 'https://rpc.thestratos.org',
   chainId: 'stratos-1',
   explorerUrl: 'https://big-dipper.thestratos.org',
-};
-
-const runFaucet = async (hdPathIndex: number, givenMnemonic: string) => {
-  const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
-    givenMnemonic,
-    hdPathIndex,
-  );
-
-  if (!derivedKeyPair) {
-    return;
-  }
-
-  const walletAddress = derivedKeyPair.address;
-  console.log('walletAddress', walletAddress);
-  console.log('walletAddress', derivedKeyPair.privateKey);
-
-  const faucetUrl = stratos.Sdk.environment.faucetUrl || '';
-  log(`will be useing faucetUrl - "${faucetUrl}"`);
-
-  const result = await stratos.accounts.accountsApi.increaseBalance(
-    walletAddress,
-    faucetUrl,
-    hdVault.stratosTopDenom,
-  );
-
-  console.log('faucet result', result);
 };
 
 const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string) => {
@@ -464,7 +439,7 @@ const testBalanceRound = async () => {
   const expectedOzBalance = spentStos / +nozPrice;
 
   console.log(expectedOzBalance);
-  const amount = toWei(expectedOzBalance, 9).toFixed();
+  const amount = stratos.BignumberService.toWei(expectedOzBalance, 9).toFixed();
   console.log('amount', amount);
   const amount2 = +amount * 0.99;
   console.log('amount2', amount2);
@@ -596,8 +571,10 @@ async function main(): Promise<void> {
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
     // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-    ppNodeUrl: 'http://35.233.211.175',
-    ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodeUrl: 'http://35.233.211.175',
+    // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.195.137.237',
     // ppNodePort: '8142',

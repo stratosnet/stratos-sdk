@@ -1,4 +1,5 @@
-import { type KeyPairInfo } from 'crypto/hdVault/hdVaultTypes';
+import { crypto } from '@stratos-network/stratos-sdk.js';
+type KeyPairInfo = crypto.hdVault.hdVaultTypes.KeyPairInfo;
 export declare const verifyDataSignature: (derivedKeyPair: KeyPairInfo, data: string, dataSignature: string) => Promise<boolean>;
 export declare const getSignedData: (derivedKeyPair: KeyPairInfo, data: string) => Promise<string>;
 export declare const decryptDataItem: (encryptedEncodedData: string, password: string) => Promise<unknown>;
@@ -13,3 +14,4 @@ export declare const buildEncryptedDataEntity: <T>(sampleData: T, derivedKeyPair
 }>;
 export declare const sendDataToRedis: <T>(derivedKeyPair: KeyPairInfo, sampleData: T) => Promise<string | undefined>;
 export declare const getDataFromRedis: (derivedKeyPair: KeyPairInfo) => Promise<unknown>;
+export {};

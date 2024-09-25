@@ -1,7 +1,7 @@
 {
-  "name": "@stratos-network/stratos-sdk.js",
+  "name": "@stratos-network/stratos-filedrive-sdk.js",
   "version": "2.2.0",
-  "description": "The JavaScript SDK for Stratos Network",
+  "description": "The JavaScript SDK for Stratos Network File Drive",
   "license": "ISC",
   "author": "Stratos Network",
   "keywords": [
@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/stratosnet/stratos-sdk.git"
+    "url": "git://github.com/stratosnet/stratos-filedrive-sdk.git"
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -40,12 +40,7 @@
     "start:once": " yarn cli:build; yarn start:run:once",
     "start:run:once": " node --trace-warnings dist/run.js ",
     "cli:build": "tsc",
-    "test:sdk:integration": "jest ./testing/integration/sdk_integration.spec.ts ",
-    "test:sdk:integration:local": " INTEGRATION_ENV_NAME=local yarn test:sdk:integration",
-    "test:sdk:integration:mesos": " INTEGRATION_ENV_NAME=mesos yarn test:sdk:integration",
-    "test:sdk:integration:devnet": " INTEGRATION_ENV_NAME=devnet yarn test:sdk:integration",
-    "integration": "yarn test:sdk:integration:local",
-    "integration:mesos": "yarn test:sdk:integration:mesos"
+    "update-sdk": "yarn upgrade @stratos-network/stratos-sdk.js"
   },
   "lint-staged": {
     "./src/**/*.ts": [
@@ -109,6 +104,7 @@
     "@cosmjs/proto-signing": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
     "@stratos-network/stratos-cosmosjs-types": "https://github.com/stratosnet/stratos-cosmosjs-types.git#develop",
+    "@stratos-network/stratos-sdk.js": "../stratos-sdk-v2",
     "@types/bn.js": "5.1.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",

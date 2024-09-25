@@ -1,2 +1,0 @@
-export const FILE_STATUS_CHECK_WAIT_TIME = 5000; // 5000 ms
-export const FILE_STATUS_CHECK_MAX_ATTEMPTS = 25;

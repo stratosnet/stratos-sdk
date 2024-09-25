@@ -1,7 +1,5 @@
-import { type KeyPairInfo } from 'crypto/hdVault/hdVaultTypes';
-import * as cosmosUtils from '../chain/cosmos/cosmosUtils';
+import { chain, crypto } from '@stratos-network/stratos-sdk.js';
 import * as REDIS from '../config/redis';
-import * as hdVault from '../crypto/hdVault';
 import { networkApi } from '../network';
 import {
   uint8arrayToBase64Str,
@@ -10,13 +8,19 @@ import {
   uint8arrayToHumanString,
 } from './helpers';
 
+type KeyPairInfo = crypto.hdVault.hdVaultTypes.KeyPairInfo;
+
 export const verifyDataSignature = async (
   derivedKeyPair: KeyPairInfo,
   data: string,
   dataSignature: string,
 ): Promise<boolean> => {
   try {
-    const res = await hdVault.keyUtils.verifySignatureInBase64(data, dataSignature, derivedKeyPair.publicKey);
+    const res = await crypto.hdVault.keyUtils.verifySignatureInBase64(
+      data,
+      dataSignature,
+      derivedKeyPair.publicKey,
+    );
     return res;
   } catch (err) {
     const msg = 'signature verification failed - ' + (err as Error).message;
@@ -28,7 +32,7 @@ export const verifyDataSignature = async (
 
 export const getSignedData = async (derivedKeyPair: KeyPairInfo, data: string): Promise<string> => {
   // 88 characters long base64 string (basically a signed message, to make sure the user in fact created that key)
-  const encodedStAddressStringSignedBase64 = await hdVault.keyUtils.signWithPrivateKeyInBase64(
+  const encodedStAddressStringSignedBase64 = await crypto.hdVault.keyUtils.signWithPrivateKeyInBase64(
     data,
     derivedKeyPair.privateKey,
   );
@@ -54,7 +58,10 @@ export const decryptDataItem = async (encryptedEncodedData: string, password: st
 
   try {
     // Uint8Array of decrypted bytes
-    decodedDecrypted = await cosmosUtils.decryptMasterKeySeed(password, decodedFromBase64ToEncrypted);
+    decodedDecrypted = await chain.cosmos.cosmosUtils.decryptMasterKeySeed(
+      password,
+      decodedFromBase64ToEncrypted,
+    );
   } catch (error) {
     const msg = `Could not decrypt data with a given password. Error - ${(error as Error)?.message ?? error}`;
     throw Error(msg);
@@ -76,7 +83,7 @@ export const decryptDataItem = async (encryptedEncodedData: string, password: st
 
 export const getEncodingPassword = (derivedKeyPair: KeyPairInfo): string => {
   // keccak256 hash of the private key , it will give 32 bytes of hash to be used, to the whole pk will be used
-  const passwordTestBytes = hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.privateKey);
+  const passwordTestBytes = crypto.hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.privateKey);
 
   const passwordTest = uint8arrayToBase64Str(passwordTestBytes);
 
@@ -85,7 +92,7 @@ export const getEncodingPassword = (derivedKeyPair: KeyPairInfo): string => {
 
 export const getDataItemKey = async (derivedKeyPair: KeyPairInfo): Promise<string> => {
   // 32 bytes length
-  const encodedStAddress = hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.address);
+  const encodedStAddress = crypto.hdVault.keyUtils.encodeSignatureMessage(derivedKeyPair.address);
 
   const encodedStAddressStringBase64 = uint8arrayToBase64Str(encodedStAddress);
 
@@ -101,7 +108,10 @@ export const encryptGivedDataItem = <T>(sampleData: T, password: string): string
 
   // sampleDataJsonStringifiedEncrypted is an sjcl.SjclCipherEncrypted object
   // const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
-  const sampleDataJsonStringifiedEncrypted = cosmosUtils.encryptMasterKeySeed(password, sampleDataBuffUint8);
+  const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
+    password,
+    sampleDataBuffUint8,
+  );
 
   const sampleDataEncripytedEncoded = humanStringToBase64String(
     sampleDataJsonStringifiedEncrypted.toString(),
