@@ -19,19 +19,19 @@ _axios.defaults.transformResponse = [
   },
 ];
 
-const getRestRedisRoute = (): string => {
-  const { restRedisUrl } = Sdk.environment;
+// const getRestRedisRoute = (): string => {
+//   const { restRedisUrl } = Sdk.environment;
+//
+//   return restRedisUrl || 'http://localhost:8080';
+// };
 
-  return restRedisUrl || 'http://localhost:8080';
-};
-
-const getGatewayToken = (): string => {
-  const { gatewayToken } = Sdk.environment;
-
-  if (!gatewayToken) return '';
-
-  return `?token=${gatewayToken.trim()}`;
-};
+// const getGatewayToken = (): string => {
+//   const { gatewayToken } = Sdk.environment;
+//
+//   if (!gatewayToken) return '';
+//
+//   return `?token=${gatewayToken.trim()}`;
+// };
 
 const getRestRoute = (): string => {
   const { restUrl } = Sdk.environment;

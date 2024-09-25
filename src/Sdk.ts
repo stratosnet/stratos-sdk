@@ -22,8 +22,8 @@ export interface SdkEnvironmentConfig {
   chainId: string;
   explorerUrl: string;
   ppNodeUrl?: string;
-  restRedisUrl?: string;
-  gatewayToken?: string;
+  // restRedisUrl?: string;
+  // gatewayToken?: string;
   ppNodePort?: string;
   faucetUrl?: string;
   nodeProtocolVersion?: string;
@@ -39,8 +39,8 @@ const SdkDefaultEnvironment: SdkEnvironmentConfig = {
   ppNodeUrl: '',
   ppNodePort: '',
   faucetUrl: '',
-  restRedisUrl: 'http://localhost:8080',
-  gatewayToken: '',
+  // restRedisUrl: 'http://localhost:8080',
+  // gatewayToken: '',
   isNewProtocol: true,
   keyPathParameters: {
     masterkey: masterkeyDefault(),
