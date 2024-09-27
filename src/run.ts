@@ -576,8 +576,8 @@ const testBalanceRound = async () => {
 // }
 
 async function main(): Promise<void> {
-  // const sdkEnv = sdkEnvDev;
-  const sdkEnv = sdkEnvTest;
+  const sdkEnv = sdkEnvDev;
+  // const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvMainNet;
   stratos.Sdk.init({ ...sdkEnv });
 
@@ -595,10 +595,10 @@ async function main(): Promise<void> {
     // devnet
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
-    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-    // ppNodeUrl: 'http://35.233.211.175',
+    ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-    ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.195.137.237',
@@ -624,7 +624,7 @@ async function main(): Promise<void> {
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
   // await testRequestUserFileList(hdPathIndex, 0);
-  // await testRequestAllUserFileList(hdPathIndex);
+  await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
 

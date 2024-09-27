@@ -388,8 +388,8 @@ const testBalanceRound = async () => {
 //   }
 // }
 async function main() {
-    // const sdkEnv = sdkEnvDev;
-    const sdkEnv = sdkEnvTest;
+    const sdkEnv = sdkEnvDev;
+    // const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
     stratos.Sdk.init(Object.assign({}, sdkEnv));
     const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
@@ -399,10 +399,7 @@ async function main() {
         // devnet
         // ppNodeUrl: 'http://35.187.47.46',
         // ppNodePort: '8142',
-        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-        // ppNodeUrl: 'http://35.233.211.175',
-        // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-        ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=' }));
+        ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org' }));
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // const a = await stratos.chain.cosmos.cosmosService.getCosmos();
@@ -420,7 +417,7 @@ async function main() {
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    // await testRequestAllUserFileList(hdPathIndex);
+    await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file25M_1_Aug_7.bin';
     // for (const myFileName of filesToUpload) {
