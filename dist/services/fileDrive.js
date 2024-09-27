@@ -99,11 +99,20 @@ const getDataItemKey = async (derivedKeyPair) => {
 };
 exports.getDataItemKey = getDataItemKey;
 const encryptGivedDataItem = (sampleData, password) => {
-    const sampleDataBuff = Buffer.from(JSON.stringify(sampleData));
+    const sampleDataString = JSON.stringify(sampleData);
+    // console.log('encryptGivedDataItem - sampleData ', sampleData);
+    // console.log('encryptGivedDataItem - sampeDataString ', sampleDataString);
+    console.log('encryptGivedDataItem - sampeDataString length', sampleDataString.length);
+    const sampleDataBuff = Buffer.from(sampleDataString);
     const sampleDataBuffUint8 = Uint8Array.from(sampleDataBuff);
+    // console.log('encryptGivedDataItem - sampleDataBuffUint8', sampleDataBuffUint8);
     // sampleDataJsonStringifiedEncrypted is an sjcl.SjclCipherEncrypted object
     // const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
     const sampleDataJsonStringifiedEncrypted = stratos_sdk_js_1.chain.cosmos.cosmosUtils.encryptMasterKeySeed(password, sampleDataBuffUint8);
+    // console.log(
+    //   'encryptGivedDataItem - sampleDataJsonStringifiedEncrypted',
+    //   sampleDataJsonStringifiedEncrypted,
+    // );
     const sampleDataEncripytedEncoded = (0, helpers_1.humanStringToBase64String)(sampleDataJsonStringifiedEncrypted.toString());
     return sampleDataEncripytedEncoded;
 };
@@ -131,6 +140,7 @@ const sendDataToRedis = async (derivedKeyPair, sampleData) => {
     if (!derivedKeyPair) {
         return;
     }
+    // console.log('sendDataToRedis sampleData', sampleData);
     const redisDataEntity = await (0, exports.buildEncryptedDataEntity)(sampleData, derivedKeyPair);
     const res = await network_1.networkApi.setFilesDataToRedis(redisDataEntity.key, `${redisDataEntity.data}:${redisDataEntity.dataSig}`, REDIS.fileDriveDataPrefix);
     if (res.error) {

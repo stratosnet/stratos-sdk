@@ -102,16 +102,30 @@ export const getDataItemKey = async (derivedKeyPair: KeyPairInfo): Promise<strin
 };
 
 export const encryptGivedDataItem = <T>(sampleData: T, password: string): string => {
-  const sampleDataBuff = Buffer.from(JSON.stringify(sampleData));
+  const sampleDataString = JSON.stringify(sampleData);
+
+  // console.log('encryptGivedDataItem - sampleData ', sampleData);
+  // console.log('encryptGivedDataItem - sampeDataString ', sampleDataString);
+  console.log('encryptGivedDataItem - sampeDataString length', sampleDataString.length);
+
+  const sampleDataBuff = Buffer.from(sampleDataString);
 
   const sampleDataBuffUint8 = Uint8Array.from(sampleDataBuff);
 
+  // console.log('encryptGivedDataItem - sampleDataBuffUint8', sampleDataBuffUint8);
+
   // sampleDataJsonStringifiedEncrypted is an sjcl.SjclCipherEncrypted object
   // const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
+
   const sampleDataJsonStringifiedEncrypted = chain.cosmos.cosmosUtils.encryptMasterKeySeed(
     password,
     sampleDataBuffUint8,
   );
+
+  // console.log(
+  //   'encryptGivedDataItem - sampleDataJsonStringifiedEncrypted',
+  //   sampleDataJsonStringifiedEncrypted,
+  // );
 
   const sampleDataEncripytedEncoded = humanStringToBase64String(
     sampleDataJsonStringifiedEncrypted.toString(),
@@ -156,6 +170,7 @@ export const sendDataToRedis = async <T>(
     return;
   }
 
+  // console.log('sendDataToRedis sampleData', sampleData);
   const redisDataEntity = await buildEncryptedDataEntity(sampleData, derivedKeyPair);
 
   const res = await networkApi.setFilesDataToRedis(
