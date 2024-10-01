@@ -19,20 +19,6 @@ _axios.defaults.transformResponse = [
   },
 ];
 
-const getRestRedisRoute = (): string => {
-  const { restRedisUrl } = Sdk.environment;
-
-  return restRedisUrl || 'http://localhost:8080';
-};
-
-const getGatewayToken = (): string => {
-  const { gatewayToken } = Sdk.environment;
-
-  if (!gatewayToken) return '';
-
-  return `?token=${gatewayToken.trim()}`;
-};
-
 const getRestRoute = (): string => {
   const { restUrl } = Sdk.environment;
 
@@ -125,6 +111,7 @@ export const sendRpcCall = async <N>(
   };
   const url = `${getPpNodeRoute()}`;
 
+  console.log('url for the rpc call', url);
   const payload = { ...defaultPayload, ...givenPayload };
 
   const dataResult = await apiPost(url, payload, { ...config });
@@ -171,6 +158,7 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   return dataResult;
 };
 
+// is in use by the wallet
 export const getTxListBlockchain = async (
   address: string,
   type: string,
@@ -180,8 +168,8 @@ export const getTxListBlockchain = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.RestTxHistoryDataResult> => {
   const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
-  console.log('url', url);
-  console.log('given page', givenPage, pageLimit);
+  // console.log('url', url);
+  // console.log('given page', givenPage, pageLimit);
 
   const userQueryType =
     userType === TxHistoryUser.TxHistorySenderUser
@@ -209,7 +197,7 @@ export const getTxListBlockchain = async (
     ...config,
     params,
   });
-  console.log('TxHistory data result ', dataResult);
+  // console.log('TxHistory data result ', dataResult);
 
   return dataResult;
 };
@@ -595,45 +583,4 @@ export const getChainAndProtocolDetails = async () => {
     resolvedChainVersion,
     isNewProtocol,
   };
-};
-
-export const getFilesDataFromRedis = async (
-  dataKey: string,
-  keyPrefix: string,
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.GetDataFromRedisResult> => {
-  // const url = `${getRestRedisRoute()}/api/get_key_value`;
-  const url = `${getRestRedisRoute()}/redis-rest-api/get_key_value${getGatewayToken()}`;
-
-  console.log('given keyPrefix for get', keyPrefix);
-  console.log('getFilesDataFromRedis url', url);
-
-  const payload = {
-    data_key: dataKey,
-  };
-
-  const dataResult = await apiPost(url, payload, config);
-
-  return dataResult;
-};
-
-export const setFilesDataToRedis = async (
-  dataKey: string,
-  dataValue: string,
-  keyPrefix: string,
-  config?: Types.NetworkAxiosConfig,
-): Promise<Types.SetDataToRedisResult> => {
-  // const url = `${getRestRedisRoute()}/api/set_key_value`;
-  const url = `${getRestRedisRoute()}/redis-rest-api/set_key_value${getGatewayToken()}`;
-
-  console.log('given keyPrefix for set', keyPrefix);
-
-  const payload = {
-    data_key: dataKey,
-    data_value: dataValue,
-  };
-
-  const dataResult = await apiPost(url, payload, config);
-
-  return dataResult;
 };
