@@ -1143,7 +1143,7 @@ export const downloadFileFromRemoteBySharedLink = async (
   const downloadResult = await remoteFileSystemApi.downloadSharedFile(
     keypair,
     filePathToSaveDownloadedTo + '_' + remoteFileName,
-    sharelink,
+    sharelink.substring(6),
     filesize,
   );
 
