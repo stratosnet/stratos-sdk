@@ -1000,6 +1000,7 @@ export const updloadFileFromBuffer = async (
                 completedBytes: readSize,
                 totalBytes: fileSize,
                 completedPercentage,
+                fileHash,
               },
             },
           },
@@ -1056,7 +1057,7 @@ export const updloadFileFromBuffer = async (
       success: true,
       code: UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED,
       message: `the latest upload return code / value is: ${uploadReturn}`,
-      details: { uploadReturn },
+      details: { uploadReturn, fileHash },
     },
   });
 

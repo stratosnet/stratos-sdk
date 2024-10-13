@@ -720,6 +720,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                                 completedBytes: readSize,
                                 totalBytes: fileSize,
                                 completedPercentage,
+                                fileHash,
                             },
                         },
                     },
@@ -760,7 +761,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             success: true,
             code: types_1.UPLOAD_CODES.USER_UPLOAD_DATA_COMPLETED,
             message: `the latest upload return code / value is: ${uploadReturn}`,
-            details: { uploadReturn },
+            details: { uploadReturn, fileHash },
         },
     });
     if (isContinueGlobal !== 0) {

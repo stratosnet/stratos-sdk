@@ -785,7 +785,7 @@ const downloadFileFromRemoteBySharedLink = async (fileReadName, randomTestPreffi
     }
     const [firstUploadedFileInfo] = remoteFilesList;
     const { filename: remoteFileName, sharelink } = firstUploadedFileInfo;
-    const downloadResult = await remoteFileSystem_1.remoteFileSystemApi.downloadSharedFile(keypair, filePathToSaveDownloadedTo + '_' + remoteFileName, sharelink, filesize);
+    const downloadResult = await remoteFileSystem_1.remoteFileSystemApi.downloadSharedFile(keypair, filePathToSaveDownloadedTo + '_' + remoteFileName, sharelink.substring(6), filesize);
     const { filePathToSave } = downloadResult;
     const downloadedFileHash = await filesystem_1.filesystemApi.calculateFileHash(filePathToSave);
     if (downloadedFileHash !== uploadedLocalFileHash) {
