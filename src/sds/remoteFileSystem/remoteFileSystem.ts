@@ -64,6 +64,10 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
       success: true,
       message: resMsg,
       code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+      details: {
+        filehash,
+        percentDownloaded: completedProgressPercentage,
+      },
     },
   });
 
@@ -133,7 +137,7 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
       readSize = readSize + dlPartSize;
       completedProgress = (100 * readSize) / filesize;
 
-      const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+      const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
       const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
 
       // log('3 We have a correct responseDownload', completedProgressMessage);
@@ -144,6 +148,10 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
           success: true,
           message: resMsg,
           code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+          details: {
+            filehash,
+            percentDownloaded: completedProgressPercentageB,
+          },
         },
       });
     }

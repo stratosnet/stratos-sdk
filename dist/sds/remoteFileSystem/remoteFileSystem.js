@@ -65,6 +65,10 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             success: true,
             message: resMsg,
             code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+            details: {
+                filehash,
+                percentDownloaded: completedProgressPercentage,
+            },
         },
     });
     while (isContinueGlobal === 2) {
@@ -111,7 +115,7 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
             readSize = readSize + dlPartSize;
             completedProgress = (100 * readSize) / filesize;
-            const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+            const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
             const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
             // log('3 We have a correct responseDownload', completedProgressMessage);
             const resMsg = `b. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
@@ -120,6 +124,10 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
                     success: true,
                     message: resMsg,
                     code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
+                    details: {
+                        filehash,
+                        percentDownloaded: completedProgressPercentageB,
+                    },
                 },
             });
         }
