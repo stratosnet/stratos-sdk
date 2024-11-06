@@ -51,15 +51,19 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
     fileInfoChunks.push(fileChunk);
     let readSize = 0;
     let completedProgress = 0;
-    let dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
+    // 3145728 - 1 - 0 = 3145727
+    const dlPartSizeToCheck = offsetEndGlobal - 1 - offsetStartGlobal;
+    let dlPartSize = offsetEndGlobal === filesize ? filesize : dlPartSizeToCheck;
     readSize = readSize + dlPartSize;
     completedProgress = (100 * readSize) / filesize;
-    const completedProgressPercentage = (Math.round(completedProgress * 100) / 100).toFixed(2);
+    console.log('a- dlPartSize, dlPartSizeToCheck, filesize, readSize', dlPartSize, dlPartSizeToCheck, filesize, readSize);
+    const completedProgressPercentageA = (Math.round(completedProgress * 100) / 100).toFixed(2);
     //   const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${
     // ( Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
-    const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
+    const completedProgressMessageA = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageA}%`;
     // log('2 We have a correct responseRequestDownload', completedProgressMessage);
-    const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+    console.log('a- readSize, completedProgress, completedProgressPercentageA, offsetStartGlobal, offsetEndGlobal', readSize, completedProgress, completedProgressPercentageA, offsetStartGlobal, offsetEndGlobal);
+    const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessageA} ___${completedProgressPercentageA}`;
     progressCb({
         result: {
             success: true,
@@ -67,7 +71,7 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
             details: {
                 filehash,
-                percentDownloaded: completedProgressPercentage,
+                percentDownloaded: completedProgressPercentageA,
             },
         },
     });
@@ -112,17 +116,20 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
                 filedata: downloadedFileData,
             };
             fileInfoChunks.push(Object.assign({}, fileChunkDl));
+            // 6291456  - 1 -  3145728  = 3145727
             dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
             readSize = readSize + dlPartSize;
             completedProgress = (100 * readSize) / filesize;
+            console.log('b dlPartSize, filesize, readSize', dlPartSize, filesize, readSize);
             const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
-            const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentage}%`;
+            const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
+            console.log('b readSize, completedProgress, completedProgressPercentageB, offsetStartGlobal, offsetEndGlobal', readSize, completedProgress, completedProgressPercentageB, offsetStartGlobal, offsetEndGlobal);
             // log('3 We have a correct responseDownload', completedProgressMessage);
-            const resMsg = `b. we have a correct responseRequestDownload, ${completedProgressMessage} ___${completedProgressPercentage}`;
+            const resMsgC = `b. we have a correct responseRequestDownload, ${completedProgressMessageC} ___${completedProgressPercentageB}`;
             progressCb({
                 result: {
                     success: true,
-                    message: resMsg,
+                    message: resMsgC,
                     code: SdsTypes.DOWNLOAD_CODES.WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD,
                     details: {
                         filehash,
@@ -597,12 +604,12 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
         try {
             const { result: { return: returnStop }, } = responseUploadToTest;
             if (+returnStop === -14) {
-                const resMsg = 'we have stopped the upload succesfully. sending request upload again';
+                const resMsgU = 'we have stopped the upload succesfully. sending request upload again';
                 progressCb({
                     result: {
                         success: true,
                         code: types_1.UPLOAD_CODES.USER_UPLOAD_DATA_PROCESS_STOPPED,
-                        message: resMsg,
+                        message: resMsgU,
                         details: { returnStop },
                     },
                 });
