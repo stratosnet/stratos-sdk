@@ -170,7 +170,7 @@ const testRequestAllUserSharedFileList = async (hdPathIndex, givenReceiverMnemon
         return;
     }
     const userSharedFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllSharedFileList(keyPairZero);
-    console.log('retrieved all user shared file list', userSharedFileList);
+    console.log('retrieved all user shared file list', userSharedFileList.length);
 };
 const testItFileUpFromBuffer = async (hdPathIndex, filename, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);

@@ -239,7 +239,7 @@ const testRequestAllUserSharedFileList = async (
     keyPairZero,
   );
 
-  console.log('retrieved all user shared file list', userSharedFileList);
+  console.log('retrieved all user shared file list', userSharedFileList.length);
 };
 
 const testItFileUpFromBuffer = async (
