@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWalletService = void 0;
+exports.getWalletService = exports.WalletService = void 0;
 class WalletService {
     constructor(givenAppId, givenAppKey, givenFileOrigin, givenWindow) {
         this.appId = givenAppId || '';
@@ -81,6 +81,7 @@ class WalletService {
         return uniqueKey;
     }
 }
+exports.WalletService = WalletService;
 let walletService;
 function getWalletService(appId, appKey, fileOrigin, givenWindow) {
     let instance = walletService;

@@ -25,7 +25,7 @@ export interface AppWalletService {
   parentWindow: Window;
 }
 
-class WalletService implements AppWalletService {
+export class WalletService implements AppWalletService {
   appId: string;
   appKey: string;
   fileOrigin: string;
@@ -150,3 +150,5 @@ export function getWalletService(
 
   return instance;
 }
+
+export type MyWalletServiceType = ReturnType<typeof getWalletService>;

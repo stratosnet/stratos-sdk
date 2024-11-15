@@ -34,6 +34,7 @@ export declare const getSharedFileList: (keypair: WalletTypes.KeyPairInfo, page?
     files: networkTypes.SharedFileInfoItem[];
     totalnumber: number;
 }>;
+export declare const getAllSharedFileList: (keypair: WalletTypes.KeyPairInfo) => Promise<networkTypes.FileInfoItem[]>;
 export declare const downloadSharedFile: (keypair: WalletTypes.KeyPairInfo, filePathToSave: string, sharelink: string, filesize: number) => Promise<{
     filePathToSave: string;
 }>;

@@ -12,4 +12,5 @@ export * as validatorsTypes from './chain/validators/validatorsTypes';
 export * as networkTypes from './network/networkTypes';
 export * as accountsTypes from './accounts/accountsTypes';
 export * as WalletService from './services/walletService';
+export { WalletService as WalletServiceClass, MyWalletServiceType, getWalletService, } from './services/walletService';
 export * as BignumberService from './services/bigNumber';

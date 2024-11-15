@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadSharedFile = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
+exports.downloadSharedFile = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
 const path_1 = __importDefault(require("path"));
 const accounts_1 = require("../../accounts");
 const remotefs_1 = require("../../config/remotefs");
@@ -931,6 +931,29 @@ const getSharedFileList = async (keypair, page = 0) => {
     };
 };
 exports.getSharedFileList = getSharedFileList;
+const getAllSharedFileList = async (keypair) => {
+    let currentPage = 0;
+    const resultFileList = [];
+    let weContinue = true;
+    do {
+        const userSharedFileList = await (0, exports.getSharedFileList)(keypair, currentPage);
+        const { totalnumber: totalNumber, files } = userSharedFileList;
+        console.log(`number shared files on page ${currentPage}`, totalNumber);
+        const weHaveDataOnThisPage = !!files && !!totalNumber;
+        if (weHaveDataOnThisPage) {
+            currentPage += 1;
+            resultFileList.push(...files);
+        }
+        if (resultFileList.length >= totalNumber) {
+            weContinue = false;
+        }
+        if (totalNumber === undefined) {
+            weContinue = false;
+        }
+    } while (weContinue);
+    return resultFileList;
+};
+exports.getAllSharedFileList = getAllSharedFileList;
 const downloadSharedFile = async (keypair, filePathToSave, sharelink, filesize) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);

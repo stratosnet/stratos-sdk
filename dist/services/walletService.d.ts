@@ -20,7 +20,7 @@ export interface AppWalletService {
     isWalletHandshakeDone: boolean;
     parentWindow: Window;
 }
-declare class WalletService implements AppWalletService {
+export declare class WalletService implements AppWalletService {
     appId: string;
     appKey: string;
     fileOrigin: string;
@@ -35,4 +35,5 @@ declare class WalletService implements AppWalletService {
     getMsgUniqueKey(): number;
 }
 export declare function getWalletService(appId: string, appKey: string, fileOrigin: string, givenWindow: Window): WalletService;
+export type MyWalletServiceType = ReturnType<typeof getWalletService>;
 export {};
