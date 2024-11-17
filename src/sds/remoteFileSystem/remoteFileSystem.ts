@@ -1312,6 +1312,38 @@ export const getSharedFileList = async (
   };
 };
 
+export const getAllSharedFileList = async (
+  keypair: WalletTypes.KeyPairInfo,
+): Promise<networkTypes.FileInfoItem[]> => {
+  let currentPage = 0;
+  const resultFileList: networkTypes.FileInfoItem[] = [];
+  let weContinue = true;
+
+  do {
+    const userSharedFileList = await getSharedFileList(keypair, currentPage);
+
+    const { totalnumber: totalNumber, files } = userSharedFileList;
+
+    console.log(`number shared files on page ${currentPage}`, totalNumber);
+    const weHaveDataOnThisPage = !!files && !!totalNumber;
+
+    if (weHaveDataOnThisPage) {
+      currentPage += 1;
+      resultFileList.push(...files);
+    }
+
+    if (resultFileList.length >= totalNumber) {
+      weContinue = false;
+    }
+
+    if (totalNumber === undefined) {
+      weContinue = false;
+    }
+  } while (weContinue);
+
+  return resultFileList;
+};
+
 export const downloadSharedFile = async (
   keypair: WalletTypes.KeyPairInfo,
   filePathToSave: string,
