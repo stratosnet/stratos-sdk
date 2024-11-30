@@ -447,6 +447,7 @@ export interface RestTxHistoryResponse {
     pagination: RestPagination | null;
     txs: RestTx[];
     tx_responses: RestTxResponse[];
+    total: string;
 }
 export interface RestTx {
     body: RestTxBody;

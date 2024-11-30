@@ -214,11 +214,14 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
         throw new Error('Could not fetch tx history');
     }
     const parsedData = [];
-    const { tx_responses: data = [], pagination } = response;
+    const { tx_responses: data = [], pagination, total: topTotal } = response;
     let total = '0';
     if (network_1.networkHelpers.isValidPagination(pagination)) {
         const { total: totalPages } = pagination;
         total = totalPages;
+    }
+    else {
+        total = topTotal || '0';
     }
     data.forEach(txResponseItem => {
         try {
