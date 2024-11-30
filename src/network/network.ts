@@ -344,7 +344,7 @@ export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<T
 export const uploadFile = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
 
-  console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
+  // console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
 
   const dataResult = await apiGet(url, config);
 

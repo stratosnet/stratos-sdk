@@ -384,8 +384,9 @@ export const getAllUploadedFileList = async (
     const { originalResponse, files } = userFileList;
 
     const totalNumber = originalResponse?.result?.totalnumber;
+    // console.log('originalResponse.result', originalResponse.result);
 
-    console.log(`number files on page ${currentPage}`, totalNumber);
+    console.log(`number files on page ${currentPage} is ${files.length}, totalNumber is ${totalNumber}`);
     const weHaveDataOnThisPage = !!files && !!totalNumber;
 
     if (weHaveDataOnThisPage) {

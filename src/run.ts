@@ -150,7 +150,11 @@ const mainSend = async (
   console.log('receiver balance', balances);
 };
 
-const mainSdsPrepay = async (hdPathIndex: number, givenReceiverMnemonic = zeroUserMnemonic) => {
+const mainSdsPrepay = async (
+  hdPathIndex: number,
+  givenReceiverMnemonic = zeroUserMnemonic,
+  memo?: string,
+) => {
   const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
     givenReceiverMnemonic,
     hdPathIndex,
@@ -163,7 +167,7 @@ const mainSdsPrepay = async (hdPathIndex: number, givenReceiverMnemonic = zeroUs
   const sendTxMessages = await stratos.sds.transactions.getSdsPrepayTx(keyPairZero.address, [{ amount: 10 }]);
 
   dirLog('from mainSdsPrepay - calling tx sign with this messageToSign', sendTxMessages);
-  const signedTx = await stratos.chain.transactions.sign(keyPairZero.address, sendTxMessages);
+  const signedTx = await stratos.chain.transactions.sign(keyPairZero.address, sendTxMessages, memo);
 
   let attempts = 0;
   if (signedTx) {
@@ -457,6 +461,34 @@ const testRequestUserDownloadSharedFile = async (
   console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 
+const testTxHistory = async (hdPathIndex: number, page = 0, givenReceiverMnemonic = zeroUserMnemonic) => {
+  const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
+    givenReceiverMnemonic,
+    hdPathIndex,
+  );
+
+  if (!keyPairZero) {
+    return;
+  }
+
+  // const filterParameter = stratos.sds.transactions.sdsTxTypes.HistoryTxType.SdsPrepay;
+  const filterParameter = 5;
+
+  try {
+    const txList = await stratos.accounts.accountsApi.getAccountTrasactions(
+      keyPairZero.address,
+      filterParameter,
+      page,
+      5,
+      stratos.network.networkTypes.TxHistoryUser.TxHistorySenderUser,
+    );
+    console.log('txList!', txList);
+    console.log('txList! data lenght', txList.data.length);
+  } catch (err) {
+    console.log('err in txList', err);
+  }
+};
+
 const testBalanceRound = async () => {
   // const address = 'st1p2zwnn6rdj8kexhf9ddkal6ldp65vnd24gam2l';
   // const b = await stratos.accounts.accountsApi.getBalanceCardMetrics(address);
@@ -596,14 +628,15 @@ const testBalanceRound = async () => {
 // }
 
 async function main(): Promise<void> {
-  const sdkEnv = sdkEnvDev;
-  // const sdkEnv = sdkEnvTest;
+  // const sdkEnv = sdkEnvDev;
+  const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvMainNet;
   stratos.Sdk.init({ ...sdkEnv });
 
   const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
     await stratos.network.networkApi.getChainAndProtocolDetails();
 
+  const a = 'QKL6GXpRnztvUL_ptmYn-ViCVTY=';
   stratos.Sdk.init({
     ...sdkEnv,
     chainId: resolvedChainID,
@@ -615,10 +648,10 @@ async function main(): Promise<void> {
     // devnet
     // ppNodeUrl: 'http://35.187.47.46',
     // ppNodePort: '8142',
-    ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
     // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-    // ppNodeUrl: 'https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
     // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
     // mesos - we connect to mesos pp
     // ppNodeUrl: 'http://34.195.137.237',
@@ -638,13 +671,13 @@ async function main(): Promise<void> {
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // 1 Check balance
-  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
   // await testRequestUserFileList(hdPathIndex, 0);
-  // await testRequestAllUserFileList(hdPathIndex);
+  await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
 
@@ -677,53 +710,53 @@ async function main(): Promise<void> {
   // 5a
   // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
 
-  const filehasheList = [
-    {
-      filehash: 'v05j1m50daqnssf8jghk710ov9qqc4upvu7al9l0',
-    },
-    {
-      filehash: 'v05j1m50dt53bnth8mr6d3rdte1dgmj58rrdeoog',
-    },
-    {
-      filehash: 'v05j1m50f7chl8ab4utrkc06f83p2a5uurjiqgmo',
-    },
-    {
-      filehash: 'v05j1m50h7dfg8euvppnctc6su6m5i2fglos527o',
-    },
-    {
-      filehash: 'v05j1m50m57bc24ab0hnlivd101mj26c3schloo0',
-    },
-    {
-      filehash: 'v05j1m50n2572mmqnbdf10okris6bu6beqcvv9vo',
-    },
-    {
-      filehash: 'v05j1m50pd5u3liv90abd8olb4qcl25pdf7lgor0',
-    },
-    {
-      filehash: 'v05j1m50qr3ub68ughtjql4v765bc1fe1t22evk0',
-    },
-    {
-      filehash: 'v05j1m50s41i8q05t16ephjd6kriejfvs6rat2ng',
-    },
-    {
-      filehash: 'v05j1m50t7q0tnvrn3dpsb1qa5q4vmraju3mrbb0',
-    },
-    {
-      filehash: 'v05j1m512fbc7kjp71686gh55s0heo1vkpadre5o',
-    },
-    {
-      filehash: 'v05j1m514ujl5tkfke0moasrbq9uklco1ed5shug',
-    },
-    {
-      filehash: 'v05j1m515ok1igqt15hpv8f5vrd89guclmtjbq0o',
-    },
-    {
-      filehash: 'v05j1m5187jq01tepbgh9eto3vo91dvvuc4g29n0',
-    },
-    {
-      filehash: 'v05j1m51cq0fmk12amm68fjfjtr21h7m4p726ng0',
-    },
-  ];
+  // const filehasheList = [
+  //   {
+  //     filehash: 'v05j1m50daqnssf8jghk710ov9qqc4upvu7al9l0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50dt53bnth8mr6d3rdte1dgmj58rrdeoog',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50f7chl8ab4utrkc06f83p2a5uurjiqgmo',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50h7dfg8euvppnctc6su6m5i2fglos527o',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50m57bc24ab0hnlivd101mj26c3schloo0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50n2572mmqnbdf10okris6bu6beqcvv9vo',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50pd5u3liv90abd8olb4qcl25pdf7lgor0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50qr3ub68ughtjql4v765bc1fe1t22evk0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50s41i8q05t16ephjd6kriejfvs6rat2ng',
+  //   },
+  //   {
+  //     filehash: 'v05j1m50t7q0tnvrn3dpsb1qa5q4vmraju3mrbb0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m512fbc7kjp71686gh55s0heo1vkpadre5o',
+  //   },
+  //   {
+  //     filehash: 'v05j1m514ujl5tkfke0moasrbq9uklco1ed5shug',
+  //   },
+  //   {
+  //     filehash: 'v05j1m515ok1igqt15hpv8f5vrd89guclmtjbq0o',
+  //   },
+  //   {
+  //     filehash: 'v05j1m5187jq01tepbgh9eto3vo91dvvuc4g29n0',
+  //   },
+  //   {
+  //     filehash: 'v05j1m51cq0fmk12amm68fjfjtr21h7m4p726ng0',
+  //   },
+  // ];
 
   // for (const filehashItem of filehasheList) {
   // console.log('yes', filehashItem.filehash);
@@ -740,9 +773,10 @@ async function main(): Promise<void> {
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
   // void testRequestUserSharedFileList(hdPathIndex, 1, zeroUserMnemonic);
-  void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+  // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
+  // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
 }
 
 void main();

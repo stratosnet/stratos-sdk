@@ -278,12 +278,15 @@ export const getAccountTrasactions = async (
 
   const parsedData: FormattedBlockChainTx[] = [];
 
-  const { tx_responses: data = [], pagination } = response;
+  const { tx_responses: data = [], pagination, total: topTotal } = response;
+
   let total = '0';
 
   if (networkHelpers.isValidPagination(pagination)) {
     const { total: totalPages } = pagination;
     total = totalPages;
+  } else {
+    total = topTotal || '0';
   }
 
   data.forEach(txResponseItem => {
