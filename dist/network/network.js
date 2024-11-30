@@ -237,7 +237,7 @@ const getRpcStatus = async (config) => {
 exports.getRpcStatus = getRpcStatus;
 const uploadFile = async (config) => {
     const url = `${getRpcRoute()}/status`;
-    console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
+    // console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
