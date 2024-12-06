@@ -6,6 +6,7 @@ import * as network from './network';
 import Sdk from './Sdk';
 import * as sds from './sds';
 export { Sdk, sds, chain, accounts, network, crypto, filesystem };
+export { SdkEnvironmentConfig } from './Sdk';
 export * as transformerTypes from './chain/transformers/transactions/types';
 export * as chainTxTypes from './chain/transactions/types';
 export * as validatorsTypes from './chain/validators/validatorsTypes';
