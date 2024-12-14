@@ -262,6 +262,7 @@ const getUploadedFileList = async (keypair, page = 0) => {
             req_time: timestamp,
         },
     ];
+    console.log('extraParams for sendUserRequestList', extraParams);
     const callResult = await network_1.networkApi.sendUserRequestList(extraParams);
     const { response } = callResult;
     if (!response) {
@@ -284,7 +285,7 @@ const getAllUploadedFileList = async (keypair) => {
         const { originalResponse, files } = userFileList;
         const totalNumber = (_a = originalResponse === null || originalResponse === void 0 ? void 0 : originalResponse.result) === null || _a === void 0 ? void 0 : _a.totalnumber;
         // console.log('originalResponse.result', originalResponse.result);
-        console.log(`number files on page ${currentPage} is ${files.length}, totalNumber is ${totalNumber}`);
+        console.log(`number files on page ${currentPage} is ${files === null || files === void 0 ? void 0 : files.length}, totalNumber is ${totalNumber}`);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
             currentPage += 1;
@@ -906,7 +907,10 @@ const getSharedFileList = async (keypair, page = 0) => {
         },
         req_time: timestamp,
     };
+    console.log('params for sendUserRequestListShare', extraParams);
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
+    // console.log('callResultRequestListShare', callResultRequestListShare);
+    // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);

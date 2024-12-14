@@ -354,6 +354,7 @@ export const getUploadedFileList = async (
       req_time: timestamp,
     },
   ];
+  console.log('extraParams for sendUserRequestList', extraParams);
 
   const callResult = await networkApi.sendUserRequestList(extraParams);
 
@@ -386,7 +387,7 @@ export const getAllUploadedFileList = async (
     const totalNumber = originalResponse?.result?.totalnumber;
     // console.log('originalResponse.result', originalResponse.result);
 
-    console.log(`number files on page ${currentPage} is ${files.length}, totalNumber is ${totalNumber}`);
+    console.log(`number files on page ${currentPage} is ${files?.length}, totalNumber is ${totalNumber}`);
     const weHaveDataOnThisPage = !!files && !!totalNumber;
 
     if (weHaveDataOnThisPage) {
@@ -1275,8 +1276,11 @@ export const getSharedFileList = async (
     },
     req_time: timestamp,
   };
+  console.log('params for sendUserRequestListShare', extraParams);
 
   const callResultRequestListShare = await networkApi.sendUserRequestListShare([extraParams]);
+  // console.log('callResultRequestListShare', callResultRequestListShare);
+  // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
 
   const { response: responseRequestListShare } = callResultRequestListShare;
 
