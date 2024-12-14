@@ -676,8 +676,8 @@ async function main(): Promise<void> {
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
-  // await testRequestUserFileList(hdPathIndex, 0);
-  await testRequestAllUserFileList(hdPathIndex);
+  // await testRequestUserFileList(hdPathIndex, 7);
+  // await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
 
@@ -710,58 +710,22 @@ async function main(): Promise<void> {
   // 5a
   // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
 
-  // const filehasheList = [
-  //   {
-  //     filehash: 'v05j1m50daqnssf8jghk710ov9qqc4upvu7al9l0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50dt53bnth8mr6d3rdte1dgmj58rrdeoog',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50f7chl8ab4utrkc06f83p2a5uurjiqgmo',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50h7dfg8euvppnctc6su6m5i2fglos527o',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50m57bc24ab0hnlivd101mj26c3schloo0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50n2572mmqnbdf10okris6bu6beqcvv9vo',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50pd5u3liv90abd8olb4qcl25pdf7lgor0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50qr3ub68ughtjql4v765bc1fe1t22evk0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50s41i8q05t16ephjd6kriejfvs6rat2ng',
-  //   },
-  //   {
-  //     filehash: 'v05j1m50t7q0tnvrn3dpsb1qa5q4vmraju3mrbb0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m512fbc7kjp71686gh55s0heo1vkpadre5o',
-  //   },
-  //   {
-  //     filehash: 'v05j1m514ujl5tkfke0moasrbq9uklco1ed5shug',
-  //   },
-  //   {
-  //     filehash: 'v05j1m515ok1igqt15hpv8f5vrd89guclmtjbq0o',
-  //   },
-  //   {
-  //     filehash: 'v05j1m5187jq01tepbgh9eto3vo91dvvuc4g29n0',
-  //   },
-  //   {
-  //     filehash: 'v05j1m51cq0fmk12amm68fjfjtr21h7m4p726ng0',
-  //   },
-  // ];
+  const filehasheList = [
+    {
+      filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
+    },
+    {
+      filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+    },
+    {
+      filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
+    },
+  ];
 
   // for (const filehashItem of filehasheList) {
-  // console.log('yes', filehashItem.filehash);
-  // await testRequestUserFileShare(hdPathIndex, filehashItem.filehash);
-  // await delay(1000);
+  //   console.log('yes', filehashItem.filehash);
+  //   await testRequestUserFileShare(hdPathIndex, filehashItem.filehash);
+  //   await delay(1000);
   // }
 
   // await testRequestUserFileShare(hdPathIndex, filehash);
@@ -772,8 +736,8 @@ async function main(): Promise<void> {
   // const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
   // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
-  // void testRequestUserSharedFileList(hdPathIndex, 1, zeroUserMnemonic);
-  // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+  // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
+  void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
