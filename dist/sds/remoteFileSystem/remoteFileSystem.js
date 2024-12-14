@@ -894,7 +894,6 @@ const stopFileSharing = async (keypair, shareid) => {
 };
 exports.stopFileSharing = stopFileSharing;
 const getSharedFileList = async (keypair, page = 0) => {
-    var _a;
     const { address, publicKey } = keypair;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${address}${timestamp}`;
@@ -910,8 +909,8 @@ const getSharedFileList = async (keypair, page = 0) => {
     };
     console.log('params for sendUserRequestListShare', extraParams);
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
-    console.log('callResultRequestListShare', callResultRequestListShare);
-    console.log('callResultRequestListShare.response', (_a = callResultRequestListShare.response) === null || _a === void 0 ? void 0 : _a.result);
+    // console.log('callResultRequestListShare', callResultRequestListShare);
+    // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);

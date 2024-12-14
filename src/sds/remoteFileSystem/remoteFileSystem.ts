@@ -1279,8 +1279,8 @@ export const getSharedFileList = async (
   console.log('params for sendUserRequestListShare', extraParams);
 
   const callResultRequestListShare = await networkApi.sendUserRequestListShare([extraParams]);
-  console.log('callResultRequestListShare', callResultRequestListShare);
-  console.log('callResultRequestListShare.response', callResultRequestListShare.response?.result);
+  // console.log('callResultRequestListShare', callResultRequestListShare);
+  // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
 
   const { response: responseRequestListShare } = callResultRequestListShare;
 
