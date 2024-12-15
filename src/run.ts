@@ -439,7 +439,8 @@ const testRequestUserDownloadSharedFile = async (
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
-  const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+  const sharelinkTrimmed = sharelink.substring(6);
+  const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelinkTrimmed}`);
 
   const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
     givenReceiverMnemonic,
@@ -450,12 +451,37 @@ const testRequestUserDownloadSharedFile = async (
     return;
   }
 
+  const myCb = (data: stratos.sds.remoteFileSystem.remoteFileSystemTypes.ProgressCbData) => {
+    const {
+      result: { success, code, message },
+      error,
+    } = data;
+
+    console.log('!!!! data', data);
+
+    if (error) {
+      dirLog('we have an error. data from myCb', data);
+    } else if (success === false) {
+      log('success is false. data from myCb', data);
+    } else if (
+      code ===
+      stratos.sds.remoteFileSystem.remoteFileSystemTypes.DOWNLOAD_CODES
+        .WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD
+    ) {
+      log('message -', message);
+    } else {
+      dirLog('unknown response', data);
+    }
+  };
+
   const userDownloadSharedFileResult =
     await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(
       keyPairZero,
       filePathToSave,
+      // sharelinkTrimmed,
       sharelink,
       filesize,
+      myCb,
     );
 
   console.log('retrieved user download shared file list', userDownloadSharedFileResult);
@@ -734,10 +760,33 @@ async function main(): Promise<void> {
   // await testRequestUserStopFileShare(hdPathIndex, shareid);
   // 7a
   // const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
-  // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
+
+  // [Object: null prototype] {
+  //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+  //   filename: 'file20M_Oct_10_15.bin',
+  //   filesize: 25000001,
+  //   linktime: 1734060111,
+  //   linktimeexp: 1749612111,
+  //   shareid: 'cc06da35244748af_ba1e097bf7_b1d6f7',
+  //   sharelink: 'sds://cc06da35244748af_ba1e097bf7_b1d6f7'
+  // },
+  // [Object: null prototype] {
+  //   filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
+  //   filename: 'file105M_Oct_17_4.bin',
+  //   filesize: 105000001,
+  //   linktime: 1734060115,
+  //   linktimeexp: 1749612115,
+  //   shareid: 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b',
+  //   sharelink: 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b'
+  // }
+
+  const filesize = 105000001;
+  const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+
+  await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
   // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-  void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+  // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);

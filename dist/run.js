@@ -261,12 +261,33 @@ const testRequestUserStopFileShare = async (hdPathIndex, shareid, givenReceiverM
 const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesize, givenReceiverMnemonic = zeroUserMnemonic) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+    const sharelinkTrimmed = sharelink.substring(6);
+    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelinkTrimmed}`);
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
     if (!keyPairZero) {
         return;
     }
-    const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, sharelink, filesize);
+    const myCb = (data) => {
+        const { result: { success, code, message }, error, } = data;
+        console.log('!!!! data', data);
+        if (error) {
+            (0, helpers_1.dirLog)('we have an error. data from myCb', data);
+        }
+        else if (success === false) {
+            (0, helpers_1.log)('success is false. data from myCb', data);
+        }
+        else if (code ===
+            stratos.sds.remoteFileSystem.remoteFileSystemTypes.DOWNLOAD_CODES
+                .WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD) {
+            (0, helpers_1.log)('message -', message);
+        }
+        else {
+            (0, helpers_1.dirLog)('unknown response', data);
+        }
+    };
+    const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, 
+    // sharelinkTrimmed,
+    sharelink, filesize, myCb);
     console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 const testTxHistory = async (hdPathIndex, page = 0, givenReceiverMnemonic = zeroUserMnemonic) => {
@@ -494,10 +515,30 @@ async function main() {
     // await testRequestUserStopFileShare(hdPathIndex, shareid);
     // 7a
     // const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
-    // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
+    // [Object: null prototype] {
+    //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+    //   filename: 'file20M_Oct_10_15.bin',
+    //   filesize: 25000001,
+    //   linktime: 1734060111,
+    //   linktimeexp: 1749612111,
+    //   shareid: 'cc06da35244748af_ba1e097bf7_b1d6f7',
+    //   sharelink: 'sds://cc06da35244748af_ba1e097bf7_b1d6f7'
+    // },
+    // [Object: null prototype] {
+    //   filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
+    //   filename: 'file105M_Oct_17_4.bin',
+    //   filesize: 105000001,
+    //   linktime: 1734060115,
+    //   linktimeexp: 1749612115,
+    //   shareid: 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b',
+    //   sharelink: 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b'
+    // }
+    const filesize = 105000001;
+    const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+    await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-    void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+    // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
