@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { log } from 'console';
 import JSONbig from 'json-bigint';
 import qs from 'qs';
 import { hdVault, chain } from '../config';
@@ -335,21 +336,21 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
+  console.log('url for getRpcStatus', url);
 
   const dataResult = await apiGet(url, config);
 
   return dataResult;
 };
 
-export const uploadFile = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
-  const url = `${getRpcRoute()}/status`;
-
-  // console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
-
-  const dataResult = await apiGet(url, config);
-
-  return dataResult;
-};
+// TODO: check in the wallet and the drive for dangling reference
+// export const uploadFile = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
+//   const url = `${getRpcRoute()}/status`;
+//
+//   const dataResult = await apiGet(url, config);
+//
+//   return dataResult;
+// };
 
 export const getRpcPayload = <T>(msgId: number, method: string, extraParams?: T) => {
   const payload = {
@@ -367,7 +368,7 @@ export const sendUserRequestList = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>> => {
   const msgId = 1;
   const method = 'user_requestList';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserRequestListParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -381,7 +382,7 @@ export const sendUserRequestUpload = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>> => {
   const msgId = 1;
   const method = 'user_requestUpload';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserRequestUploadParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -395,7 +396,7 @@ export const sendUserRequestDownload = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>> => {
   const msgId = 1;
   const method = 'user_requestDownload';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserRequestDownloadParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -409,7 +410,7 @@ export const sendUserDownloadData = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>> => {
   const msgId = 1;
   const method = 'user_downloadData';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserDownloadDataParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -423,7 +424,7 @@ export const sendUserDownloadedFileInfo = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>> => {
   const msgId = 1;
   const method = 'user_downloadedFileInfo';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserDownloadedFileInfoParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -437,7 +438,7 @@ export const sendUserRequestGetOzone = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>> => {
   const msgId = 1;
   const method = 'user_requestGetOzone';
-
+  // gateway
   const payload = getRpcPayload<typeof extraParams>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -451,7 +452,7 @@ export const sendUserUploadData = async (
 ): Promise<Types.FileUserRequestResult<Types.FileUserUploadDataResponse>> => {
   const msgId = 1;
   const method = 'user_uploadData';
-
+  // gateway
   const payload = getRpcPayload<Types.FileUserUploadDataParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -465,7 +466,7 @@ export const sendUserRequestShare = async <T = Types.FileUserRequestShareParams>
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestShareResponse>> => {
   const msgId = 1;
   const method = 'user_requestShare';
-
+  // gateway
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -479,7 +480,7 @@ export const sendUserRequestListShare = async <T = Types.FileUserRequestListShar
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestListShareResponse>> => {
   const msgId = 1;
   const method = 'user_requestListShare';
-
+  // gateway
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -493,7 +494,7 @@ export const sendUserRequestStopShare = async <T = Types.FileUserRequestStopShar
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestStopShareResponse>> => {
   const msgId = 1;
   const method = 'user_requestStopShare';
-
+  // gateway
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -507,7 +508,7 @@ export const sendUserRequestGetShared = async <T = Types.FileUserRequestGetShare
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetSharedResponse>> => {
   const msgId = 1;
   const method = 'user_requestGetShared';
-
+  // gateway
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
@@ -521,7 +522,7 @@ export const sendUserRequestGetFileStatus = async <T = Types.FileUserRequestGetF
 ): Promise<Types.FileUserRequestResult<Types.FileUserRequestGetFileStatusResponse>> => {
   const msgId = 1;
   const method = 'user_getFileStatus';
-
+  // gateway
   const payload = getRpcPayload<T[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);

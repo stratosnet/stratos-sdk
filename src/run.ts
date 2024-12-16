@@ -26,6 +26,7 @@ const sdkEnvTest = {
   name: 'Mesos',
   restUrl: 'https://rest-mesos.thestratos.org',
   rpcUrl: 'https://rpc-mesos.thestratos.org',
+  // rpcUrl: '',
   chainId: 'stratos-testnet-2',
   explorerUrl: 'https://big-dipper-mesos.thestratos.org',
   faucetUrl: 'https://faucet-mesos.thestratos.org/credit',
@@ -439,7 +440,11 @@ const testRequestUserDownloadSharedFile = async (
   const PROJECT_ROOT = path.resolve(__dirname, '../');
   const SRC_ROOT = path.resolve(PROJECT_ROOT, './src');
 
-  const sharelinkTrimmed = sharelink.substring(6);
+  // it always comes with the sds://
+  const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
+
+  // it always drops sds://
+  const sharelinkTrimmed = filelink.substring(6);
   const filePathToSave = path.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelinkTrimmed}`);
 
   const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
@@ -478,8 +483,7 @@ const testRequestUserDownloadSharedFile = async (
     await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(
       keyPairZero,
       filePathToSave,
-      // sharelinkTrimmed,
-      sharelink,
+      filelink,
       filesize,
       myCb,
     );
@@ -653,36 +657,65 @@ const testBalanceRound = async () => {
 //   }
 // }
 
+const testGateway = async () => {
+  const opts = { depth: null, colors: true, maxArrayLength: null };
+  const res = await stratos.network.networkApi.getRpcStatus();
+  // console.dir(res, opts);
+
+  // const res2 = await stratos.network.networkApi.getChainId();
+  // console.dir(res2, opts);
+  // const res3 = await stratos.network.networkApi.getChainAndProtocolDetails();
+  // console.dir(res3, opts);
+  // return res3;
+};
 async function main(): Promise<void> {
   // const sdkEnv = sdkEnvDev;
   const sdkEnv = sdkEnvTest;
   // const sdkEnv = sdkEnvMainNet;
-  stratos.Sdk.init({ ...sdkEnv });
-
-  const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
-    await stratos.network.networkApi.getChainAndProtocolDetails();
 
   const a = 'QKL6GXpRnztvUL_ptmYn-ViCVTY=';
-  stratos.Sdk.init({
-    ...sdkEnv,
-    chainId: resolvedChainID,
-    nodeProtocolVersion: resolvedChainVersion,
-    isNewProtocol,
+  // const rpcUrlG = `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`;
 
-    // optional
-    // keyPathParameters: keyPathParametersForSdk,
-    // devnet
-    // ppNodeUrl: 'http://35.187.47.46',
-    // ppNodePort: '8142',
-    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-    // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-    // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+  const initData = {
+    ...sdkEnv,
+    // rpcUrl: rpcUrlG,
+  };
+
+  stratos.Sdk.init(initData);
+
+  // const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
+  const { resolvedChainID } = await stratos.network.networkApi.getChainAndProtocolDetails();
+
+  // console.log('resolvedChainID, resolvedChainID', resolvedChainID);
+
+  stratos.Sdk.init({
+    ...initData,
+    chainId: resolvedChainID,
     ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
-    // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-    // mesos - we connect to mesos pp
-    // ppNodeUrl: 'http://34.195.137.237',
-    // ppNodePort: '8142',
   });
+
+  // stratos.Sdk.init({
+  // ...sdkEnv,
+  // chainId: resolvedChainID,
+  // rpcUrl: rpcUrlG,
+  // nodeProtocolVersion: resolvedChainVersion,
+  // isNewProtocol,
+
+  // optional
+  // keyPathParameters: keyPathParametersForSdk,
+  // devnet
+  // ppNodeUrl: 'http://35.187.47.46',
+  // ppNodePort: '8142',
+  // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+  // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+  // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+  // ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
+  // rpcUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
+  // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+  // mesos - we connect to mesos pp
+  // ppNodeUrl: 'http://34.195.137.237',
+  // ppNodePort: '8142',
+  // });
 
   const hdPathIndex = 0;
 
@@ -782,6 +815,10 @@ async function main(): Promise<void> {
 
   const filesize = 105000001;
   const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+  // const sharelink = 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+
+  // const filesize = 25000001;
+  // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
 
   await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
@@ -790,6 +827,7 @@ async function main(): Promise<void> {
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
+  // void testGateway();
 }
 
 void main();

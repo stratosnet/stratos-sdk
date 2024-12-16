@@ -17,7 +17,6 @@ export declare const getUnboundingBalance: (delegatorAddr: string, config?: Type
 export declare const getRewardBalance: (delegatorAddr: string, config?: Types.NetworkAxiosConfig) => Promise<Types.RewardBalanceDataResult>;
 export declare const requestBalanceIncrease: (walletAddress: string, faucetUrl: string, denom?: string, config?: Types.NetworkAxiosConfig) => Promise<Types.SubmitTransactionDataResult>;
 export declare const getRpcStatus: (config?: Types.NetworkAxiosConfig) => Promise<Types.RpcStatusDataResult>;
-export declare const uploadFile: (config?: Types.NetworkAxiosConfig) => Promise<Types.RpcStatusDataResult>;
 export declare const getRpcPayload: <T>(msgId: number, method: string, extraParams?: T | undefined) => {
     id: number;
     method: string;

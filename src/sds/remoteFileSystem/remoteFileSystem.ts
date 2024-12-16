@@ -1345,7 +1345,7 @@ export const getAllSharedFileList = async (
 
 export const downloadSharedFileToBuffer = async (
   keypair: WalletTypes.KeyPairInfo,
-  sharelink: string, // without sds://
+  sharelink: string, // with or without sds://
   filesize: number,
   progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
 ): Promise<{ downloadedFile: Buffer; originalFileName: string }> => {
@@ -1353,13 +1353,14 @@ export const downloadSharedFileToBuffer = async (
 
   const sequence = await getCurrentSequenceString(address);
 
-  // const sharelinkTrimmed = sharelink.substring(6);
   const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
   console.log('!!! given sharelink', sharelink);
   console.log('!!! filelink to use', filelink);
 
   const timestamp = getTimestampInSeconds();
-  const messageToSign = `${sharelink}${address}${sequence}${timestamp}`;
+  // messageToSign must not starts with the sds://
+  const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
+  console.log('!!! messageToSign', messageToSign);
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 
@@ -1522,7 +1523,7 @@ export const downloadSharedFileToBuffer = async (
 export const downloadSharedFile = async (
   keypair: WalletTypes.KeyPairInfo,
   filePathToSave: string,
-  sharelink: string,
+  sharelink: string, // with or without sds://
   filesize: number,
   progressCb: (data: SdsTypes.ProgressCbData) => void = (data: unknown) => {
     console.log('data passed to callback', data);

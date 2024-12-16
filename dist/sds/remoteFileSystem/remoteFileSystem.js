@@ -975,16 +975,17 @@ const getAllSharedFileList = async (keypair) => {
     return resultFileList;
 };
 exports.getAllSharedFileList = getAllSharedFileList;
-const downloadSharedFileToBuffer = async (keypair, sharelink, // without sds://
+const downloadSharedFileToBuffer = async (keypair, sharelink, // with or without sds://
 filesize, progressCb = () => { }) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
-    // const sharelinkTrimmed = sharelink.substring(6);
     const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
     console.log('!!! given sharelink', sharelink);
     console.log('!!! filelink to use', filelink);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
-    const messageToSign = `${sharelink}${address}${sequence}${timestamp}`;
+    // messageToSign must not starts with the sds://
+    const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
+    console.log('!!! messageToSign', messageToSign);
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = {
         signature: {
@@ -1109,7 +1110,8 @@ filesize, progressCb = () => { }) => {
     return { downloadedFile: decodedFile, originalFileName };
 };
 exports.downloadSharedFileToBuffer = downloadSharedFileToBuffer;
-const downloadSharedFile = async (keypair, filePathToSave, sharelink, filesize, progressCb = (data) => {
+const downloadSharedFile = async (keypair, filePathToSave, sharelink, // with or without sds://
+filesize, progressCb = (data) => {
     console.log('data passed to callback', data);
 }) => {
     const { downloadedFile, originalFileName } = await (0, exports.downloadSharedFileToBuffer)(keypair, sharelink, filesize, progressCb);
