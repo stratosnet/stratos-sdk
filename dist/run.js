@@ -561,10 +561,10 @@ async function main() {
     //   shareid: 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b',
     //   sharelink: 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b'
     // }
-    // const filesize = 105000001;
-    // const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
-    const filesize = 25000001;
-    const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
+    const filesize = 105000001;
+    const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+    // const filesize = 25000001;
+    // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
     await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
