@@ -378,7 +378,6 @@ exports.downloadFileOriginal = downloadFileOriginal;
 const downloadFileToBuffer = async (keypair, filehash, filesize, progressCb = () => { }) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
-    // console.log('sequence', sequence);
     const filehandle = `sdm://${address}/${filehash}`;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
@@ -980,12 +979,8 @@ filesize, progressCb = () => { }) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
     const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
-    console.log('!!! given sharelink', sharelink);
-    console.log('!!! filelink to use', filelink);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
-    // messageToSign must not starts with the sds://
     const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
-    console.log('!!! messageToSign', messageToSign);
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
     const extraParams = {
         signature: {
@@ -1011,6 +1006,7 @@ filesize, progressCb = () => { }) => {
     }
     const { result: resultWithOffesets } = responseRequestGetShared;
     const { return: requestGetSharedReturn, reqid: reqidDownloadFile, filehash, filename: originalFileName, offsetstart: offsetstartInit, offsetend: offsetendInit, } = resultWithOffesets;
+    // console.log('resultWithOffesets', resultWithOffesets);
     if (parseInt(requestGetSharedReturn, 10) < 0) {
         const errorMsg = `return field in the request get shared response contains an error. Error code "${requestGetSharedReturn}"`;
         progressCb({
@@ -1092,7 +1088,7 @@ filesize, progressCb = () => { }) => {
         });
         throw new Error(errorMsg);
     }
-    const decodedFile = await processUsedFileDownload(responseRequestGetShared, filehash, filesize);
+    const decodedFile = await processUsedFileDownload(responseRequestGetShared, filehash, filesize, progressCb);
     if (!decodedFile) {
         const errorMsg = `Could not process download of the user shared file for the "${filehash}" into buffer`;
         progressCb({

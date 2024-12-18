@@ -511,7 +511,6 @@ export const downloadFileToBuffer = async (
   const { address, publicKey } = keypair;
 
   const sequence = await getCurrentSequenceString(address);
-  // console.log('sequence', sequence);
 
   const filehandle = `sdm://${address}/${filehash}`;
 
@@ -560,6 +559,7 @@ export const downloadFileToBuffer = async (
 
   if (parseInt(requestDownloadFileReturn, 10) < 0) {
     const errorMsg = `return field in the request download shared response contains an error. Error code "${requestDownloadFileReturn}"`;
+
     progressCb({
       result: { success: false, code: SdsTypes.DOWNLOAD_CODES.RETURN_FIELD_OF_REQUEST_DOWNLOAD_HAS_ERROR },
       error: {
@@ -1354,13 +1354,9 @@ export const downloadSharedFileToBuffer = async (
   const sequence = await getCurrentSequenceString(address);
 
   const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
-  console.log('!!! given sharelink', sharelink);
-  console.log('!!! filelink to use', filelink);
 
   const timestamp = getTimestampInSeconds();
-  // messageToSign must not starts with the sds://
   const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
-  console.log('!!! messageToSign', messageToSign);
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
 
@@ -1401,6 +1397,7 @@ export const downloadSharedFileToBuffer = async (
     offsetstart: offsetstartInit,
     offsetend: offsetendInit,
   } = resultWithOffesets;
+  // console.log('resultWithOffesets', resultWithOffesets);
 
   if (parseInt(requestGetSharedReturn, 10) < 0) {
     const errorMsg = `return field in the request get shared response contains an error. Error code "${requestGetSharedReturn}"`;
@@ -1499,6 +1496,7 @@ export const downloadSharedFileToBuffer = async (
     responseRequestGetShared,
     filehash,
     filesize,
+    progressCb,
   );
 
   if (!decodedFile) {
