@@ -355,7 +355,7 @@ export const getUploadedFileList = async (
       req_time: timestamp,
     },
   ];
-  console.log('extraParams for sendUserRequestList', extraParams);
+  // console.log('extraParams for sendUserRequestList', extraParams);
 
   const callResult = await networkApi.sendUserRequestList(extraParams);
 
