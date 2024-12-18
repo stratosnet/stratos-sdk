@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.uploadFile = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
+exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDownload = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
@@ -231,17 +231,19 @@ config) => {
 exports.requestBalanceIncrease = requestBalanceIncrease;
 const getRpcStatus = async (config) => {
     const url = `${getRpcRoute()}/status`;
+    console.log('url for getRpcStatus', url);
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
 exports.getRpcStatus = getRpcStatus;
-const uploadFile = async (config) => {
-    const url = `${getRpcRoute()}/status`;
-    // console.log('🚀 !~ file: network.ts ~ line 321 ~ getRpcStatus ~ url', url);
-    const dataResult = await (0, exports.apiGet)(url, config);
-    return dataResult;
-};
-exports.uploadFile = uploadFile;
+// TODO: check in the wallet and the drive for dangling reference
+// export const uploadFile = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
+//   const url = `${getRpcRoute()}/status`;
+//
+//   const dataResult = await apiGet(url, config);
+//
+//   return dataResult;
+// };
 const getRpcPayload = (msgId, method, extraParams) => {
     const payload = {
         id: msgId,
@@ -254,6 +256,7 @@ exports.getRpcPayload = getRpcPayload;
 const sendUserRequestList = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestList';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -262,6 +265,7 @@ exports.sendUserRequestList = sendUserRequestList;
 const sendUserRequestUpload = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestUpload';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -270,6 +274,7 @@ exports.sendUserRequestUpload = sendUserRequestUpload;
 const sendUserRequestDownload = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestDownload';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -278,6 +283,7 @@ exports.sendUserRequestDownload = sendUserRequestDownload;
 const sendUserDownloadData = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_downloadData';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -286,6 +292,7 @@ exports.sendUserDownloadData = sendUserDownloadData;
 const sendUserDownloadedFileInfo = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_downloadedFileInfo';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -294,6 +301,7 @@ exports.sendUserDownloadedFileInfo = sendUserDownloadedFileInfo;
 const sendUserRequestGetOzone = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestGetOzone';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -302,6 +310,7 @@ exports.sendUserRequestGetOzone = sendUserRequestGetOzone;
 const sendUserUploadData = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_uploadData';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -310,6 +319,7 @@ exports.sendUserUploadData = sendUserUploadData;
 const sendUserRequestShare = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestShare';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -318,6 +328,7 @@ exports.sendUserRequestShare = sendUserRequestShare;
 const sendUserRequestListShare = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestListShare';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -326,6 +337,7 @@ exports.sendUserRequestListShare = sendUserRequestListShare;
 const sendUserRequestStopShare = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestStopShare';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -334,6 +346,7 @@ exports.sendUserRequestStopShare = sendUserRequestStopShare;
 const sendUserRequestGetShared = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_requestGetShared';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;
@@ -342,6 +355,7 @@ exports.sendUserRequestGetShared = sendUserRequestGetShared;
 const sendUserRequestGetFileStatus = async (extraParams, config) => {
     const msgId = 1;
     const method = 'user_getFileStatus';
+    // gateway
     const payload = (0, exports.getRpcPayload)(msgId, method, extraParams);
     const dataResult = await (0, exports.sendRpcCall)(payload, config);
     return dataResult;

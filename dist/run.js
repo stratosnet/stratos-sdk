@@ -49,6 +49,7 @@ const sdkEnvTest = {
     name: 'Mesos',
     restUrl: 'https://rest-mesos.thestratos.org',
     rpcUrl: 'https://rpc-mesos.thestratos.org',
+    // rpcUrl: '',
     chainId: 'stratos-testnet-2',
     explorerUrl: 'https://big-dipper-mesos.thestratos.org',
     faucetUrl: 'https://faucet-mesos.thestratos.org/credit',
@@ -261,12 +262,34 @@ const testRequestUserStopFileShare = async (hdPathIndex, shareid, givenReceiverM
 const testRequestUserDownloadSharedFile = async (hdPathIndex, sharelink, filesize, givenReceiverMnemonic = zeroUserMnemonic) => {
     const PROJECT_ROOT = path_1.default.resolve(__dirname, '../');
     const SRC_ROOT = path_1.default.resolve(PROJECT_ROOT, './src');
-    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelink}`);
+    // it always comes with the sds://
+    const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
+    // it always drops sds://
+    const sharelinkTrimmed = filelink.substring(6);
+    const filePathToSave = path_1.default.resolve(SRC_ROOT, `my_super_new_from_shared_${sharelinkTrimmed}`);
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
     if (!keyPairZero) {
         return;
     }
-    const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, sharelink, filesize);
+    const myCb = (data) => {
+        const { result: { success, code, message }, error, } = data;
+        console.log('!!!! data', data);
+        if (error) {
+            (0, helpers_1.dirLog)('we have an error. data from myCb', data);
+        }
+        else if (success === false) {
+            (0, helpers_1.log)('success is false. data from myCb', data);
+        }
+        else if (code ===
+            stratos.sds.remoteFileSystem.remoteFileSystemTypes.DOWNLOAD_CODES
+                .WE_HAVE_CORRECT_RESPONSE_TO_REQUEST_DOWNLOAD) {
+            (0, helpers_1.log)('message -', message);
+        }
+        else {
+            (0, helpers_1.dirLog)('unknown response', data);
+        }
+    };
+    const userDownloadSharedFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.downloadSharedFile(keyPairZero, filePathToSave, filelink, filesize, myCb);
     console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 const testTxHistory = async (hdPathIndex, page = 0, givenReceiverMnemonic = zeroUserMnemonic) => {
@@ -411,23 +434,49 @@ const testBalanceRound = async () => {
 //     console.log('SIGNATURE VERIFICATION HAS FAILED. Data might be compomised');
 //   }
 // }
+const testGateway = async () => {
+    const opts = { depth: null, colors: true, maxArrayLength: null };
+    const res = await stratos.network.networkApi.getRpcStatus();
+    // console.dir(res, opts);
+    // const res2 = await stratos.network.networkApi.getChainId();
+    // console.dir(res2, opts);
+    // const res3 = await stratos.network.networkApi.getChainAndProtocolDetails();
+    // console.dir(res3, opts);
+    // return res3;
+};
 async function main() {
     // const sdkEnv = sdkEnvDev;
     const sdkEnv = sdkEnvTest;
     // const sdkEnv = sdkEnvMainNet;
-    stratos.Sdk.init(Object.assign({}, sdkEnv));
-    const { resolvedChainID, resolvedChainVersion, isNewProtocol } = await stratos.network.networkApi.getChainAndProtocolDetails();
     const a = 'QKL6GXpRnztvUL_ptmYn-ViCVTY=';
-    stratos.Sdk.init(Object.assign(Object.assign({}, sdkEnv), { chainId: resolvedChainID, nodeProtocolVersion: resolvedChainVersion, isNewProtocol, 
-        // optional
-        // keyPathParameters: keyPathParametersForSdk,
-        // devnet
-        // ppNodeUrl: 'http://35.187.47.46',
-        // ppNodePort: '8142',
-        // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
-        // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-        // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
-        ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}` }));
+    // const rpcUrlG = `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`;
+    const initData = Object.assign({}, sdkEnv);
+    stratos.Sdk.init(initData);
+    // const { resolvedChainID, resolvedChainVersion, isNewProtocol } =
+    const { resolvedChainID } = await stratos.network.networkApi.getChainAndProtocolDetails();
+    // console.log('resolvedChainID, resolvedChainID', resolvedChainID);
+    stratos.Sdk.init(Object.assign(Object.assign({}, initData), { chainId: resolvedChainID, ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}` }));
+    // stratos.Sdk.init({
+    // ...sdkEnv,
+    // chainId: resolvedChainID,
+    // rpcUrl: rpcUrlG,
+    // nodeProtocolVersion: resolvedChainVersion,
+    // isNewProtocol,
+    // optional
+    // keyPathParameters: keyPathParametersForSdk,
+    // devnet
+    // ppNodeUrl: 'http://35.187.47.46',
+    // ppNodePort: '8142',
+    // ppNodeUrl: 'https://sds-dev-pp-8.thestratos.org',
+    // ppNodeUrl: 'http://35.233.211.175:8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodePort: '8080/private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // ppNodeUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
+    // rpcUrl: `https://sds-gateway-uswest-mesos.thestratos.org/private/rpc/${a}`,
+    // ppNodePort: 'private/rpc/iKZQw8IMYfkM9Jdo62v_yasNS7A=',
+    // mesos - we connect to mesos pp
+    // ppNodeUrl: 'http://34.195.137.237',
+    // ppNodePort: '8142',
+    // });
     const hdPathIndex = 0;
     const _cosmosClient = await stratos.chain.cosmos.cosmosService.create(zeroUserMnemonic, hdPathIndex);
     // const a = await stratos.chain.cosmos.cosmosService.getCosmos();
@@ -494,13 +543,36 @@ async function main() {
     // await testRequestUserStopFileShare(hdPathIndex, shareid);
     // 7a
     // const sharelink = 'ICDrUX_2d44dc5f3f8ac6b1';
-    // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
+    // [Object: null prototype] {
+    //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+    //   filename: 'file20M_Oct_10_15.bin',
+    //   filesize: 25000001,
+    //   linktime: 1734060111,
+    //   linktimeexp: 1749612111,
+    //   shareid: 'cc06da35244748af_ba1e097bf7_b1d6f7',
+    //   sharelink: 'sds://cc06da35244748af_ba1e097bf7_b1d6f7'
+    // },
+    // [Object: null prototype] {
+    //   filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
+    //   filename: 'file105M_Oct_17_4.bin',
+    //   filesize: 105000001,
+    //   linktime: 1734060115,
+    //   linktimeexp: 1749612115,
+    //   shareid: 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b',
+    //   sharelink: 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b'
+    // }
+    const filesize = 105000001;
+    const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+    // const filesize = 25000001;
+    // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
+    await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-    void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+    // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
+    // void testGateway();
 }
 void main();
 //# sourceMappingURL=run.js.map
