@@ -171,6 +171,7 @@ const testRequestAllUserSharedFileList = async (hdPathIndex, givenReceiverMnemon
         return;
     }
     const userSharedFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllSharedFileList(keyPairZero);
+    // console.log('retrieved all user shared file list', userSharedFileList);
     console.log('retrieved all user shared file list', userSharedFileList.length);
 };
 const testItFileUpFromBuffer = async (hdPathIndex, filename, givenReceiverMnemonic = zeroUserMnemonic) => {
@@ -243,13 +244,14 @@ const testRequestUserSharedFileList = async (hdPathIndex, page, givenReceiverMne
     const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getSharedFileList(keyPairZero, page);
     console.log('retrieved user shared file list', userFileList);
 };
-const testRequestUserFileShare = async (hdPathIndex, filehash, givenReceiverMnemonic = zeroUserMnemonic) => {
+const testRequestUserFileShare = async (hdPathIndex, filehash, durationInDays = 180, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
     if (!keyPairZero) {
         return;
     }
-    const userShareFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.shareFile(keyPairZero, filehash);
+    const userShareFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.shareFile(keyPairZero, filehash, durationInDays);
     console.log('retrieved user shared file result', userShareFileResult);
+    return userShareFileResult;
 };
 const testRequestUserStopFileShare = async (hdPathIndex, shareid, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -437,6 +439,12 @@ const testBalanceRound = async () => {
 const testGateway = async () => {
     const opts = { depth: null, colors: true, maxArrayLength: null };
     const res = await stratos.network.networkApi.getRpcStatus();
+    const cur = (0, helpers_1.getCurrentTimestamp)();
+    const curInSec = (0, helpers_1.getTimestampInSeconds)();
+    // console.log('curM', cur);
+    console.log('curInSecM', curInSec);
+    const example = 1750218794;
+    console.log('curInSecE', example);
     // console.dir(res, opts);
     // const res2 = await stratos.network.networkApi.getChainId();
     // console.dir(res2, opts);
@@ -522,21 +530,28 @@ async function main() {
     // 5a
     // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
     const filehasheList = [
-        {
-            filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
-        },
-        {
-            filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
-        },
+        // {
+        // filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
+        // filehash: 'shit',
+        // },
+        // {
+        //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+        // },
         {
             filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
         },
     ];
-    // for (const filehashItem of filehasheList) {
-    //   console.log('yes', filehashItem.filehash);
-    //   await testRequestUserFileShare(hdPathIndex, filehashItem.filehash);
-    //   await delay(1000);
-    // }
+    for (const filehashItem of filehasheList) {
+        const durationInDays = 1;
+        try {
+            const a = await testRequestUserFileShare(hdPathIndex, filehashItem.filehash, durationInDays);
+            console.log('a', a);
+        }
+        catch (error) {
+            console.log('e', error);
+        }
+        await (0, helpers_1.delay)(500);
+    }
     // await testRequestUserFileShare(hdPathIndex, filehash);
     // 6a
     // const shareid = '2d44dc5f3f8ac6b1';
@@ -565,10 +580,10 @@ async function main() {
     const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
     // const filesize = 25000001;
     // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
-    await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
+    // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-    // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+    void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);

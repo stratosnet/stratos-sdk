@@ -24,7 +24,7 @@ export declare const updloadFileFromBuffer: (keypair: WalletTypes.KeyPairInfo, f
     filehash: string;
     fileStatusInfo: SdsTypes.UploadedFileStatusInfo;
 }>;
-export declare const shareFile: (keypair: WalletTypes.KeyPairInfo, filehash: string) => Promise<{
+export declare const shareFile: (keypair: WalletTypes.KeyPairInfo, filehash: string, durationInDays?: number) => Promise<{
     filehash: string;
     sharelink: string;
     shareid: string;

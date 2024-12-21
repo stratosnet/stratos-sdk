@@ -282,7 +282,7 @@ const getUploadedFileList = async (keypair, page = 0) => {
             req_time: timestamp,
         },
     ];
-    console.log('extraParams for sendUserRequestList', extraParams);
+    // console.log('extraParams for sendUserRequestList', extraParams);
     const callResult = await network_1.networkApi.sendUserRequestList(extraParams);
     const { response } = callResult;
     if (!response) {
@@ -836,14 +836,18 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
     return uploadResult;
 };
 exports.updloadFileFromBuffer = updloadFileFromBuffer;
-const shareFile = async (keypair, filehash) => {
+const shareFile = async (keypair, filehash, durationInDays = 180) => {
     const { address, publicKey } = keypair;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+    const durationInSec = durationInDays *
+        24 * // in hours
+        60 * // in minutes
+        60; // in seconds
     const extraParams = {
         filehash,
-        duration: 0,
+        duration: durationInSec,
         bool: false,
         signature: {
             address,

@@ -1146,6 +1146,7 @@ export const updloadFileFromBuffer = async (
 export const shareFile = async (
   keypair: WalletTypes.KeyPairInfo,
   filehash: string,
+  durationInDays = 180,
 ): Promise<{ filehash: string; sharelink: string; shareid: string }> => {
   const { address, publicKey } = keypair;
 
@@ -1153,9 +1154,16 @@ export const shareFile = async (
   const messageToSign = `${filehash}${address}${timestamp}`;
 
   const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const durationInSec =
+    durationInDays *
+    24 * // in hours
+    60 * // in minutes
+    60; // in seconds
+
   const extraParams: networkTypes.FileUserRequestShareParams = {
     filehash,
-    duration: 0,
+    duration: durationInSec,
     bool: false,
     signature: {
       address,
