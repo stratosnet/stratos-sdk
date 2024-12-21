@@ -4,7 +4,7 @@ import { hdVault } from './config';
 import * as stratos from './index';
 import { toWei } from './services/bigNumber';
 // import * as FileDrive from './services/fileDrive';
-import { delay, dirLog, log } from './services/helpers';
+import { delay, dirLog, getCurrentTimestamp, getTimestampInSeconds, log } from './services/helpers';
 
 dotenv.config();
 
@@ -244,6 +244,7 @@ const testRequestAllUserSharedFileList = async (
     keyPairZero,
   );
 
+  // console.log('retrieved all user shared file list', userSharedFileList);
   console.log('retrieved all user shared file list', userSharedFileList.length);
 };
 
@@ -390,6 +391,7 @@ const testRequestUserSharedFileList = async (
 const testRequestUserFileShare = async (
   hdPathIndex: number,
   filehash: string,
+  durationInDays = 180,
   givenReceiverMnemonic = zeroUserMnemonic,
 ) => {
   const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
@@ -404,9 +406,11 @@ const testRequestUserFileShare = async (
   const userShareFileResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.shareFile(
     keyPairZero,
     filehash,
+    durationInDays,
   );
 
   console.log('retrieved user shared file result', userShareFileResult);
+  return userShareFileResult;
 };
 
 const testRequestUserStopFileShare = async (
@@ -660,6 +664,12 @@ const testBalanceRound = async () => {
 const testGateway = async () => {
   const opts = { depth: null, colors: true, maxArrayLength: null };
   const res = await stratos.network.networkApi.getRpcStatus();
+  const cur = getCurrentTimestamp();
+  const curInSec = getTimestampInSeconds();
+  // console.log('curM', cur);
+  console.log('curInSecM', curInSec);
+  const example = 1750218794;
+  console.log('curInSecE', example);
   // console.dir(res, opts);
 
   // const res2 = await stratos.network.networkApi.getChainId();
@@ -770,22 +780,28 @@ async function main(): Promise<void> {
   // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
 
   const filehasheList = [
-    {
-      filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
-    },
-    {
-      filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
-    },
+    // {
+    // filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
+    // filehash: 'shit',
+    // },
+    // {
+    //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+    // },
     {
       filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
     },
   ];
 
-  // for (const filehashItem of filehasheList) {
-  //   console.log('yes', filehashItem.filehash);
-  //   await testRequestUserFileShare(hdPathIndex, filehashItem.filehash);
-  //   await delay(1000);
-  // }
+  for (const filehashItem of filehasheList) {
+    const durationInDays = 1;
+    try {
+      const a = await testRequestUserFileShare(hdPathIndex, filehashItem.filehash, durationInDays);
+      console.log('a', a);
+    } catch (error) {
+      console.log('e', error);
+    }
+    await delay(500);
+  }
 
   // await testRequestUserFileShare(hdPathIndex, filehash);
   // 6a
@@ -819,10 +835,10 @@ async function main(): Promise<void> {
   // const filesize = 25000001;
   // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
 
-  await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
+  // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
   // void testBalanceRound();
   // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-  // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+  void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
