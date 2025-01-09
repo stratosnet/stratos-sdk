@@ -1554,7 +1554,7 @@ export const getSharedFileInfo = async (
     sharelink: filelink,
   };
 
-  console.log('extraParams for getSharedFileInfo', extraParams);
+  // console.log('extraParams for getSharedFileInfo', extraParams);
 
   const callResultRequestGetShared = await networkApi.sendUserRequestGetShared([extraParams]);
 
@@ -1570,12 +1570,17 @@ export const getSharedFileInfo = async (
 
   const { result: resultWithOffesets } = responseRequestGetShared;
 
-  const { return: requestGetSharedReturn, filehash, filename: originalFileName } = resultWithOffesets;
+  const {
+    return: requestGetSharedReturn,
+    filehash,
+    filename: originalFileName,
+    filesize,
+  } = resultWithOffesets;
 
   return {
     filehash,
     originalFileName,
     requestGetSharedReturn,
-    filesize: 12000000,
+    filesize,
   };
 };

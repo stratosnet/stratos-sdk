@@ -731,6 +731,7 @@ export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
     filehash: string;
     filename: string;
     filedata: string;
+    filesize: number;
   };
 }
 

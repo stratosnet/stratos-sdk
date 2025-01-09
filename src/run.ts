@@ -853,6 +853,7 @@ async function main(): Promise<void> {
 
   // const filesize = 105000001;
   const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
+  // const sharelink = 'blabla';
 
   // console.log('zeroUserMnemonic', zeroUserMnemonic);
   const filesize = 25000001;
