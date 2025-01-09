@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
+exports.getSharedFileInfo = exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
 const path_1 = __importDefault(require("path"));
 const accounts_1 = require("../../accounts");
 const remotefs_1 = require("../../config/remotefs");
@@ -39,6 +39,7 @@ const types_1 = require("./types");
 const processUsedFileDownload = async (responseRequestDownloadShared, filehash, filesize, progressCb = () => { }) => {
     var _a;
     const { result: resultWithOffesets } = responseRequestDownloadShared;
+    // console.log('resultWithOffesets, ', resultWithOffesets);
     let offsetStartGlobal = 0;
     let offsetEndGlobal = 0;
     let isContinueGlobal = 0;
@@ -56,26 +57,8 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
     let dlPartSize = offsetEndGlobal === filesize ? filesize : dlPartSizeToCheck;
     readSize = readSize + dlPartSize;
     completedProgress = (100 * readSize) / filesize;
-    // console.log(
-    //   'a- dlPartSize, dlPartSizeToCheck, filesize, readSize',
-    //   dlPartSize,
-    //   dlPartSizeToCheck,
-    //   filesize,
-    //   readSize,
-    // );
     const completedProgressPercentageA = (Math.round(completedProgress * 100) / 100).toFixed(2);
-    //   const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${
-    // ( Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
     const completedProgressMessageA = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageA}%`;
-    // log('2 We have a correct responseRequestDownload', completedProgressMessage);
-    // console.log(
-    //   'a- readSize, completedProgress, completedProgressPercentageA, offsetStartGlobal, offsetEndGlobal',
-    //   readSize,
-    //   completedProgress,
-    //   completedProgressPercentageA,
-    //   offsetStartGlobal,
-    //   offsetEndGlobal,
-    // );
     const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessageA} ___${completedProgressPercentageA}`;
     progressCb({
         result: {
@@ -98,10 +81,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
         const callResultDownload = await network_1.networkApi.sendUserDownloadData(extraParamsForUserDownload);
         const { response: responseDownload } = callResultDownload;
         if (!responseDownload) {
-            // dirLog(
-            //   '-- ERROR processUsedFileDownload - we dont have response. it might be an error',
-            //   callResultDownload,
-            // );
             const errorMsg = '-- ERROR processUsedFileDownload - we dont have response. it might be an error';
             progressCb({
                 result: {
@@ -115,9 +94,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             });
             return;
         }
-        // const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-        // const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-        // dirLog('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
         const { result: { offsetend: offsetendDownload, offsetstart: offsetstartDownload, return: isContinueDownload, filedata: downloadedFileData, }, } = responseDownload;
         isContinueGlobal = +isContinueDownload;
         if (offsetstartDownload !== undefined && offsetendDownload !== undefined) {
@@ -136,14 +112,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             // console.log('b dlPartSize, filesize, readSize', dlPartSize, filesize, readSize);
             const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
             const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
-            // console.log(
-            //   'b readSize, completedProgress, completedProgressPercentageB, offsetStartGlobal, offsetEndGlobal',
-            //   readSize,
-            //   completedProgress,
-            //   completedProgressPercentageB,
-            //   offsetStartGlobal,
-            //   offsetEndGlobal,
-            // );
             // log('3 We have a correct responseDownload', completedProgressMessage);
             const resMsgC = `b. we have a correct responseRequestDownload, ${completedProgressMessageC} ___${completedProgressPercentageB}`;
             progressCb({
@@ -856,6 +824,7 @@ const shareFile = async (keypair, filehash, durationInDays = 180) => {
         },
         req_time: timestamp,
     };
+    console.log('extraParams for fileShare', extraParams);
     const callResultRequestShare = await network_1.networkApi.sendUserRequestShare([extraParams]);
     const { response: responseRequestShare } = callResultRequestShare;
     if (!responseRequestShare) {
@@ -997,6 +966,7 @@ filesize, progressCb = () => { }) => {
     };
     const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
+    console.log('responseRequestGetShared', responseRequestGetShared);
     if (!responseRequestGetShared) {
         const errorMsg = 'Error. There is no response for download shared file request.';
         progressCb({
@@ -1124,4 +1094,38 @@ filesize, progressCb = (data) => {
     return { filePathToSave: filePathToSaveWithOriginalName };
 };
 exports.downloadSharedFile = downloadSharedFile;
+const getSharedFileInfo = async (keypair, sharelink) => {
+    const { address, publicKey } = keypair;
+    const sequence = await getCurrentSequenceString(address);
+    const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
+    const timestamp = (0, helpers_1.getTimestampInSeconds)();
+    const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+    const extraParams = {
+        signature: {
+            address,
+            pubkey: publicKey,
+            signature,
+        },
+        req_time: timestamp,
+        sharelink: filelink,
+    };
+    // console.log('extraParams for getSharedFileInfo', extraParams);
+    const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
+    const { response: responseRequestGetShared } = callResultRequestGetShared;
+    // console.log('responseRequestGetShared from getSharedFileInfo', responseRequestGetShared);
+    if (!responseRequestGetShared) {
+        const errorMsg = 'Error. There is no response for download shared file request.';
+        throw new Error(errorMsg);
+    }
+    const { result: resultWithOffesets } = responseRequestGetShared;
+    const { return: requestGetSharedReturn, filehash, filename: originalFileName, filesize, } = resultWithOffesets;
+    return {
+        filehash,
+        originalFileName,
+        requestGetSharedReturn,
+        filesize,
+    };
+};
+exports.getSharedFileInfo = getSharedFileInfo;
 //# sourceMappingURL=remoteFileSystem.js.map

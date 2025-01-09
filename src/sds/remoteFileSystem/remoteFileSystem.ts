@@ -17,6 +17,7 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
 ): Promise<Buffer | undefined> => {
   const { result: resultWithOffesets } = responseRequestDownloadShared;
 
+  // console.log('resultWithOffesets, ', resultWithOffesets);
   let offsetStartGlobal = 0;
   let offsetEndGlobal = 0;
   let isContinueGlobal = 0;
@@ -50,30 +51,9 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
   readSize = readSize + dlPartSize;
   completedProgress = (100 * readSize) / filesize;
 
-  // console.log(
-  //   'a- dlPartSize, dlPartSizeToCheck, filesize, readSize',
-  //   dlPartSize,
-  //   dlPartSizeToCheck,
-  //   filesize,
-  //   readSize,
-  // );
-
   const completedProgressPercentageA = (Math.round(completedProgress * 100) / 100).toFixed(2);
-  //   const completedProgressMessage = `completed ${readSize} from ${filesize} bytes, or ${
-  // ( Math.round(completedProgress * 100) / 100).toFixed(2)}%`;
 
   const completedProgressMessageA = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageA}%`;
-
-  // log('2 We have a correct responseRequestDownload', completedProgressMessage);
-
-  // console.log(
-  //   'a- readSize, completedProgress, completedProgressPercentageA, offsetStartGlobal, offsetEndGlobal',
-  //   readSize,
-  //   completedProgress,
-  //   completedProgressPercentageA,
-  //   offsetStartGlobal,
-  //   offsetEndGlobal,
-  // );
 
   const resMsg = `a. we have a correct responseRequestDownload, ${completedProgressMessageA} ___${completedProgressPercentageA}`;
 
@@ -102,11 +82,6 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
     const { response: responseDownload } = callResultDownload;
 
     if (!responseDownload) {
-      // dirLog(
-      //   '-- ERROR processUsedFileDownload - we dont have response. it might be an error',
-      //   callResultDownload,
-      // );
-
       const errorMsg = '-- ERROR processUsedFileDownload - we dont have response. it might be an error';
 
       progressCb({
@@ -121,11 +96,6 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
       });
       return;
     }
-
-    // const { return: dlReturn, offsetstart: dlOffsetstart, offsetend: dlOffsetend } = responseDownload.result;
-
-    // const responseDownloadFormatted = { dlReturn, dlOffsetstart, dlOffsetend };
-    // dirLog('ResponseDownloadFormatted (without downloadedFileData)', responseDownloadFormatted);
 
     const {
       result: {
@@ -160,15 +130,6 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
 
       const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
       const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
-
-      // console.log(
-      //   'b readSize, completedProgress, completedProgressPercentageB, offsetStartGlobal, offsetEndGlobal',
-      //   readSize,
-      //   completedProgress,
-      //   completedProgressPercentageB,
-      //   offsetStartGlobal,
-      //   offsetEndGlobal,
-      // );
 
       // log('3 We have a correct responseDownload', completedProgressMessage);
       const resMsgC = `b. we have a correct responseRequestDownload, ${completedProgressMessageC} ___${completedProgressPercentageB}`;
@@ -1173,6 +1134,7 @@ export const shareFile = async (
     req_time: timestamp,
   };
 
+  console.log('extraParams for fileShare', extraParams);
   const callResultRequestShare = await networkApi.sendUserRequestShare([extraParams]);
 
   const { response: responseRequestShare } = callResultRequestShare;
@@ -1382,6 +1344,8 @@ export const downloadSharedFileToBuffer = async (
 
   const { response: responseRequestGetShared } = callResultRequestGetShared;
 
+  console.log('responseRequestGetShared', responseRequestGetShared);
+
   if (!responseRequestGetShared) {
     const errorMsg = 'Error. There is no response for download shared file request.';
 
@@ -1558,4 +1522,65 @@ export const downloadSharedFile = async (
   filesystemApi.writeFile(filePathToSaveWithOriginalName, downloadedFile);
 
   return { filePathToSave: filePathToSaveWithOriginalName };
+};
+
+export const getSharedFileInfo = async (
+  keypair: WalletTypes.KeyPairInfo,
+  sharelink: string, // with or without sds://
+): Promise<{
+  requestGetSharedReturn: '0' | '1' | '2' | '3' | '4' | '5';
+  filehash: string;
+  originalFileName: string;
+  filesize: number;
+}> => {
+  const { address, publicKey } = keypair;
+
+  const sequence = await getCurrentSequenceString(address);
+
+  const filelink = sharelink.startsWith('sds://') ? sharelink.trim() : `sds://${sharelink.trim()}`;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filelink.substring(6)}${address}${sequence}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const extraParams: networkTypes.FileUserRequestGetSharedParams = {
+    signature: {
+      address,
+      pubkey: publicKey,
+      signature,
+    },
+    req_time: timestamp,
+    sharelink: filelink,
+  };
+
+  // console.log('extraParams for getSharedFileInfo', extraParams);
+
+  const callResultRequestGetShared = await networkApi.sendUserRequestGetShared([extraParams]);
+
+  const { response: responseRequestGetShared } = callResultRequestGetShared;
+
+  // console.log('responseRequestGetShared from getSharedFileInfo', responseRequestGetShared);
+
+  if (!responseRequestGetShared) {
+    const errorMsg = 'Error. There is no response for download shared file request.';
+
+    throw new Error(errorMsg);
+  }
+
+  const { result: resultWithOffesets } = responseRequestGetShared;
+
+  const {
+    return: requestGetSharedReturn,
+    filehash,
+    filename: originalFileName,
+    filesize,
+  } = resultWithOffesets;
+
+  return {
+    filehash,
+    originalFileName,
+    requestGetSharedReturn,
+    filesize,
+  };
 };

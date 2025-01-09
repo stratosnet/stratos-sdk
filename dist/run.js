@@ -333,6 +333,15 @@ const testBalanceRound = async () => {
     const amount2 = +amount * 0.99;
     console.log('amount2', amount2);
 };
+const testGetSharedFileInfo = async (hdPathIndex, sharelink, // with or without sds://
+givenReceiverMnemonic = zeroUserMnemonic) => {
+    const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
+    if (!keyPairZero) {
+        return;
+    }
+    const sharedFileInfo = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getSharedFileInfo(keyPairZero, sharelink);
+    console.log('sharedFileInfo', sharedFileInfo);
+};
 // async function testRedis() {
 //   const derivedKeyPair = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(zeroUserMnemonic, 0);
 //
@@ -530,28 +539,26 @@ async function main() {
     // 5a
     // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
     const filehasheList = [
-        // {
-        // filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
-        // filehash: 'shit',
-        // },
-        // {
-        //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
-        // },
+        {
+            filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
+        },
+        {
+            filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
+        },
         {
             filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
         },
     ];
-    for (const filehashItem of filehasheList) {
-        const durationInDays = 1;
-        try {
-            const a = await testRequestUserFileShare(hdPathIndex, filehashItem.filehash, durationInDays);
-            console.log('a', a);
-        }
-        catch (error) {
-            console.log('e', error);
-        }
-        await (0, helpers_1.delay)(500);
-    }
+    // for (const filehashItem of filehasheList) {
+    //   const durationInDays = 1;
+    //   try {
+    //     const a = await testRequestUserFileShare(hdPathIndex, filehashItem.filehash, durationInDays);
+    //     console.log('a', a);
+    //   } catch (error) {
+    //     console.log('e', error);
+    //   }
+    //   await delay(500);
+    // }
     // await testRequestUserFileShare(hdPathIndex, filehash);
     // 6a
     // const shareid = '2d44dc5f3f8ac6b1';
@@ -562,6 +569,7 @@ async function main() {
     //   filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
     //   filename: 'file20M_Oct_10_15.bin',
     //   filesize: 25000001,
+    //   sharelink: 'sds://cc06da35244748af_ba1e097bf7_b1d6f7'
     //   linktime: 1734060111,
     //   linktimeexp: 1749612111,
     //   shareid: 'cc06da35244748af_ba1e097bf7_b1d6f7',
@@ -576,14 +584,17 @@ async function main() {
     //   shareid: 'ee5f947dfdfc4b18_8dc2c45db1_b6bd9b',
     //   sharelink: 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b'
     // }
-    const filesize = 105000001;
+    // const filesize = 105000001;
     const sharelink = 'sds://ee5f947dfdfc4b18_8dc2c45db1_b6bd9b';
-    // const filesize = 25000001;
+    // const sharelink = 'blabla';
+    // console.log('zeroUserMnemonic', zeroUserMnemonic);
+    const filesize = 25000001;
     // const sharelink = 'sds://cc06da35244748af_ba1e097bf7_b1d6f7';
     // await testRequestUserDownloadSharedFile(hdPathIndex, sharelink, filesize);
     // void testBalanceRound();
+    void testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
-    void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
+    // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);

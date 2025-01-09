@@ -42,3 +42,9 @@ export declare const downloadSharedFileToBuffer: (keypair: WalletTypes.KeyPairIn
 export declare const downloadSharedFile: (keypair: WalletTypes.KeyPairInfo, filePathToSave: string, sharelink: string, filesize: number, progressCb?: (data: SdsTypes.ProgressCbData) => void) => Promise<{
     filePathToSave: string;
 }>;
+export declare const getSharedFileInfo: (keypair: WalletTypes.KeyPairInfo, sharelink: string) => Promise<{
+    requestGetSharedReturn: '0' | '1' | '2' | '3' | '4' | '5';
+    filehash: string;
+    originalFileName: string;
+    filesize: number;
+}>;
