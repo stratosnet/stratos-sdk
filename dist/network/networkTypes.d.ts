@@ -294,6 +294,9 @@ export interface RpcStatusDataResult extends NetworkAxiosDataResult {
 export interface RestTxListDataResult extends NetworkAxiosDataResult {
     response?: RestTxListResponse;
 }
+export type ReturnErrorCodes = '-1' | '-2' | '-3' | '-4' | '-5' | '-6' | '-7' | '-8' | '-9' | '-10' | '-11' | '-12';
+export type ReturnSuccessCodes = '0' | '1' | '2' | '3' | '4' | '5';
+export type ReturnCodeType = ReturnSuccessCodes & ReturnErrorCodes;
 export interface MainRpcResponse {
     id: string;
     jsonrpc: string;
@@ -332,7 +335,7 @@ export interface SharedFileInfoItem extends Omit<FileInfoItem, 'createtime>'> {
 }
 export interface FileUserRequestListResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1';
+        return: ReturnCodeType;
         fileinfo: FileInfoItem[];
         totalnumber: number;
     };
@@ -357,7 +360,7 @@ export interface UserFileSignature {
 }
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2' | '3' | '4';
+        return: ReturnCodeType;
         reqid: string;
         offsetstart: string;
         offsetend: string;
@@ -370,7 +373,7 @@ export interface FileUserDownloadDataParams {
 }
 export interface FileUserDownloadDataResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2' | '3';
+        return: ReturnCodeType;
         offsetstart?: string;
         offsetend?: string;
         filedata?: string;
@@ -383,12 +386,12 @@ export interface FileUserDownloadedFileInfoParams {
 }
 export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2' | '3';
+        return: ReturnCodeType;
     };
 }
 export interface FileUserRequestUploadResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1';
+        return: ReturnCodeType;
         offsetstart?: string;
         offsetend?: string;
     };
@@ -403,7 +406,7 @@ export interface FileUserUploadDataParams {
 }
 export interface FileUserUploadDataResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1';
+        return: ReturnCodeType;
         offsetstart?: string;
         offsetend?: string;
     };
@@ -413,7 +416,7 @@ export interface FileUserRequestGetOzoneParams {
 }
 export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1';
+        return: ReturnCodeType;
         ozone?: string;
         sequencynumber?: string;
     };
@@ -566,7 +569,7 @@ export interface FileUserRequestShareParams {
 }
 export interface FileUserRequestShareResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: ReturnCodeType;
         shareid: string;
         sharelink: string;
     };
@@ -578,7 +581,7 @@ export interface FileUserRequestListShareParams {
 }
 export interface FileUserRequestListShareResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: ReturnCodeType;
         fileinfo?: SharedFileInfoItem[];
         totalnumber?: number;
     };
@@ -590,7 +593,7 @@ export interface FileUserRequestStopShareParams {
 }
 export interface FileUserRequestStopShareResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2';
+        return: ReturnCodeType;
     };
 }
 export interface FileUserRequestGetSharedParams {
@@ -600,7 +603,8 @@ export interface FileUserRequestGetSharedParams {
 }
 export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2' | '3' | '4';
+        return: ReturnCodeType;
+        detail?: string;
         reqid: string;
         offsetstart: string;
         offsetend: string;
@@ -617,7 +621,7 @@ export interface FileUserRequestGetFileStatusParams {
 }
 export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
     result: {
-        return: '0' | '1' | '2' | '3';
+        return: ReturnCodeType;
         file_upload_state: number;
         user_has_file: boolean;
         replicas: number;

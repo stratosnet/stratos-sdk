@@ -43,8 +43,9 @@ export declare const downloadSharedFile: (keypair: WalletTypes.KeyPairInfo, file
     filePathToSave: string;
 }>;
 export declare const getSharedFileInfo: (keypair: WalletTypes.KeyPairInfo, sharelink: string) => Promise<{
-    requestGetSharedReturn: '0' | '1' | '2' | '3' | '4' | '5';
+    requestGetSharedReturn: networkTypes.ReturnCodeType;
     filehash: string;
     originalFileName: string;
     filesize: number;
+    requestReturnDetail: string;
 }>;
