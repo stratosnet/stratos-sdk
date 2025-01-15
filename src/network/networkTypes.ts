@@ -343,6 +343,42 @@ export interface RestTxListDataResult extends NetworkAxiosDataResult {
   response?: RestTxListResponse;
 }
 
+/*
+    GENERIC_ERR           string = "-1"
+    SIGNATURE_FAILURE     string = "-3"
+    WRONG_FILE_SIZE       string = "-4"
+    TIME_OUT              string = "-5"
+    FILE_REQ_FAILURE      string = "-6"
+    WRONG_INPUT           string = "-7"
+    WRONG_PP_ADDRESS      string = "-8"
+    INTERNAL_DATA_FAILURE string = "-9"
+    INTERNAL_COMM_FAILURE string = "-10"
+    WRONG_FILE_INFO       string = "-11"
+    WRONG_WALLET_ADDRESS  string = "-12"
+
+    UPLOAD_DATA     string = "1"
+    DOWNLOAD_OK     string = "2"
+    DL_OK_ASK_INFO  string = "3"
+    SHARED_DL_START string = "4"
+    SUCCESS         string = "0"
+ * */
+
+export type ReturnErrorCodes =
+  | '-1'
+  | '-2'
+  | '-3'
+  | '-4'
+  | '-5'
+  | '-6'
+  | '-7'
+  | '-8'
+  | '-9'
+  | '-10'
+  | '-11'
+  | '-12';
+export type ReturnSuccessCodes = '0' | '1' | '2' | '3' | '4' | '5'; // 4 SHARED_DL_START
+export type ReturnCodeType = ReturnSuccessCodes & ReturnErrorCodes;
+
 export interface MainRpcResponse {
   id: string;
   jsonrpc: string;
@@ -389,7 +425,7 @@ export interface SharedFileInfoItem extends Omit<FileInfoItem, 'createtime>'> {
 
 export interface FileUserRequestListResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1';
+    return: ReturnCodeType;
     fileinfo: FileInfoItem[];
     totalnumber: number;
   };
@@ -416,28 +452,9 @@ export interface UserFileSignature {
   signature: string;
 }
 
-/*
-    GENERIC_ERR           string = "-1"
-    SIGNATURE_FAILURE     string = "-3"
-    WRONG_FILE_SIZE       string = "-4"
-    TIME_OUT              string = "-5"
-    FILE_REQ_FAILURE      string = "-6"
-    WRONG_INPUT           string = "-7"
-    WRONG_PP_ADDRESS      string = "-8"
-    INTERNAL_DATA_FAILURE string = "-9"
-    INTERNAL_COMM_FAILURE string = "-10"
-    WRONG_FILE_INFO       string = "-11"
-    WRONG_WALLET_ADDRESS  string = "-12"
-
-    UPLOAD_DATA     string = "1"
-    DOWNLOAD_OK     string = "2"
-    DL_OK_ASK_INFO  string = "3"
-    SHARED_DL_START string = "4"
-    SUCCESS         string = "0"
- * */
 export interface FileUserRequestDownloadResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2' | '3' | '4'; // 4 SHARED_DL_START
+    return: ReturnCodeType; // 4 SHARED_DL_START
     reqid: string;
     offsetstart: string;
     offsetend: string;
@@ -452,7 +469,7 @@ export interface FileUserDownloadDataParams {
 
 export interface FileUserDownloadDataResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2' | '3';
+    return: ReturnCodeType;
     offsetstart?: string;
     offsetend?: string;
     filedata?: string;
@@ -467,13 +484,13 @@ export interface FileUserDownloadedFileInfoParams {
 
 export interface FileUserDownloadedFileInfoResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2' | '3';
+    return: ReturnCodeType;
   };
 }
 
 export interface FileUserRequestUploadResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1';
+    return: ReturnCodeType;
     offsetstart?: string;
     offsetend?: string;
   };
@@ -490,7 +507,7 @@ export interface FileUserUploadDataParams {
 
 export interface FileUserUploadDataResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1';
+    return: ReturnCodeType;
     offsetstart?: string;
     offsetend?: string;
   };
@@ -502,7 +519,7 @@ export interface FileUserRequestGetOzoneParams {
 
 export interface FileUserRequestGetOzoneResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1';
+    return: ReturnCodeType;
     ozone?: string;
     sequencynumber?: string;
   };
@@ -684,7 +701,7 @@ export interface FileUserRequestShareParams {
 
 export interface FileUserRequestShareResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2';
+    return: ReturnCodeType;
     shareid: string;
     sharelink: string;
   };
@@ -698,7 +715,7 @@ export interface FileUserRequestListShareParams {
 
 export interface FileUserRequestListShareResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2';
+    return: ReturnCodeType;
     fileinfo?: SharedFileInfoItem[];
     totalnumber?: number;
   };
@@ -712,7 +729,7 @@ export interface FileUserRequestStopShareParams {
 
 export interface FileUserRequestStopShareResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2';
+    return: ReturnCodeType;
   };
 }
 
@@ -724,7 +741,8 @@ export interface FileUserRequestGetSharedParams {
 
 export interface FileUserRequestGetSharedResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2' | '3' | '4'; // 4 SHARED_DL_START
+    return: ReturnCodeType; // 4 SHARED_DL_START
+    detail?: string;
     reqid: string;
     offsetstart: string;
     offsetend: string;
@@ -750,7 +768,7 @@ export interface FileUserRequestGetFileStatusParams {
  */
 export interface FileUserRequestGetFileStatusResponse extends MainRpcResponse {
   result: {
-    return: '0' | '1' | '2' | '3';
+    return: ReturnCodeType;
     file_upload_state: number;
     user_has_file: boolean;
     replicas: number;

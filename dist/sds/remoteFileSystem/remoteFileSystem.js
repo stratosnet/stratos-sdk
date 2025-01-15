@@ -1119,11 +1119,12 @@ const getSharedFileInfo = async (keypair, sharelink) => {
         throw new Error(errorMsg);
     }
     const { result: resultWithOffesets } = responseRequestGetShared;
-    const { return: requestGetSharedReturn, filehash, filename: originalFileName, filesize, } = resultWithOffesets;
+    const { return: requestGetSharedReturn, detail, filehash, filename: originalFileName, filesize, } = resultWithOffesets;
     return {
         filehash,
         originalFileName,
         requestGetSharedReturn,
+        requestReturnDetail: detail || '',
         filesize,
     };
 };

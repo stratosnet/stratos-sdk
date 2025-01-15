@@ -1528,10 +1528,11 @@ export const getSharedFileInfo = async (
   keypair: WalletTypes.KeyPairInfo,
   sharelink: string, // with or without sds://
 ): Promise<{
-  requestGetSharedReturn: '0' | '1' | '2' | '3' | '4' | '5';
+  requestGetSharedReturn: networkTypes.ReturnCodeType;
   filehash: string;
   originalFileName: string;
   filesize: number;
+  requestReturnDetail: string;
 }> => {
   const { address, publicKey } = keypair;
 
@@ -1572,6 +1573,7 @@ export const getSharedFileInfo = async (
 
   const {
     return: requestGetSharedReturn,
+    detail,
     filehash,
     filename: originalFileName,
     filesize,
@@ -1581,6 +1583,7 @@ export const getSharedFileInfo = async (
     filehash,
     originalFileName,
     requestGetSharedReturn,
+    requestReturnDetail: detail || '',
     filesize,
   };
 };
