@@ -23,11 +23,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformTx = exports.getTransformer = exports.TxHistoryTypesMap = void 0;
+exports.transformTx = exports.getTransformer = exports.TxHistoryTypesMap = exports.TransactionTransformersTypes = void 0;
 const TxTypesPrepay = __importStar(require("../../../sds/transactions/types"));
 const TxTypes = __importStar(require("../../transactions/types"));
 const Formatters = __importStar(require("./formatters"));
 const formatTxAmounts_1 = require("./formatters/formatTxAmounts");
+exports.TransactionTransformersTypes = __importStar(require("./types"));
 exports.TxHistoryTypesMap = new Map([
     [TxTypes.TxMsgTypes.All, Formatters.formatTxdDefault],
     [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault],
