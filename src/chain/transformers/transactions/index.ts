@@ -5,6 +5,8 @@ import * as Types from '../transactions/types';
 import * as Formatters from './formatters';
 import { formatTxFee } from './formatters/formatTxAmounts';
 
+export * as TransactionTransformersTypes from './types';
+
 export const TxHistoryTypesMap = new Map<string, Types.TxFormatter>([
   [TxTypes.TxMsgTypes.All, Formatters.formatTxdDefault], // default.
   [TxTypes.TxMsgTypes.Account, Formatters.formatTxdDefault], // default.
