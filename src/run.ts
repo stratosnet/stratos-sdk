@@ -694,6 +694,8 @@ const testGateway = async () => {
   console.log('curInSecE', example);
   // console.dir(res, opts);
 
+  const m = stratos.crypto.hdVault.mnemonic.generateMnemonicPhrase(12);
+  console.log('testGateway m: %s', m); // __AUTO_GENERATED_PRINT_VAR_END__
   // const res2 = await stratos.network.networkApi.getChainId();
   // console.dir(res2, opts);
   // const res3 = await stratos.network.networkApi.getChainAndProtocolDetails();
@@ -868,39 +870,42 @@ async function main(): Promise<void> {
   const numIterations = 1;
   const interval = 10000; // 10 seconds in milliseconds
 
-  for (let i = 0; i < numIterations; i++) {
-    const startTime = Date.now();
-    console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
+  // for (let i = 0; i < numIterations; i++) {
+  //   const startTime = Date.now();
+  //   console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
+  //
+  //   try {
+  //     const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
+  //     // const result = await testGetSharedFileInfo();
+  //     console.log(`Iteration ${i + 1} result:`, result);
+  //   } catch (error) {
+  //     console.error(`Error in iteration ${i + 1}:`, error);
+  //   }
+  //
+  //   const endTime = Date.now();
+  //   const elapsed = endTime - startTime;
+  //
+  //   // Wait for the remaining time in the interval, if needed.
+  //   const timeToWait = interval - elapsed;
+  //
+  //   if (timeToWait > 0) {
+  //     console.log(`Waiting ${timeToWait}ms before next iteration...`);
+  //     await new Promise(resolve => setTimeout(resolve, timeToWait));
+  //   } else {
+  //     console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
+  //   }
+  // }
 
-    try {
-      const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
-      // const result = await testGetSharedFileInfo();
-      console.log(`Iteration ${i + 1} result:`, result);
-    } catch (error) {
-      console.error(`Error in iteration ${i + 1}:`, error);
-    }
-
-    const endTime = Date.now();
-    const elapsed = endTime - startTime;
-
-    // Wait for the remaining time in the interval, if needed.
-    const timeToWait = interval - elapsed;
-
-    if (timeToWait > 0) {
-      console.log(`Waiting ${timeToWait}ms before next iteration...`);
-      await new Promise(resolve => setTimeout(resolve, timeToWait));
-    } else {
-      console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
-    }
-  }
-
+  // /
+  // st1cvhptpr4zwtygejx6hu3ra8alchnqfh6269pnp
+  //
   console.log('All iterations completed.');
   // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
   // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  // void testGateway();
+  void testGateway();
 }
 
 void main();
