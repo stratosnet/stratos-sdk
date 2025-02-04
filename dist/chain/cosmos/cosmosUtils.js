@@ -55,9 +55,6 @@ exports.decryptMasterKeySeed = decryptMasterKeySeed;
 // which is useful for React Native env, where crypto is not available by default
 function initializeRandomGenerator(hexStringFromRandomBytes) {
     sjcl_1.default.random.addEntropy(hexStringFromRandomBytes, 1024, 'native-crypto');
-    // Force immediate pool mixing
-    sjcl_1.default.random.startCollectors();
-    sjcl_1.default.random.stopCollectors();
     const ready = sjcl_1.default.random.isReady();
     if (!ready) {
         throw new Error('Random generator failed to initialize!!!!');

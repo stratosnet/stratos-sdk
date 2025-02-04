@@ -59,10 +59,6 @@ export function initializeRandomGenerator(hexStringFromRandomBytes: string): {
 } {
   sjcl.random.addEntropy(hexStringFromRandomBytes, 1024, 'native-crypto');
 
-  // Force immediate pool mixing
-  sjcl.random.startCollectors();
-  sjcl.random.stopCollectors();
-
   const ready = sjcl.random.isReady();
 
   if (!ready) {
