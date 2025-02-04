@@ -455,8 +455,11 @@ const testGateway = async () => {
     const example = 1750218794;
     console.log('curInSecE', example);
     // console.dir(res, opts);
-    const m = stratos.crypto.hdVault.mnemonic.generateMnemonicPhrase(12);
-    console.log('testGateway m: %s', m); // __AUTO_GENERATED_PRINT_VAR_END__
+    const phrase = stratos.crypto.hdVault.mnemonic.generateMnemonicPhrase(12);
+    console.log('testGateway m: %s', phrase); // __AUTO_GENERATED_PRINT_VAR_END__
+    const masterKeySeed = await stratos.crypto.hdVault.keyManager.createMasterKeySeed(phrase, '123');
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log('testGateway masterKeySeed: %s', masterKeySeed); // __AUTO_GENERATED_PRINT_VAR_END__
     // const res2 = await stratos.network.networkApi.getChainId();
     // console.dir(res2, opts);
     // const res3 = await stratos.network.networkApi.getChainAndProtocolDetails();
@@ -507,7 +510,7 @@ async function main() {
     // await runFaucet(hdPathIndex, zeroUserMnemonic);
     // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
     // 1 Check balance
-    // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+    await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
     // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
@@ -634,7 +637,7 @@ async function main() {
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-    void testGateway();
+    // void testGateway();
 }
 void main();
 //# sourceMappingURL=run.js.map
