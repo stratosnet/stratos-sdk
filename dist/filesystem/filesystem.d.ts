@@ -2,7 +2,6 @@
 import fs from 'fs';
 import { type OpenedFileInfo } from './types';
 export declare const getFileBuffer: (filePath: string) => Promise<Buffer>;
-export declare const calculateFileHashOld: (filePath: string) => Promise<string>;
 export declare const calculateFileHashFromBuffer: (fileBuffer: Buffer) => Promise<string>;
 export declare const calculateFileHash: (filePath: string) => Promise<string>;
 export declare const getFileInfo: (filePath: string) => Promise<OpenedFileInfo>;

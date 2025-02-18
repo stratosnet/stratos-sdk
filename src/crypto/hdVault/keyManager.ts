@@ -38,6 +38,7 @@ export const createMasterKeySeed = async (
   if (hdPathIndex > maxHdPathKeyindex) {
     throw Error(`hd path index can not be more than ${maxHdPathKeyindex}`);
   }
+
   const derivedMasterKeySeed = await keyUtils.generateMasterKeySeed(phrase);
 
   const wallet = await cosmosWallet.createWalletAtPath(hdPathIndex, convertArrayToString(phrase));

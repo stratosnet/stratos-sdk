@@ -1,11 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyPhrase = exports.generateMnemonicPhrase = exports.convertStringToArray = exports.convertArrayToString = void 0;
 const bip39_1 = require("bip39");
-const crypto_1 = __importDefault(require("crypto"));
+// import crypto from 'crypto';
 const mnemonic12 = 12;
 const mnemonic24 = 24;
 const convertArrayToString = (mnemonicArray) => {
@@ -17,16 +14,29 @@ const convertStringToArray = (mnemonicStr) => {
     return mnemonicArray.map((word, idx) => ({ index: idx + 1, word }));
 };
 exports.convertStringToArray = convertStringToArray;
+// export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPhrase => {
+//   let mnemonicString = '';
+//
+//   if (phraseLength === mnemonic12) {
+//     mnemonicString = generateMnemonic();
+//     return convertStringToArray(mnemonicString);
+//   }
+//
+//   const entropy = crypto.randomBytes(32);
+//   mnemonicString = entropyToMnemonic(entropy);
+//
+//   return convertStringToArray(mnemonicString);
+// };
 const generateMnemonicPhrase = (phraseLength) => {
-    let mnemonicString = '';
-    if (phraseLength === mnemonic12) {
-        mnemonicString = (0, bip39_1.generateMnemonic)();
-        return (0, exports.convertStringToArray)(mnemonicString);
+    let strength = 128; // Default to 12 words
+    console.log('hey!1');
+    if (phraseLength === mnemonic24) {
+        console.log('hey!2');
+        strength = 256; // 24 words
     }
-    const entropy = crypto_1.default.randomBytes(32);
-    mnemonicString = (0, bip39_1.entropyToMnemonic)(entropy);
-    // another way:
-    // const mnemonic = Bip39.encode(Random.getBytes(16)).toString(); // using { Bip39 } '@cosmjs/crypto'
+    console.log('hey!3');
+    const mnemonicString = (0, bip39_1.generateMnemonic)(strength);
+    console.log('hey!4');
     return (0, exports.convertStringToArray)(mnemonicString);
 };
 exports.generateMnemonicPhrase = generateMnemonicPhrase;
