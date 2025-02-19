@@ -1,4 +1,5 @@
 /// <reference types="node" />
+/// <reference types="node" />
 export declare const now: () => string;
 export declare const log: (message: string, ...rest: any) => void;
 export declare const dirLog: (message: string, ...rest: any) => void;

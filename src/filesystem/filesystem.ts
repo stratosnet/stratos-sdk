@@ -1,5 +1,3 @@
-import CIDM from 'cids';
-import crypto from 'crypto';
 import fs from 'fs';
 import { base32hex } from 'multiformats/bases/base32';
 import { CID } from 'multiformats/cid';
@@ -15,19 +13,6 @@ export const getFileBuffer = async (filePath: string): Promise<Buffer> => {
   } catch (err) {
     throw new Error(`Could not read a file from ${filePath}: Details: ${(err as Error).message}`);
   }
-};
-
-export const calculateFileHashOld = async (filePath: string): Promise<string> => {
-  const fileBuffer = await getFileBuffer(filePath);
-  const md5Digest = crypto.createHash('md5').update(fileBuffer).digest();
-
-  const encodedHash = await multihashing(md5Digest, 'keccak-256', 20);
-
-  const cid = new CIDM(1, 'raw', encodedHash, 'base32hex');
-
-  const realFileHash = cid.toString();
-
-  return realFileHash;
 };
 
 export const calculateFileHashFromBuffer = async (fileBuffer: Buffer): Promise<string> => {

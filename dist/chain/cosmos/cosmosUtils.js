@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serializeWithEncryptionKey = exports.deserializeWithEncryptionKey = exports.encryptMasterKeySeed = exports.decryptMasterKeySeed = exports.isGteN = exports.n = exports.isZero = void 0;
+exports.serializeWithEncryptionKey = exports.deserializeWithEncryptionKey = exports.encryptMasterKeySeed = exports.initializeRandomGenerator = exports.decryptMasterKeySeed = exports.isGteN = exports.n = exports.isZero = void 0;
 const crypto_2 = require("@cosmjs/crypto");
 const encoding_1 = require("@cosmjs/encoding");
 const utils_1 = require("@cosmjs/utils");
@@ -51,9 +51,26 @@ const decryptMasterKeySeed = async (password, encryptedMasterKeySeed) => {
     }
 };
 exports.decryptMasterKeySeed = decryptMasterKeySeed;
+// we have an option to initialize sjcl entropy with a given hex string of random byties
+// which is useful for React Native env, where crypto is not available by default
+function initializeRandomGenerator(hexStringFromRandomBytes) {
+    sjcl_1.default.random.addEntropy(hexStringFromRandomBytes, 1024, 'native-crypto');
+    const ready = sjcl_1.default.random.isReady();
+    if (!ready) {
+        throw new Error('Random generator failed to initialize!!!!');
+    }
+    const saltBits = sjcl_1.default.random.randomWords(4); // 128-bit salt
+    const res = { ready, saltBits };
+    return res;
+}
+exports.initializeRandomGenerator = initializeRandomGenerator;
 // used in keymanager
 const encryptMasterKeySeed = (password, masterKeySeed) => {
     const strMasterKey = (0, encoding_1.toBase64)(masterKeySeed);
+    // if crypto is not available in the current env, it will throw an error
+    if (!sjcl_1.default.random.isReady()) {
+        throw new Error('Random generator failed to initialize!!');
+    }
     const saltBits = sjcl_1.default.random.randomWords(4);
     const encryptParams = {
         v: 1,
