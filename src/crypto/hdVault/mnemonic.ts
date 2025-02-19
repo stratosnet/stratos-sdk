@@ -1,5 +1,6 @@
-import { entropyToMnemonic, generateMnemonic, validateMnemonic, wordlists } from 'bip39';
-import crypto from 'crypto';
+import { generateMnemonic, validateMnemonic, wordlists } from 'bip39';
+
+// import crypto from 'crypto';
 
 const mnemonic12 = 12;
 const mnemonic24 = 24;
@@ -22,20 +23,37 @@ export const convertStringToArray = (mnemonicStr: string): MnemonicPhrase => {
   return mnemonicArray.map((word: string, idx: number): MnemonicItem => ({ index: idx + 1, word }));
 };
 
-export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPhrase => {
-  let mnemonicString = '';
+// export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPhrase => {
+//   let mnemonicString = '';
+//
+//   if (phraseLength === mnemonic12) {
+//     mnemonicString = generateMnemonic();
+//     return convertStringToArray(mnemonicString);
+//   }
+//
+//   const entropy = crypto.randomBytes(32);
+//   mnemonicString = entropyToMnemonic(entropy);
+//
+//   // another way:
+//   // const mnemonic = Bip39.encode(Random.getBytes(16)).toString(); // using { Bip39 } '@cosmjs/crypto'
+//
+//   return convertStringToArray(mnemonicString);
+// };
 
-  if (phraseLength === mnemonic12) {
-    mnemonicString = generateMnemonic();
-    return convertStringToArray(mnemonicString);
+export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPhrase => {
+  let strength = 128; // Default to 12 words
+
+  console.log('hey!1');
+
+  if (phraseLength === mnemonic24) {
+    console.log('hey!2');
+    strength = 256; // 24 words
   }
 
-  const entropy = crypto.randomBytes(32);
-  mnemonicString = entropyToMnemonic(entropy);
+  console.log('hey!3');
+  const mnemonicString = generateMnemonic(strength);
 
-  // another way:
-  // const mnemonic = Bip39.encode(Random.getBytes(16)).toString(); // using { Bip39 } '@cosmjs/crypto'
-
+  console.log('hey!4');
   return convertStringToArray(mnemonicString);
 };
 

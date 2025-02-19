@@ -26,9 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashFromBuffer = exports.calculateFileHashOld = exports.getFileBuffer = void 0;
-const cids_1 = __importDefault(require("cids"));
-const crypto_1 = __importDefault(require("crypto"));
+exports.writeFileToPath = exports.writeFile = exports.getLocalFileReadStream = exports.getEncodedFileChunks = exports.decodeFileChunks = exports.encodeFileChunks = exports.combineDecodedChunks = exports.encodeFileFromPath = exports.encodeFile = exports.encodeBuffer = exports.getFileChunk = exports.getFileChunks = exports.getFileInfo = exports.calculateFileHash = exports.calculateFileHashFromBuffer = exports.getFileBuffer = void 0;
 const fs_1 = __importDefault(require("fs"));
 const base32_1 = require("multiformats/bases/base32");
 const cid_1 = require("multiformats/cid");
@@ -45,15 +43,6 @@ const getFileBuffer = async (filePath) => {
     }
 };
 exports.getFileBuffer = getFileBuffer;
-const calculateFileHashOld = async (filePath) => {
-    const fileBuffer = await (0, exports.getFileBuffer)(filePath);
-    const md5Digest = crypto_1.default.createHash('md5').update(fileBuffer).digest();
-    const encodedHash = await (0, multihashing_async_1.default)(md5Digest, 'keccak-256', 20);
-    const cid = new cids_1.default(1, 'raw', encodedHash, 'base32hex');
-    const realFileHash = cid.toString();
-    return realFileHash;
-};
-exports.calculateFileHashOld = calculateFileHashOld;
 const calculateFileHashFromBuffer = async (fileBuffer) => {
     const firstKeccak = await (0, multihashing_async_1.default)(fileBuffer, 'keccak-256', 20);
     const secondKeccak = await (0, multihashing_async_1.default)(firstKeccak, 'keccak-256', 20);

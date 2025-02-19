@@ -51,13 +51,41 @@ export const decryptMasterKeySeed = async (
   }
 };
 
+// we have an option to initialize sjcl entropy with a given hex string of random byties
+// which is useful for React Native env, where crypto is not available by default
+export function initializeRandomGenerator(hexStringFromRandomBytes: string): {
+  ready: boolean;
+  saltBits: sjcl.BitArray;
+} {
+  sjcl.random.addEntropy(hexStringFromRandomBytes, 1024, 'native-crypto');
+
+  const ready = sjcl.random.isReady();
+
+  if (!ready) {
+    throw new Error('Random generator failed to initialize!!!!');
+  }
+
+  const saltBits = sjcl.random.randomWords(4); // 128-bit salt
+
+  const res = { ready, saltBits };
+
+  return res;
+}
+
 // used in keymanager
 export const encryptMasterKeySeed = (
   password: string,
   masterKeySeed: Uint8Array,
 ): sjcl.SjclCipherEncrypted => {
   const strMasterKey = toBase64(masterKeySeed);
+
+  // if crypto is not available in the current env, it will throw an error
+  if (!sjcl.random.isReady()) {
+    throw new Error('Random generator failed to initialize!!');
+  }
+
   const saltBits = sjcl.random.randomWords(4);
+
   const encryptParams = {
     v: 1,
     iter: 1000,
@@ -117,7 +145,7 @@ export const serializeWithEncryptionKey = (
   password: string,
   wallet: StratosDirectSecp256k1HdWallet,
 ): string => {
-  const walletAccounts = wallet['myAccounts'] as Secp256k1Derivation[];
+  const walletAccounts = wallet['myAccounts'];
 
   const dataToEncrypt: DirectSecp256k1HdWalletData = {
     mnemonic: wallet.mnemonic,
