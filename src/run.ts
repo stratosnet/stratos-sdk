@@ -684,9 +684,9 @@ const testGetSharedFileInfo = async (
 // }
 
 const testGateway = async () => {
-  const opts = { depth: null, colors: true, maxArrayLength: null };
-  const res = await stratos.network.networkApi.getRpcStatus();
-  const cur = getCurrentTimestamp();
+  // const opts = { depth: null, colors: true, maxArrayLength: null };
+  // const res = await stratos.network.networkApi.getRpcStatus();
+  // const cur = getCurrentTimestamp();
   const curInSec = getTimestampInSeconds();
   // console.log('curM', cur);
   console.log('curInSecM', curInSec);
@@ -868,39 +868,39 @@ async function main(): Promise<void> {
   const numIterations = 1;
   const interval = 10000; // 10 seconds in milliseconds
 
-  for (let i = 0; i < numIterations; i++) {
-    const startTime = Date.now();
-    console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
-
-    try {
-      const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
-      // const result = await testGetSharedFileInfo();
-      console.log(`Iteration ${i + 1} result:`, result);
-    } catch (error) {
-      console.error(`Error in iteration ${i + 1}:`, error);
-    }
-
-    const endTime = Date.now();
-    const elapsed = endTime - startTime;
-
-    // Wait for the remaining time in the interval, if needed.
-    const timeToWait = interval - elapsed;
-
-    if (timeToWait > 0) {
-      console.log(`Waiting ${timeToWait}ms before next iteration...`);
-      await new Promise(resolve => setTimeout(resolve, timeToWait));
-    } else {
-      console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
-    }
-  }
-
+  // for (let i = 0; i < numIterations; i++) {
+  //   const startTime = Date.now();
+  //   console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
+  //
+  //   try {
+  //     const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
+  //     // const result = await testGetSharedFileInfo();
+  //     console.log(`Iteration ${i + 1} result:`, result);
+  //   } catch (error) {
+  //     console.error(`Error in iteration ${i + 1}:`, error);
+  //   }
+  //
+  //   const endTime = Date.now();
+  //   const elapsed = endTime - startTime;
+  //
+  //   // Wait for the remaining time in the interval, if needed.
+  //   const timeToWait = interval - elapsed;
+  //
+  //   if (timeToWait > 0) {
+  //     console.log(`Waiting ${timeToWait}ms before next iteration...`);
+  //     await new Promise(resolve => setTimeout(resolve, timeToWait));
+  //   } else {
+  //     console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
+  //   }
+  // }
+  //
   console.log('All iterations completed.');
   // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
   // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  // void testGateway();
+  void testGateway();
 }
 
 void main();

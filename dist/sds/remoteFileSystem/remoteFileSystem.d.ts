@@ -13,12 +13,12 @@ export declare const downloadFileToBuffer: (keypair: WalletTypes.KeyPairInfo, fi
 export declare const downloadFile: (keypair: WalletTypes.KeyPairInfo, filePathToSave: string, filehash: string, filesize: number, progressCb?: (data: SdsTypes.ProgressCbData) => void) => Promise<{
     filePathToSave: string;
 }>;
-export declare const updloadFile: (keypair: WalletTypes.KeyPairInfo, fileReadPath: string) => Promise<{
+export declare const updloadFileFromBuffer: (keypair: WalletTypes.KeyPairInfo, fileBuffer: Buffer, resolvedFileName: string, fileHash: string, fileSize: number, progressCb?: (data: SdsTypes.ProgressCbData) => void) => Promise<{
     uploadReturn: string;
     filehash: string;
     fileStatusInfo: SdsTypes.UploadedFileStatusInfo;
 }>;
-export declare const updloadFileFromBuffer: (keypair: WalletTypes.KeyPairInfo, fileBuffer: Buffer, resolvedFileName: string, fileHash: string, fileSize: number, progressCb?: (data: SdsTypes.ProgressCbData) => void) => Promise<{
+export declare const updloadFile: (keypair: WalletTypes.KeyPairInfo, fileReadPath: string) => Promise<{
     uploadReturn: string;
     filehash: string;
     fileStatusInfo: SdsTypes.UploadedFileStatusInfo;

@@ -9,6 +9,21 @@ import { delay, dirLog, getTimestampInSeconds, log } from '../../services/helper
 import * as SdsTypes from './types';
 import { UPLOAD_CODES } from './types';
 
+const getCurrentSequenceString = async (address: string): Promise<string> => {
+  const ozoneBalance = await accountsApi.getOtherBalanceCardMetrics(address);
+
+  const { detailedBalance } = ozoneBalance;
+
+  if (!detailedBalance) {
+    throw new Error('no sequence is presented in the ozone balance response');
+  }
+
+  const { sequence } = detailedBalance;
+
+  return `${sequence ? sequence : ''}`;
+};
+
+// actually downloads the file based on the offsets retrived inside the function
 const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDownloadResponse>(
   responseRequestDownloadShared: T,
   filehash: string,
@@ -369,6 +384,8 @@ export const getAllUploadedFileList = async (
   return resultFileList;
 };
 
+// 1 s - depricated
+// uses processUsedFileDownload , which does not use sequence, so no changes needed
 export const downloadFileOriginal = async (
   keypair: WalletTypes.KeyPairInfo,
   filePathToSave: string,
@@ -463,6 +480,7 @@ export const downloadFileOriginal = async (
   return { filePathToSave };
 };
 
+// 2s uses processUsedFileDownload , which does not use sequence, so no changes needed
 export const downloadFileToBuffer = async (
   keypair: WalletTypes.KeyPairInfo,
   filehash: string,
@@ -645,52 +663,7 @@ export const downloadFile = async (
   return { filePathToSave };
 };
 
-const getCurrentSequenceString = async (address: string) => {
-  const ozoneBalance = await accountsApi.getOtherBalanceCardMetrics(address);
-
-  const { detailedBalance } = ozoneBalance;
-
-  if (!detailedBalance) {
-    throw new Error('no sequence is presented in the ozone balance response');
-  }
-
-  const { sequence } = detailedBalance;
-
-  return sequence;
-};
-
-const getUserRequestUploadParams = async (
-  keypair: WalletTypes.KeyPairInfo,
-  filehash: string,
-  filename: string,
-  filesize: number,
-): Promise<networkTypes.FileUserRequestUploadParams[]> => {
-  const { address, publicKey } = keypair;
-  const sequence = await getCurrentSequenceString(address);
-
-  const timestamp = getTimestampInSeconds();
-  const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
-
-  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
-
-  const extraParams: networkTypes.FileUserRequestUploadParams[] = [
-    {
-      filename,
-      filesize: filesize,
-      filehash: filehash,
-      signature: {
-        address,
-        pubkey: publicKey,
-        signature,
-      },
-      req_time: timestamp,
-      sequencenumber: sequence,
-    },
-  ];
-
-  return extraParams;
-};
-
+// helper, used in updloadFileFromBuffer
 const getOffsetsAndResultFromRequestUpload = async (
   extraParams: networkTypes.FileUserRequestUploadParams[],
 ) => {
@@ -719,15 +692,51 @@ const getOffsetsAndResultFromRequestUpload = async (
   return { offsetstartInit, offsetendInit, isContinueInit, responseInit, callResultInit, errorsList };
 };
 
+// 3s ? in updloadFileFromBuffer - changed
+// helper
+const getUserRequestUploadParams = async (
+  keypair: WalletTypes.KeyPairInfo,
+  filehash: string,
+  filename: string,
+  filesize: number,
+  sequence: string,
+): Promise<networkTypes.FileUserRequestUploadParams[]> => {
+  const { address, publicKey } = keypair;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const extraParams: networkTypes.FileUserRequestUploadParams[] = [
+    {
+      filename,
+      filesize: filesize,
+      filehash: filehash,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
+      sequencenumber: sequence,
+    },
+  ];
+
+  return extraParams;
+};
+
+// 4s ? in updloadFileFromBuffer twice - changed
+// helper
 const getUserUploadDataParams = async (
   keypair: WalletTypes.KeyPairInfo,
   filehash: string,
   encodedFileChunk: string,
+  sequenceUpload: string,
   stop = false,
 ): Promise<networkTypes.FileUserUploadDataParams[]> => {
   const { address, publicKey } = keypair;
   const timestampForUpload = getTimestampInSeconds();
-  const sequenceUpload = await getCurrentSequenceString(address);
   const messageToSignForUpload = `${filehash}${address}${sequenceUpload}${timestampForUpload}`;
 
   const signatureForUpload = await keyUtils.signWithPrivateKey(messageToSignForUpload, keypair.privateKey);
@@ -753,19 +762,9 @@ const getUserUploadDataParams = async (
   return extraParamsForUpload;
 };
 
-export const updloadFile = async (
-  keypair: WalletTypes.KeyPairInfo,
-  fileReadPath: string,
-): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
-  const imageFileName = path.basename(fileReadPath);
-
-  const fileInfo = await filesystemApi.getFileInfo(fileReadPath);
-
-  const readBinaryFile = await filesystemApi.getFileBuffer(fileReadPath);
-
-  return updloadFileFromBuffer(keypair, readBinaryFile, imageFileName, fileInfo.filehash, fileInfo.size);
-};
-
+// no sequence here
+// uses 1 const getUserRequestUploadParams = async (
+// uses 2 const getUserUploadDataParams = async (
 export const updloadFileFromBuffer = async (
   keypair: WalletTypes.KeyPairInfo,
   fileBuffer: Buffer,
@@ -774,7 +773,16 @@ export const updloadFileFromBuffer = async (
   fileSize: number,
   progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
 ): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
-  const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize);
+  const { address } = keypair;
+
+  const sequence = await getCurrentSequenceString(address);
+  const extraParams = await getUserRequestUploadParams(
+    keypair,
+    fileHash,
+    resolvedFileName,
+    fileSize,
+    sequence,
+  );
 
   const {
     errorsList: initErrorsList,
@@ -818,7 +826,7 @@ export const updloadFileFromBuffer = async (
       },
     });
 
-    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
+    const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', sequence, true);
 
     const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
@@ -948,7 +956,12 @@ export const updloadFileFromBuffer = async (
       let responseUpload;
 
       do {
-        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
+        const extraParamsForUpload = await getUserUploadDataParams(
+          keypair,
+          fileHash,
+          encodedFileChunk,
+          sequence,
+        );
 
         const callResultUpload = await networkApi.sendUserUploadData(extraParamsForUpload);
 
@@ -1102,6 +1115,20 @@ export const updloadFileFromBuffer = async (
   });
 
   return uploadResult;
+};
+
+// wrapper. uses updloadFileFromBuffer
+export const updloadFile = async (
+  keypair: WalletTypes.KeyPairInfo,
+  fileReadPath: string,
+): Promise<{ uploadReturn: string; filehash: string; fileStatusInfo: SdsTypes.UploadedFileStatusInfo }> => {
+  const imageFileName = path.basename(fileReadPath);
+
+  const fileInfo = await filesystemApi.getFileInfo(fileReadPath);
+
+  const readBinaryFile = await filesystemApi.getFileBuffer(fileReadPath);
+
+  return updloadFileFromBuffer(keypair, readBinaryFile, imageFileName, fileInfo.filehash, fileInfo.size);
 };
 
 export const shareFile = async (
@@ -1313,6 +1340,7 @@ export const getAllSharedFileList = async (
   return resultFileList;
 };
 
+// 5s - no changes needed
 export const downloadSharedFileToBuffer = async (
   keypair: WalletTypes.KeyPairInfo,
   sharelink: string, // with or without sds://
@@ -1369,7 +1397,6 @@ export const downloadSharedFileToBuffer = async (
     offsetstart: offsetstartInit,
     offsetend: offsetendInit,
   } = resultWithOffesets;
-  // console.log('resultWithOffesets', resultWithOffesets);
 
   if (parseInt(requestGetSharedReturn, 10) < 0) {
     const errorMsg = `return field in the request get shared response contains an error. Error code "${requestGetSharedReturn}"`;
@@ -1524,6 +1551,7 @@ export const downloadSharedFile = async (
   return { filePathToSave: filePathToSaveWithOriginalName };
 };
 
+// 6s - no changes needed
 export const getSharedFileInfo = async (
   keypair: WalletTypes.KeyPairInfo,
   sharelink: string, // with or without sds://
@@ -1555,13 +1583,9 @@ export const getSharedFileInfo = async (
     sharelink: filelink,
   };
 
-  // console.log('extraParams for getSharedFileInfo', extraParams);
-
   const callResultRequestGetShared = await networkApi.sendUserRequestGetShared([extraParams]);
 
   const { response: responseRequestGetShared } = callResultRequestGetShared;
-
-  // console.log('responseRequestGetShared from getSharedFileInfo', responseRequestGetShared);
 
   if (!responseRequestGetShared) {
     const errorMsg = 'Error. There is no response for download shared file request.';
