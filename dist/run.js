@@ -85,7 +85,6 @@ const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
         return;
     }
     const balanaces = await stratos.accounts.accountsApi.getBalanceCardMetrics(derivedKeyPair.address);
-    // console.log('d', derivedKeyPair.privateKey)
     console.log('balanace card metrics ', balanaces);
 };
 const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
@@ -163,7 +162,8 @@ const testRequestAllUserFileList = async (hdPathIndex, givenReceiverMnemonic = z
         return;
     }
     const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllUploadedFileList(keyPairZero);
-    console.log('retrieved all user file list', userFileList);
+    return userFileList;
+    // console.log('retrieved all user file list', userFileList);
 };
 const testRequestAllUserSharedFileList = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -510,7 +510,7 @@ async function main() {
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
-    // await testRequestUserFileList(hdPathIndex, 7);
+    await testRequestUserFileList(hdPathIndex, 2);
     // await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file25M_1_Aug_7.bin';
@@ -630,7 +630,7 @@ async function main() {
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-    void testGateway();
+    // void testGateway();
 }
 void main();
 //# sourceMappingURL=run.js.map

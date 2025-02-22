@@ -182,7 +182,6 @@ const getDelegateTx = async (delegatorAddress, delegatePayload) => {
                 validatorAddress: validatorAddress,
             },
         };
-        console.log('message to Delegate', message);
         messagesList.push(message);
         iteratedData = payloadToProcess.next();
     }

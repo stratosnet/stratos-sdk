@@ -32,10 +32,7 @@ export const increaseBalance = async (walletAddress: string, faucetUrl: string, 
     if (faucetError) {
       return { result: false, errorMessage: `Could not increase balance: Error: "${faucetError.message}"` };
     }
-
-    console.log('🚀 ~ file: accounts.ts ~  increaseBalance ~ result', result);
   } catch (error) {
-    console.log('Error: Faucet returns:', (error as Error).message);
     return {
       result: false,
       errorMessage: `Could not increase balance: Error: "${(error as Error).message}"`,
@@ -114,6 +111,7 @@ export const getOtherBalanceCardMetrics = async (
       detailedBalance.sequence = sequence;
     }
   } catch (error) {
+    // @TODO: add error handler?
     console.log('could not get ozone balance , error', error);
   }
 
@@ -293,8 +291,8 @@ export const getAccountTrasactions = async (
     try {
       const parsed = transformTx(txResponseItem);
       parsedData.push(parsed);
-    } catch (err) {
-      console.log(`Parsing error: ${(err as Error).message}`);
+    } catch (_err) {
+      // @TODO: add handler
     }
   });
 

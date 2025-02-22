@@ -32,14 +32,10 @@ exports.convertStringToArray = convertStringToArray;
 // };
 const generateMnemonicPhrase = (phraseLength) => {
     let strength = 128; // Default to 12 words
-    console.log('hey!1');
     if (phraseLength === mnemonic24) {
-        console.log('hey!2');
         strength = 256; // 24 words
     }
-    console.log('hey!3');
     const mnemonicString = (0, bip39_1.generateMnemonic)(strength);
-    console.log('hey!4');
     return (0, exports.convertStringToArray)(mnemonicString);
 };
 exports.generateMnemonicPhrase = generateMnemonicPhrase;

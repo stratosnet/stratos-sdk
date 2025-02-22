@@ -49,7 +49,6 @@ const getCurrentSequenceString = async (address) => {
 const processUsedFileDownload = async (responseRequestDownloadShared, filehash, filesize, progressCb = () => { }) => {
     var _a;
     const { result: resultWithOffesets } = responseRequestDownloadShared;
-    // console.log('resultWithOffesets, ', resultWithOffesets);
     let offsetStartGlobal = 0;
     let offsetEndGlobal = 0;
     let isContinueGlobal = 0;
@@ -119,7 +118,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
             readSize = readSize + dlPartSize;
             completedProgress = (100 * readSize) / filesize;
-            // console.log('b dlPartSize, filesize, readSize', dlPartSize, filesize, readSize);
             const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
             const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
             // log('3 We have a correct responseDownload', completedProgressMessage);
@@ -260,7 +258,6 @@ const getUploadedFileList = async (keypair, page = 0) => {
             req_time: timestamp,
         },
     ];
-    // console.log('extraParams for sendUserRequestList', extraParams);
     const callResult = await network_1.networkApi.sendUserRequestList(extraParams);
     const { response } = callResult;
     if (!response) {
@@ -282,7 +279,6 @@ const getAllUploadedFileList = async (keypair) => {
         const userFileList = await (0, exports.getUploadedFileList)(keypair, currentPage);
         const { originalResponse, files } = userFileList;
         const totalNumber = (_a = originalResponse === null || originalResponse === void 0 ? void 0 : originalResponse.result) === null || _a === void 0 ? void 0 : _a.totalnumber;
-        // console.log('originalResponse.result', originalResponse.result);
         console.log(`number files on page ${currentPage} is ${files === null || files === void 0 ? void 0 : files.length}, totalNumber is ${totalNumber}`);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
@@ -837,7 +833,6 @@ const shareFile = async (keypair, filehash, durationInDays = 180) => {
         },
         req_time: timestamp,
     };
-    console.log('extraParams for fileShare', extraParams);
     const callResultRequestShare = await network_1.networkApi.sendUserRequestShare([extraParams]);
     const { response: responseRequestShare } = callResultRequestShare;
     if (!responseRequestShare) {
@@ -908,10 +903,7 @@ const getSharedFileList = async (keypair, page = 0) => {
         },
         req_time: timestamp,
     };
-    console.log('params for sendUserRequestListShare', extraParams);
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
-    // console.log('callResultRequestListShare', callResultRequestListShare);
-    // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);
@@ -944,7 +936,6 @@ const getAllSharedFileList = async (keypair) => {
     do {
         const userSharedFileList = await (0, exports.getSharedFileList)(keypair, currentPage);
         const { totalnumber: totalNumber, files } = userSharedFileList;
-        console.log(`number shared files on page ${currentPage}`, totalNumber);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
             currentPage += 1;
@@ -980,7 +971,6 @@ filesize, progressCb = () => { }) => {
     };
     const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
-    console.log('responseRequestGetShared', responseRequestGetShared);
     if (!responseRequestGetShared) {
         const errorMsg = 'Error. There is no response for download shared file request.';
         progressCb({

@@ -49,7 +49,6 @@ function makeStratosHubPath(a) {
         ];
     }
     catch (error) {
-        console.log('could not parse  keyPathParameters from sdk', keyPathParameters);
         return defaultPath;
     }
 }

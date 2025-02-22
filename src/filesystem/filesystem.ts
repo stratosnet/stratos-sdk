@@ -63,6 +63,7 @@ export const getFileInfo = async (filePath: string): Promise<OpenedFileInfo> => 
       });
     });
   } catch (error) {
+    // @TODO: add error handler
     console.log(error);
   }
 
@@ -85,13 +86,10 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
           // no-constant-condition
           const chunk = fileStream.read(chunkSize);
 
-          console.log('ch size', chunkSize);
-
           if (!chunk || !chunk.length) {
             break;
           }
 
-          console.log('chunked chunk length', chunk.length);
           bytesRead += chunk.length;
 
           result.push(chunk);
@@ -106,6 +104,7 @@ export const getFileChunks = async (filePath: string, chunkSize = 10000): Promis
       });
     });
   } catch (error) {
+    // @TODO: add handler
     console.log(error);
   }
   return chunksList;
@@ -121,7 +120,6 @@ export const getFileChunk = async (fileStream: fs.ReadStream, readChunkSize: num
       resolve(chunk);
     });
   } catch (error) {
-    console.log(error);
     throw 'could not read file chunk';
   }
   return chunksList;
@@ -190,7 +188,6 @@ export const getLocalFileReadStream = async (filePath: string): Promise<fs.ReadS
     return myStream;
   } catch (error) {
     const errorMessage = `could not create file stream at path ${filePath}`;
-    console.log(errorMessage, error);
     throw new Error(errorMessage);
   }
 };
@@ -199,6 +196,7 @@ export const writeFile = (filePath: string, fileBuffer: Buffer) => {
   try {
     fs.writeFileSync(filePath, fileBuffer);
   } catch (err) {
+    // @TODO: add handler
     console.log(`Could not write file to ${filePath}: Details: ${(err as Error).message}`);
   }
 };

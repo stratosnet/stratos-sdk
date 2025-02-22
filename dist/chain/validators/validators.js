@@ -70,7 +70,6 @@ const getValidators = async (status = Types.ValidatorStatus.Bonded, page) => {
         throw new Error('Could not fetch total staking pool info');
     }
     const totalBondedTokens = (0, get_1.default)(poolResponse, 'pool.bonded_tokens', 0);
-    console.log('totalBondedTokens', totalBondedTokens);
     const parsedData = validatorResultList.map(validatorItem => {
         const operatorAddress = (0, get_1.default)(validatorItem, 'operator_address', '');
         const name = (0, get_1.default)(validatorItem, 'description.moniker', `v_${operatorAddress}`);

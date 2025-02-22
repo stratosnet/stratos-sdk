@@ -32,7 +32,6 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
 ): Promise<Buffer | undefined> => {
   const { result: resultWithOffesets } = responseRequestDownloadShared;
 
-  // console.log('resultWithOffesets, ', resultWithOffesets);
   let offsetStartGlobal = 0;
   let offsetEndGlobal = 0;
   let isContinueGlobal = 0;
@@ -140,8 +139,6 @@ const processUsedFileDownload = async <T extends networkTypes.FileUserRequestDow
 
       readSize = readSize + dlPartSize;
       completedProgress = (100 * readSize) / filesize;
-
-      // console.log('b dlPartSize, filesize, readSize', dlPartSize, filesize, readSize);
 
       const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
       const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
@@ -331,7 +328,6 @@ export const getUploadedFileList = async (
       req_time: timestamp,
     },
   ];
-  // console.log('extraParams for sendUserRequestList', extraParams);
 
   const callResult = await networkApi.sendUserRequestList(extraParams);
 
@@ -362,7 +358,6 @@ export const getAllUploadedFileList = async (
     const { originalResponse, files } = userFileList;
 
     const totalNumber = originalResponse?.result?.totalnumber;
-    // console.log('originalResponse.result', originalResponse.result);
 
     console.log(`number files on page ${currentPage} is ${files?.length}, totalNumber is ${totalNumber}`);
     const weHaveDataOnThisPage = !!files && !!totalNumber;
@@ -1161,7 +1156,6 @@ export const shareFile = async (
     req_time: timestamp,
   };
 
-  console.log('extraParams for fileShare', extraParams);
   const callResultRequestShare = await networkApi.sendUserRequestShare([extraParams]);
 
   const { response: responseRequestShare } = callResultRequestShare;
@@ -1267,11 +1261,8 @@ export const getSharedFileList = async (
     },
     req_time: timestamp,
   };
-  console.log('params for sendUserRequestListShare', extraParams);
 
   const callResultRequestListShare = await networkApi.sendUserRequestListShare([extraParams]);
-  // console.log('callResultRequestListShare', callResultRequestListShare);
-  // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
 
   const { response: responseRequestListShare } = callResultRequestListShare;
 
@@ -1320,7 +1311,6 @@ export const getAllSharedFileList = async (
 
     const { totalnumber: totalNumber, files } = userSharedFileList;
 
-    console.log(`number shared files on page ${currentPage}`, totalNumber);
     const weHaveDataOnThisPage = !!files && !!totalNumber;
 
     if (weHaveDataOnThisPage) {
@@ -1371,8 +1361,6 @@ export const downloadSharedFileToBuffer = async (
   const callResultRequestGetShared = await networkApi.sendUserRequestGetShared([extraParams]);
 
   const { response: responseRequestGetShared } = callResultRequestGetShared;
-
-  console.log('responseRequestGetShared', responseRequestGetShared);
 
   if (!responseRequestGetShared) {
     const errorMsg = 'Error. There is no response for download shared file request.';

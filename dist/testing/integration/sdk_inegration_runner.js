@@ -426,7 +426,6 @@ const sendBeginRedelegateTx = async (hdPathIndex = 0, givenReceiverMnemonic = ''
     try {
         const [balanceValue] = delegatedAfter.split(' ');
         const a = parseFloat(balanceValue).toFixed(1);
-        console.log('a after and totalDelegated', a, totalDelegated);
         if (!(a === expectedDelegated)) {
             throw new Error(`account "${keyPairReceiver.address}" must have available delegate balance after redelegation, but its balance is ${balanceValue}`);
         }

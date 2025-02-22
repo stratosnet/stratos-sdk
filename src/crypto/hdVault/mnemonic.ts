@@ -43,17 +43,12 @@ export const convertStringToArray = (mnemonicStr: string): MnemonicPhrase => {
 export const generateMnemonicPhrase = (phraseLength: MnemonicLength): MnemonicPhrase => {
   let strength = 128; // Default to 12 words
 
-  console.log('hey!1');
-
   if (phraseLength === mnemonic24) {
-    console.log('hey!2');
     strength = 256; // 24 words
   }
 
-  console.log('hey!3');
   const mnemonicString = generateMnemonic(strength);
 
-  console.log('hey!4');
   return convertStringToArray(mnemonicString);
 };
 

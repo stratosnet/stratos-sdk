@@ -86,7 +86,6 @@ const getBalanceCardMetrics = async (hdPathIndex: number, givenMnemonic: string)
     return;
   }
   const balanaces = await stratos.accounts.accountsApi.getBalanceCardMetrics(derivedKeyPair.address);
-  // console.log('d', derivedKeyPair.privateKey)
 
   console.log('balanace card metrics ', balanaces);
 };
@@ -224,7 +223,8 @@ const testRequestAllUserFileList = async (hdPathIndex: number, givenReceiverMnem
     keyPairZero,
   );
 
-  console.log('retrieved all user file list', userFileList);
+  return userFileList;
+  // console.log('retrieved all user file list', userFileList);
 };
 
 const testRequestAllUserSharedFileList = async (
@@ -767,7 +767,7 @@ async function main(): Promise<void> {
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
-  // await testRequestUserFileList(hdPathIndex, 7);
+  await testRequestUserFileList(hdPathIndex, 2);
   // await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
@@ -900,7 +900,7 @@ async function main(): Promise<void> {
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  void testGateway();
+  // void testGateway();
 }
 
 void main();
