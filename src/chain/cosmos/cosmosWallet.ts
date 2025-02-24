@@ -17,7 +17,6 @@ export const deserializeEncryptedWallet = async (serializedWallet: string, passw
   } catch (error) {
     const msg = `"${(error as Error).message}", w "${serializedWallet}"`;
     const errorMsg = `could not deserialize / decode wallet ${msg}`;
-    console.log(errorMsg);
     throw new Error(errorMsg);
   }
 

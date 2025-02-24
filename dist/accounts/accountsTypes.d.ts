@@ -1,6 +1,8 @@
 export interface OtherBalanceCardMetrics {
     ozone?: string;
-    detailedBalance?: any;
+    detailedBalance?: {
+        [key: string]: string | number;
+    };
 }
 export interface BalanceCardMetrics {
     available: string;

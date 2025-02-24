@@ -21,8 +21,8 @@ export const getValidatorsBondedToDelegator = async (
   }
 
   const parsedData: Types.ParsedLightValidatorItem[] = validatorResultList.map(validatorItem => {
-    const operatorAddress = _get(validatorItem, 'operator_address', '') as string;
-    const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`) as string;
+    const operatorAddress = _get(validatorItem, 'operator_address', '');
+    const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`);
     const status = _get(validatorItem, 'status', 0);
 
     const vStatus = Types.ParsedValidatorsStatusMap.get(status) || Types.ValidatorStatus.Bonded;
@@ -63,15 +63,14 @@ export const getValidators = async (
   }
 
   const totalBondedTokens = _get(poolResponse, 'pool.bonded_tokens', 0);
-  console.log('totalBondedTokens', totalBondedTokens);
 
   const parsedData: Types.ParsedValidatorItem[] = validatorResultList.map(validatorItem => {
-    const operatorAddress = _get(validatorItem, 'operator_address', '') as string;
-    const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`) as string;
+    const operatorAddress = _get(validatorItem, 'operator_address', '');
+    const name = _get(validatorItem, 'description.moniker', `v_${operatorAddress}`);
     const status = _get(validatorItem, 'status', 0);
     const totalTokens = _get(validatorItem, 'tokens', 0);
     const votingPower = (Number(totalTokens) * 100) / totalBondedTokens;
-    const comission = _get(validatorItem, 'commission.commission_rates.rate', '0') as string;
+    const comission = _get(validatorItem, 'commission.commission_rates.rate', '0');
 
     const vStatus = Types.ParsedValidatorsStatusMap.get(status) || Types.ValidatorStatus.Bonded;
 

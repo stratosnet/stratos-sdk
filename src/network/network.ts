@@ -143,7 +143,6 @@ export const submitTransaction = async <T extends Types.TransactionData>(
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.SubmitTransactionDataResult> => {
   const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
-  console.log('url to broadcast the tx (POST)');
 
   const { response: txData, error } = getSubmitTransactionData(data);
 
@@ -151,10 +150,7 @@ export const submitTransaction = async <T extends Types.TransactionData>(
     return { error };
   }
 
-  console.log('tx data to broadcast', txData);
-
   const dataResult = await apiPost(url, txData, config);
-  console.log('dataResult after the broadcast', dataResult);
 
   return dataResult;
 };
@@ -169,8 +165,6 @@ export const getTxListBlockchain = async (
   config?: Types.NetworkAxiosConfig,
 ): Promise<Types.RestTxHistoryDataResult> => {
   const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
-  // console.log('url', url);
-  // console.log('given page', givenPage, pageLimit);
 
   const userQueryType =
     userType === TxHistoryUser.TxHistorySenderUser
@@ -198,7 +192,6 @@ export const getTxListBlockchain = async (
     ...config,
     params,
   });
-  // console.log('TxHistory data result ', dataResult);
 
   return dataResult;
 };
@@ -336,7 +329,6 @@ export const requestBalanceIncrease = async (
 
 export const getRpcStatus = async (config?: Types.NetworkAxiosConfig): Promise<Types.RpcStatusDataResult> => {
   const url = `${getRpcRoute()}/status`;
-  console.log('url for getRpcStatus', url);
 
   const dataResult = await apiGet(url, config);
 
@@ -569,13 +561,10 @@ export const getChainAndProtocolDetails = async () => {
 
     resolvedChainVersion = resolvedChainVersionToTest;
 
-    console.log('🚀 ~ file: network ~ resolvedChainIDToTest', resolvedChainIDToTest);
-
     const { MIN_NEW_PROTOCOL_VERSION } = chain;
 
     isNewProtocol = getNewProtocolFlag(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
   } catch (error) {
-    console.log('🚀 ~ file: network ~ resolvedChainID error', error);
     throw new Error('Could not resolve chain id');
   }
 

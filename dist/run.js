@@ -85,7 +85,6 @@ const getBalanceCardMetrics = async (hdPathIndex, givenMnemonic) => {
         return;
     }
     const balanaces = await stratos.accounts.accountsApi.getBalanceCardMetrics(derivedKeyPair.address);
-    // console.log('d', derivedKeyPair.privateKey)
     console.log('balanace card metrics ', balanaces);
 };
 const getOzoneBalance = async (hdPathIndex, givenMnemonic) => {
@@ -163,7 +162,8 @@ const testRequestAllUserFileList = async (hdPathIndex, givenReceiverMnemonic = z
         return;
     }
     const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllUploadedFileList(keyPairZero);
-    console.log('retrieved all user file list', userFileList);
+    return userFileList;
+    // console.log('retrieved all user file list', userFileList);
 };
 const testRequestAllUserSharedFileList = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -446,9 +446,9 @@ givenReceiverMnemonic = zeroUserMnemonic) => {
 //   }
 // }
 const testGateway = async () => {
-    const opts = { depth: null, colors: true, maxArrayLength: null };
-    const res = await stratos.network.networkApi.getRpcStatus();
-    const cur = (0, helpers_1.getCurrentTimestamp)();
+    // const opts = { depth: null, colors: true, maxArrayLength: null };
+    // const res = await stratos.network.networkApi.getRpcStatus();
+    // const cur = getCurrentTimestamp();
     const curInSec = (0, helpers_1.getTimestampInSeconds)();
     // console.log('curM', cur);
     console.log('curInSecM', curInSec);
@@ -510,7 +510,7 @@ async function main() {
     // const hdPathIndexReceiver = 1;
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
-    // await testRequestUserFileList(hdPathIndex, 7);
+    await testRequestUserFileList(hdPathIndex, 0);
     // await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file25M_1_Aug_7.bin';
@@ -598,29 +598,32 @@ async function main() {
     // void testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
     const numIterations = 1;
     const interval = 10000; // 10 seconds in milliseconds
-    for (let i = 0; i < numIterations; i++) {
-        const startTime = Date.now();
-        console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
-        try {
-            const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
-            // const result = await testGetSharedFileInfo();
-            console.log(`Iteration ${i + 1} result:`, result);
-        }
-        catch (error) {
-            console.error(`Error in iteration ${i + 1}:`, error);
-        }
-        const endTime = Date.now();
-        const elapsed = endTime - startTime;
-        // Wait for the remaining time in the interval, if needed.
-        const timeToWait = interval - elapsed;
-        if (timeToWait > 0) {
-            console.log(`Waiting ${timeToWait}ms before next iteration...`);
-            await new Promise(resolve => setTimeout(resolve, timeToWait));
-        }
-        else {
-            console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
-        }
-    }
+    // for (let i = 0; i < numIterations; i++) {
+    //   const startTime = Date.now();
+    //   console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
+    //
+    //   try {
+    //     const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
+    //     // const result = await testGetSharedFileInfo();
+    //     console.log(`Iteration ${i + 1} result:`, result);
+    //   } catch (error) {
+    //     console.error(`Error in iteration ${i + 1}:`, error);
+    //   }
+    //
+    //   const endTime = Date.now();
+    //   const elapsed = endTime - startTime;
+    //
+    //   // Wait for the remaining time in the interval, if needed.
+    //   const timeToWait = interval - elapsed;
+    //
+    //   if (timeToWait > 0) {
+    //     console.log(`Waiting ${timeToWait}ms before next iteration...`);
+    //     await new Promise(resolve => setTimeout(resolve, timeToWait));
+    //   } else {
+    //     console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
+    //   }
+    // }
+    //
     console.log('All iterations completed.');
     // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
     // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);

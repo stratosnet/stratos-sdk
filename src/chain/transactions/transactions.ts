@@ -194,7 +194,7 @@ export const getSendTx = async (
   const messagesList: Types.SendTxMessage[] = [];
 
   while (iteratedData.value) {
-    const { amount, toAddress } = iteratedData.value as Types.SendTxPayload;
+    const { amount, toAddress } = iteratedData.value;
 
     const message = {
       typeUrl: Types.TxMsgTypes.Send,
@@ -224,7 +224,7 @@ export const getDelegateTx = async (
   const messagesList: Types.DelegateTxMessage[] = [];
 
   while (iteratedData.value) {
-    const { amount, validatorAddress } = iteratedData.value as Types.DelegateTxPayload;
+    const { amount, validatorAddress } = iteratedData.value;
 
     const message = {
       typeUrl: Types.TxMsgTypes.Delegate,
@@ -237,8 +237,6 @@ export const getDelegateTx = async (
         validatorAddress: validatorAddress,
       },
     };
-
-    console.log('message to Delegate', message);
 
     messagesList.push(message);
 
@@ -259,8 +257,7 @@ export const getBeginRedelegateTx = async (
   const messagesList: Types.BeginRedelegateTxMessage[] = [];
 
   while (iteratedData.value) {
-    const { amount, validatorSrcAddress, validatorDstAddress } =
-      iteratedData.value as Types.BeginRedelegateTxPayload;
+    const { amount, validatorSrcAddress, validatorDstAddress } = iteratedData.value;
 
     const message = {
       typeUrl: Types.TxMsgTypes.BeginRedelegate,
@@ -327,7 +324,7 @@ export const getWithdrawalRewardTx = async (
   const messagesList: Types.WithdrawalRewardTxMessage[] = [];
 
   while (iteratedData.value) {
-    const { validatorAddress } = iteratedData.value as Types.WithdrawalRewardTxPayload;
+    const { validatorAddress } = iteratedData.value;
 
     const message = {
       typeUrl: Types.TxMsgTypes.WithdrawRewards,

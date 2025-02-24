@@ -115,22 +115,17 @@ const getSubmitTransactionData = (data) => {
 exports.getSubmitTransactionData = getSubmitTransactionData;
 const submitTransaction = async (delegatorAddr, data, config) => {
     const url = `${getRestRoute()}/staking/delegators/${delegatorAddr}/delegations`;
-    console.log('url to broadcast the tx (POST)');
     const { response: txData, error } = (0, exports.getSubmitTransactionData)(data);
     if (error) {
         return { error };
     }
-    console.log('tx data to broadcast', txData);
     const dataResult = await (0, exports.apiPost)(url, txData, config);
-    console.log('dataResult after the broadcast', dataResult);
     return dataResult;
 };
 exports.submitTransaction = submitTransaction;
 // is in use by the wallet
 const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, userType = networkTypes_1.TxHistoryUser.TxHistorySenderUser, config) => {
     const url = `${getRestRoute()}/cosmos/tx/v1beta1/txs`;
-    // console.log('url', url);
-    // console.log('given page', givenPage, pageLimit);
     const userQueryType = userType === networkTypes_1.TxHistoryUser.TxHistorySenderUser
         ? `message.sender='${address}'`
         : `transfer.recipient='${address}'`;
@@ -148,7 +143,6 @@ const getTxListBlockchain = async (address, type, givenPage = 1, pageLimit = 5, 
         order_by: 'ORDER_BY_DESC',
     };
     const dataResult = await (0, exports.apiGet)(url, Object.assign(Object.assign({}, config), { params }));
-    // console.log('TxHistory data result ', dataResult);
     return dataResult;
 };
 exports.getTxListBlockchain = getTxListBlockchain;
@@ -231,7 +225,6 @@ config) => {
 exports.requestBalanceIncrease = requestBalanceIncrease;
 const getRpcStatus = async (config) => {
     const url = `${getRpcRoute()}/status`;
-    console.log('url for getRpcStatus', url);
     const dataResult = await (0, exports.apiGet)(url, config);
     return dataResult;
 };
@@ -392,12 +385,10 @@ const getChainAndProtocolDetails = async () => {
             throw new Error('Protocol version id is empty. Exiting');
         }
         resolvedChainVersion = resolvedChainVersionToTest;
-        console.log('🚀 ~ file: network ~ resolvedChainIDToTest', resolvedChainIDToTest);
         const { MIN_NEW_PROTOCOL_VERSION } = config_1.chain;
         isNewProtocol = (0, helpers_1.getNewProtocolFlag)(resolvedChainVersion, MIN_NEW_PROTOCOL_VERSION);
     }
     catch (error) {
-        console.log('🚀 ~ file: network ~ resolvedChainID error', error);
         throw new Error('Could not resolve chain id');
     }
     return {

@@ -6,7 +6,6 @@ import {
 } from './networkTypes';
 
 export const getNewProtocolFlag = (currentVersion: string, minRequiredNewVersion: string) => {
-  console.log('current protocol version ', currentVersion);
   const [pVer, pSubVer, pPatch] = currentVersion.split('.');
   const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
 

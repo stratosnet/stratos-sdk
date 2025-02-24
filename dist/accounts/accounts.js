@@ -43,10 +43,8 @@ const increaseBalance = async (walletAddress, faucetUrl, denom) => {
         if (faucetError) {
             return { result: false, errorMessage: `Could not increase balance: Error: "${faucetError.message}"` };
         }
-        console.log('🚀 ~ file: accounts.ts ~  increaseBalance ~ result', result);
     }
     catch (error) {
-        console.log('Error: Faucet returns:', error.message);
         return {
             result: false,
             errorMessage: `Could not increase balance: Error: "${error.message}"`,
@@ -101,6 +99,7 @@ const getOtherBalanceCardMetrics = async (keyPairAddress) => {
         }
     }
     catch (error) {
+        // @TODO: add error handler?
         console.log('could not get ozone balance , error', error);
     }
     cardMetricsResult.detailedBalance = detailedBalance;
@@ -228,8 +227,8 @@ const getAccountTrasactions = async (address, type = TxTypes.HistoryTxType.All, 
             const parsed = (0, transactions_1.transformTx)(txResponseItem);
             parsedData.push(parsed);
         }
-        catch (err) {
-            console.log(`Parsing error: ${err.message}`);
+        catch (_err) {
+            // @TODO: add handler
         }
     });
     const totalUnformatted = parseInt(total) / pageLimit;

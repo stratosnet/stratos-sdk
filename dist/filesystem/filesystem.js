@@ -83,6 +83,7 @@ const getFileInfo = async (filePath) => {
         });
     }
     catch (error) {
+        // @TODO: add error handler
         console.log(error);
     }
     return openedFileInfo;
@@ -101,11 +102,9 @@ const getFileChunks = async (filePath, chunkSize = 10000) => {
                 while (true) {
                     // no-constant-condition
                     const chunk = fileStream.read(chunkSize);
-                    console.log('ch size', chunkSize);
                     if (!chunk || !chunk.length) {
                         break;
                     }
-                    console.log('chunked chunk length', chunk.length);
                     bytesRead += chunk.length;
                     result.push(chunk);
                 }
@@ -119,6 +118,7 @@ const getFileChunks = async (filePath, chunkSize = 10000) => {
         });
     }
     catch (error) {
+        // @TODO: add handler
         console.log(error);
     }
     return chunksList;
@@ -133,7 +133,6 @@ const getFileChunk = async (fileStream, readChunkSize) => {
         });
     }
     catch (error) {
-        console.log(error);
         throw 'could not read file chunk';
     }
     return chunksList;
@@ -198,7 +197,6 @@ const getLocalFileReadStream = async (filePath) => {
     }
     catch (error) {
         const errorMessage = `could not create file stream at path ${filePath}`;
-        console.log(errorMessage, error);
         throw new Error(errorMessage);
     }
 };
@@ -208,6 +206,7 @@ const writeFile = (filePath, fileBuffer) => {
         fs_1.default.writeFileSync(filePath, fileBuffer);
     }
     catch (err) {
+        // @TODO: add handler
         console.log(`Could not write file to ${filePath}: Details: ${err.message}`);
     }
 };

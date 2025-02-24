@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSharedFileInfo = exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFileFromBuffer = exports.updloadFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
+exports.getSharedFileInfo = exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = exports.updloadFile = exports.updloadFileFromBuffer = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = void 0;
 const path_1 = __importDefault(require("path"));
 const accounts_1 = require("../../accounts");
 const remotefs_1 = require("../../config/remotefs");
@@ -36,10 +36,19 @@ const network_1 = require("../../network");
 const helpers_1 = require("../../services/helpers");
 const SdsTypes = __importStar(require("./types"));
 const types_1 = require("./types");
+const getCurrentSequenceString = async (address) => {
+    const ozoneBalance = await accounts_1.accountsApi.getOtherBalanceCardMetrics(address);
+    const { detailedBalance } = ozoneBalance;
+    if (!detailedBalance) {
+        throw new Error('no sequence is presented in the ozone balance response');
+    }
+    const { sequence } = detailedBalance;
+    return `${sequence ? sequence : ''}`;
+};
+// actually downloads the file based on the offsets retrived inside the function
 const processUsedFileDownload = async (responseRequestDownloadShared, filehash, filesize, progressCb = () => { }) => {
     var _a;
     const { result: resultWithOffesets } = responseRequestDownloadShared;
-    // console.log('resultWithOffesets, ', resultWithOffesets);
     let offsetStartGlobal = 0;
     let offsetEndGlobal = 0;
     let isContinueGlobal = 0;
@@ -109,7 +118,6 @@ const processUsedFileDownload = async (responseRequestDownloadShared, filehash, 
             dlPartSize = offsetEndGlobal - 1 - offsetStartGlobal;
             readSize = readSize + dlPartSize;
             completedProgress = (100 * readSize) / filesize;
-            // console.log('b dlPartSize, filesize, readSize', dlPartSize, filesize, readSize);
             const completedProgressPercentageB = (Math.round(completedProgress * 100) / 100).toFixed(2);
             const completedProgressMessageC = `completed ${readSize} from ${filesize} bytes, or ${completedProgressPercentageB}%`;
             // log('3 We have a correct responseDownload', completedProgressMessage);
@@ -250,7 +258,6 @@ const getUploadedFileList = async (keypair, page = 0) => {
             req_time: timestamp,
         },
     ];
-    // console.log('extraParams for sendUserRequestList', extraParams);
     const callResult = await network_1.networkApi.sendUserRequestList(extraParams);
     const { response } = callResult;
     if (!response) {
@@ -272,7 +279,6 @@ const getAllUploadedFileList = async (keypair) => {
         const userFileList = await (0, exports.getUploadedFileList)(keypair, currentPage);
         const { originalResponse, files } = userFileList;
         const totalNumber = (_a = originalResponse === null || originalResponse === void 0 ? void 0 : originalResponse.result) === null || _a === void 0 ? void 0 : _a.totalnumber;
-        // console.log('originalResponse.result', originalResponse.result);
         console.log(`number files on page ${currentPage} is ${files === null || files === void 0 ? void 0 : files.length}, totalNumber is ${totalNumber}`);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
@@ -289,6 +295,8 @@ const getAllUploadedFileList = async (keypair) => {
     return resultFileList;
 };
 exports.getAllUploadedFileList = getAllUploadedFileList;
+// 1 s - depricated
+// uses processUsedFileDownload , which does not use sequence, so no changes needed
 const downloadFileOriginal = async (keypair, filePathToSave, filehash, filesize) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
@@ -343,6 +351,7 @@ const downloadFileOriginal = async (keypair, filePathToSave, filehash, filesize)
     return { filePathToSave };
 };
 exports.downloadFileOriginal = downloadFileOriginal;
+// 2s uses processUsedFileDownload , which does not use sequence, so no changes needed
 const downloadFileToBuffer = async (keypair, filehash, filesize, progressCb = () => { }) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
@@ -473,18 +482,24 @@ const downloadFile = async (keypair, filePathToSave, filehash, filesize, progres
     return { filePathToSave };
 };
 exports.downloadFile = downloadFile;
-const getCurrentSequenceString = async (address) => {
-    const ozoneBalance = await accounts_1.accountsApi.getOtherBalanceCardMetrics(address);
-    const { detailedBalance } = ozoneBalance;
-    if (!detailedBalance) {
-        throw new Error('no sequence is presented in the ozone balance response');
+// helper, used in updloadFileFromBuffer
+const getOffsetsAndResultFromRequestUpload = async (extraParams) => {
+    const callResultInit = await network_1.networkApi.sendUserRequestUpload(extraParams);
+    const { response: responseInit } = callResultInit;
+    const errorsList = [];
+    if (!responseInit) {
+        errorsList.push(`params for sendUserRequestUpload which we had when the error occured. ${JSON.stringify(extraParams)}`);
+        errorsList.push('we dont have response. it might be an error.');
+        return { responseInit, isContinueInit: 0, callResultInit, errorsList };
     }
-    const { sequence } = detailedBalance;
-    return sequence;
+    const { result: resultWithOffesets } = responseInit;
+    const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
+    return { offsetstartInit, offsetendInit, isContinueInit, responseInit, callResultInit, errorsList };
 };
-const getUserRequestUploadParams = async (keypair, filehash, filename, filesize) => {
+// 3s ? in updloadFileFromBuffer - changed
+// helper
+const getUserRequestUploadParams = async (keypair, filehash, filename, filesize, sequence) => {
     const { address, publicKey } = keypair;
-    const sequence = await getCurrentSequenceString(address);
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
     const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
@@ -504,23 +519,11 @@ const getUserRequestUploadParams = async (keypair, filehash, filename, filesize)
     ];
     return extraParams;
 };
-const getOffsetsAndResultFromRequestUpload = async (extraParams) => {
-    const callResultInit = await network_1.networkApi.sendUserRequestUpload(extraParams);
-    const { response: responseInit } = callResultInit;
-    const errorsList = [];
-    if (!responseInit) {
-        errorsList.push(`params for sendUserRequestUpload which we had when the error occured. ${JSON.stringify(extraParams)}`);
-        errorsList.push('we dont have response. it might be an error.');
-        return { responseInit, isContinueInit: 0, callResultInit, errorsList };
-    }
-    const { result: resultWithOffesets } = responseInit;
-    const { offsetend: offsetendInit, offsetstart: offsetstartInit, return: isContinueInit, } = resultWithOffesets;
-    return { offsetstartInit, offsetendInit, isContinueInit, responseInit, callResultInit, errorsList };
-};
-const getUserUploadDataParams = async (keypair, filehash, encodedFileChunk, stop = false) => {
+// 4s ? in updloadFileFromBuffer twice - changed
+// helper
+const getUserUploadDataParams = async (keypair, filehash, encodedFileChunk, sequenceUpload, stop = false) => {
     const { address, publicKey } = keypair;
     const timestampForUpload = (0, helpers_1.getTimestampInSeconds)();
-    const sequenceUpload = await getCurrentSequenceString(address);
     const messageToSignForUpload = `${filehash}${address}${sequenceUpload}${timestampForUpload}`;
     const signatureForUpload = await keyUtils.signWithPrivateKey(messageToSignForUpload, keypair.privateKey);
     const extraParamsForUpload = [
@@ -541,16 +544,14 @@ const getUserUploadDataParams = async (keypair, filehash, encodedFileChunk, stop
     }
     return extraParamsForUpload;
 };
-const updloadFile = async (keypair, fileReadPath) => {
-    const imageFileName = path_1.default.basename(fileReadPath);
-    const fileInfo = await filesystem_1.filesystemApi.getFileInfo(fileReadPath);
-    const readBinaryFile = await filesystem_1.filesystemApi.getFileBuffer(fileReadPath);
-    return (0, exports.updloadFileFromBuffer)(keypair, readBinaryFile, imageFileName, fileInfo.filehash, fileInfo.size);
-};
-exports.updloadFile = updloadFile;
+// no sequence here
+// uses 1 const getUserRequestUploadParams = async (
+// uses 2 const getUserUploadDataParams = async (
 const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, fileHash, fileSize, progressCb = () => { }) => {
     var _a;
-    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize);
+    const { address } = keypair;
+    const sequence = await getCurrentSequenceString(address);
+    const extraParams = await getUserRequestUploadParams(keypair, fileHash, resolvedFileName, fileSize, sequence);
     const { errorsList: initErrorsList, responseInit, callResultInit, offsetstartInit, offsetendInit, isContinueInit, } = await getOffsetsAndResultFromRequestUpload(extraParams);
     if (initErrorsList.length) {
         const errorMsg = 'sendUserRequestUpload has returned an error';
@@ -579,7 +580,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
                 details: { isContinueGlobal },
             },
         });
-        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', true);
+        const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, '', sequence, true);
         const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
         const { response: responseUploadToTest } = callResultUpload;
         const resMsg = 'responseUploadToTest after sending the stop to sendUserUploadData';
@@ -680,7 +681,7 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
             });
             let responseUpload;
             do {
-                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk);
+                const extraParamsForUpload = await getUserUploadDataParams(keypair, fileHash, encodedFileChunk, sequence);
                 const callResultUpload = await network_1.networkApi.sendUserUploadData(extraParamsForUpload);
                 const { response: responseUploadToTest } = callResultUpload;
                 if (!responseUploadToTest) {
@@ -804,6 +805,14 @@ const updloadFileFromBuffer = async (keypair, fileBuffer, resolvedFileName, file
     return uploadResult;
 };
 exports.updloadFileFromBuffer = updloadFileFromBuffer;
+// wrapper. uses updloadFileFromBuffer
+const updloadFile = async (keypair, fileReadPath) => {
+    const imageFileName = path_1.default.basename(fileReadPath);
+    const fileInfo = await filesystem_1.filesystemApi.getFileInfo(fileReadPath);
+    const readBinaryFile = await filesystem_1.filesystemApi.getFileBuffer(fileReadPath);
+    return (0, exports.updloadFileFromBuffer)(keypair, readBinaryFile, imageFileName, fileInfo.filehash, fileInfo.size);
+};
+exports.updloadFile = updloadFile;
 const shareFile = async (keypair, filehash, durationInDays = 180) => {
     const { address, publicKey } = keypair;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
@@ -824,7 +833,6 @@ const shareFile = async (keypair, filehash, durationInDays = 180) => {
         },
         req_time: timestamp,
     };
-    console.log('extraParams for fileShare', extraParams);
     const callResultRequestShare = await network_1.networkApi.sendUserRequestShare([extraParams]);
     const { response: responseRequestShare } = callResultRequestShare;
     if (!responseRequestShare) {
@@ -895,10 +903,7 @@ const getSharedFileList = async (keypair, page = 0) => {
         },
         req_time: timestamp,
     };
-    console.log('params for sendUserRequestListShare', extraParams);
     const callResultRequestListShare = await network_1.networkApi.sendUserRequestListShare([extraParams]);
-    // console.log('callResultRequestListShare', callResultRequestListShare);
-    // console.log('callResultRequestListShare.response', callResultRequestListShare?.response?.result);
     const { response: responseRequestListShare } = callResultRequestListShare;
     if (!responseRequestListShare) {
         (0, helpers_1.dirLog)('we dont have response for list share request. it might be an error', callResultRequestListShare);
@@ -931,7 +936,6 @@ const getAllSharedFileList = async (keypair) => {
     do {
         const userSharedFileList = await (0, exports.getSharedFileList)(keypair, currentPage);
         const { totalnumber: totalNumber, files } = userSharedFileList;
-        console.log(`number shared files on page ${currentPage}`, totalNumber);
         const weHaveDataOnThisPage = !!files && !!totalNumber;
         if (weHaveDataOnThisPage) {
             currentPage += 1;
@@ -947,6 +951,7 @@ const getAllSharedFileList = async (keypair) => {
     return resultFileList;
 };
 exports.getAllSharedFileList = getAllSharedFileList;
+// 5s - no changes needed
 const downloadSharedFileToBuffer = async (keypair, sharelink, // with or without sds://
 filesize, progressCb = () => { }) => {
     const { address, publicKey } = keypair;
@@ -966,7 +971,6 @@ filesize, progressCb = () => { }) => {
     };
     const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
-    console.log('responseRequestGetShared', responseRequestGetShared);
     if (!responseRequestGetShared) {
         const errorMsg = 'Error. There is no response for download shared file request.';
         progressCb({
@@ -980,7 +984,6 @@ filesize, progressCb = () => { }) => {
     }
     const { result: resultWithOffesets } = responseRequestGetShared;
     const { return: requestGetSharedReturn, reqid: reqidDownloadFile, filehash, filename: originalFileName, offsetstart: offsetstartInit, offsetend: offsetendInit, } = resultWithOffesets;
-    // console.log('resultWithOffesets', resultWithOffesets);
     if (parseInt(requestGetSharedReturn, 10) < 0) {
         const errorMsg = `return field in the request get shared response contains an error. Error code "${requestGetSharedReturn}"`;
         progressCb({
@@ -1094,6 +1097,7 @@ filesize, progressCb = (data) => {
     return { filePathToSave: filePathToSaveWithOriginalName };
 };
 exports.downloadSharedFile = downloadSharedFile;
+// 6s - no changes needed
 const getSharedFileInfo = async (keypair, sharelink) => {
     const { address, publicKey } = keypair;
     const sequence = await getCurrentSequenceString(address);
@@ -1110,10 +1114,8 @@ const getSharedFileInfo = async (keypair, sharelink) => {
         req_time: timestamp,
         sharelink: filelink,
     };
-    // console.log('extraParams for getSharedFileInfo', extraParams);
     const callResultRequestGetShared = await network_1.networkApi.sendUserRequestGetShared([extraParams]);
     const { response: responseRequestGetShared } = callResultRequestGetShared;
-    // console.log('responseRequestGetShared from getSharedFileInfo', responseRequestGetShared);
     if (!responseRequestGetShared) {
         const errorMsg = 'Error. There is no response for download shared file request.';
         throw new Error(errorMsg);

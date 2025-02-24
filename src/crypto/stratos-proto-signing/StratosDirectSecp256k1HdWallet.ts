@@ -91,7 +91,6 @@ export function makeStratosHubPath(a: number): typeof crypto_1.HdPath {
       Slip10RawIndex.normal(a),
     ];
   } catch (error) {
-    console.log('could not parse  keyPathParameters from sdk', keyPathParameters);
     return defaultPath;
   }
 }

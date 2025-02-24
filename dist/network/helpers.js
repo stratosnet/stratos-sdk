@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidPagination = exports.isOldBalanceVersion = exports.isNewBalanceVersion = exports.getNewProtocolFlag = void 0;
 const getNewProtocolFlag = (currentVersion, minRequiredNewVersion) => {
-    console.log('current protocol version ', currentVersion);
     const [pVer, pSubVer, pPatch] = currentVersion.split('.');
     const [minVer, minSubVer, minPatch] = minRequiredNewVersion.split('.');
     const isVerOld = +pVer < +minVer;
