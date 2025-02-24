@@ -767,7 +767,7 @@ async function main(): Promise<void> {
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
-  await testRequestUserFileList(hdPathIndex, 2);
+  await testRequestUserFileList(hdPathIndex, 0);
   // await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
