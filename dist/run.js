@@ -522,7 +522,7 @@ async function main() {
     // const filename = 'file_d_10mb_2025_02_26-15_20_49_01.bin';
     // const filename = 'file_d_10mb_2025_02_26-16_11_10_01.bin';
     const filename = 'file_d_10mb_2025_02_26-16_19_49_01.bin';
-    await testItFileUpFromBuffer(hdPathIndex, filename);
+    // await testItFileUpFromBuffer(hdPathIndex, filename);
     // const filename = 'file100K_Aug_21_v1.bin';
     // await testItFileUpFromBuffer(hdPathIndex, filename);
     // 3a
