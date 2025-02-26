@@ -174,6 +174,68 @@ export const getAllUploadedFileList = async (
   return resultFileList;
 };
 
+const sendUserUploadSignRequest = async (
+  fileHash: string,
+  keypair: WalletTypes.KeyPairInfo,
+  progressCb: (data: SdsTypes.ProgressCbData) => void = () => {},
+): Promise<boolean> => {
+  const { address, publicKey } = keypair;
+  const sequenceUploadSign = await getCurrentSequenceString(address);
+
+  const timestampUploadSign = getTimestampInSeconds();
+  const messageUploadSign = `${fileHash}${address}${sequenceUploadSign}${timestampUploadSign}`;
+  const signatureUploadSign = await keyUtils.signWithPrivateKey(messageUploadSign, keypair.privateKey);
+
+  const extraParamsUploadSign = [
+    {
+      filehash: fileHash,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature: signatureUploadSign,
+      },
+      req_time: timestampUploadSign,
+      sequencenumber: sequenceUploadSign,
+    },
+  ];
+
+  const callUploadSignResult = await networkApi.sendUserUploadSign(extraParamsUploadSign);
+
+  const { response: responseUploadSign } = callUploadSignResult;
+
+  if (!responseUploadSign) {
+    const errorMsg = `There was an error during the upload sign. "response" from the request is empty , Details: (${callUploadSignResult})`;
+    progressCb({
+      result: { success: false, code: UPLOAD_CODES.USER_UPLOAD_DATA_USER_SIGN_FAIL },
+      error: {
+        message: errorMsg,
+        details: { callUploadSignResult },
+      },
+    });
+
+    throw new Error(errorMsg);
+  }
+
+  const {
+    result: { return: uploadSignReturnValue },
+  } = responseUploadSign;
+
+  if (uploadSignReturnValue !== '0') {
+    const errorMsg = `There was an error during the upload sign. Non 0 code was returned, Details: (${responseUploadSign})`;
+    progressCb({
+      result: { success: false, code: UPLOAD_CODES.USER_UPLOAD_DATA_USER_SIGN_FAIL },
+      error: {
+        message: errorMsg,
+        details: { callUploadSignResult },
+      },
+    });
+
+    throw new Error(errorMsg);
+  }
+
+  return true;
+};
+
 // helper, used in updloadFileFromBuffer
 const getOffsetsAndResultFromRequestUpload = async (
   extraParams: networkTypes.FileUserRequestUploadParams[],
@@ -589,6 +651,21 @@ export const updloadFileFromBuffer = async (
         details: { isContinueGlobal, uploadReturn },
       },
     });
+    throw new Error(errorMsg);
+  }
+
+  const isUploadSigned = await sendUserUploadSignRequest(fileHash, keypair, progressCb);
+
+  if (!isUploadSigned) {
+    const errorMsg = `There was an error during the upload sign. isUploadSigned is false`;
+    progressCb({
+      result: { success: false, code: UPLOAD_CODES.USER_UPLOAD_DATA_USER_SIGN_FAIL },
+      error: {
+        message: errorMsg,
+        details: { isUploadSigned },
+      },
+    });
+
     throw new Error(errorMsg);
   }
 

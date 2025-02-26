@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { log } from 'console';
 import JSONbig from 'json-bigint';
 import qs from 'qs';
 import { hdVault, chain } from '../config';
@@ -376,6 +375,19 @@ export const sendUserRequestUpload = async (
   const method = 'user_requestUpload';
   // gateway
   const payload = getRpcPayload<Types.FileUserRequestUploadParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
+export const sendUserUploadSign = async (
+  extraParams: Types.FileUserUploadSignParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserUploadSignResponse>> => {
+  const msgId = 1;
+  const method = 'user_uploadSign';
+  const payload = getRpcPayload<Types.FileUserUploadSignParams[]>(msgId, method, extraParams);
 
   const dataResult = await sendRpcCall<typeof payload>(payload, config);
 

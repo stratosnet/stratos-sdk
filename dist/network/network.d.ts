@@ -24,6 +24,7 @@ export declare const getRpcPayload: <T>(msgId: number, method: string, extraPara
 };
 export declare const sendUserRequestList: (extraParams: Types.FileUserRequestListParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestListResponse>>;
 export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>>;
+export declare const sendUserUploadSign: (extraParams: Types.FileUserUploadSignParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserUploadSignResponse>>;
 export declare const sendUserRequestDownload: (extraParams: Types.FileUserRequestDownloadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>>;
 export declare const sendUserDownloadData: (extraParams: Types.FileUserDownloadDataParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>>;
 export declare const sendUserDownloadedFileInfo: (extraParams: Types.FileUserDownloadedFileInfoParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>>;
