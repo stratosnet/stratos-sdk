@@ -762,12 +762,12 @@ async function main(): Promise<void> {
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
-  await testRequestUserFileList(hdPathIndex, 0);
+  // await testRequestUserFileList(hdPathIndex, 0);
   // await testRequestAllUserFileList(hdPathIndex);
   // 2a - that is the file name - it has to be in ./src
   // const filename = 'file25M_1_Aug_7.bin';
@@ -777,9 +777,13 @@ async function main(): Promise<void> {
   //   await testItFileUpFromBuffer(hdPathIndex, myFileName);
   // }
   // let filename = 'file20M_1_Jul_18.bin';
+  // const filename = 'file_d_10mb_2025_02_26-15_20_49_01.bin';
+  // const filename = 'file_d_10mb_2025_02_26-16_11_10_01.bin';
+  const filename = 'file_d_10mb_2025_02_26-16_19_49_01.bin';
+
   // await testItFileUpFromBuffer(hdPathIndex, filename);
 
-  const filename = 'file100K_Aug_21_v1.bin';
+  // const filename = 'file100K_Aug_21_v1.bin';
   // await testItFileUpFromBuffer(hdPathIndex, filename);
 
   // 3a

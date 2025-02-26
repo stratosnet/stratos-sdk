@@ -57,4 +57,5 @@ export declare const UPLOAD_CODES: {
     USER_UPLOAD_DATA_COMPLETED: number;
     USER_UPLOAD_DATA_NO_CONTINUE: number;
     USER_UPLOAD_DATA_FINISHED: number;
+    USER_UPLOAD_DATA_USER_SIGN_FAIL: number;
 };
