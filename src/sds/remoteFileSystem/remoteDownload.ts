@@ -208,7 +208,6 @@ export const downloadFileOriginal = async (
   const { address, publicKey } = keypair;
 
   const sequence = await getCurrentSequenceString(address);
-  console.log('sequence', sequence);
 
   const filehandle = `sdm://${address}/${filehash}`;
 
@@ -474,4 +473,69 @@ export const downloadFile = async (
   filesystemApi.writeFile(filePathToSave, downloadedFile);
 
   return { filePathToSave };
+};
+
+export const deleteFile = async (
+  keypair: WalletTypes.KeyPairInfo,
+  filehash: string,
+  progressCb: (data: SdsTypes.ProgressCbData) => void = (data: unknown) => {
+    console.log('data passed to callback', data);
+  },
+): Promise<{ fileDeleteReturnCode: string; filehash: string }> => {
+  const { address, publicKey } = keypair;
+
+  const timestamp = getTimestampInSeconds();
+  const messageToSign = `${filehash}${address}${timestamp}`;
+
+  const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+
+  const extraParams: networkTypes.FileUserRequestDeleteFileParams[] = [
+    {
+      filehash,
+      signature: {
+        address,
+        pubkey: publicKey,
+        signature,
+      },
+      req_time: timestamp,
+    },
+  ];
+
+  const callResultDelete = await networkApi.sendUserRequestDeleteFile(extraParams);
+
+  const { response: responseRequest } = callResultDelete;
+
+  if (!responseRequest) {
+    const errorMsg = 'Error. There is no response for delete request.';
+
+    progressCb({
+      result: { success: false, code: SdsTypes.DOWNLOAD_CODES.NO_RESPONSE_TO_DELETE_REQUEST },
+      error: {
+        message: errorMsg,
+        details: { callResultDelete },
+      },
+    });
+    throw new Error(errorMsg);
+  }
+
+  const { result: resultDelete } = responseRequest;
+
+  const { return: requestDeleteFileReturn } = resultDelete;
+
+  console.log('responseRequest', responseRequest);
+  if (parseInt(requestDeleteFileReturn, 10) < 0) {
+    const errorMsg = `return field in the request download shared response contains an error. Error code "${requestDeleteFileReturn}"`;
+
+    progressCb({
+      result: { success: false, code: SdsTypes.DOWNLOAD_CODES.RETURN_FIELD_OF_REQUEST_DELETE_HAS_ERROR },
+      error: {
+        message: errorMsg,
+        details: { responseRequest },
+      },
+    });
+
+    throw new Error(errorMsg);
+  }
+
+  return { filehash, fileDeleteReturnCode: requestDeleteFileReturn };
 };

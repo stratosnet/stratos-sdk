@@ -408,6 +408,20 @@ export const sendUserRequestDownload = async (
   return dataResult;
 };
 
+export const sendUserRequestDeleteFile = async (
+  extraParams: Types.FileUserRequestDeleteFileParams[],
+  config?: Types.NetworkAxiosConfig,
+): Promise<Types.FileUserRequestResult<Types.FileUserRequestDeleteFileResponse>> => {
+  const msgId = 1;
+  const method = 'user_requestDeleteFile';
+
+  const payload = getRpcPayload<Types.FileUserRequestDeleteFileParams[]>(msgId, method, extraParams);
+
+  const dataResult = await sendRpcCall<typeof payload>(payload, config);
+
+  return dataResult;
+};
+
 export const sendUserDownloadData = async (
   extraParams: Types.FileUserDownloadDataParams[],
   config?: Types.NetworkAxiosConfig,

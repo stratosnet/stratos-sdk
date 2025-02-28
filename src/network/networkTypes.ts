@@ -453,6 +453,12 @@ export interface FileUserRequestDownloadParams {
   req_time: number;
 }
 
+export interface FileUserRequestDeleteFileParams {
+  filehash: string;
+  signature: UserFileSignature;
+  req_time: number;
+}
+
 export interface UserFileSignature {
   address: string;
   pubkey: string;
@@ -466,6 +472,12 @@ export interface FileUserRequestDownloadResponse extends MainRpcResponse {
     offsetstart: string;
     offsetend: string;
     filedata: string;
+  };
+}
+
+export interface FileUserRequestDeleteFileResponse extends MainRpcResponse {
+  result: {
+    return: ReturnCodeType;
   };
 }
 
