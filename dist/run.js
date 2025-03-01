@@ -162,8 +162,17 @@ const testRequestAllUserFileList = async (hdPathIndex, givenReceiverMnemonic = z
         return;
     }
     const userFileList = await stratos.sds.remoteFileSystem.remoteFileSystemApi.getAllUploadedFileList(keyPairZero);
+    console.log('retrieved all user file list', userFileList);
     return userFileList;
-    // console.log('retrieved all user file list', userFileList);
+};
+const testDeleteUserFile = async (filhash, hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic) => {
+    const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
+    if (!keyPairZero) {
+        return;
+    }
+    const deleteResult = await stratos.sds.remoteFileSystem.remoteFileSystemApi.deleteFile(keyPairZero, filhash);
+    console.log('delete result ', deleteResult);
+    return deleteResult;
 };
 const testRequestAllUserSharedFileList = async (hdPathIndex, givenReceiverMnemonic = zeroUserMnemonic) => {
     const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(givenReceiverMnemonic, hdPathIndex);
@@ -511,7 +520,7 @@ async function main() {
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    // await testRequestAllUserFileList(hdPathIndex);
+    await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file25M_1_Aug_7.bin';
     // for (const myFileName of filesToUpload) {
@@ -531,7 +540,8 @@ async function main() {
     // const filename = 'file20M_3_Jul_20.bin';
     // const filehash = 'v05j1m50abbkpfmb9o9oc8mgiegcuorfo52l0rv8';
     // const filesize = 20_000_001;
-    const filehash = 'v05j1m57u6n0s8vt9mmmi18tpoihdvm6qggea4c0';
+    const filehash = 'v05j1m57pump33rdrtufv2bb4r9f95un4c7hq6rg';
+    // await testDeleteUserFile(filehash, hdPathIndex);
     // filesize: 20000001,
     // filename: 'file20M_9_Jul_20.bin',
     // createtime: 1721495844
@@ -541,17 +551,6 @@ async function main() {
     // await testRequestUserSharedFileList(hdPathIndex, 0);
     // 5a
     // const filehash = 'v05j1m54m10sdhavr6tg8g2dmhng30712l9sisao';
-    const filehasheList = [
-        {
-            filehash: 'v05j1m54sjmk309b1obi4jopl71tg4eechufnouo',
-        },
-        {
-            filehash: 'v05j1m54tfk4jmpitr760rekj72sedl0jn8ooe6o',
-        },
-        {
-            filehash: 'v05j1m54tka4k75s4u70ruv4ah2e9soaok8a5na0',
-        },
-    ];
     // for (const filehashItem of filehasheList) {
     //   const durationInDays = 1;
     //   try {

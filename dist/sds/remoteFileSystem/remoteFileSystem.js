@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updloadFile = exports.updloadFileFromBuffer = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = exports.downloadFile = exports.downloadFileToBuffer = exports.processUsedFileDownload = exports.getSharedFileInfo = exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = void 0;
+exports.updloadFile = exports.updloadFileFromBuffer = exports.getAllUploadedFileList = exports.getUploadedFileList = exports.getUploadedFilesStatus = exports.deleteFile = exports.downloadFile = exports.downloadFileToBuffer = exports.processUsedFileDownload = exports.getSharedFileInfo = exports.downloadSharedFile = exports.downloadSharedFileToBuffer = exports.getAllSharedFileList = exports.getSharedFileList = exports.stopFileSharing = exports.shareFile = void 0;
 var remoteShared_1 = require("./remoteShared");
 Object.defineProperty(exports, "shareFile", { enumerable: true, get: function () { return remoteShared_1.shareFile; } });
 Object.defineProperty(exports, "stopFileSharing", { enumerable: true, get: function () { return remoteShared_1.stopFileSharing; } });
@@ -13,6 +13,7 @@ var remoteDownload_1 = require("./remoteDownload");
 Object.defineProperty(exports, "processUsedFileDownload", { enumerable: true, get: function () { return remoteDownload_1.processUsedFileDownload; } });
 Object.defineProperty(exports, "downloadFileToBuffer", { enumerable: true, get: function () { return remoteDownload_1.downloadFileToBuffer; } });
 Object.defineProperty(exports, "downloadFile", { enumerable: true, get: function () { return remoteDownload_1.downloadFile; } });
+Object.defineProperty(exports, "deleteFile", { enumerable: true, get: function () { return remoteDownload_1.deleteFile; } });
 var remoteUpload_1 = require("./remoteUpload");
 Object.defineProperty(exports, "getUploadedFilesStatus", { enumerable: true, get: function () { return remoteUpload_1.getUploadedFilesStatus; } });
 Object.defineProperty(exports, "getUploadedFileList", { enumerable: true, get: function () { return remoteUpload_1.getUploadedFileList; } });

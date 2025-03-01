@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.processUsedFileDownload = void 0;
+exports.deleteFile = exports.downloadFile = exports.downloadFileToBuffer = exports.downloadFileOriginal = exports.processUsedFileDownload = void 0;
 const keyUtils = __importStar(require("../../crypto/hdVault/keyUtils"));
 const filesystem_1 = require("../../filesystem");
 const network_1 = require("../../network");
@@ -167,7 +167,6 @@ exports.processUsedFileDownload = processUsedFileDownload;
 const downloadFileOriginal = async (keypair, filePathToSave, filehash, filesize) => {
     const { address, publicKey } = keypair;
     const sequence = await (0, remoteCommon_1.getCurrentSequenceString)(address);
-    console.log('sequence', sequence);
     const filehandle = `sdm://${address}/${filehash}`;
     const timestamp = (0, helpers_1.getTimestampInSeconds)();
     const messageToSign = `${filehash}${address}${sequence}${timestamp}`;
@@ -349,4 +348,52 @@ const downloadFile = async (keypair, filePathToSave, filehash, filesize, progres
     return { filePathToSave };
 };
 exports.downloadFile = downloadFile;
+const deleteFile = async (keypair, filehash, progressCb = (data) => {
+    console.log('data passed to callback', data);
+}) => {
+    const { address, publicKey } = keypair;
+    const timestamp = (0, helpers_1.getTimestampInSeconds)();
+    const messageToSign = `${filehash}${address}${timestamp}`;
+    const signature = await keyUtils.signWithPrivateKey(messageToSign, keypair.privateKey);
+    const extraParams = [
+        {
+            filehash,
+            signature: {
+                address,
+                pubkey: publicKey,
+                signature,
+            },
+            req_time: timestamp,
+        },
+    ];
+    const callResultDelete = await network_1.networkApi.sendUserRequestDeleteFile(extraParams);
+    const { response: responseRequest } = callResultDelete;
+    if (!responseRequest) {
+        const errorMsg = 'Error. There is no response for delete request.';
+        progressCb({
+            result: { success: false, code: SdsTypes.DOWNLOAD_CODES.NO_RESPONSE_TO_DELETE_REQUEST },
+            error: {
+                message: errorMsg,
+                details: { callResultDelete },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    const { result: resultDelete } = responseRequest;
+    const { return: requestDeleteFileReturn } = resultDelete;
+    console.log('responseRequest', responseRequest);
+    if (parseInt(requestDeleteFileReturn, 10) < 0) {
+        const errorMsg = `return field in the request download shared response contains an error. Error code "${requestDeleteFileReturn}"`;
+        progressCb({
+            result: { success: false, code: SdsTypes.DOWNLOAD_CODES.RETURN_FIELD_OF_REQUEST_DELETE_HAS_ERROR },
+            error: {
+                message: errorMsg,
+                details: { responseRequest },
+            },
+        });
+        throw new Error(errorMsg);
+    }
+    return { filehash, fileDeleteReturnCode: requestDeleteFileReturn };
+};
+exports.deleteFile = deleteFile;
 //# sourceMappingURL=remoteDownload.js.map

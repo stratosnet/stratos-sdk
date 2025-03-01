@@ -8,7 +8,7 @@ export {
   getSharedFileInfo,
 } from './remoteShared';
 
-export { processUsedFileDownload, downloadFileToBuffer, downloadFile } from './remoteDownload';
+export { processUsedFileDownload, downloadFileToBuffer, downloadFile, deleteFile } from './remoteDownload';
 
 export {
   getUploadedFilesStatus,

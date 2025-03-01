@@ -26,6 +26,7 @@ export declare const sendUserRequestList: (extraParams: Types.FileUserRequestLis
 export declare const sendUserRequestUpload: (extraParams: Types.FileUserRequestUploadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestUploadResponse>>;
 export declare const sendUserUploadSign: (extraParams: Types.FileUserUploadSignParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserUploadSignResponse>>;
 export declare const sendUserRequestDownload: (extraParams: Types.FileUserRequestDownloadParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestDownloadResponse>>;
+export declare const sendUserRequestDeleteFile: (extraParams: Types.FileUserRequestDeleteFileParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestDeleteFileResponse>>;
 export declare const sendUserDownloadData: (extraParams: Types.FileUserDownloadDataParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadDataResponse>>;
 export declare const sendUserDownloadedFileInfo: (extraParams: Types.FileUserDownloadedFileInfoParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserDownloadedFileInfoResponse>>;
 export declare const sendUserRequestGetOzone: (extraParams: Types.FileUserRequestGetOzoneParams[], config?: Types.NetworkAxiosConfig) => Promise<Types.FileUserRequestResult<Types.FileUserRequestGetOzoneResponse>>;
