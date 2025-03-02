@@ -151,7 +151,7 @@ const getAllUploadedFileList = async (keypair) => {
             weContinue = false;
         }
     } while (weContinue);
-    return resultFileList;
+    return resultFileList.sort((a, b) => b.createtime - a.createtime);
 };
 exports.getAllUploadedFileList = getAllUploadedFileList;
 const sendUserUploadSignRequest = async (fileHash, keypair, progressCb = () => { }) => {
