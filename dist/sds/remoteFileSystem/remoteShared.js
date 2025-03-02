@@ -166,7 +166,7 @@ const getAllSharedFileList = async (keypair) => {
             weContinue = false;
         }
     } while (weContinue);
-    return resultFileList;
+    return resultFileList.sort((a, b) => b.createtime - a.createtime);
 };
 exports.getAllSharedFileList = getAllSharedFileList;
 // 5s - no changes needed

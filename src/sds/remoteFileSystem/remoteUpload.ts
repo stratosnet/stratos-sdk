@@ -171,7 +171,7 @@ export const getAllUploadedFileList = async (
     }
   } while (weContinue);
 
-  return resultFileList;
+  return resultFileList.sort((a, b) => b.createtime - a.createtime);
 };
 
 const sendUserUploadSignRequest = async (
