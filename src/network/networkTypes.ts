@@ -22,6 +22,7 @@ export interface NetworkAxiosHeaders {
 
 export interface NetworkAxiosConfig {
   headers?: NetworkAxiosHeaders;
+  data?: { [keya: string]: { [keyb: string]: unknown } };
   params?: any;
 }
 
@@ -577,6 +578,24 @@ export interface RestTxSignerInfo {
 
 export interface RestTxHistoryDataResult extends NetworkAxiosDataResult {
   response?: RestTxHistoryResponse;
+}
+
+export interface ClaimPromoDataResult extends NetworkAxiosDataResult {
+  response?: ClaimPromoResponse;
+}
+
+export interface ClaimPromoResponse {
+  msg: string;
+  data: string;
+}
+
+export interface Promo {
+  content: string;
+  promo_type: number;
+  amount: Amount;
+  max_use_times: number;
+  start: string;
+  expire: string;
 }
 
 export interface RestTxHistoryResponse {

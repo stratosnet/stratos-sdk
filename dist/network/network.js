@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDeleteFile = exports.sendUserRequestDownload = exports.sendUserUploadSign = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
+exports.claimPromo = exports.getChainAndProtocolDetails = exports.getNodeProtocolVersion = exports.getChainId = exports.sendUserRequestGetFileStatus = exports.sendUserRequestGetShared = exports.sendUserRequestStopShare = exports.sendUserRequestListShare = exports.sendUserRequestShare = exports.sendUserUploadData = exports.sendUserRequestGetOzone = exports.sendUserDownloadedFileInfo = exports.sendUserDownloadData = exports.sendUserRequestDeleteFile = exports.sendUserRequestDownload = exports.sendUserUploadSign = exports.sendUserRequestUpload = exports.sendUserRequestList = exports.getRpcPayload = exports.getRpcStatus = exports.requestBalanceIncrease = exports.getRewardBalance = exports.getUnboundingBalance = exports.getDelegatedBalance = exports.getAvailableBalance = exports.getAvailableBalance_n = exports.getNozPrice = exports.getStakingPool = exports.getValidator = exports.getValidatorsBondedToDelegatorList = exports.getValidatorsList = exports.getTxListBlockchain = exports.submitTransaction = exports.getSubmitTransactionData = exports.sendRpcCall = exports.apiGet = exports.apiPost = void 0;
 const axios_1 = __importDefault(require("axios"));
 const json_bigint_1 = __importDefault(require("json-bigint"));
 const qs_1 = __importDefault(require("qs"));
@@ -414,4 +414,46 @@ const getChainAndProtocolDetails = async () => {
     };
 };
 exports.getChainAndProtocolDetails = getChainAndProtocolDetails;
+// export const getPromoList = async (ozUrl: string, auth: string) => {
+//   const url = `${ozUrl}/promo/list`;
+//
+//   const data = {
+//     base_info: { authorization: auth },
+//   };
+//
+//   const config = {
+//     data,
+//   };
+//
+//   const dataResult = await apiGet(url, { ...config });
+//
+//   return dataResult;
+// };
+//
+// export const addUpdatePromo = async (ozUrl: string, auth: string, newPromoData: Types.Promo) => {
+//   const url = `${ozUrl}/promo`;
+//   console.log('url2', url);
+//
+//   const payload = {
+//     base_info: { authorization: auth },
+//     ...newPromoData,
+//   };
+//
+//   const dataResult = await apiPost(url, payload);
+//
+//   return dataResult;
+// };
+const claimPromo = async (ozUrl, beneficiary, promo) => {
+    const url = `${ozUrl}/claim`;
+    const promoType = promo.startsWith('http') ? 2 : 1;
+    const payload = {
+        beneficiary,
+        promo_type: promoType,
+        content: promo,
+    };
+    // response =  { msg: 'ok', data: 'request sent' }
+    const dataResult = await (0, exports.apiPost)(url, payload);
+    return dataResult;
+};
+exports.claimPromo = claimPromo;
 //# sourceMappingURL=network.js.map

@@ -43,3 +43,4 @@ export declare const getChainAndProtocolDetails: () => Promise<{
     resolvedChainVersion: string;
     isNewProtocol: boolean;
 }>;
+export declare const claimPromo: (ozUrl: string, beneficiary: string, promo: string) => Promise<Types.ClaimPromoDataResult>;
