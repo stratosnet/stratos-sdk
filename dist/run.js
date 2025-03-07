@@ -455,20 +455,33 @@ givenReceiverMnemonic = zeroUserMnemonic) => {
 //   }
 // }
 const testGateway = async () => {
-    // const opts = { depth: null, colors: true, maxArrayLength: null };
-    // const res = await stratos.network.networkApi.getRpcStatus();
-    // const cur = getCurrentTimestamp();
-    const curInSec = (0, helpers_1.getTimestampInSeconds)();
-    // console.log('curM', cur);
-    console.log('curInSecM', curInSec);
-    const example = 1750218794;
-    console.log('curInSecE', example);
-    // console.dir(res, opts);
-    // const res2 = await stratos.network.networkApi.getChainId();
-    // console.dir(res2, opts);
-    // const res3 = await stratos.network.networkApi.getChainAndProtocolDetails();
-    // console.dir(res3, opts);
-    // return res3;
+    // get list of promo codes
+    const ozUrl = 'http://localhost:8080';
+    const auth = '123b';
+    // const resultList = await stratos.network.networkApi.getPromoList(ozUrl, auth);
+    // console.log('resultList', JSON.stringify(resultList));
+    // create a new promo code
+    const promoCodeContent = 'p1';
+    const newPromoData = {
+        base_info: { authorization: auth },
+        content: 'p1',
+        promo_type: 1,
+        amount: {
+            denom: 'stos',
+            amount: '1',
+        },
+        max_use_times: 200,
+        start: (0, helpers_1.createDateTimeString)('2025-01-01'),
+        expire: (0, helpers_1.createDateTimeString)('2025-06-08', '18:00:00'),
+    };
+    // const resultCreate = await stratos.network.networkApi.addUpdatePromo(ozUrl, auth, newPromoData);
+    // console.log('resultCreate', resultCreate);
+    // claim promo code
+    const beneficiary = 'st1tufzs8k0djfmcces7xld69lxjy50hq4wn7k7s5';
+    const promoCodeToClaim = promoCodeContent;
+    // const resultClaim = await stratos.network.networkApi.claimPromo(ozUrl, beneficiary, promoCodeToClaim);
+    // console.log('resultClaim', resultClaim);
+    // console.log('resultClaim.response', resultClaim.response);
 };
 async function main() {
     // const sdkEnv = sdkEnvDev;
@@ -520,7 +533,7 @@ async function main() {
     // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
     // 1a
     // await testRequestUserFileList(hdPathIndex, 0);
-    await testRequestAllUserFileList(hdPathIndex);
+    // await testRequestAllUserFileList(hdPathIndex);
     // 2a - that is the file name - it has to be in ./src
     // const filename = 'file25M_1_Aug_7.bin';
     // for (const myFileName of filesToUpload) {

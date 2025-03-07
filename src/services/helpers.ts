@@ -62,3 +62,39 @@ export const uint8arrayToHexStr = (input: Uint8Array): string => Buffer.from(inp
 export const uint8arrayToBase64Str = (input: Uint8Array): string => Buffer.from(input).toString('base64');
 export const hexToBytes = (input: string): Uint8Array => new Uint8Array(Buffer.from(input, 'hex'));
 export const uint8arrayToHumanString = (input: Uint8Array): string => Buffer.from(input).toString();
+
+// example - createDateTimeString("2025-12-25", "23:59:59") // "2025-12-25T23:59:59-05:00"
+export const createDateTimeString = (startLocalDate?: string, startLocalTime?: string): string => {
+  const formatNumber = (n: number) => n.toString().padStart(2, '0');
+
+  const formatOffset = (date: Date) => {
+    const offset = date.getTimezoneOffset();
+    const sign = offset > 0 ? '-' : '+';
+    const hours = formatNumber(Math.floor(Math.abs(offset) / 60));
+    const minutes = formatNumber(Math.abs(offset) % 60);
+    return `${sign}${hours}:${minutes}`;
+  };
+
+  const dateObj = new Date();
+
+  if (startLocalDate) {
+    const [year, month, day] = startLocalDate.split('-').map(Number);
+    dateObj.setFullYear(year, month - 1, day); // Months are 0-based
+  }
+
+  if (startLocalTime) {
+    const [hours, minutes, seconds] = startLocalTime.split(':').map(Number);
+    dateObj.setHours(hours, minutes, seconds || 0, 0);
+  }
+
+  return [
+    [dateObj.getFullYear(), formatNumber(dateObj.getMonth() + 1), formatNumber(dateObj.getDate())].join('-'),
+    'T',
+    [
+      formatNumber(dateObj.getHours()),
+      formatNumber(dateObj.getMinutes()),
+      formatNumber(dateObj.getSeconds()),
+    ].join(':'),
+    formatOffset(dateObj),
+  ].join('');
+};

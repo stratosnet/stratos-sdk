@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uint8arrayToHumanString = exports.hexToBytes = exports.uint8arrayToBase64Str = exports.uint8arrayToHexStr = exports.base64StringToHumanString = exports.humanStringToBase64String = exports.hexStringToHumanString = exports.humanStringToHexString = exports.toBuffer = exports.toArrayBuffer = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
+exports.createDateTimeString = exports.uint8arrayToHumanString = exports.hexToBytes = exports.uint8arrayToBase64Str = exports.uint8arrayToHexStr = exports.base64StringToHumanString = exports.humanStringToBase64String = exports.hexStringToHumanString = exports.humanStringToHexString = exports.toBuffer = exports.toArrayBuffer = exports.getCurrentTimestamp = exports.getTimestampInSeconds = exports.delay = exports.wait = exports.dirLog = exports.log = exports.now = void 0;
 const now = () => new Date().toLocaleString();
 exports.now = now;
 // NOTE - did log for console output -
@@ -68,4 +68,35 @@ const hexToBytes = (input) => new Uint8Array(Buffer.from(input, 'hex'));
 exports.hexToBytes = hexToBytes;
 const uint8arrayToHumanString = (input) => Buffer.from(input).toString();
 exports.uint8arrayToHumanString = uint8arrayToHumanString;
+// example - createDateTimeString("2025-12-25", "23:59:59") // "2025-12-25T23:59:59-05:00"
+const createDateTimeString = (startLocalDate, startLocalTime) => {
+    const formatNumber = (n) => n.toString().padStart(2, '0');
+    const formatOffset = (date) => {
+        const offset = date.getTimezoneOffset();
+        const sign = offset > 0 ? '-' : '+';
+        const hours = formatNumber(Math.floor(Math.abs(offset) / 60));
+        const minutes = formatNumber(Math.abs(offset) % 60);
+        return `${sign}${hours}:${minutes}`;
+    };
+    const dateObj = new Date();
+    if (startLocalDate) {
+        const [year, month, day] = startLocalDate.split('-').map(Number);
+        dateObj.setFullYear(year, month - 1, day); // Months are 0-based
+    }
+    if (startLocalTime) {
+        const [hours, minutes, seconds] = startLocalTime.split(':').map(Number);
+        dateObj.setHours(hours, minutes, seconds || 0, 0);
+    }
+    return [
+        [dateObj.getFullYear(), formatNumber(dateObj.getMonth() + 1), formatNumber(dateObj.getDate())].join('-'),
+        'T',
+        [
+            formatNumber(dateObj.getHours()),
+            formatNumber(dateObj.getMinutes()),
+            formatNumber(dateObj.getSeconds()),
+        ].join(':'),
+        formatOffset(dateObj),
+    ].join('');
+};
+exports.createDateTimeString = createDateTimeString;
 //# sourceMappingURL=helpers.js.map

@@ -17,3 +17,4 @@ export declare const uint8arrayToHexStr: (input: Uint8Array) => string;
 export declare const uint8arrayToBase64Str: (input: Uint8Array) => string;
 export declare const hexToBytes: (input: string) => Uint8Array;
 export declare const uint8arrayToHumanString: (input: Uint8Array) => string;
+export declare const createDateTimeString: (startLocalDate?: string, startLocalTime?: string) => string;
