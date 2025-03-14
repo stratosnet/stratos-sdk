@@ -480,8 +480,6 @@ export interface ClaimPromoResponse {
     data: {
         estimated_noz: string;
         estimated_traffic: string;
-        estimated_noz_str: string;
-        estimated_traffic_str: string;
     };
 }
 export interface Promo {

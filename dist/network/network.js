@@ -434,7 +434,6 @@ const getPromoList = async (ozUrl, auth) => {
 exports.getPromoList = getPromoList;
 const addUpdatePromo = async (ozUrl, auth, newPromoData) => {
     const url = `${ozUrl}/promo`;
-    console.log('url2', url);
     const payload = Object.assign({ base_info: { authorization: auth } }, newPromoData);
     const dataResult = await (0, exports.apiPost)(url, payload);
     return dataResult;
