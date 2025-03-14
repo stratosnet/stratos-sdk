@@ -61,7 +61,14 @@ export const apiPost = async (
     axiosResponse = await _axios.post(url, data, { ...config, ...myConfig });
   } catch (err) {
     const e: Error = err as Error;
-    return { error: { message: e.message } };
+    const isAxiosError = (err as any).isAxiosError;
+    let errorDetails = '';
+
+    if (isAxiosError) {
+      errorDetails += '. ' + (err as any).response?.data?.msg || '';
+    }
+
+    return { error: { message: `${e.message}${errorDetails}` } };
   }
   try {
     const myResponse = axiosResponse.data;
@@ -601,35 +608,34 @@ export const getChainAndProtocolDetails = async () => {
   };
 };
 
-// export const getPromoList = async (ozUrl: string, auth: string) => {
-//   const url = `${ozUrl}/promo/list`;
-//
-//   const data = {
-//     base_info: { authorization: auth },
-//   };
-//
-//   const config = {
-//     data,
-//   };
-//
-//   const dataResult = await apiGet(url, { ...config });
-//
-//   return dataResult;
-// };
-//
-// export const addUpdatePromo = async (ozUrl: string, auth: string, newPromoData: Types.Promo) => {
-//   const url = `${ozUrl}/promo`;
-//   console.log('url2', url);
-//
-//   const payload = {
-//     base_info: { authorization: auth },
-//     ...newPromoData,
-//   };
-//
-//   const dataResult = await apiPost(url, payload);
-//
-//   return dataResult;
-// };
+export const getPromoList = async (ozUrl: string, auth: string) => {
+  const url = `${ozUrl}/promo/list`;
+
+  const data = {
+    base_info: { authorization: auth },
+  };
+
+  const config = {
+    data,
+  };
+
+  const dataResult = await apiGet(url, { ...config });
+
+  return dataResult;
+};
+
+export const addUpdatePromo = async (ozUrl: string, auth: string, newPromoData: Types.Promo) => {
+  const url = `${ozUrl}/promo`;
+
+  const payload = {
+    base_info: { authorization: auth },
+    ...newPromoData,
+  };
+
+  const dataResult = await apiPost(url, payload);
+
+  return dataResult;
+};
 
 export const claimPromo = async (
   ozUrl: string,
@@ -646,7 +652,6 @@ export const claimPromo = async (
     content: promo,
   };
 
-  // response =  { msg: 'ok', data: 'request sent' }
   const dataResult = await apiPost(url, payload);
 
   return dataResult;

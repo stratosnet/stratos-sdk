@@ -477,7 +477,12 @@ export interface ClaimPromoDataResult extends NetworkAxiosDataResult {
 }
 export interface ClaimPromoResponse {
     msg: string;
-    data: string;
+    data: {
+        estimated_noz: string;
+        estimated_traffic: string;
+        estimated_noz_str: string;
+        estimated_traffic_str: string;
+    };
 }
 export interface Promo {
     content: string;
