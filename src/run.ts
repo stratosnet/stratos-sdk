@@ -814,7 +814,7 @@ async function main(): Promise<void> {
   // await runFaucet(hdPathIndex, zeroUserMnemonic);
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // 1 Check balance
-  // await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
+  await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
   // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
@@ -919,7 +919,7 @@ async function main(): Promise<void> {
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  void testGateway();
+  // void testGateway();
 }
 
 void main();
