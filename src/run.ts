@@ -723,10 +723,10 @@ const testGateway = async () => {
   // console.log('resultList', JSON.stringify(resultList));
 
   // create a new promo code
-  const promoCodeContent = 'p1';
+  const promoCodeContent = 'p7';
   const newPromoData = {
     base_info: { authorization: auth },
-    content: 'p1',
+    content: promoCodeContent,
     promo_type: 1,
     amount: {
       denom: 'stos',
@@ -741,11 +741,14 @@ const testGateway = async () => {
   // console.log('resultCreate', resultCreate);
 
   // claim promo code
-  const beneficiary = 'st1tufzs8k0djfmcces7xld69lxjy50hq4wn7k7s5';
+  // const beneficiary = 'st1tufzs8k0djfmcces7xld69lxjy50hq4wn7k7s5';
+  // const beneficiary = 'st1s5f6waaweuntqmmp52l7vjv032zu5mxsa5jpze';
+  const beneficiary = 'st1a04ev97jy3c6a6zl4mfyhdtdj2jrss674p9rrg';
   const promoCodeToClaim = promoCodeContent;
+  // const promoCodeToClaim = 'boo';
 
-  // const resultClaim = await stratos.network.networkApi.claimPromo(ozUrl, beneficiary, promoCodeToClaim);
-  // console.log('resultClaim', resultClaim);
+  const resultClaim = await stratos.network.networkApi.claimPromo(ozUrl, beneficiary, promoCodeToClaim);
+  console.log('resultClaim', resultClaim);
   // console.log('resultClaim.response', resultClaim.response);
 };
 
@@ -812,7 +815,7 @@ async function main(): Promise<void> {
   // await mainSdsPrepay(hdPathIndex, zeroUserMnemonic);
   // 1 Check balance
   await getBalanceCardMetrics(hdPathIndex, zeroUserMnemonic);
-  await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
+  // await getOzoneBalance(hdPathIndex, zeroUserMnemonic);
   // const hdPathIndexReceiver = 1;
   // await mainSend(hdPathIndex, zeroUserMnemonic, hdPathIndexReceiver);
   // 1a
@@ -910,32 +913,6 @@ async function main(): Promise<void> {
   const numIterations = 1;
   const interval = 10000; // 10 seconds in milliseconds
 
-  // for (let i = 0; i < numIterations; i++) {
-  //   const startTime = Date.now();
-  //   console.log(`Starting iteration ${i + 1} of ${numIterations}...`);
-  //
-  //   try {
-  //     const result = await testGetSharedFileInfo(hdPathIndex, sharelink, zeroUserMnemonic);
-  //     // const result = await testGetSharedFileInfo();
-  //     console.log(`Iteration ${i + 1} result:`, result);
-  //   } catch (error) {
-  //     console.error(`Error in iteration ${i + 1}:`, error);
-  //   }
-  //
-  //   const endTime = Date.now();
-  //   const elapsed = endTime - startTime;
-  //
-  //   // Wait for the remaining time in the interval, if needed.
-  //   const timeToWait = interval - elapsed;
-  //
-  //   if (timeToWait > 0) {
-  //     console.log(`Waiting ${timeToWait}ms before next iteration...`);
-  //     await new Promise(resolve => setTimeout(resolve, timeToWait));
-  //   } else {
-  //     console.warn(`Iteration ${i + 1} took longer than the interval (${elapsed}ms).`);
-  //   }
-  // }
-  //
   console.log('All iterations completed.');
   // void testRequestUserSharedFileList(hdPathIndex, 0, zeroUserMnemonic);
   // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);

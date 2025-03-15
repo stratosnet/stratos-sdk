@@ -43,4 +43,6 @@ export declare const getChainAndProtocolDetails: () => Promise<{
     resolvedChainVersion: string;
     isNewProtocol: boolean;
 }>;
+export declare const getPromoList: (ozUrl: string, auth: string) => Promise<Types.NetworkAxiosDataResult>;
+export declare const addUpdatePromo: (ozUrl: string, auth: string, newPromoData: Types.Promo) => Promise<Types.NetworkAxiosDataResult>;
 export declare const claimPromo: (ozUrl: string, beneficiary: string, promo: string) => Promise<Types.ClaimPromoDataResult>;
