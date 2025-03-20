@@ -622,7 +622,7 @@ async function main() {
     // void testRedis();
     // void testEnc();
     // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-    void testGateway();
+    // void testGateway();
 }
 void main();
 //# sourceMappingURL=run.js.map
