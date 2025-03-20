@@ -919,7 +919,7 @@ async function main(): Promise<void> {
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  void testGateway();
+  // void testGateway();
 }
 
 void main();

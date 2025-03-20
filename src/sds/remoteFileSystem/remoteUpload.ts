@@ -221,7 +221,10 @@ const sendUserUploadSignRequest = async (
   } = responseUploadSign;
 
   if (uploadSignReturnValue !== '0') {
-    const errorMsg = `There was an error during the upload sign. Non 0 code was returned, Details: (${responseUploadSign})`;
+    const errorMsg = `There was an error during the upload sign. Non 0 code was returned, Details: ${JSON.stringify(
+      responseUploadSign,
+    )}`;
+
     progressCb({
       result: { success: false, code: UPLOAD_CODES.USER_UPLOAD_DATA_USER_SIGN_FAIL },
       error: {
