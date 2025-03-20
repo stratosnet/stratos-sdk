@@ -723,22 +723,22 @@ const testGateway = async () => {
   // console.log('resultList', JSON.stringify(resultList));
 
   // create a new promo code
-  const promoCodeContent = 'p7';
+  const promoCodeContent = 'p10';
   const newPromoData = {
     base_info: { authorization: auth },
     content: promoCodeContent,
     promo_type: 1,
     amount: {
-      denom: 'stos',
-      amount: '1',
+      denom: 'wei',
+      amount: '10000000000000',
     },
     max_use_times: 200,
     start: createDateTimeString('2025-01-01'),
     expire: createDateTimeString('2025-06-08', '18:00:00'),
   };
 
-  // const resultCreate = await stratos.network.networkApi.addUpdatePromo(ozUrl, auth, newPromoData);
-  // console.log('resultCreate', resultCreate);
+  const resultCreate = await stratos.network.networkApi.addUpdatePromo(ozUrl, auth, newPromoData);
+  console.log('resultCreate', resultCreate);
 
   // claim promo code
   // const beneficiary = 'st1tufzs8k0djfmcces7xld69lxjy50hq4wn7k7s5';
@@ -747,8 +747,8 @@ const testGateway = async () => {
   const promoCodeToClaim = promoCodeContent;
   // const promoCodeToClaim = 'boo';
 
-  const resultClaim = await stratos.network.networkApi.claimPromo(ozUrl, beneficiary, promoCodeToClaim);
-  console.log('resultClaim', resultClaim);
+  // const resultClaim = await stratos.network.networkApi.claimPromo(ozUrl, beneficiary, promoCodeToClaim);
+  // console.log('resultClaim', resultClaim);
   // console.log('resultClaim.response', resultClaim.response);
 };
 
@@ -919,7 +919,7 @@ async function main(): Promise<void> {
   // void testRedis();
   // void testEnc();
   // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
-  // void testGateway();
+  void testGateway();
 }
 
 void main();
