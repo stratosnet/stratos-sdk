@@ -641,6 +641,7 @@ export const claimPromo = async (
   ozUrl: string,
   beneficiary: string,
   promo: string,
+  memo?: string,
 ): Promise<Types.ClaimPromoDataResult> => {
   const url = `${ozUrl}/claim`;
 
@@ -652,7 +653,9 @@ export const claimPromo = async (
     content: promo,
   };
 
-  const dataResult = await apiPost(url, payload);
+  const payloadToSend = memo ? { ...payload, memo: memo.trim() } : payload;
+
+  const dataResult = await apiPost(url, payloadToSend);
 
   return dataResult;
 };
