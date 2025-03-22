@@ -439,7 +439,7 @@ const addUpdatePromo = async (ozUrl, auth, newPromoData) => {
     return dataResult;
 };
 exports.addUpdatePromo = addUpdatePromo;
-const claimPromo = async (ozUrl, beneficiary, promo) => {
+const claimPromo = async (ozUrl, beneficiary, promo, memo) => {
     const url = `${ozUrl}/claim`;
     const promoType = promo.startsWith('http') ? 2 : 1;
     const payload = {
@@ -447,7 +447,8 @@ const claimPromo = async (ozUrl, beneficiary, promo) => {
         promo_type: promoType,
         content: promo,
     };
-    const dataResult = await (0, exports.apiPost)(url, payload);
+    const payloadToSend = memo ? Object.assign(Object.assign({}, payload), { memo: memo.trim() }) : payload;
+    const dataResult = await (0, exports.apiPost)(url, payloadToSend);
     return dataResult;
 };
 exports.claimPromo = claimPromo;
