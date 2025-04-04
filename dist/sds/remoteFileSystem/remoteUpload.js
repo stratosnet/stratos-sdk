@@ -175,7 +175,7 @@ const sendUserUploadSignRequest = async (fileHash, keypair, progressCb = () => {
     const callUploadSignResult = await network_1.networkApi.sendUserUploadSign(extraParamsUploadSign);
     const { response: responseUploadSign } = callUploadSignResult;
     if (!responseUploadSign) {
-        const errorMsg = `There was an error during the upload sign. "response" from the request is empty , Details: (${callUploadSignResult})`;
+        const errorMsg = `There was an error during the upload sign. "response" from the request is empty , Details: (${JSON.stringify(callUploadSignResult)})`;
         progressCb({
             result: { success: false, code: types_1.UPLOAD_CODES.USER_UPLOAD_DATA_USER_SIGN_FAIL },
             error: {
