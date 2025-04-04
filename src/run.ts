@@ -526,7 +526,12 @@ const testRequestUserDownloadSharedFile = async (
   console.log('retrieved user download shared file list', userDownloadSharedFileResult);
 };
 
-const testTxHistory = async (hdPathIndex: number, page = 0, givenReceiverMnemonic = zeroUserMnemonic) => {
+const testTxHistory = async (
+  hdPathIndex: number,
+  page = 0,
+  givenReceiverMnemonic = zeroUserMnemonic,
+  givenAddress = '',
+) => {
   const keyPairZero = await stratos.crypto.hdVault.wallet.deriveKeyPairFromMnemonic(
     givenReceiverMnemonic,
     hdPathIndex,
@@ -539,13 +544,15 @@ const testTxHistory = async (hdPathIndex: number, page = 0, givenReceiverMnemoni
   // const filterParameter = stratos.sds.transactions.sdsTxTypes.HistoryTxType.SdsPrepay;
   const filterParameter = 5;
 
+  const addressToUse = givenAddress ? givenAddress : keyPairZero.address;
   try {
     const txList = await stratos.accounts.accountsApi.getAccountTrasactions(
-      keyPairZero.address,
+      addressToUse,
       filterParameter,
       page,
       5,
-      stratos.network.networkTypes.TxHistoryUser.TxHistorySenderUser,
+      // stratos.network.networkTypes.TxHistoryUser.TxHistorySenderUser,
+      stratos.network.networkTypes.TxHistoryUser.TxHistoryReceiverUser,
     );
     console.log('txList!', txList);
     console.log('txList! data lenght', txList.data.length);
@@ -918,7 +925,11 @@ async function main(): Promise<void> {
   // void testRequestAllUserSharedFileList(hdPathIndex, zeroUserMnemonic);
   // void testRedis();
   // void testEnc();
-  // void testTxHistory(hdPathIndex, 1, zeroUserMnemonic);
+  // TozA1
+  const newAddress = 'st1s93afcdtvvxjrv8869klfwvkkrrtqz8tcn3lsy';
+  // const newAddress = 'st173hd396lmpksl872eek32q6m6czd4j0dw9jp09'; //
+
+  void testTxHistory(hdPathIndex, 1, zeroUserMnemonic, newAddress);
   // void testGateway();
 }
 
